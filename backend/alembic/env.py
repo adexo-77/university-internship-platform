@@ -18,8 +18,9 @@ from app.models import Base, Session, User  # noqa: F401
 # access to the values within the .ini file in use.
 config = context.config
 
-# Set sqlalchemy.url from application settings
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# Set sqlalchemy.url from application settings if not provided in config
+if not config.get_main_option("sqlalchemy.url"):
+    config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
