@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from pydantic import ValidationError
+from pydantic import ValidationError, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Determine repository root directory dynamically (backend/app/core -> project root)
@@ -19,6 +19,14 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     TEST_DATABASE_URL: str
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
+    COOKIE_SECURE: bool | None = None
+
+    @model_validator(mode="after")
+    def set_cookie_secure_default(self) -> "Settings":
+        """Default COOKIE_SECURE to True in production, False otherwise."""
+        if self.COOKIE_SECURE is None:
+            self.COOKIE_SECURE = self.ENVIRONMENT == "production"
+        return self
 
     model_config = SettingsConfigDict(
         env_file=str(ENV_PATH) if ENV_PATH.exists() else None,
