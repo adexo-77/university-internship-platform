@@ -1,20 +1,22 @@
 import React, { useState } from 'react';
-import { Activity, BookOpen, Briefcase, Menu, Settings, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
+import { navigationItems, NavItem } from '../../config/navigation';
 import { cn } from '../../lib/utils';
 
 export interface AppShellProps {
   children: React.ReactNode;
+  navItems?: NavItem[];
+  currentPath?: string;
 }
 
-export const AppShell: React.FC<AppShellProps> = ({ children }) => {
+export const AppShell: React.FC<AppShellProps> = ({
+  children,
+  navItems = navigationItems,
+  currentPath = '/',
+}) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const navigation = [
-    { name: 'System status', href: '#', active: true, icon: Activity },
-    { name: 'Internships', href: '#', active: false, icon: Briefcase },
-    { name: 'Learning', href: '#', active: false, icon: BookOpen },
-    { name: 'Settings', href: '#', active: false, icon: Settings },
-  ];
+  const activeItem = navItems.find((item) => item.path === currentPath) ?? navItems[0];
 
   return (
     <div className="min-h-screen bg-chalk text-ink flex flex-col md:flex-row">
@@ -48,53 +50,45 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
           isMobileMenuOpen ? 'translate-x-0 shadow-menu' : '-translate-x-full md:translate-x-0'
         )}
       >
-        {/* Academic Platform Identifier */}
+        {/* Platform Title */}
         <div className="border-b border-line px-5 py-4">
           <span className="text-base font-semibold text-ink tracking-tight block">
             University Platform
           </span>
-          <span className="text-xs text-pencil block mt-0.5">Academic workspace</span>
         </div>
 
         {/* Navigation */}
         <nav aria-label="Main navigation" className="flex-1 p-3 space-y-1">
-          {navigation.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
+            const isActive = item.path === currentPath;
+
             return (
               <a
-                key={item.name}
-                href={item.href}
+                key={item.path}
+                href={item.path}
                 onClick={() => setIsMobileMenuOpen(false)}
-                aria-current={item.active ? 'page' : undefined}
+                aria-current={isActive ? 'page' : undefined}
                 className={cn(
                   'flex items-center gap-3 rounded-control px-3 py-2 text-base font-medium transition-colors duration-150',
-                  item.active
+                  isActive
                     ? 'bg-petrol-tint text-petrol font-semibold'
                     : 'text-pencil hover:bg-chalk hover:text-ink'
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0 text-current" />
-                <span>{item.name}</span>
+                <span>{item.label}</span>
               </a>
             );
           })}
         </nav>
-
-        {/* Sidebar Footer */}
-        <div className="border-t border-line p-4 text-xs text-pencil">
-          <span>Academic term 2026-2027</span>
-        </div>
       </aside>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Desktop Top Bar */}
-        <header className="hidden md:flex h-14 items-center justify-between border-b border-line bg-surface px-8">
-          <div className="text-xs text-pencil">
-            Platform environment &bull;{' '}
-            <span className="text-ink font-medium">Local workspace</span>
-          </div>
-          <div className="text-xs text-pencil">Phase 0b foundation</div>
+        <header className="hidden md:flex h-14 items-center border-b border-line bg-surface px-8">
+          <span className="text-base font-medium text-ink">{activeItem?.label}</span>
         </header>
 
         {/* Page Container */}

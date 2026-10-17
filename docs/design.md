@@ -58,7 +58,7 @@ All UI components are built in-house with zero external widget kits:
 | `ErrorMessage` | `whatHappened`, `howToFix`, `action` | Explains what failed and provides exact steps to resolve |
 | `Notice` | `info`, `attention`, `error` | Informational or attention banner with platform tints |
 | `PageHeader` | `title`, `description`, `actions` | Top view header with sentence case and actions slot |
-| `AppShell` | Left sidebar + Top bar + Main canvas | Responsive layout (min 360px wide) with academic hierarchy |
+| `AppShell` | Left sidebar + Top bar + Main canvas | Responsive layout (min 360px wide) with academic hierarchy. Sidebar navigation is configured centrally via `src/config/navigation.ts`, displaying only existing routes |
 
 ---
 
@@ -82,3 +82,4 @@ All UI components are built in-house with zero external widget kits:
 - **Plain Verbs**: Clear, direct actions ("Save changes", "Check again") instead of vague marketing terms ("Submit", "Explore").
 - **Error Clarity**: Errors must explicitly explain **what went wrong** and **how to fix it**.
 - **Empty States**: Must clearly state **what to do next**.
+- **No Placeholder Copy**: No placeholder, invented, or phase text anywhere in the UI (e.g. no mock academic terms, fictional environments, or phase badges). Navigation exclusively displays routes that actually exist via `frontend/src/config/navigation.ts`.
