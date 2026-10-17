@@ -92,7 +92,9 @@ From the repository root:
 Copy-Item .env.example .env
 ```
 
-Review `.env` to verify your PostgreSQL credentials (default: `postgres:postgres@localhost:5432/university_platform`).
+> **Important**: `DATABASE_URL` and `TEST_DATABASE_URL` are strictly required settings with **no hard-coded defaults**. If `.env` is missing or either variable is unset, application startup and tests will fail immediately with a clear error message instructing you to copy `.env.example` to `.env`.
+>
+> Review `.env` to verify your PostgreSQL credentials (default: `postgres:postgres@localhost:5432/university_platform` and `university_platform_test`).
 
 ---
 
@@ -201,6 +203,8 @@ npm run format
 ### 6. Automated Testing Commands
 
 #### Backend Tests (Pytest)
+
+> **Note**: Backend tests require `.env` at the project root or the `TEST_DATABASE_URL` environment variable to run the real database test suite. Ensure `university_platform_test` database exists.
 
 ```powershell
 Set-Location backend

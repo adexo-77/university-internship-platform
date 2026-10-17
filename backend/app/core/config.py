@@ -1,7 +1,9 @@
 """Application configuration module using pydantic-settings."""
 
+import sys
 from pathlib import Path
 
+from pydantic import ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Determine repository root directory dynamically (backend/app/core -> project root)
@@ -10,14 +12,12 @@ ENV_PATH = PROJECT_ROOT / ".env"
 
 
 class Settings(BaseSettings):
-    """Application settings loaded from environment variables or .env."""
+    """Application settings loaded strictly from environment variables or .env."""
 
     ENVIRONMENT: str = "development"
     PORT: int = 8001
-    DATABASE_URL: str = "postgresql+psycopg://postgres:postgres@localhost:5432/university_platform"
-    TEST_DATABASE_URL: str = (
-        "postgresql+psycopg://postgres:postgres@localhost:5432/university_platform_test"
-    )
+    DATABASE_URL: str
+    TEST_DATABASE_URL: str
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
 
     model_config = SettingsConfigDict(
@@ -27,4 +27,31 @@ class Settings(BaseSettings):
     )
 
 
-settings = Settings()
+def load_settings(env_file_path: Path | str | None = None) -> Settings:
+    """Load settings from environment or .env, failing with a clear message if missing."""
+    try:
+        if env_file_path is not None:
+            resolved_path = Path(env_file_path)
+            return Settings(_env_file=str(resolved_path) if resolved_path.exists() else None)
+        return Settings()
+    except ValidationError as exc:
+        missing_fields = [
+            str(err["loc"][0]) for err in exc.errors() if err.get("type") == "missing"
+        ]
+        missing_str = ", ".join(missing_fields) if missing_fields else str(exc)
+        error_msg = (
+            f"\n{'=' * 78}\n"
+            f"[FATAL CONFIGURATION ERROR] Missing required setting(s): {missing_str}\n"
+            "Please copy '.env.example' to '.env' at the project root and configure settings:\n"
+            "  PowerShell: Copy-Item .env.example .env\n"
+            "  Bash:       cp .env.example .env\n"
+            f"{'=' * 78}\n"
+        )
+        sys.stderr.write(error_msg)
+        raise RuntimeError(
+            f"Missing required environment variable(s): {missing_str}. "
+            "Please copy '.env.example' to '.env' at the project root."
+        ) from exc
+
+
+settings = load_settings()

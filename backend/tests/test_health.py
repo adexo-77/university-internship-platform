@@ -1,7 +1,9 @@
 """Tests for system and database health endpoints mounted under /api."""
 
+import pytest
 from fastapi.testclient import TestClient
 
+from app.core import config
 from app.core.config import settings
 
 
@@ -37,8 +39,21 @@ def test_api_health_db_returns_clear_error_when_database_fails(
 
 
 def test_settings_loaded_properly() -> None:
-    """Ensure settings are loaded with valid defaults and no hardcoded paths."""
+    """Ensure settings are loaded from .env/environment with no hardcoded paths."""
     assert settings.PORT == 8001
     assert "postgresql" in settings.DATABASE_URL
     assert "postgresql" in settings.TEST_DATABASE_URL
     assert not any("\\" in origin for origin in settings.CORS_ORIGINS)
+
+
+def test_missing_required_setting_fails_startup(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Startup must fail with a clear message telling the user to copy .env.example to .env."""
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.delenv("TEST_DATABASE_URL", raising=False)
+
+    with pytest.raises(RuntimeError) as exc_info:
+        config.load_settings(env_file_path=config.PROJECT_ROOT / ".nonexistent_env")
+
+    error_message = str(exc_info.value)
+    assert "copy '.env.example' to '.env'" in error_message
+    assert "DATABASE_URL" in error_message
