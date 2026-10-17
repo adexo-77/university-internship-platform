@@ -1,6 +1,6 @@
 """Main FastAPI application entry point."""
 
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -28,7 +28,7 @@ app.add_middleware(
 async def app_exception_handler(_: Request, exc: AppException) -> JSONResponse:
     """Consistent error handler for domain application exceptions."""
     return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        status_code=exc.status_code,
         content={"detail": exc.message, "code": exc.code or "INTERNAL_ERROR"},
     )
 
