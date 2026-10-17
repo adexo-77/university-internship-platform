@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.exceptions import AppException
+from app.routers.auth import router as auth_router
 from app.routers.health import router as health_router
 
 app = FastAPI(
@@ -35,3 +36,4 @@ async def app_exception_handler(_: Request, exc: AppException) -> JSONResponse:
 
 # Mount routers under /api only
 app.include_router(health_router, prefix="/api")
+app.include_router(auth_router, prefix="/api")
