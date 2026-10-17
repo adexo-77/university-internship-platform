@@ -33,6 +33,5 @@ async def app_exception_handler(_: Request, exc: AppException) -> JSONResponse:
     )
 
 
-# Mount routers (both root and /api prefix for proxy flexibility)
-app.include_router(health_router)
+# Mount routers under /api only
 app.include_router(health_router, prefix="/api")

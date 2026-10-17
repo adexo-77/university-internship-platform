@@ -1,7 +1,7 @@
 import { DatabaseHealthResponse, HealthResponse } from '../types/health';
 
 /**
- * Fetch basic system health through the Vite proxy (/api/health -> backend /health or /api/health).
+ * Fetch basic system health through the Vite proxy (/api/health -> backend /api/health).
  */
 export async function fetchHealth(): Promise<HealthResponse> {
   const response = await fetch('/api/health', {

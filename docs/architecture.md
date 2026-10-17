@@ -17,7 +17,7 @@ flowchart LR
     end
 
     subgraph BackendApp ["FastAPI Backend (Port 8001)"]
-        Router["APIRouter (/health, /health/db)"]
+        Router["APIRouter (/api/health, /api/health/db)"]
         Service["HealthService"]
         DBEngine["SQLAlchemy 2 Engine"]
     end
@@ -47,7 +47,7 @@ flowchart LR
 - **Schemas (`schemas/`)**:
   - Pydantic models with frozen immutability and strict serialization contracts.
 - **Routers (`routers/`)**:
-  - Declarative route endpoints kept thin. No direct SQL queries in router files.
+  - Declarative route endpoints mounted under `/api` only. No direct SQL queries in router files.
 - **Services (`services/`)**:
   - Pure domain and query execution logic (`HealthService`).
 
@@ -67,7 +67,5 @@ flowchart LR
 
 | Endpoint | Method | Backend Handler | Response Contract | Proxy Target |
 | :--- | :--- | :--- | :--- | :--- |
-| `/health` | `GET` | `get_health` | `{"status": "ok"}` | `http://localhost:8001/health` |
 | `/api/health` | `GET` | `get_health` | `{"status": "ok"}` | `http://localhost:8001/api/health` |
-| `/health/db` | `GET` | `get_database_health` | `{"database": "ok"}` | `http://localhost:8001/health/db` |
 | `/api/health/db` | `GET` | `get_database_health` | `{"database": "ok"}` | `http://localhost:8001/api/health/db` |
