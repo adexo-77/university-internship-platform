@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import settings
 from app.core.database import get_db
@@ -21,12 +21,10 @@ def test_db_engine():
     """Create test database engine using TEST_DATABASE_URL if available."""
     try:
         engine = create_engine(TEST_DB_URL, pool_pre_ping=True)
-        # Test if database server is reachable
         with engine.connect() as conn:
             conn.close()
         yield engine
     except Exception:
-        # If test postgres server is not currently reachable, yield None
         yield None
 
 
@@ -35,6 +33,31 @@ def client() -> Generator[TestClient, None, None]:
     """TestClient fixture with default dependencies."""
     with TestClient(app) as test_client:
         yield test_client
+
+
+@pytest.fixture
+def real_db_client() -> Generator[TestClient, None, None]:
+    """TestClient configured to execute against real database from TEST_DATABASE_URL."""
+    test_engine = create_engine(TEST_DB_URL, pool_pre_ping=True)
+    testing_session_local = sessionmaker(
+        bind=test_engine,
+        autocommit=False,
+        autoflush=False,
+        expire_on_commit=False,
+    )
+
+    def override_get_db() -> Generator[Session, None, None]:
+        db = testing_session_local()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db] = override_get_db
+    with TestClient(app) as test_client:
+        yield test_client
+    app.dependency_overrides.clear()
+    test_engine.dispose()
 
 
 @pytest.fixture
