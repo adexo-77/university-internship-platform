@@ -36,16 +36,17 @@ university-internship-platform/
 │   │   └── env.py             # Migration harness wired to Base metadata
 │   ├── alembic.ini            # Alembic configuration
 │   ├── pyproject.toml         # Ruff and Pytest settings
-│   ├── requirements.txt       # Python dependencies
+│   ├── requirements.txt       # Production dependencies
+│   ├── requirements-dev.txt   # Development and testing dependencies (pytest, ruff, httpx)
 │   ├── app/
 │   │   ├── core/              # Settings, database engine, exceptions
 │   │   ├── models/            # SQLAlchemy 2 declarative Base
 │   │   ├── schemas/           # Pydantic schemas (Health, Error)
-│   │   ├── routers/           # Thin FastAPI HTTP endpoints
+│   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only)
 │   │   ├── services/          # Pure business logic and database queries
 │   │   └── main.py            # FastAPI entry point & CORS
 │   └── tests/
-│       ├── conftest.py        # Pytest fixtures and mock DB sessions
+│       ├── conftest.py        # Pytest fixtures and database test harnesses
 │       └── test_health.py     # System & DB health test suite
 └── frontend/
     ├── eslint.config.js       # ESLint 9 flat configuration
@@ -121,9 +122,10 @@ python -m venv .venv
 # Activate the virtual environment
 .\.venv\Scripts\Activate.ps1
 
-# Upgrade pip and install all dependencies
+# Upgrade pip and install dependencies
 pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r requirements.txt       # Production dependencies
+pip install -r requirements-dev.txt   # Development & testing tools (ruff, pytest, httpx)
 
 # Run database migrations with Alembic
 .\.venv\Scripts\alembic.exe upgrade head
@@ -134,8 +136,8 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8001 --reload
 
 Backend URLs:
 - API Root: [http://localhost:8001](http://localhost:8001)
-- Health Check: [http://localhost:8001/health](http://localhost:8001/health) (or `/api/health`)
-- Database Check: [http://localhost:8001/health/db](http://localhost:8001/health/db) (or `/api/health/db`)
+- Health Check: [http://localhost:8001/api/health](http://localhost:8001/api/health)
+- Database Check: [http://localhost:8001/api/health/db](http://localhost:8001/api/health/db)
 - Interactive OpenAPI Docs: [http://localhost:8001/docs](http://localhost:8001/docs)
 
 ---

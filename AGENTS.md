@@ -33,7 +33,8 @@ university-internship-platform/
 │   │   └── env.py
 │   ├── alembic.ini            # Alembic configuration
 │   ├── pyproject.toml         # Ruff and Pytest settings
-│   ├── requirements.txt       # Production & development dependencies
+│   ├── requirements.txt       # Production dependencies
+│   ├── requirements-dev.txt   # Development & testing tools (ruff, pytest, httpx)
 │   ├── app/
 │   │   ├── core/              # Config, database engine, exceptions
 │   │   ├── models/            # SQLAlchemy declarative models
