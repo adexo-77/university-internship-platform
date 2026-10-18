@@ -6,6 +6,7 @@ import { getHomePath } from './config/navigation';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './hooks/useAuth';
 import { AccountPage } from './pages/AccountPage';
+import { ApplicationDetailPage } from './pages/ApplicationDetailPage';
 import { AssignmentCreatePage } from './pages/AssignmentCreatePage';
 import { AssignmentDetailPage } from './pages/AssignmentDetailPage';
 import { AssignmentEditPage } from './pages/AssignmentEditPage';
@@ -13,8 +14,14 @@ import { CourseCreatePage } from './pages/CourseCreatePage';
 import { CourseDetailPage } from './pages/CourseDetailPage';
 import { CourseEditPage } from './pages/CourseEditPage';
 import { CoursesPage } from './pages/CoursesPage';
+import { InternshipCreatePage } from './pages/InternshipCreatePage';
+import { InternshipDetailPage } from './pages/InternshipDetailPage';
+import { InternshipEditPage } from './pages/InternshipEditPage';
+import { InternshipsPage } from './pages/InternshipsPage';
 import { LoginPage } from './pages/LoginPage';
+import { MyApplicationsPage } from './pages/MyApplicationsPage';
 import { MyCoursesPage } from './pages/MyCoursesPage';
+import { MyInternshipsPage } from './pages/MyInternshipsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -57,11 +64,24 @@ export const AppRoutes: React.FC = () => {
         {/* Course catalogue: student and admin */}
         <Route element={<RoleRoute allowedRoles={['student', 'admin']} />}>
           <Route path="/courses" element={<CoursesPage />} />
+          <Route path="/internships" element={<InternshipsPage />} />
         </Route>
 
         {/* My courses: student and instructor */}
         <Route element={<RoleRoute allowedRoles={['student', 'instructor']} />}>
           <Route path="/my-courses" element={<MyCoursesPage />} />
+        </Route>
+
+        {/* Student applications */}
+        <Route element={<RoleRoute allowedRoles={['student']} />}>
+          <Route path="/my-applications" element={<MyApplicationsPage />} />
+        </Route>
+
+        {/* Organization internship management */}
+        <Route element={<RoleRoute allowedRoles={['organization']} />}>
+          <Route path="/my-internships" element={<MyInternshipsPage />} />
+          <Route path="/internships/new" element={<InternshipCreatePage />} />
+          <Route path="/internships/:id/edit" element={<InternshipEditPage />} />
         </Route>
 
         {/* Create course: instructor only */}
@@ -80,9 +100,11 @@ export const AppRoutes: React.FC = () => {
           <Route path="/courses/:id/edit" element={<CourseEditPage />} />
         </Route>
 
-        {/* Course and assignment details: any signed-in user */}
+        {/* Details: any signed-in user (role permissions handled in pages) */}
         <Route path="/courses/:id" element={<CourseDetailPage />} />
         <Route path="/assignments/:id" element={<AssignmentDetailPage />} />
+        <Route path="/internships/:id" element={<InternshipDetailPage />} />
+        <Route path="/applications/:id" element={<ApplicationDetailPage />} />
 
         {/* System status: admin role only */}
         <Route element={<RoleRoute allowedRoles={['admin']} />}>

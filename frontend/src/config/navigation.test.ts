@@ -5,7 +5,7 @@ describe('Navigation Configuration', () => {
   it('returns role-specific home paths', () => {
     expect(getHomePath('student')).toBe('/my-courses');
     expect(getHomePath('instructor')).toBe('/my-courses');
-    expect(getHomePath('organization')).toBe('/profile');
+    expect(getHomePath('organization')).toBe('/my-internships');
     expect(getHomePath('admin')).toBe('/courses');
   });
 
@@ -17,8 +17,11 @@ describe('Navigation Configuration', () => {
 
     expect(labels).toContain('Courses');
     expect(labels).toContain('My courses');
+    expect(labels).toContain('Internships');
+    expect(labels).toContain('My applications');
     expect(labels).toContain('Profile');
     expect(labels).toContain('Account');
+    expect(labels).not.toContain('My internships');
     expect(labels).not.toContain('System status');
   });
 
@@ -31,8 +34,25 @@ describe('Navigation Configuration', () => {
     expect(labels).toContain('My courses');
     expect(labels).toContain('Account');
     expect(labels).not.toContain('Courses');
+    expect(labels).not.toContain('Internships');
+    expect(labels).not.toContain('My applications');
+    expect(labels).not.toContain('My internships');
     expect(labels).not.toContain('Profile');
     expect(labels).not.toContain('System status');
+  });
+
+  it('filters navigation items for organization role', () => {
+    const orgItems = navigationItems.filter(
+      (item) => !item.roles || item.roles.includes('organization')
+    );
+    const labels = orgItems.map((i) => i.label);
+
+    expect(labels).toContain('My internships');
+    expect(labels).toContain('Profile');
+    expect(labels).toContain('Account');
+    expect(labels).not.toContain('Courses');
+    expect(labels).not.toContain('Internships');
+    expect(labels).not.toContain('My applications');
   });
 
   it('filters navigation items for admin role', () => {
@@ -42,9 +62,12 @@ describe('Navigation Configuration', () => {
     const labels = adminItems.map((i) => i.label);
 
     expect(labels).toContain('Courses');
+    expect(labels).toContain('Internships');
     expect(labels).toContain('Account');
     expect(labels).toContain('System status');
     expect(labels).not.toContain('My courses');
+    expect(labels).not.toContain('My applications');
+    expect(labels).not.toContain('My internships');
     expect(labels).not.toContain('Profile');
   });
 });

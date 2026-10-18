@@ -2,7 +2,9 @@ import {
   Activity,
   BookMarked,
   BookOpen,
+  Briefcase,
   Contact,
+  FileText,
   User as UserIcon,
   type LucideIcon,
 } from 'lucide-react';
@@ -34,6 +36,24 @@ export const navigationItems: NavItem[] = [
     roles: ['student', 'instructor'],
   },
   {
+    path: '/internships',
+    label: 'Internships',
+    icon: Briefcase,
+    roles: ['student', 'admin'],
+  },
+  {
+    path: '/my-applications',
+    label: 'My applications',
+    icon: FileText,
+    roles: ['student'],
+  },
+  {
+    path: '/my-internships',
+    label: 'My internships',
+    icon: Briefcase,
+    roles: ['organization'],
+  },
+  {
     path: '/profile',
     label: 'Profile',
     icon: Contact,
@@ -60,7 +80,7 @@ export function getHomePath(role: UserRole): string {
     return '/my-courses';
   }
   if (role === 'organization') {
-    return '/profile';
+    return '/my-internships';
   }
   if (role === 'admin') {
     return '/courses';
