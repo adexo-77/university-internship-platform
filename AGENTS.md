@@ -37,7 +37,8 @@ university-internship-platform/
 │   ├── alembic/               # Database migration environment
 │   │   ├── versions/          # Alembic revision migration files
 │   │   │   ├── 6d7757d439a5_create_users_and_sessions_tables.py
-│   │   │   └── d5196328fe27_create_student_and_organization_profiles.py
+│   │   │   ├── d5196328fe27_create_student_and_organization_profiles.py
+│   │   │   └── f0197aea93a8_create_courses_and_enrollments_tables.py
 │   │   ├── env.py             # Migration harness wired to Base metadata
 │   │   └── script.py.mako     # Migration template
 │   ├── alembic.ini            # Alembic configuration
@@ -53,22 +54,30 @@ university-internship-platform/
 │   │   │   └── security.py
 │   │   ├── models/            # SQLAlchemy declarative models
 │   │   │   ├── base.py
+│   │   │   ├── course.py
+│   │   │   ├── enrollment.py
 │   │   │   ├── organization_profile.py
 │   │   │   ├── session.py
 │   │   │   ├── student_profile.py
 │   │   │   └── user.py
 │   │   ├── schemas/           # Pydantic validation schemas
 │   │   │   ├── auth.py
+│   │   │   ├── course.py
+│   │   │   ├── enrollment.py
 │   │   │   ├── health.py
 │   │   │   ├── organization_profile.py
 │   │   │   └── student_profile.py
 │   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only)
 │   │   │   ├── auth.py
+│   │   │   ├── course.py
+│   │   │   ├── enrollment.py
 │   │   │   ├── health.py
 │   │   │   ├── organization_profile.py
 │   │   │   └── student_profile.py
 │   │   ├── services/          # Pure business logic and domain rules
 │   │   │   ├── auth.py
+│   │   │   ├── course.py
+│   │   │   ├── enrollment.py
 │   │   │   ├── health.py
 │   │   │   ├── organization_profile.py
 │   │   │   └── student_profile.py
@@ -78,6 +87,8 @@ university-internship-platform/
 │       ├── test_auth_login.py # Auth login, invalid credentials & hash leak tests
 │       ├── test_auth_register.py # Registration & atomic profile provisioning tests
 │       ├── test_auth_session.py  # Session lifecycle, logout, expiry & role guard tests
+│       ├── test_course.py     # Course lifecycle, catalog, search, and permissions tests
+│       ├── test_enrollment.py # Enrollment, double-enroll, leave, and roster tests
 │       ├── test_health.py     # Health integration tests (mirrors health.py)
 │       ├── test_organization_profile.py # Organization profile integration tests
 │       ├── test_script_create_user.py   # CLI user creation script tests
@@ -96,9 +107,18 @@ university-internship-platform/
     └── src/
         ├── api/               # API clients and HTTP request wrappers
         │   ├── auth.ts
+        │   ├── course.ts
         │   ├── health.ts
         │   └── profile.ts
         ├── components/
+        │   ├── courses/       # Course domain components
+        │   │   ├── CourseForm.tsx
+        │   │   ├── CourseForm.test.tsx
+        │   │   ├── CourseTable.tsx
+        │   │   ├── EnrollButton.tsx
+        │   │   ├── EnrollButton.test.tsx
+        │   │   ├── StudentRosterTable.tsx
+        │   │   └── StudentRosterTable.test.tsx
         │   ├── layout/        # Application shell and structural layout
         │   │   ├── AppShell.tsx
         │   │   └── AppShell.test.tsx
@@ -126,7 +146,8 @@ university-internship-platform/
         │   ├── HealthCheck.tsx
         │   └── HealthCheck.test.tsx
         ├── config/            # Centralized configuration
-        │   └── navigation.ts
+        │   ├── navigation.ts
+        │   └── navigation.test.ts
         ├── context/           # React context providers
         │   ├── AuthContext.tsx
         │   ├── AuthContext.test.tsx
@@ -140,8 +161,15 @@ university-internship-platform/
         │   └── skills.test.ts
         ├── pages/             # Page-level route views
         │   ├── AccountPage.tsx
+        │   ├── CourseCreatePage.tsx
+        │   ├── CourseDetailPage.tsx
+        │   ├── CourseEditPage.tsx
+        │   ├── CoursesPage.tsx
+        │   ├── CoursesPage.test.tsx
         │   ├── LoginPage.tsx
         │   ├── LoginPage.test.tsx
+        │   ├── MyCoursesPage.tsx
+        │   ├── MyCoursesPage.test.tsx
         │   ├── NotFoundPage.tsx
         │   ├── ProfilePage.tsx
         │   ├── ProfilePage.test.tsx
@@ -152,6 +180,7 @@ university-internship-platform/
         │   └── setup.ts
         ├── types/             # Shared TypeScript type definitions
         │   ├── auth.ts
+        │   ├── course.ts
         │   ├── health.ts
         │   └── profile.ts
         ├── App.tsx            # Main router configuration
