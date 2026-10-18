@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { navigationItems, NavItem } from '../../config/navigation';
+import { useAuth } from '../../hooks/useAuth';
 import { cn } from '../../lib/utils';
+import { Badge, Button } from '../ui';
 
 export interface AppShellProps {
   children: React.ReactNode;
@@ -12,11 +15,23 @@ export interface AppShellProps {
 export const AppShell: React.FC<AppShellProps> = ({
   children,
   navItems = navigationItems,
-  currentPath = '/',
+  currentPath,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const { user, logout } = useAuth();
 
-  const activeItem = navItems.find((item) => item.path === currentPath) ?? navItems[0];
+  const activePath = currentPath ?? location.pathname;
+
+  // Filter navigation items based on user role
+  const visibleNavItems = navItems.filter((item) => {
+    if (!item.roles || item.roles.length === 0) {
+      return true;
+    }
+    return user ? item.roles.includes(user.role) : false;
+  });
+
+  const activeItem = visibleNavItems.find((item) => item.path === activePath) ?? visibleNavItems[0];
 
   return (
     <div className="min-h-screen bg-chalk text-ink flex flex-col md:flex-row">
@@ -59,14 +74,14 @@ export const AppShell: React.FC<AppShellProps> = ({
 
         {/* Navigation */}
         <nav aria-label="Main navigation" className="flex-1 p-3 space-y-1">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const Icon = item.icon;
-            const isActive = item.path === currentPath;
+            const isActive = item.path === activePath;
 
             return (
-              <a
+              <Link
                 key={item.path}
-                href={item.path}
+                to={item.path}
                 onClick={() => setIsMobileMenuOpen(false)}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
@@ -78,17 +93,53 @@ export const AppShell: React.FC<AppShellProps> = ({
               >
                 <Icon className="h-4 w-4 shrink-0 text-current" />
                 <span>{item.label}</span>
-              </a>
+              </Link>
             );
           })}
         </nav>
+
+        {/* Mobile Sidebar Footer User Info */}
+        {user && (
+          <div className="border-t border-line p-3 md:hidden">
+            <div className="px-3 py-1.5 text-xs text-pencil">
+              Signed in as <span className="font-semibold text-ink">{user.full_name}</span> (
+              {user.role})
+            </div>
+            <Button
+              variant="quiet"
+              size="sm"
+              className="w-full justify-start text-brick hover:bg-chalk mt-1"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                void logout();
+              }}
+            >
+              Log out
+            </Button>
+          </div>
+        )}
       </aside>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Desktop Top Bar */}
-        <header className="hidden md:flex h-14 items-center border-b border-line bg-surface px-8">
+        <header className="hidden md:flex h-14 items-center justify-between border-b border-line bg-surface px-8">
           <span className="text-base font-medium text-ink">{activeItem?.label}</span>
+
+          {user && (
+            <div className="flex items-center gap-3">
+              <span className="text-base text-ink font-medium">{user.full_name}</span>
+              <Badge variant="neutral">{user.role}</Badge>
+              <Button
+                id="header-logout-button"
+                variant="quiet"
+                size="sm"
+                onClick={() => void logout()}
+              >
+                Log out
+              </Button>
+            </div>
+          )}
         </header>
 
         {/* Page Container */}
