@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createCourse } from '../api/course';
 import { CourseForm, CourseFormData } from '../components/courses/CourseForm';
 import { AppShell } from '../components/layout/AppShell';
-import { PageHeader } from '../ui/PageHeader';
+import { PageHeader } from '../components/ui';
 
 export const CourseCreatePage: React.FC = () => {
   const navigate = useNavigate();

@@ -45,14 +45,21 @@ export const EnrollButton: React.FC<EnrollButtonProps> = ({
     <div className="flex flex-col items-start gap-2">
       <Button
         type="button"
-        variant={enrolled ? 'outline' : 'primary'}
+        variant={enrolled ? 'secondary' : 'primary'}
         onClick={handleToggle}
-        loading={loading}
         disabled={disabled || loading}
       >
-        {enrolled ? 'Leave course' : 'Enroll in course'}
+        {loading
+          ? enrolled
+            ? 'Leaving...'
+            : 'Enrolling...'
+          : enrolled
+            ? 'Leave course'
+            : 'Enroll in course'}
       </Button>
-      {error && <ErrorMessage message={error} />}
+      {error && (
+        <ErrorMessage whatHappened={error} howToFix="Please try again or refresh the page." />
+      )}
     </div>
   );
 };

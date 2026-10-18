@@ -4,11 +4,7 @@ import { getCourseById, getCourseRoster, updateCourse } from '../api/course';
 import { EnrollButton } from '../components/courses/EnrollButton';
 import { StudentRosterTable } from '../components/courses/StudentRosterTable';
 import { AppShell } from '../components/layout/AppShell';
-import { Badge } from '../ui/Badge';
-import { Button } from '../ui/Button';
-import { ErrorMessage } from '../ui/ErrorMessage';
-import { Notice } from '../ui/Notice';
-import { PageHeader } from '../ui/PageHeader';
+import { Badge, Button, ErrorMessage, Notice, PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { Course, EnrolledStudent } from '../types/course';
 
@@ -82,8 +78,13 @@ export const CourseDetailPage: React.FC = () => {
   return (
     <AppShell>
       <div className="space-y-8 max-w-4xl">
-        {error && <ErrorMessage message={error} />}
-        {notice && <Notice variant="success">{notice}</Notice>}
+        {error && (
+          <ErrorMessage
+            whatHappened={error}
+            howToFix="Please try again or return to the course catalogue."
+          />
+        )}
+        {notice && <Notice variant="info">{notice}</Notice>}
 
         {loading ? (
           <div className="py-12 text-center text-pencil">Loading course details...</div>
@@ -99,9 +100,12 @@ export const CourseDetailPage: React.FC = () => {
               actions={
                 <div className="flex items-center gap-3">
                   {(isOwner || isAdmin) && (
-                    <Button as={Link} to={`/courses/${course.id}/edit`} variant="outline" size="sm">
+                    <Link
+                      to={`/courses/${course.id}/edit`}
+                      className="inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-control border px-3 py-1.5 text-xs bg-surface text-ink border-line hover:bg-chalk"
+                    >
                       Edit course
-                    </Button>
+                    </Link>
                   )}
                   {isOwner && course.status === 'draft' && (
                     <Button
@@ -109,9 +113,9 @@ export const CourseDetailPage: React.FC = () => {
                       variant="primary"
                       size="sm"
                       onClick={handlePublish}
-                      loading={publishing}
+                      disabled={publishing}
                     >
-                      Publish course
+                      {publishing ? 'Publishing...' : 'Publish course'}
                     </Button>
                   )}
                   {isStudent && (
@@ -136,7 +140,7 @@ export const CourseDetailPage: React.FC = () => {
               <Badge variant={course.status === 'published' ? 'success' : 'neutral'}>
                 {course.status === 'published' ? 'Published' : 'Draft'}
               </Badge>
-              {isStudent && course.enrolled && <Badge variant="info">Enrolled</Badge>}
+              {isStudent && course.enrolled && <Badge variant="success">Enrolled</Badge>}
             </div>
 
             <section className="space-y-2">

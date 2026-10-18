@@ -3,8 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getCourseById, updateCourse } from '../api/course';
 import { CourseForm, CourseFormData } from '../components/courses/CourseForm';
 import { AppShell } from '../components/layout/AppShell';
-import { ErrorMessage } from '../ui/ErrorMessage';
-import { PageHeader } from '../ui/PageHeader';
+import { ErrorMessage, PageHeader } from '../components/ui';
 import { Course } from '../types/course';
 
 export const CourseEditPage: React.FC = () => {
@@ -72,7 +71,12 @@ export const CourseEditPage: React.FC = () => {
           description={course ? `Editing "${course.title}"` : 'Update course details and syllabus.'}
         />
 
-        {error && <ErrorMessage message={error} />}
+        {error && (
+          <ErrorMessage
+            whatHappened={error}
+            howToFix="Please verify the course details and try saving again."
+          />
+        )}
 
         {loading ? (
           <div className="py-12 text-center text-pencil">Loading course...</div>

@@ -68,8 +68,13 @@ export const CourseForm: React.FC<CourseFormProps> = ({
   const isPublishedLocked = isEdit && initialData?.status === 'published';
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-xl">
-      {error && <ErrorMessage message={error} />}
+    <form onSubmit={handleSubmit} noValidate className="space-y-6 max-w-xl">
+      {error && (
+        <ErrorMessage
+          whatHappened={error}
+          howToFix="Please check your input values and try again."
+        />
+      )}
 
       <TextField
         id="course-title"
@@ -112,8 +117,14 @@ export const CourseForm: React.FC<CourseFormProps> = ({
       )}
 
       <div className="flex items-center gap-3 pt-2">
-        <Button type="submit" variant="primary" loading={isSubmitting}>
-          {isEdit ? 'Save changes' : 'Create course'}
+        <Button type="submit" variant="primary" disabled={isSubmitting}>
+          {isSubmitting
+            ? isEdit
+              ? 'Saving...'
+              : 'Creating...'
+            : isEdit
+              ? 'Save changes'
+              : 'Create course'}
         </Button>
         {onCancel && (
           <Button type="button" variant="secondary" onClick={onCancel} disabled={isSubmitting}>

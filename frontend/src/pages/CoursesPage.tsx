@@ -2,11 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { getCourses } from '../api/course';
 import { CourseTable } from '../components/courses/CourseTable';
 import { AppShell } from '../components/layout/AppShell';
-import { Button } from '../ui/Button';
-import { EmptyState } from '../ui/EmptyState';
-import { ErrorMessage } from '../ui/ErrorMessage';
-import { PageHeader } from '../ui/PageHeader';
-import { TextField } from '../ui/TextField';
+import { Button, EmptyState, ErrorMessage, PageHeader, TextField } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { Course } from '../types/course';
 
@@ -86,14 +82,19 @@ export const CoursesPage: React.FC = () => {
               Search
             </Button>
             {submittedQuery && (
-              <Button type="button" variant="ghost" onClick={handleClearSearch}>
+              <Button type="button" variant="quiet" onClick={handleClearSearch}>
                 Clear
               </Button>
             )}
           </div>
         </form>
 
-        {error && <ErrorMessage message={error} />}
+        {error && (
+          <ErrorMessage
+            whatHappened={error}
+            howToFix="Please try reloading the course list or refine your search."
+          />
+        )}
 
         {loading ? (
           <div className="py-12 text-center text-pencil">Loading courses...</div>
@@ -121,7 +122,7 @@ export const CoursesPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
                   disabled={!hasPrevPage}
                   onClick={() => setOffset((prev) => Math.max(0, prev - PAGE_SIZE))}
@@ -130,7 +131,7 @@ export const CoursesPage: React.FC = () => {
                 </Button>
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
                   disabled={!hasNextPage}
                   onClick={() => setOffset((prev) => prev + PAGE_SIZE)}

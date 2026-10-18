@@ -27,7 +27,7 @@ const mockStudentUser: User = {
 };
 
 describe('AppShell Component', () => {
-  it('renders navigation filtered for admin user (Account and System status)', () => {
+  it('renders navigation filtered for admin user (Account, Courses, and System status)', () => {
     render(
       <MemoryRouter initialEntries={['/status']}>
         <AuthProvider initialUser={mockAdminUser}>
@@ -38,15 +38,17 @@ describe('AppShell Component', () => {
       </MemoryRouter>
     );
 
+    expect(screen.getByRole('link', { name: 'Courses' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Account' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'System status' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Profile' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'My courses' })).not.toBeInTheDocument();
     expect(screen.getByText('Page test content')).toBeInTheDocument();
     expect(screen.getAllByText('Admin Boss').length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByRole('button', { name: 'Log out' }).length).toBeGreaterThanOrEqual(1);
   });
 
-  it('filters out admin-only navigation for student role and shows Profile', () => {
+  it('filters out admin-only navigation for student role and shows Courses, My courses, Profile', () => {
     render(
       <MemoryRouter initialEntries={['/account']}>
         <AuthProvider initialUser={mockStudentUser}>
@@ -57,6 +59,8 @@ describe('AppShell Component', () => {
       </MemoryRouter>
     );
 
+    expect(screen.getByRole('link', { name: 'Courses' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'My courses' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Profile' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Account' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'System status' })).not.toBeInTheDocument();

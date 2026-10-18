@@ -3,10 +3,7 @@ import { Link } from 'react-router-dom';
 import { getInstructorCourses, getStudentCourses } from '../api/course';
 import { CourseTable } from '../components/courses/CourseTable';
 import { AppShell } from '../components/layout/AppShell';
-import { Button } from '../ui/Button';
-import { EmptyState } from '../ui/EmptyState';
-import { ErrorMessage } from '../ui/ErrorMessage';
-import { PageHeader } from '../ui/PageHeader';
+import { EmptyState, ErrorMessage, PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { Course } from '../types/course';
 
@@ -65,14 +62,22 @@ export const MyCoursesPage: React.FC = () => {
           }
           actions={
             isInstructor ? (
-              <Button as={Link} to="/courses/new" variant="primary">
+              <Link
+                to="/courses/new"
+                className="inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-control border px-4 py-2 text-base leading-snug bg-petrol text-surface border-petrol hover:bg-petrol-hover"
+              >
                 New course
-              </Button>
+              </Link>
             ) : undefined
           }
         />
 
-        {error && <ErrorMessage message={error} />}
+        {error && (
+          <ErrorMessage
+            whatHappened={error}
+            howToFix="Please try reloading your courses or check back shortly."
+          />
+        )}
 
         {loading ? (
           <div className="py-12 text-center text-pencil">Loading your courses...</div>
@@ -85,15 +90,21 @@ export const MyCoursesPage: React.FC = () => {
                 : "You aren't enrolled in any courses yet. Browse the course catalogue to find courses."
             }
             action={
-              isInstructor
-                ? {
-                    label: 'Create course',
-                    href: '/courses/new',
-                  }
-                : {
-                    label: 'Browse courses',
-                    href: '/courses',
-                  }
+              isInstructor ? (
+                <Link
+                  to="/courses/new"
+                  className="inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-control border px-4 py-2 text-base leading-snug bg-petrol text-surface border-petrol hover:bg-petrol-hover"
+                >
+                  Create course
+                </Link>
+              ) : (
+                <Link
+                  to="/courses"
+                  className="inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-control border px-4 py-2 text-base leading-snug bg-petrol text-surface border-petrol hover:bg-petrol-hover"
+                >
+                  Browse courses
+                </Link>
+              )
             }
           />
         ) : (
