@@ -85,6 +85,7 @@ university-internship-platform/
 │   │   │   ├── assignment.py
 │   │   │   ├── auth.py
 │   │   │   ├── course.py
+│   │   │   ├── course_catalog.py
 │   │   │   ├── enrollment.py
 │   │   │   ├── health.py
 │   │   │   ├── organization_profile.py
