@@ -39,7 +39,8 @@ university-internship-platform/
 │   │   │   ├── 6d7757d439a5_create_users_and_sessions_tables.py
 │   │   │   ├── c9e18918b114_create_student_and_organization_.py
 │   │   │   ├── f0197aea93a8_create_courses_and_enrollments_tables.py
-│   │   │   └── 340caf61d32f_create_assignments_and_submissions_.py
+│   │   │   ├── 340caf61d32f_create_assignments_and_submissions_.py
+│   │   │   └── e17d6f716230_create_internship_postings_and_.py
 │   │   ├── env.py             # Migration harness wired to Base metadata
 │   │   └── script.py.mako     # Migration template
 │   ├── alembic.ini            # Alembic configuration
@@ -54,40 +55,49 @@ university-internship-platform/
 │   │   │   ├── exceptions.py
 │   │   │   └── security.py
 │   │   ├── models/            # SQLAlchemy declarative models
+│   │   │   ├── application.py
 │   │   │   ├── assignment.py
 │   │   │   ├── base.py
 │   │   │   ├── course.py
 │   │   │   ├── enrollment.py
+│   │   │   ├── internship.py
 │   │   │   ├── organization_profile.py
 │   │   │   ├── session.py
 │   │   │   ├── student_profile.py
 │   │   │   ├── submission.py
 │   │   │   └── user.py
 │   │   ├── schemas/           # Pydantic validation schemas
+│   │   │   ├── application.py
 │   │   │   ├── assignment.py
 │   │   │   ├── auth.py
 │   │   │   ├── course.py
 │   │   │   ├── enrollment.py
 │   │   │   ├── health.py
+│   │   │   ├── internship.py
 │   │   │   ├── organization_profile.py
 │   │   │   ├── student_profile.py
 │   │   │   └── submission.py
 │   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only)
+│   │   │   ├── application.py
 │   │   │   ├── assignment.py
 │   │   │   ├── auth.py
 │   │   │   ├── course.py
 │   │   │   ├── enrollment.py
 │   │   │   ├── health.py
+│   │   │   ├── internship.py
 │   │   │   ├── organization_profile.py
 │   │   │   ├── student_profile.py
 │   │   │   └── submission.py
 │   │   ├── services/          # Pure business logic and domain rules
+│   │   │   ├── application.py
 │   │   │   ├── assignment.py
 │   │   │   ├── auth.py
 │   │   │   ├── course.py
 │   │   │   ├── course_catalog.py
 │   │   │   ├── enrollment.py
 │   │   │   ├── health.py
+│   │   │   ├── internship.py
+│   │   │   ├── internship_catalog.py
 │   │   │   ├── organization_profile.py
 │   │   │   ├── student_profile.py
 │   │   │   └── submission.py
@@ -95,16 +105,20 @@ university-internship-platform/
 │   └── tests/                 # Pytest test suite mirroring app/ domain modules
 │       ├── conftest.py        # Database harness and fixtures
 │       ├── factories.py       # Test data factories and authentication helpers
-│       ├── test_assignment_create.py # Assignment creation and visibility tests
+│       ├── test_application_apply.py    # Application submission, profile prerequisite, and withdrawal tests
+│       ├── test_application_decision.py # Organization application review, decision transitions, and locking tests
+│       ├── test_assignment_create.py    # Assignment creation and visibility tests
 │       ├── test_assignment_lifecycle.py # Assignment grade floor and deletion guard tests
-│       ├── test_auth_login.py # Auth login, invalid credentials & hash leak tests
-│       ├── test_auth_register.py # Registration & atomic profile provisioning tests
-│       ├── test_auth_session.py  # Session lifecycle, logout, expiry & role guard tests
-│       ├── test_course_create.py     # Course creation permissions and field validation tests
-│       ├── test_course_update.py     # Course update and status transition tests
-│       ├── test_course_visibility.py # Course visibility, catalog search, and pagination tests
-│       ├── test_enrollment.py # Enrollment, double-enroll, leave, and roster tests
-│       ├── test_health.py     # Health integration tests (mirrors health.py)
+│       ├── test_auth_login.py           # Auth login, invalid credentials & hash leak tests
+│       ├── test_auth_register.py        # Registration & atomic profile provisioning tests
+│       ├── test_auth_session.py         # Session lifecycle, logout, expiry & role guard tests
+│       ├── test_course_create.py        # Course creation permissions and field validation tests
+│       ├── test_course_update.py        # Course update and status transition tests
+│       ├── test_course_visibility.py    # Course visibility, catalog search, and pagination tests
+│       ├── test_enrollment.py           # Enrollment, double-enroll, leave, and roster tests
+│       ├── test_health.py               # Health integration tests (mirrors health.py)
+│       ├── test_internship_catalog.py   # Internship catalogue search, work mode filters, and visibility tests
+│       ├── test_internship_manage.py    # Internship creation, owner editing, and status transition tests
 │       ├── test_organization_profile_access.py # Organization profile access & guards tests
 │       ├── test_organization_profile_update.py # Organization profile update & validation tests
 │       ├── test_script_create_user.py   # CLI user creation script tests
@@ -124,10 +138,12 @@ university-internship-platform/
     ├── vite.config.ts         # Vite configuration with /api proxy to :8001 and Vitest
     └── src/
         ├── api/               # API clients and HTTP request wrappers
+        │   ├── application.ts
         │   ├── assignment.ts
         │   ├── auth.ts
         │   ├── course.ts
         │   ├── health.ts
+        │   ├── internship.ts
         │   └── profile.ts
         ├── components/
         │   ├── assignments/   # Assignment domain components
@@ -135,7 +151,7 @@ university-internship-platform/
         │   │   ├── AssignmentTable.tsx
         │   │   ├── AssignmentTable.test.tsx
         │   │   ├── CourseAssignmentsSection.tsx
-│   │   ├── CourseAssignmentsSection.test.tsx
+        │   │   ├── CourseAssignmentsSection.test.tsx
         │   │   ├── DueBadge.tsx
         │   │   ├── DueBadge.test.tsx
         │   │   ├── GradeForm.tsx
@@ -155,6 +171,22 @@ university-internship-platform/
         │   │   ├── EnrollButton.test.tsx
         │   │   ├── StudentRosterTable.tsx
         │   │   └── StudentRosterTable.test.tsx
+        │   ├── internships/   # Internship & application domain components
+        │   │   ├── ApplicantsTable.tsx
+        │   │   ├── ApplicantsTable.test.tsx
+        │   │   ├── ApplicationStatusBadge.tsx
+        │   │   ├── ApplyForm.tsx
+        │   │   ├── ApplyForm.test.tsx
+        │   │   ├── DecisionForm.tsx
+        │   │   ├── DecisionForm.test.tsx
+        │   │   ├── InternshipApplicantsSection.tsx
+        │   │   ├── InternshipForm.tsx
+        │   │   ├── InternshipForm.test.tsx
+        │   │   ├── InternshipStatusBadge.tsx
+        │   │   ├── InternshipTable.tsx
+        │   │   ├── MyApplicationsTable.tsx
+        │   │   ├── StudentApplicationPanel.tsx
+        │   │   └── StudentApplicationPanel.test.tsx
         │   ├── layout/        # Application shell and structural layout
         │   │   ├── AppShell.tsx
         │   │   └── AppShell.test.tsx
@@ -202,6 +234,7 @@ university-internship-platform/
         │   └── skills.test.ts
         ├── pages/             # Page-level route views
         │   ├── AccountPage.tsx
+        │   ├── ApplicationDetailPage.tsx
         │   ├── AssignmentCreatePage.tsx
         │   ├── AssignmentDetailPage.tsx
         │   ├── AssignmentEditPage.tsx
@@ -210,10 +243,17 @@ university-internship-platform/
         │   ├── CourseEditPage.tsx
         │   ├── CoursesPage.tsx
         │   ├── CoursesPage.test.tsx
+        │   ├── InternshipCreatePage.tsx
+        │   ├── InternshipDetailPage.tsx
+        │   ├── InternshipEditPage.tsx
+        │   ├── InternshipsPage.tsx
+        │   ├── InternshipsPage.test.tsx
         │   ├── LoginPage.tsx
         │   ├── LoginPage.test.tsx
+        │   ├── MyApplicationsPage.tsx
         │   ├── MyCoursesPage.tsx
         │   ├── MyCoursesPage.test.tsx
+        │   ├── MyInternshipsPage.tsx
         │   ├── NotFoundPage.tsx
         │   ├── ProfilePage.tsx
         │   ├── ProfilePage.test.tsx
@@ -225,10 +265,12 @@ university-internship-platform/
         │   ├── palette-guard.test.ts
         │   └── setup.ts
         ├── types/             # Shared TypeScript type definitions
+        │   ├── application.ts
         │   ├── assignment.ts
         │   ├── auth.ts
         │   ├── course.ts
         │   ├── health.ts
+        │   ├── internship.ts
         │   └── profile.ts
         ├── App.tsx            # Main router configuration
         ├── index.css          # Global styles and design system tokens

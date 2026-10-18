@@ -14,6 +14,11 @@ The **University Learning & Internship Platform** is engineered with a modular, 
   - **Enrollment**: student enrollment and unenrollment in published courses with unique constraints.
   - **Rosters**: instructor and admin visibility into enrolled student names, emails, and enrollment dates.
   - **Discovery**: title search and limit/offset pagination with per-student enrollment flags.
+- **Phase 5**: Internship Postings and Applications:
+  - **Internship Postings**: Organization-authored postings with draft/open/closed lifecycle, work mode (onsite, remote, hybrid), duration, and application deadline.
+  - **Catalogue & Search**: Students browse open postings with title/organization search and work mode filter; admin views all statuses.
+  - **Student Applications**: Student applications with cover letter, profile completeness guard (university and department required), duplicate prevention, and withdrawal window.
+  - **Review & Decisions**: Organization review of applicant background profiles and cover letters with decision workflow (shortlisted, accepted, rejected) and decision messages. Terminal states locked. Admin read-only access.
 
 ```mermaid
 flowchart TD
@@ -85,6 +90,8 @@ flowchart TD
   - `enrollment.py`: `Enrollment` model linking course and student with unique constraint.
   - `assignment.py`: `Assignment` model with course FK, title, description, timezone-aware `due_at`, `max_points`, timestamps.
   - `submission.py`: `Submission` model linking assignment and student with unique constraint, content, link_url, is_late, grade, feedback, graded_at, graded_by.
+  - `internship.py`: `InternshipPosting` model with organization FK, title, description, requirements, location, work mode, duration_weeks, application_deadline, status (`draft`, `open`, `closed`).
+  - `application.py`: `Application` model linking posting and student with unique constraint, cover_letter, status (`submitted`, `shortlisted`, `accepted`, `rejected`, `withdrawn`), decision_message, decided_at.
   - `base.py`: Central `DeclarativeBase` metadata class.
 - **Schemas (`schemas/`)**:
   - `auth.py`: `RegisterRequest`, `LoginRequest`, `UserResponse`.
@@ -94,6 +101,8 @@ flowchart TD
   - `enrollment.py`: `EnrolledStudentResponse`, `EnrollmentResponse`, `EnrollmentActionResponse`.
   - `assignment.py`: `AssignmentCreate` (extra="forbid", future due date), `AssignmentUpdate` (extra="forbid"), `AssignmentResponse`.
   - `submission.py`: `SubmissionSubmit` (extra="forbid", http/https validation), `SubmissionGrade` (extra="forbid"), `SubmissionResponse`, `StudentSubmissionRosterItem`.
+  - `internship.py`: `InternshipCreate`, `InternshipUpdate`, `InternshipResponse`, `InternshipCatalogueItem`, `InternshipListResponse`, `MyInternshipItem`.
+  - `application.py`: `ApplicationCreate`, `ApplicationDecision`, `ApplicationResponse`, `MyApplicationItem`, `ApplicantRosterItem`.
   - `health.py`: Health verification schemas.
 - **Routers (`routers/`)**:
   - Thin FastAPI HTTP endpoints under `/api`.
@@ -104,28 +113,35 @@ flowchart TD
   - `enrollment.py`: `/courses/{id}/enrollment`, `/courses/{id}/students`.
   - `assignment.py`: `/courses/{id}/assignments`, `/assignments/{id}`.
   - `submission.py`: `/assignments/{id}/submission`, `/assignments/{id}/submissions`, `/submissions/{id}/grade`.
+  - `internship.py`: `/internships`, `/organizations/me/internships`, `/internships/{id}`.
+  - `application.py`: `/internships/{id}/applications`, `/students/me/applications`, `/applications/{id}/withdraw`, `/applications/{id}`, `/applications/{id}/decision`.
 - **Services (`services/`)**:
   - `AuthService`: Registration (atomic user + profile), authentication, session lifecycle.
   - `StudentProfileService`: Student profile retrieval and updates.
   - `OrganizationProfileService`: Organization profile retrieval and updates.
-  - `course.py`: Course creation, search and pagination, detail lookup with draft visibility guard, update with draft-reversion lock.
+  - `course.py`: Course creation, detail lookup with draft visibility guard, update with draft-reversion lock.
+  - `course_catalog.py`: Course search and pagination.
   - `enrollment.py`: Course enrollment with duplicate prevention, unenrollment, and roster retrieval.
   - `assignment.py`: Assignment creation, course assignment listing with student submission status mapping, assignment detail lookup, update with max_points grade floor check, and deletion protected against existing submissions.
   - `submission.py`: Student assignment submission with server-clock late flag calculation and locked-after-graded protection, student submission lookup, instructor/admin submissions roster, and instructor grading with max_points bounds.
+  - `internship.py`: Internship posting creation, detail lookup, update with status transitions (`draft`->`open`, `open`->`closed`), organization own postings list with applicant counts.
+  - `internship_catalog.py`: Catalogue search and pagination for students and admin with applied status mapping.
+  - `application.py`: Student application submission with profile completeness and open deadline guards, duplicate prevention, student application listing, withdrawal window, applicant roster retrieval, and organization decision transitions.
 
 ### 2. Frontend Layer (`frontend/src/`)
 - **API (`api/`)**:
-  - `auth.ts`, `profile.ts`, `course.ts`, `assignment.ts`, `health.ts`.
+  - `auth.ts`, `profile.ts`, `course.ts`, `assignment.ts`, `internship.ts`, `application.ts`, `health.ts`.
 - **Context &amp; Navigation (`context/`, `config/`)**:
   - `AuthContext`: Session lifecycle and user identity.
-  - `navigation.ts`: Navigation items filtered per role, role-based `getHomePath`.
+  - `navigation.ts`: Navigation items filtered per role, role-based `getHomePath` (organization routes to `/my-internships`).
 - **Libraries (`lib/`)**:
   - `cn.ts`: Tailwind class utility.
   - `skills.ts`: Comma-separated skill string parsing.
-  - `dates.ts`: Viewer local timezone date formatting, due-soon (3 days), and past-due logic.
+  - `dates.ts`: Unambiguous date formatting (`formatDate`, `formatDateTime`), due-soon (3 days), and past-due logic.
 - **Components (`components/`)**:
   - `components/courses/`: `CourseForm`, `CourseTable`, `EnrollButton`, `StudentRosterTable`.
   - `components/assignments/`: `AssignmentForm`, `AssignmentTable`, `CourseAssignmentsSection`, `DueBadge`, `GradeForm`, `SubmissionForm`, `SubmissionStatusBadge`, `SubmissionsTable`.
+  - `components/internships/`: `InternshipForm`, `InternshipTable`, `InternshipStatusBadge`, `ApplyForm`, `ApplicationStatusBadge`, `ApplicantsTable`, `DecisionForm`, `MyApplicationsTable`, `StudentApplicationPanel`, `InternshipApplicantsSection`.
   - `components/ui/`: `Button`, `TextField`, `Textarea`, `Select`, `Badge`, `DataTable`, `EmptyState`, `ErrorMessage`, `Notice`, `PageHeader`.
   - `components/layout/`: `AppShell`.
   - `components/routes/`: `ProtectedRoute`, `RoleRoute`.
@@ -139,6 +155,13 @@ flowchart TD
   - `/assignments/:id/edit`: Instructor assignment editing form.
   - `/assignments/:id`: Assignment detail view with student submission form / locked grade or instructor submissions roster.
   - `/assignments/:assignmentId/submissions/:submissionId/grade`: Instructor grading page.
+  - `/internships`: Internship catalogue with search, work-mode filter, and pagination.
+  - `/internships/:id`: Internship details view with student apply form or status / owner review and applicant roster.
+  - `/my-internships`: Organization view with posting table, applicant count, publish/close actions, and new posting button.
+  - `/internships/new`: Organization internship creation form.
+  - `/internships/:id/edit`: Organization internship editing form.
+  - `/my-applications`: Student applications table with status badges and withdraw action.
+  - `/applications/:id`: Applicant review page with background profile, cover letter, and decision form.
   - `/profile`: Role-specific student and organization profile views.
   - `/account`: Account details and credentials overview.
   - `/status`: Admin system status view.
@@ -175,5 +198,17 @@ flowchart TD
 | `/api/assignments/{id}/submission` | `GET` | `student` (enrolled) | Get student's own submission | `200 OK` |
 | `/api/assignments/{id}/submissions` | `GET` | `instructor` (owner), `admin` | List every enrolled student with submission or null | `200 OK` |
 | `/api/submissions/{id}/grade` | `PUT` | `instructor` (owner) | Grade submission (0 to max_points, feedback, regradable) | `200 OK` |
+| `/api/internships` | `POST` | `organization` | Create internship posting with future deadline | `201 Created` |
+| `/api/organizations/me/internships` | `GET` | `organization` | Get organization's own postings with applicant count | `200 OK` |
+| `/api/internships/{id}` | `PATCH` | `organization` (owner) | Update posting fields or advance status (`draft`->`open`, `open`->`closed`) | `200 OK` |
+| `/api/internships` | `GET` | `student`, `admin` | Search catalogue (?q=, ?work_mode=, pagination); 403 for others | `200 OK` |
+| `/api/internships/{id}` | `GET` | `student` (if open), owner `organization`, `admin` | Get internship details (404 for others) | `200 OK` |
+| `/api/internships/{id}/applications` | `POST` | `student` | Submit application (guards profile completeness, deadline, duplicates) | `201 Created` |
+| `/api/students/me/applications` | `GET` | `student` | Get authenticated student's applications | `200 OK` |
+| `/api/applications/{id}/withdraw` | `POST` | `student` (owner) | Withdraw application while submitted/shortlisted | `200 OK` |
+| `/api/internships/{id}/applications` | `GET` | `organization` (owner), `admin` | List applicant background profiles, cover letters, and statuses | `200 OK` |
+| `/api/applications/{id}` | `GET` | `student` (owner), `organization` (owner), `admin` | Get application details (404 for others) | `200 OK` |
+| `/api/applications/{id}/decision` | `PUT` | `organization` (owner) | Decide application (`shortlisted`, `accepted`, `rejected`) | `200 OK` |
 | `/api/health` | `GET` | Public | Basic platform status probe | `200 OK` |
 | `/api/health/db` | `GET` | Public | Database query connectivity probe | `200 OK` |
+
