@@ -40,11 +40,13 @@ describe('RegisterPage Component', () => {
 
     // Initially role is student, organization name field is not present
     expect(screen.queryByLabelText('Organization name')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Student')).toBeChecked();
+    expect(screen.getByLabelText('Organization')).not.toBeChecked();
 
     // Select Organization role
-    fireEvent.change(screen.getByLabelText('Account role'), {
-      target: { value: 'organization' },
-    });
+    fireEvent.click(screen.getByLabelText('Organization'));
+    expect(screen.getByLabelText('Organization')).toBeChecked();
+    expect(screen.getByLabelText('Student')).not.toBeChecked();
 
     // Organization name field is now displayed
     expect(screen.getByLabelText('Organization name')).toBeInTheDocument();
@@ -98,9 +100,7 @@ describe('RegisterPage Component', () => {
     fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Jane Doe' } });
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'jane@example.com' } });
     fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'Password123!' } });
-    fireEvent.change(screen.getByLabelText('Account role'), {
-      target: { value: 'organization' },
-    });
+    fireEvent.click(screen.getByLabelText('Organization'));
 
     fireEvent.change(screen.getByLabelText('Organization name'), {
       target: { value: 'Acme Corp' },
