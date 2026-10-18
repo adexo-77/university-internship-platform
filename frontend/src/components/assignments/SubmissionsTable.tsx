@@ -91,10 +91,6 @@ export const SubmissionsTable: React.FC<SubmissionsTableProps> = ({
   }
 
   return (
-    <DataTable
-      columns={columns}
-      data={roster}
-      keyExtractor={(item) => String(item.student_id)}
-    />
+    <DataTable columns={columns} data={roster} keyExtractor={(item) => String(item.student_id)} />
   );
 };

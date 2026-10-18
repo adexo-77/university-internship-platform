@@ -115,10 +115,6 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
   }
 
   return (
-    <DataTable
-      columns={columns}
-      data={assignments}
-      keyExtractor={(item) => String(item.id)}
-    />
+    <DataTable columns={columns} data={assignments} keyExtractor={(item) => String(item.id)} />
   );
 };
