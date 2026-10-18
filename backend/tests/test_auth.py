@@ -55,6 +55,7 @@ def test_register_student_and_organization(real_db_client: TestClient) -> None:
             "password": "Password123!",
             "full_name": "Acme Corp",
             "role": "organization",
+            "organization_name": "Acme Corp",
         },
     )
     assert resp_org.status_code == 201
