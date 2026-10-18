@@ -235,7 +235,7 @@ university-internship-platform/
 
 - New code goes in the folder that matches its job. Business logic lives in services, never in routers.
 - Models: one file per model. Schemas, routers, services and tests: one file per domain, with the same name across them (for example `course.py`).
-- Each file has one job and stays under about 300 lines. Split before it grows past that.
+- Each file has one job and stays under 250 physical lines (counted with `(Get-Content <file>).Count`, including blank lines and test files). Split before it grows past that.
 - No files named `utils` or `helpers` that collect unrelated code.
 - No scratch, backup, debug or unused files. Only source and docs are committed.
 - Each phase updates README, docs/database.md and docs/architecture.md when it changes them.
@@ -297,7 +297,7 @@ npm run test
 5. **Thin Routers, Business Logic in Services**:
    Routers only handle request parsing, parameter injection, status codes, and response serialization. All database interactions and domain logic live inside `backend/app/services/`.
 6. **File Size Limit**:
-   Keep all source files under approximately 300 lines. Split into focused sub-modules when complexity grows.
+   Keep all source and test files strictly under 250 physical lines, counted with `(Get-Content <file>).Count` (including blank lines and test files). From now on, any file above 250 physical lines must be split into focused sub-modules before the phase is called done.
 7. **Strict Typing Everywhere**:
    - Python: Complete type hints on all functions, parameters, return types, and variables.
    - TypeScript: Strict compiler options enabled. Absolute prohibition of the `any` type (`@typescript-eslint/no-explicit-any` is configured as an error).
@@ -327,5 +327,8 @@ Every phase, feature, or refactoring task must satisfy the following checklist b
 3. **No unused files, imports, or dependencies**.
 4. **Documentation is complete** (`README.md`, `docs/architecture.md`, `docs/database.md`, `docs/design.md`).
 5. **Working tree is clean and committed** with small, focused conventional commits.
-6. **Report the 8 largest source files by line count; none may exceed 300 lines.**
+6. **Report the 8 largest files by physical line count with `(Get-Content <file>).Count`, including blank lines and including test files; none may exceed 250 physical lines. From now on, any file above 250 physical lines must be split before the phase is called done.** Run:
+   ```powershell
+   Get-ChildItem backend\app, backend\tests, frontend\src -Recurse -Include *.py,*.ts,*.tsx | ForEach-Object { [pscustomobject]@{Lines=(Get-Content $_.FullName).Count; File=$_.Name} } | Sort-Object Lines -Descending | Select-Object -First 8
+   ```
 

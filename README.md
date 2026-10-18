@@ -59,13 +59,16 @@ university-internship-platform/
 │       ├── test_auth_login.py # Auth login tests
 │       ├── test_auth_register.py # Auth registration tests
 │       ├── test_auth_session.py  # Session lifecycle & role guard tests
-│       ├── test_course.py     # Course creation, listing, search, visibility, and status tests
+│       ├── test_course_create.py     # Course creation permissions and field validation tests
+│       ├── test_course_update.py     # Course update and status transition tests
+│       ├── test_course_visibility.py # Course visibility, catalog search, and pagination tests
 │       ├── test_enrollment.py # Enrollment, roster inspection, and cascade delete tests
 │       ├── test_health.py     # System & DB health test suite
 │       ├── test_organization_profile.py # Organization profile integration tests
 │       ├── test_script_create_user.py   # CLI script integration tests
 │       ├── test_student_profile.py      # Student profile integration tests
-│       └── test_submission.py # Student submission, server-clock late flag, lock-after-graded, and grading tests
+│       ├── test_submission_grading.py   # Submissions roster, grading and regrading tests
+│       └── test_submission_lifecycle.py # Student submission, server-clock late flag, and locking tests
 └── frontend/
     ├── eslint.config.js       # ESLint 9 flat configuration
     ├── index.html             # HTML entry with typography and SEO metadata
@@ -267,4 +270,4 @@ npm run test -- --run
 | **4. Documentation is complete** | PASS | Updated README, docs/architecture.md, docs/database.md, AGENTS.md |
 | **5. Working tree is clean and committed** | PASS | Small, focused conventional commits across every step |
 | **6. Build verification** | PASS | Frontend production bundle builds cleanly (`tsc --noEmit && vite build`) |
-| **7. File size limits** | PASS | All source files strictly under 300 lines limit (all under 250 lines) |
+| **7. File size limits** | PASS | Count physical lines with `(Get-Content <file>).Count`, including blank lines and test files. From now on, any file above 250 physical lines must be split before the phase is called done. (Reported via: `Get-ChildItem backend\app, backend\tests, frontend\src -Recurse -Include *.py,*.ts,*.tsx \| ForEach-Object { [pscustomobject]@{Lines=(Get-Content $_.FullName).Count; File=$_.Name} } \| Sort-Object Lines -Descending \| Select-Object -First 8`) |
