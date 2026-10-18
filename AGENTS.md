@@ -139,12 +139,12 @@ university-internship-platform/
 ### Structure Rules for Every Future Phase
 
 - New code goes in the folder that matches its job. Business logic lives in services, never in routers.
-- One file per domain, with the same name across models, schemas, routers, services, and tests (for example `course.py`).
+- Models: one file per model. Schemas, routers, services and tests: one file per domain, with the same name across them (for example `course.py`).
 - Each file has one job and stays under about 300 lines. Split before it grows past that.
 - No files named `utils` or `helpers` that collect unrelated code.
-- No scratch, backup, debug, or unused files. Only source and docs are committed.
-- Each phase updates README, docs/database.md, and docs/architecture.md when it changes them.
-- Before finishing any phase, run `git ls-files` and check it against this guide.
+- No scratch, backup, debug or unused files. Only source and docs are committed.
+- Each phase updates README, docs/database.md and docs/architecture.md when it changes them.
+- Before finishing any phase, run `git ls-files` and compare it to this guide.
 
 ---
 
