@@ -6,11 +6,13 @@ from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.exceptions import AppException
+from app.routers.application import router as application_router
 from app.routers.assignment import router as assignment_router
 from app.routers.auth import router as auth_router
 from app.routers.course import router as course_router
 from app.routers.enrollment import router as enrollment_router
 from app.routers.health import router as health_router
+from app.routers.internship import router as internship_router
 from app.routers.organization_profile import router as organization_profile_router
 from app.routers.student_profile import router as student_profile_router
 from app.routers.submission import router as submission_router
@@ -49,3 +51,5 @@ app.include_router(course_router, prefix="/api")
 app.include_router(enrollment_router, prefix="/api")
 app.include_router(assignment_router, prefix="/api")
 app.include_router(submission_router, prefix="/api")
+app.include_router(internship_router, prefix="/api")
+app.include_router(application_router, prefix="/api")
