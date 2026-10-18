@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Assignment } from '../../types/assignment';
-import { ColumnDef, DataTable } from '../ui/DataTable';
+import { Column, DataTable } from '../ui/DataTable';
 import { EmptyState } from '../ui/EmptyState';
 import { DueBadge } from './DueBadge';
 import { SubmissionStatusBadge } from './SubmissionStatusBadge';
@@ -21,10 +21,11 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
   isAdmin,
   isStudent,
 }) => {
-  const columns: ColumnDef<Assignment>[] = [
+  const columns: Column<Assignment>[] = [
     {
+      key: 'title',
       header: 'Title',
-      accessor: (item) => (
+      render: (item) => (
         <div>
           <Link
             to={`/assignments/${item.id}`}
@@ -39,12 +40,14 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
       ),
     },
     {
+      key: 'due_at',
       header: 'Due date',
-      accessor: (item) => <DueBadge dueAt={item.due_at} />,
+      render: (item) => <DueBadge dueAt={item.due_at} />,
     },
     {
+      key: 'max_points',
       header: 'Points',
-      accessor: (item) => (
+      render: (item) => (
         <span className="text-sm text-pencil font-medium">{item.max_points} pts</span>
       ),
     },
@@ -52,8 +55,9 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
 
   if (isStudent) {
     columns.push({
+      key: 'submission_status',
       header: 'Your status',
-      accessor: (item) => (
+      render: (item) => (
         <SubmissionStatusBadge
           status={item.submission_status}
           isLate={item.is_late}
@@ -65,9 +69,9 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
   }
 
   columns.push({
+    key: 'actions',
     header: 'Actions',
-    className: 'text-right',
-    accessor: (item) => (
+    render: (item) => (
       <div className="flex items-center justify-end gap-2">
         <Link
           to={`/assignments/${item.id}`}
@@ -115,7 +119,6 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
       columns={columns}
       data={assignments}
       keyExtractor={(item) => String(item.id)}
-      caption="Course assignments"
     />
   );
 };

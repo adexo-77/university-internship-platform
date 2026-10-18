@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { StudentSubmissionRosterItem } from '../../types/assignment';
 import { Badge } from '../ui/Badge';
-import { ColumnDef, DataTable } from '../ui/DataTable';
+import { Column, DataTable } from '../ui/DataTable';
 import { EmptyState } from '../ui/EmptyState';
 
 export interface SubmissionsTableProps {
@@ -18,10 +18,11 @@ export const SubmissionsTable: React.FC<SubmissionsTableProps> = ({
   maxPoints,
   isOwner = false,
 }) => {
-  const columns: ColumnDef<StudentSubmissionRosterItem>[] = [
+  const columns: Column<StudentSubmissionRosterItem>[] = [
     {
+      key: 'student',
       header: 'Student',
-      accessor: (item) => (
+      render: (item) => (
         <div>
           <span className="font-medium text-ink block">{item.student_name}</span>
           <span className="text-xs text-pencil">{item.student_email}</span>
@@ -29,8 +30,9 @@ export const SubmissionsTable: React.FC<SubmissionsTableProps> = ({
       ),
     },
     {
+      key: 'status',
       header: 'Status',
-      accessor: (item) => {
+      render: (item) => {
         if (!item.submission) {
           return <Badge variant="neutral">Not submitted</Badge>;
         }
@@ -43,8 +45,9 @@ export const SubmissionsTable: React.FC<SubmissionsTableProps> = ({
       },
     },
     {
+      key: 'grade',
       header: 'Grade',
-      accessor: (item) => {
+      render: (item) => {
         if (!item.submission) return <span className="text-pencil text-sm">—</span>;
         if (item.submission.grade !== null && item.submission.grade !== undefined) {
           return (
@@ -60,9 +63,9 @@ export const SubmissionsTable: React.FC<SubmissionsTableProps> = ({
 
   if (isOwner) {
     columns.push({
+      key: 'actions',
       header: 'Actions',
-      className: 'text-right',
-      accessor: (item) => {
+      render: (item) => {
         if (!item.submission) {
           return <span className="text-pencil text-xs italic">Awaiting submission</span>;
         }
@@ -92,7 +95,6 @@ export const SubmissionsTable: React.FC<SubmissionsTableProps> = ({
       columns={columns}
       data={roster}
       keyExtractor={(item) => String(item.student_id)}
-      caption="Enrolled students submission roster"
     />
   );
 };
