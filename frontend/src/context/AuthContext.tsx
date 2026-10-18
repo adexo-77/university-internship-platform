@@ -8,9 +8,9 @@ export interface AuthProviderProps {
   initialUser?: User | null;
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children, initialUser = null }) => {
-  const [user, setUser] = useState<User | null>(initialUser);
-  const [isLoading, setIsLoading] = useState<boolean>(initialUser === null);
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children, initialUser }) => {
+  const [user, setUser] = useState<User | null>(initialUser ?? null);
+  const [isLoading, setIsLoading] = useState<boolean>(initialUser === undefined);
 
   const fetchSession = useCallback(async () => {
     try {
@@ -24,7 +24,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children, initialUse
   }, []);
 
   useEffect(() => {
-    if (initialUser === null) {
+    if (initialUser === undefined) {
       void fetchSession();
     }
   }, [fetchSession, initialUser]);

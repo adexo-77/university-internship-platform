@@ -1,4 +1,4 @@
-import { ApiErrorResponse, LoginPayload, RegisterPayload, User } from '../types/auth';
+import { LoginPayload, RegisterPayload, User } from '../types/auth';
 
 /**
  * Custom error thrown by authentication API calls with HTTP status and machine code.
@@ -20,7 +20,7 @@ async function handleResponseError(response: Response): Promise<never> {
   let code: string | undefined;
 
   try {
-    const errorBody = (await response.json()) as ApiErrorResponse;
+    const errorBody = (await response.json()) as { detail?: unknown; code?: string };
     if (typeof errorBody.detail === 'string') {
       message = errorBody.detail;
     } else if (Array.isArray(errorBody.detail) && errorBody.detail.length > 0) {

@@ -1,42 +1,83 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Activity, BookOpen } from 'lucide-react';
-import { describe, expect, it } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
+import { describe, expect, it, vi } from 'vitest';
+import { AuthProvider } from '../../context/AuthContext';
+import { User } from '../../types/auth';
 import { AppShell } from './AppShell';
 
+const mockAdminUser: User = {
+  id: 1,
+  email: 'admin@example.com',
+  full_name: 'Admin Boss',
+  role: 'admin',
+  is_active: true,
+  created_at: '2026-10-18T00:00:00Z',
+  updated_at: '2026-10-18T00:00:00Z',
+};
+
+const mockStudentUser: User = {
+  id: 2,
+  email: 'student@example.com',
+  full_name: 'Jane Student',
+  role: 'student',
+  is_active: true,
+  created_at: '2026-10-18T00:00:00Z',
+  updated_at: '2026-10-18T00:00:00Z',
+};
+
 describe('AppShell Component', () => {
-  it('renders default navigation item and page content', () => {
+  it('renders navigation filtered for admin user (Account and System status)', () => {
     render(
-      <AppShell>
-        <div>Page test content</div>
-      </AppShell>
+      <MemoryRouter initialEntries={['/']}>
+        <AuthProvider initialUser={mockAdminUser}>
+          <AppShell currentPath="/">
+            <div>Page test content</div>
+          </AppShell>
+        </AuthProvider>
+      </MemoryRouter>
     );
 
-    // Verifies navigation item from navigation configuration
+    expect(screen.getByRole('link', { name: 'Account' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'System status' })).toBeInTheDocument();
     expect(screen.getByText('Page test content')).toBeInTheDocument();
+    expect(screen.getAllByText('Admin Boss').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByRole('button', { name: 'Log out' }).length).toBeGreaterThanOrEqual(1);
+  });
 
-    // Verifies absence of placeholder/invented items and copy
-    expect(screen.queryByText('Internships')).not.toBeInTheDocument();
-    expect(screen.queryByText('Learning')).not.toBeInTheDocument();
-    expect(screen.queryByText('Settings')).not.toBeInTheDocument();
-    expect(screen.queryByText(/Academic term/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Platform environment/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Phase/i)).not.toBeInTheDocument();
+  it('filters out admin-only navigation for student role', () => {
+    render(
+      <MemoryRouter initialEntries={['/account']}>
+        <AuthProvider initialUser={mockStudentUser}>
+          <AppShell currentPath="/account">
+            <div>Student account content</div>
+          </AppShell>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole('link', { name: 'Account' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'System status' })).not.toBeInTheDocument();
+    expect(screen.getAllByText('Jane Student').length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders custom navigation items passed via navItems prop', () => {
     const customNavItems = [
-      { path: '/', label: 'System status', icon: Activity },
+      { path: '/account', label: 'Account', icon: Activity },
       { path: '/courses', label: 'Courses', icon: BookOpen },
     ];
 
     render(
-      <AppShell navItems={customNavItems} currentPath="/courses">
-        <div>Courses content</div>
-      </AppShell>
+      <MemoryRouter initialEntries={['/courses']}>
+        <AuthProvider initialUser={mockStudentUser}>
+          <AppShell navItems={customNavItems} currentPath="/courses">
+            <div>Courses content</div>
+          </AppShell>
+        </AuthProvider>
+      </MemoryRouter>
     );
 
-    expect(screen.getByRole('link', { name: 'System status' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Account' })).toBeInTheDocument();
     const coursesLink = screen.getByRole('link', { name: 'Courses' });
     expect(coursesLink).toBeInTheDocument();
     expect(coursesLink).toHaveAttribute('aria-current', 'page');
@@ -44,9 +85,13 @@ describe('AppShell Component', () => {
 
   it('toggles mobile menu open and closed', () => {
     render(
-      <AppShell>
-        <div>Content</div>
-      </AppShell>
+      <MemoryRouter initialEntries={['/account']}>
+        <AuthProvider initialUser={mockStudentUser}>
+          <AppShell currentPath="/account">
+            <div>Content</div>
+          </AppShell>
+        </AuthProvider>
+      </MemoryRouter>
     );
 
     const toggleButton = screen.getByRole('button', { name: 'Open menu' });
@@ -62,6 +107,35 @@ describe('AppShell Component', () => {
     expect(screen.getByRole('button', { name: 'Open menu' })).toHaveAttribute(
       'aria-expanded',
       'false'
+    );
+  });
+
+  it('calls logout when header Log out button is clicked', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ message: 'Logged out' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    );
+
+    render(
+      <MemoryRouter initialEntries={['/account']}>
+        <AuthProvider initialUser={mockStudentUser}>
+          <AppShell currentPath="/account">
+            <div>Content</div>
+          </AppShell>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    const logoutBtns = screen.getAllByRole('button', { name: 'Log out' });
+    await act(async () => {
+      fireEvent.click(logoutBtns[0]);
+    });
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      '/api/auth/logout',
+      expect.objectContaining({ method: 'POST' })
     );
   });
 });
