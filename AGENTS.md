@@ -128,6 +128,7 @@ university-internship-platform/
         │   │   ├── AssignmentTable.tsx
         │   │   ├── AssignmentTable.test.tsx
         │   │   ├── CourseAssignmentsSection.tsx
+│   │   ├── CourseAssignmentsSection.test.tsx
         │   │   ├── DueBadge.tsx
         │   │   ├── DueBadge.test.tsx
         │   │   ├── GradeForm.tsx
@@ -159,6 +160,7 @@ university-internship-platform/
         │   │   └── RouteGuards.test.tsx
         │   ├── ui/            # Reusable, typed UI components (Button, Badge, etc.)
         │   │   ├── Badge.tsx
+        │   │   ├── Button.test.tsx
         │   │   ├── Button.tsx
         │   │   ├── DataTable.tsx
         │   │   ├── EmptyState.tsx
@@ -180,7 +182,9 @@ university-internship-platform/
         │   └── auth-context-def.ts
         ├── hooks/             # Custom React hooks
         │   ├── useAuth.ts
-        │   └── useHealth.ts
+        │   ├── useHealth.ts
+        │   ├── usePageTitle.test.ts
+        │   └── usePageTitle.ts
         ├── lib/               # Utility libraries (cn, dates, skills)
         │   ├── cn.ts
         │   ├── dates.ts
