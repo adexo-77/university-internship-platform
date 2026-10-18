@@ -83,9 +83,7 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
             </div>
             {submission.feedback && (
               <div className="space-y-1">
-                <span className="text-xs font-medium text-pencil uppercase tracking-wider">
-                  Instructor feedback
-                </span>
+                <span className="text-xs font-medium text-pencil">Instructor feedback</span>
                 <p className="text-sm text-ink whitespace-pre-wrap">{submission.feedback}</p>
               </div>
             )}

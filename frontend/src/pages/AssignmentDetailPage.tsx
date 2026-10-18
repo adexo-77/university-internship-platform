@@ -127,15 +127,11 @@ export const AssignmentDetailPage: React.FC = () => {
 
             <div className="flex items-center gap-4 flex-wrap pb-2 border-b border-line">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-pencil uppercase tracking-wider">
-                  Due:
-                </span>
+                <span className="text-xs font-semibold text-pencil">Due</span>
                 <DueBadge dueAt={assignment.due_at} />
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-pencil uppercase tracking-wider">
-                  Points:
-                </span>
+                <span className="text-xs font-semibold text-pencil">Points</span>
                 <Badge variant="neutral">{assignment.max_points} max points</Badge>
               </div>
             </div>
