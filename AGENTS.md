@@ -116,8 +116,8 @@ university-internship-platform/
         ├── hooks/             # Custom React hooks
         │   ├── useAuth.ts
         │   └── useHealth.ts
-        ├── lib/               # Utility functions (cn class merging)
-        │   └── utils.ts
+        ├── lib/               # Class name merging utility (cn)
+        │   └── cn.ts
         ├── pages/             # Page-level route views
         │   ├── AccountPage.tsx
         │   ├── HomePage.tsx

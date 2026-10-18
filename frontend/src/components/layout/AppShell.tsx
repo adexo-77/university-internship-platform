@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { navigationItems, NavItem } from '../../config/navigation';
 import { useAuth } from '../../hooks/useAuth';
-import { cn } from '../../lib/utils';
+import { cn } from '../../lib/cn';
 import { Badge, Button } from '../ui';
 
 export interface AppShellProps {
