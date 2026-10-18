@@ -29,9 +29,9 @@ const mockStudentUser: User = {
 describe('AppShell Component', () => {
   it('renders navigation filtered for admin user (Account and System status)', () => {
     render(
-      <MemoryRouter initialEntries={['/']}>
+      <MemoryRouter initialEntries={['/status']}>
         <AuthProvider initialUser={mockAdminUser}>
-          <AppShell currentPath="/">
+          <AppShell currentPath="/status">
             <div>Page test content</div>
           </AppShell>
         </AuthProvider>

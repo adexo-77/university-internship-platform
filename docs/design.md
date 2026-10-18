@@ -87,6 +87,8 @@ All UI components are built in-house with zero external widget kits:
 
 ## 7. Page Layouts &amp; Routing
 
+- **Root Redirect (`/`)**:
+  - Has no page of its own. Unauthenticated users are sent to `/login`; authenticated users are sent to their role's home page via `getHomePath(role)` in `src/config/navigation.ts` (currently `/account` for all roles).
 - **Public Authentication Pages (`/login`, `/register`)**:
   - Plain centered form on `bg-chalk` page background with a single card (`bg-surface`, 1px border `border-line`, rounded `rounded-control`).
   - No sidebar, navigation links, or decorative heroes.
@@ -95,7 +97,8 @@ All UI components are built in-house with zero external widget kits:
 - **Authenticated Application Shell (`AppShell`)**:
   - Left navigation sidebar dynamically filtered according to the active user's role (`roles` configuration in `src/config/navigation.ts`).
   - Top header displays the active page title, current user's full name, role badge, and a quiet `Log out` action.
+- **System Status (`/status`)**: Admin-only. Displays health-check results for the API server and database connection.
 - **Route Authorization Guards**:
   - `ProtectedRoute`: Seamlessly redirects unauthenticated requests to `/login` preserving intended destination state.
-  - `RoleRoute`: Renders an accessible, plain-language access restriction view with a direct navigation action back to `/account`.
+  - `RoleRoute`: Renders a single access-denied message — heading "You don't have access to this page", description "This page is only available to [role names] accounts." (role names derived from the route's `allowedRoles`), and a "Go to your account" button.
 

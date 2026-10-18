@@ -64,7 +64,7 @@ describe('ProtectedRoute Guard', () => {
 });
 
 describe('RoleRoute Guard', () => {
-  it('renders "You don\'t have access to this page" with way back when unauthorized', () => {
+  it('shows access-denied with allowed role names when unauthorized', () => {
     render(
       <MemoryRouter initialEntries={['/admin-panel']}>
         <AuthProvider initialUser={mockStudentUser}>
@@ -78,9 +78,29 @@ describe('RoleRoute Guard', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText("You don't have access to this page.")).toBeInTheDocument();
+    expect(screen.getByText("You don't have access to this page")).toBeInTheDocument();
+    expect(screen.getByText('This page is only available to admin accounts.')).toBeInTheDocument();
     expect(screen.queryByText('Admin Exclusive Panel')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Return to account' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Go to your account' })).toBeInTheDocument();
+  });
+
+  it('lists multiple role names in the access-denied message', () => {
+    render(
+      <MemoryRouter initialEntries={['/restricted']}>
+        <AuthProvider initialUser={mockStudentUser}>
+          <Routes>
+            <Route element={<RoleRoute allowedRoles={['admin', 'instructor']} />}>
+              <Route path="/restricted" element={<div>Restricted Content</div>} />
+            </Route>
+            <Route path="/account" element={<div>Account Page</div>} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    expect(
+      screen.getByText('This page is only available to admin and instructor accounts.')
+    ).toBeInTheDocument();
   });
 
   it('allows authorized role to access route', () => {
@@ -99,3 +119,55 @@ describe('RoleRoute Guard', () => {
     expect(screen.getByText('Admin Exclusive Panel')).toBeInTheDocument();
   });
 });
+
+describe('Root redirect', () => {
+  it('redirects unauthenticated user from / to /login', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <AuthProvider initialUser={null}>
+          <Routes>
+            <Route path="/" element={<RootRedirectTestHelper />} />
+            <Route path="/login" element={<div>Login Page</div>} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Login Page')).toBeInTheDocument();
+  });
+
+  it('redirects authenticated user from / to /account', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <AuthProvider initialUser={mockStudentUser}>
+          <Routes>
+            <Route path="/" element={<RootRedirectTestHelper />} />
+            <Route path="/account" element={<div>Account Destination</div>} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Account Destination')).toBeInTheDocument();
+  });
+});
+
+/* ---------- helpers ---------- */
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
+import { getHomePath } from '../../config/navigation';
+
+/**
+ * Mirrors the RootRedirect logic from App.tsx so we can test it in isolation
+ * without importing the full App router.
+ */
+const RootRedirectTestHelper: React.FC = () => {
+  const { isAuthenticated, user } = useAuth();
+
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Navigate to={getHomePath(user.role)} replace />;
+};
