@@ -25,7 +25,7 @@ describe('SubmissionStatusPanel Component', () => {
       grade: null,
       feedback: null,
       graded_at: null,
-      grader_id: null,
+      updated_at: '2026-10-18T20:10:00Z',
     };
 
     render(<SubmissionStatusPanel submission={submission} maxPoints={100} />);
@@ -47,7 +47,7 @@ describe('SubmissionStatusPanel Component', () => {
       grade: null,
       feedback: null,
       graded_at: null,
-      grader_id: null,
+      updated_at: '2026-10-18T20:10:00Z',
     };
 
     render(<SubmissionStatusPanel submission={submission} maxPoints={100} />);
@@ -69,7 +69,7 @@ describe('SubmissionStatusPanel Component', () => {
       grade: 92,
       feedback: 'Great job!',
       graded_at: '2026-10-19T10:00:00Z',
-      grader_id: 5,
+      updated_at: '2026-10-18T20:10:00Z',
     };
 
     render(<SubmissionStatusPanel submission={submission} maxPoints={100} />);
@@ -91,7 +91,7 @@ describe('SubmissionStatusPanel Component', () => {
       grade: 78,
       feedback: 'Good work despite slight delay.',
       graded_at: '2026-10-19T10:00:00Z',
-      grader_id: 5,
+      updated_at: '2026-10-18T20:10:00Z',
     };
 
     render(<SubmissionStatusPanel submission={submission} maxPoints={100} />);
