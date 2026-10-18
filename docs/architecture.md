@@ -81,7 +81,8 @@ flowchart TD
   - `/login`: Public centered login form.
   - `/register`: Public centered registration form with student/organization selection.
   - `/account`: Protected user profile view.
-  - `/`: Admin-only system status dashboard.
+  - `/`: Root redirect to /login (unauthenticated) or role home page (authenticated).
+  - `/status`: Admin-only system status dashboard (`SystemStatusPage`).
 
 ---
 

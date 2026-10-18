@@ -120,12 +120,12 @@ university-internship-platform/
         │   └── cn.ts
         ├── pages/             # Page-level route views
         │   ├── AccountPage.tsx
-        │   ├── HomePage.tsx
         │   ├── LoginPage.tsx
         │   ├── LoginPage.test.tsx
         │   ├── NotFoundPage.tsx
         │   ├── RegisterPage.tsx
-        │   └── RegisterPage.test.tsx
+        │   ├── RegisterPage.test.tsx
+        │   └── SystemStatusPage.tsx
         ├── test/              # Frontend testing setup
         │   └── setup.ts
         ├── types/             # Shared TypeScript type definitions

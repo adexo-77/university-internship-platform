@@ -3,7 +3,7 @@ import { HealthCheck } from '../components/HealthCheck';
 import { AppShell } from '../components/layout/AppShell';
 import { PageHeader } from '../components/ui';
 
-export const HomePage: React.FC = () => {
+export const SystemStatusPage: React.FC = () => {
   return (
     <AppShell>
       <div className="space-y-8">

@@ -70,7 +70,7 @@ university-internship-platform/
         ├── context/           # React AuthContext and AuthProvider
         ├── hooks/             # Custom hooks (useAuth, useHealth)
         ├── lib/               # Utility functions (cn helper)
-        ├── pages/             # Pages (Login, Register, Account, HomePage, NotFound)
+        ├── pages/             # Pages (Login, Register, Account, SystemStatusPage, NotFound)
         ├── types/             # Shared TypeScript types
         ├── App.tsx            # Application routing entry point
         └── main.tsx           # React DOM root

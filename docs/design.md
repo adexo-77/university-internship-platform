@@ -97,7 +97,7 @@ All UI components are built in-house with zero external widget kits:
 - **Authenticated Application Shell (`AppShell`)**:
   - Left navigation sidebar dynamically filtered according to the active user's role (`roles` configuration in `src/config/navigation.ts`).
   - Top header displays the active page title, current user's full name, role badge, and a quiet `Log out` action.
-- **System Status (`/status`)**: Admin-only. Displays health-check results for the API server and database connection.
+- **System Status (`/status`)**: Admin-only. Displays health-check results for the API server and database connection (`SystemStatusPage`).
 - **Route Authorization Guards**:
   - `ProtectedRoute`: Seamlessly redirects unauthenticated requests to `/login` preserving intended destination state.
   - `RoleRoute`: Renders a single access-denied message — heading "You don't have access to this page", description "This page is only available to [role names] accounts." (role names derived from the route's `allowedRoles`), and a "Go to your account" button.

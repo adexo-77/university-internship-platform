@@ -6,10 +6,10 @@ import { getHomePath } from './config/navigation';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './hooks/useAuth';
 import { AccountPage } from './pages/AccountPage';
-import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { SystemStatusPage } from './pages/SystemStatusPage';
 
 /**
  * Root index redirect: sends unauthenticated users to /login
@@ -41,7 +41,7 @@ export const AppRoutes: React.FC = () => {
 
         {/* System status: admin role only */}
         <Route element={<RoleRoute allowedRoles={['admin']} />}>
-          <Route path="/status" element={<HomePage />} />
+          <Route path="/status" element={<SystemStatusPage />} />
         </Route>
       </Route>
 
