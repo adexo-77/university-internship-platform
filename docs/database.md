@@ -11,6 +11,9 @@ erDiagram
     users ||--o{ sessions : "has active sessions"
     users ||--o| student_profiles : "has profile (student)"
     users ||--o| organization_profiles : "has profile (organization)"
+    users ||--o{ courses : "instructs (instructor)"
+    users ||--o{ enrollments : "enrolled in (student)"
+    courses ||--o{ enrollments : "has enrollments"
 
     users {
         int id PK "autoincrement"
@@ -51,6 +54,23 @@ erDiagram
         string website "nullable, valid http/https URL, max 255"
         string description "nullable, max 1000"
         timestamp updated_at "with time zone, server default now(), on update"
+    }
+
+    courses {
+        int id PK "autoincrement"
+        int instructor_id FK "users.id, ON DELETE CASCADE, indexed"
+        string title "max 120"
+        string description "nullable, max 2000"
+        course_status status "enum: draft | published, default draft"
+        timestamp created_at "with time zone, server default now()"
+        timestamp updated_at "with time zone, server default now(), on update"
+    }
+
+    enrollments {
+        int id PK "autoincrement"
+        int course_id FK "courses.id, ON DELETE CASCADE"
+        int student_id FK "users.id, ON DELETE CASCADE, indexed"
+        timestamp enrolled_at "with time zone, server default now()"
     }
 ```
 
@@ -115,13 +135,41 @@ Represents company details, industry sector, and contact points for organization
 | `description` | `VARCHAR(1000)` | `NULLABLE` | Organization mission, culture, and overview |
 | `updated_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Profile last modification timestamp |
 
+### `courses`
+
+Represents instructor-created learning courses with draft/published lifecycle.
+
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | `PRIMARY KEY`, `AUTOINCREMENT` | Unique course identifier |
+| `instructor_id` | `INTEGER` | `NOT NULL`, `FK users(id) ON DELETE CASCADE`, `INDEX` | Owning instructor user account |
+| `title` | `VARCHAR(120)` | `NOT NULL` | Course title (3 to 120 characters) |
+| `description` | `VARCHAR(2000)` | `NULLABLE` | Syllabus and course outline |
+| `status` | `course_status` | `NOT NULL`, `DEFAULT 'draft'` | Enum status (`draft`, `published`) |
+| `created_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Creation timestamp in UTC |
+| `updated_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Last update timestamp in UTC |
+
+### `enrollments`
+
+Represents student enrollment linking a student account to a course.
+
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | `PRIMARY KEY`, `AUTOINCREMENT` | Unique enrollment identifier |
+| `course_id` | `INTEGER` | `NOT NULL`, `FK courses(id) ON DELETE CASCADE` | Course reference |
+| `student_id` | `INTEGER` | `NOT NULL`, `FK users(id) ON DELETE CASCADE`, `INDEX` | Enrolled student user reference |
+| `enrolled_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Enrollment timestamp in UTC |
+| &mdash; | &mdash; | `UNIQUE (course_id, student_id)` | Prevents duplicate student enrollments |
+
 ---
 
 ## 3. Security &amp; Data Integrity Rules
 
 1. **Token Storage**: Raw session tokens are never stored in the database. Only the SHA-256 digest is persisted in `sessions.token_hash`.
 2. **Credential Privacy**: `password_hash` is never included in API responses or logs.
-3. **Cascade Invalidation**: Deleting a user account cascades to automatically drop all active sessions and associated profile records (`student_profiles` or `organization_profiles`).
+3. **Cascade Invalidation**: Deleting a user account cascades to automatically drop all active sessions, associated profile records (`student_profiles` or `organization_profiles`), created courses (for instructors), and enrollments (for students).
 4. **Stale Session Purging**: Expired sessions are checked against `expires_at` and automatically deleted upon access resolution.
-5. **Atomic Registration Transaction**: User creation and initial profile creation (`student_profiles` with empty skills or `organization_profiles` with `organization_name`) occur in the same database transaction; failure of either rolls back both.
-6. **Session-Bound Identity**: Endpoints resolving profiles derive user identity solely from the verified session, never allowing external modification of foreign keys.
+5. **Atomic Registration Transaction**: User creation and initial profile creation occur in the same database transaction; failure of either rolls back both.
+6. **Session-Bound Identity**: Endpoints resolving profiles, creating courses, or enrolling students derive user identity solely from the verified session, never allowing external modification or spoofing of foreign keys.
+7. **One-Way Status Transition**: Courses can transition from `draft` to `published`, but published courses cannot be reverted to `draft` (enforced with 409 Conflict).
+8. **Unique Enrollment**: Unique constraint on `(course_id, student_id)` prevents double-enrollment, backed by 409 Conflict handling.

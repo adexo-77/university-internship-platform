@@ -1,8 +1,8 @@
-# University Learning &amp; Internship Platform &bull; Phase 2 Profiles
+# University Learning &amp; Internship Platform &bull; Phase 3 Courses &amp; Enrollment
 
 A production-grade, modular web platform designed for university student learning tracking, skill assessment, and internship placement matching. Built for the Brolf Tech internship technical challenge with a strict **MVP first, one phase at a time** methodology.
 
-> **Phase 2 Status**: Student and organization profiles fully operational. Models and migrations for `student_profiles` and `organization_profiles`, atomic profile row creation during registration, strict role-based profile retrieval and update endpoints (`/api/students/me`, `/api/organizations/me`), input trimming and validation, and interactive `/profile` forms with server error notices and plain success states.
+> **Phase 3 Status**: Courses and enrollment fully operational. Instructor-authored courses with draft/published lifecycle, student enrollment and unenrollment, duplicate enrollment prevention (409 Conflict), course catalogue with title search (?q=) and limit/offset pagination, instructor course management with enrolled student counts, enrolled student roster tables for instructors and admins, and role-specific home page routing (`/my-courses` for students and instructors, `/courses` for admin, `/profile` for organizations).
 
 ---
 
@@ -12,7 +12,7 @@ A production-grade, modular web platform designed for university student learnin
 | :--- | :--- |
 | **Backend** | Python 3.12+ / 3.14+, FastAPI, SQLAlchemy 2, PostgreSQL (via `psycopg` 3), Alembic, Pydantic v2 |
 | **Frontend** | React 18, React Router 6/7, Vite (proxy to backend :8001), TypeScript (strict, no `any`), Tailwind CSS, Lucide React |
-| **Testing** | Pytest + FastAPI `TestClient` (backend: 38 tests), Vitest + React Testing Library (frontend: 31 tests) |
+| **Testing** | Pytest + FastAPI `TestClient` (backend: 50 tests), Vitest + React Testing Library (frontend: 57 tests) |
 | **Tooling &amp; Quality** | Ruff (backend lint &amp; format), ESLint 9 + Prettier (frontend lint &amp; format) |
 | **Environment** | Windows PowerShell compatible, Unix LF line endings, no hardcoded Windows paths |
 
@@ -44,14 +44,18 @@ university-internship-platform/
 │   ├── requirements-dev.txt   # Development and testing dependencies (pytest, ruff, httpx)
 │   ├── app/
 │   │   ├── core/              # Settings, database engine, security helpers, deps
-│   │   ├── models/            # SQLAlchemy 2 declarative models (User, Session, StudentProfile, OrganizationProfile)
-│   │   ├── schemas/           # Pydantic schemas (Auth, StudentProfile, OrganizationProfile, Health)
-│   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only)
-│   │   ├── services/          # Pure business logic and domain rules
+│   │   ├── models/            # SQLAlchemy models (User, Session, StudentProfile, OrganizationProfile, Course, Enrollment)
+│   │   ├── schemas/           # Pydantic schemas (Auth, StudentProfile, OrganizationProfile, Course, Enrollment, Health)
+│   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only: auth, student_profile, organization_profile, course, enrollment)
+│   │   ├── services/          # Pure business logic and domain rules (auth, student_profile, organization_profile, course, enrollment)
 │   │   └── main.py            # FastAPI entry point & CORS
 │   └── tests/
 │       ├── conftest.py        # Pytest fixtures and database test harnesses
-│       ├── test_auth.py       # Authentication, security, and registration tests
+│       ├── test_auth_login.py # Auth login tests
+│       ├── test_auth_register.py # Auth registration tests
+│       ├── test_auth_session.py  # Session lifecycle & role guard tests
+│       ├── test_course.py     # Course creation, listing, search, visibility, and status tests
+│       ├── test_enrollment.py # Enrollment, roster inspection, and cascade delete tests
 │       ├── test_health.py     # System & DB health test suite
 │       ├── test_organization_profile.py # Organization profile integration tests
 │       ├── test_script_create_user.py   # CLI script integration tests
@@ -66,14 +70,19 @@ university-internship-platform/
     ├── tsconfig.node.json     # Vite config TypeScript options
     ├── vite.config.ts         # Vite proxy configuration (/api -> :8001) and Vitest
     └── src/
-        ├── api/               # API clients (auth, health, profile)
-        ├── components/        # Layout (AppShell), RouteGuards, and UI library
+        ├── api/               # API clients (auth, health, profile, course)
+        ├── components/
+        │   ├── courses/       # CourseForm, CourseTable, EnrollButton, StudentRosterTable
+        │   ├── layout/        # AppShell layout component
+        │   ├── profile/       # StudentProfileForm, OrganizationProfileForm
+        │   ├── routes/        # ProtectedRoute, RoleRoute
+        │   └── ui/            # Reusable UI component library (Button, TextField, DataTable, etc.)
         ├── config/            # Centralized navigation configuration
         ├── context/           # React AuthContext and AuthProvider
         ├── hooks/             # Custom hooks (useAuth, useHealth)
-        ├── lib/               # Utility functions (cn helper)
-        ├── pages/             # Pages (Login, Register, Account, Profile, SystemStatusPage, NotFound)
-        ├── types/             # Shared TypeScript types
+        ├── lib/               # Utility functions (cn, skills)
+        ├── pages/             # Pages (Login, Register, Account, Profile, Courses, MyCourses, CourseCreate, CourseEdit, CourseDetail, SystemStatus, NotFound)
+        ├── types/             # Shared TypeScript types (auth, health, profile, course)
         ├── App.tsx            # Application routing entry point
         └── main.tsx           # React DOM root
 ```
@@ -138,68 +147,33 @@ Set-Location backend
 Create instructor or admin accounts directly from the command line:
 
 ```powershell
-# From project root (using the backend venv python)
-.\backend\.venv\Scripts\python.exe scripts/create_user.py --email admin@university.edu --name "Platform Administrator" --role admin
+# From project root
+python scripts/create_user.py --email admin@example.com --password "SecureAdminPassword123!" --full-name "System Administrator" --role admin
 
-# Create an instructor
-.\backend\.venv\Scripts\python.exe scripts/create_user.py --email instructor@university.edu --name "Dr. Alan Turing" --role instructor
+python scripts/create_user.py --email instructor@example.com --password "InstructorPassword123!" --full-name "Prof. Turing" --role instructor
 ```
-
-> **Security Note**: Password entry uses Python's standard `getpass` module. Passwords are never passed as CLI arguments, stored in shell history, or printed to terminal logs. Running the command again with an existing email prevents duplicates.
 
 ---
 
-### 5. Backend Setup &amp; Run (Port 8001)
+### 5. Backend Server Execution
+
+Run the FastAPI development server:
 
 ```powershell
-# Navigate to backend directory
 Set-Location backend
 
-# Create virtual environment in backend/.venv (if not already created)
-python -m venv .venv
-
-# Activate the virtual environment
-.\.venv\Scripts\Activate.ps1
-
-# Upgrade pip and install dependencies
-pip install --upgrade pip
-pip install -r requirements.txt       # Production dependencies
-pip install -r requirements-dev.txt   # Development & testing tools (ruff, pytest, httpx)
-
-# Run database migrations
-.\.venv\Scripts\alembic.exe upgrade head
-
-# Start the FastAPI server on port 8001
+# Run with hot-reloading on port 8001
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8001 --reload
 ```
 
-Backend URLs:
-- API Root: [http://localhost:8001](http://localhost:8001)
-- Interactive OpenAPI Docs: [http://localhost:8001/docs](http://localhost:8001/docs)
-- Endpoints:
-  - `POST /api/auth/register` (student, organization)
-  - `POST /api/auth/login`
-  - `POST /api/auth/logout`
-  - `GET /api/auth/me`
-  - `GET /api/students/me` (student only)
-  - `PUT /api/students/me` (student only)
-  - `GET /api/organizations/me` (organization only)
-  - `PUT /api/organizations/me` (organization only)
-  - `GET /api/health`
-  - `GET /api/health/db`
-
 ---
 
-### 6. Frontend Setup &amp; Run (Port 5173)
+### 6. Frontend Server Execution
 
-Open a second PowerShell window:
+Run the Vite frontend development server:
 
 ```powershell
-# Navigate to frontend directory
 Set-Location frontend
-
-# Install dependencies
-npm install
 
 # Start Vite development server
 npm run dev
@@ -208,6 +182,11 @@ npm run dev
 Frontend Routes:
 - Sign in: [http://localhost:5173/login](http://localhost:5173/login)
 - Register: [http://localhost:5173/register](http://localhost:5173/register)
+- Course Catalogue: [http://localhost:5173/courses](http://localhost:5173/courses) (Students and Admin)
+- My Courses: [http://localhost:5173/my-courses](http://localhost:5173/my-courses) (Students and Instructors)
+- Create Course: [http://localhost:5173/courses/new](http://localhost:5173/courses/new) (Instructors)
+- Course Details: [http://localhost:5173/courses/:id](http://localhost:5173/courses/:id)
+- Edit Course: [http://localhost:5173/courses/:id/edit](http://localhost:5173/courses/:id/edit)
 - Profile: [http://localhost:5173/profile](http://localhost:5173/profile) (Student and Organization roles)
 - Account Summary: [http://localhost:5173/account](http://localhost:5173/account)
 - System Status: [http://localhost:5173/status](http://localhost:5173/status) (Admin role only)
@@ -226,10 +205,6 @@ Set-Location backend
 
 # Run Ruff formatting check
 .\.venv\Scripts\ruff.exe format --check .
-
-# To automatically apply fixes:
-.\.venv\Scripts\ruff.exe check --fix .
-.\.venv\Scripts\ruff.exe format .
 ```
 
 #### Frontend (ESLint + Prettier)
@@ -266,18 +241,19 @@ Set-Location backend
 Set-Location frontend
 
 # Run Vitest suite
-npm run test
+npm run test -- --run
 ```
 
 ---
 
-## Phase 2 Definition of Done Verification
+## Phase 3 Definition of Done Verification
 
 | Criteria | Status | Details |
 | :--- | :---: | :--- |
 | **1. Lint &amp; format pass with 0 warnings** | PASS | Ruff check &amp; format pass with 0 errors; ESLint &amp; Prettier pass with 0 warnings |
-| **2. All tests pass** | PASS | Pytest (38/38 passed against PostgreSQL); Vitest (31/31 passed) |
+| **2. All tests pass** | PASS | Pytest (50/50 passed against real PostgreSQL); Vitest (57/57 passed across 16 test files) |
 | **3. No unused files, imports, or dependencies** | PASS | All modules, imports, and packages verified clean against project guide |
-| **4. Documentation is complete** | PASS | Updated README, docs/architecture.md, docs/database.md, and docs/design.md |
+| **4. Documentation is complete** | PASS | Updated README, docs/architecture.md, docs/database.md |
 | **5. Working tree is clean and committed** | PASS | Small, focused conventional commits across every step |
 | **6. Build verification** | PASS | Frontend production bundle builds cleanly (`tsc --noEmit && vite build`) |
+| **7. File size limits** | PASS | All source files strictly under 300 lines limit |

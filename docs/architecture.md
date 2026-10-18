@@ -1,16 +1,19 @@
-# Platform Architecture &bull; Authentication, Roles &amp; Profiles
+# Platform Architecture &bull; Authentication, Roles, Profiles, Courses &amp; Enrollment
 
 ## 1. Overview
 
 The **University Learning & Internship Platform** is engineered with a modular, decoupled architecture prioritizing maintainability, strict typing, and high reliability.
 
-Phase 1 establishes authentication, session lifecycle, and role-based access control across four primary roles: `student`, `instructor`, `organization`, and `admin`.
-
-Phase 2 establishes domain profile management:
-- **Student profiles**: academic tracking (university, department, year of study 1-6), bio, and skill inventory.
-- **Organization profiles**: enterprise representation (company name, industry, location, verified website URL, description).
-- **Atomic transactions**: registration automatically creates the role-appropriate profile row in the same transaction.
-- **Session-bound identity**: profile endpoints derive identity exclusively from authenticated server session cookies, rejecting arbitrary user IDs with 422.
+- **Phase 1**: Authentication, session lifecycle, and role-based access control across four primary roles: `student`, `instructor`, `organization`, and `admin`.
+- **Phase 2**: Domain profile management:
+  - **Student profiles**: academic tracking (university, department, year of study 1-6), bio, and skill inventory.
+  - **Organization profiles**: enterprise representation (company name, industry, location, verified website URL, description).
+  - **Atomic transactions**: registration automatically creates the role-appropriate profile row in the same transaction.
+- **Phase 3**: Courses and Enrollment:
+  - **Courses**: instructor-authored learning syllabi with draft/published lifecycle.
+  - **Enrollment**: student enrollment and unenrollment in published courses with unique constraints.
+  - **Rosters**: instructor and admin visibility into enrolled student names, emails, and enrollment dates.
+  - **Discovery**: title search and limit/offset pagination with per-student enrollment flags.
 
 ```mermaid
 flowchart TD
@@ -27,10 +30,14 @@ flowchart TD
         AuthRouter["AuthRouter (/api/auth/*)"]
         StudentRouter["StudentProfileRouter (/api/students/*)"]
         OrgRouter["OrganizationProfileRouter (/api/organizations/*)"]
+        CourseRouter["CourseRouter (/api/courses/*)"]
+        EnrollmentRouter["EnrollmentRouter (/api/courses/{id}/enrollment & roster)"]
         Deps["Dependencies (get_current_user, require_roles)"]
         AuthService["AuthService"]
         StudentService["StudentProfileService"]
         OrgService["OrganizationProfileService"]
+        CourseService["CourseService"]
+        EnrollmentService["EnrollmentService"]
         Security["Security (scrypt, SHA-256)"]
         DBEngine["SQLAlchemy 2 Engine"]
     end
@@ -40,15 +47,19 @@ flowchart TD
         SessionsTable[("sessions table")]
         StudentProfilesTable[("student_profiles table")]
         OrgProfilesTable[("organization_profiles table")]
+        CoursesTable[("courses table")]
+        EnrollmentsTable[("enrollments table")]
     end
 
-    SPA -->|"Credentials / Profile Requests"| Proxy
-    Proxy -->|"HTTP Forward"| AuthRouter & StudentRouter & OrgRouter
-    AuthRouter -->|"Register / Authenticate"| AuthService
-    StudentRouter -->|"GET / PUT profile"| StudentService
-    OrgRouter -->|"GET / PUT profile"| OrgService
-    AuthService & StudentService & OrgService --> DBEngine
-    DBEngine --> UsersTable & SessionsTable & StudentProfilesTable & OrgProfilesTable
+    SPA -->|"Requests"| Proxy
+    Proxy -->|"HTTP Forward"| AuthRouter & StudentRouter & OrgRouter & CourseRouter & EnrollmentRouter
+    AuthRouter --> AuthService
+    StudentRouter --> StudentService
+    OrgRouter --> OrgService
+    CourseRouter --> CourseService
+    EnrollmentRouter --> EnrollmentService
+    AuthService & StudentService & OrgService & CourseService & EnrollmentService --> DBEngine
+    DBEngine --> UsersTable & SessionsTable & StudentProfilesTable & OrgProfilesTable & CoursesTable & EnrollmentsTable
     AuthRouter -->|"Set-Cookie: session_token"| CookieStorage
     CookieStorage -.->|"Automatic Cookie Transmission"| Deps
     Deps -->|"Resolve session"| AuthService
@@ -60,53 +71,60 @@ flowchart TD
 
 ### 1. Backend Layer (`backend/app/`)
 - **Core (`core/`)**:
-  - `config.py`: Environment-driven settings via `pydantic-settings` reading from project root `.env`, including `COOKIE_SECURE`.
-  - `database.py`: SQLAlchemy 2 engine with connection pooling (`pool_pre_ping=True`) and dependency generator `get_db()`.
-  - `security.py`: Password hashing with stdlib `hashlib.scrypt`, constant-time timing defense on login, and SHA-256 session token hashing.
-  - `deps.py`: `get_current_user` resolving active session from cookie and `require_roles(*roles)` enforcing role authorization.
-  - `exceptions.py`: Domain application exceptions mapped consistently to standard HTTP status codes and codes.
+  - `config.py`: Environment settings via `pydantic-settings`.
+  - `database.py`: SQLAlchemy 2 engine with connection pooling and `get_db()` dependency.
+  - `security.py`: Password hashing with stdlib `hashlib.scrypt` and SHA-256 session token hashing.
+  - `deps.py`: `get_current_user` and `require_roles(*roles)` enforcing role authorization.
+  - `exceptions.py`: Application exceptions mapped to standard HTTP status codes (`NotFoundException`, `ConflictException`, `ForbiddenException`, `UnauthorizedException`).
 - **Models (`models/`)**:
   - `user.py`: `User` account model with `UserRole` enum (`student`, `instructor`, `organization`, `admin`).
-  - `session.py`: `Session` model with `user_id` foreign key (cascade delete) and indexed `token_hash`.
-  - `student_profile.py`: `StudentProfile` model with 1-to-1 cascade FK to users, year of study check constraint (1-6), and skills array.
-  - `organization_profile.py`: `OrganizationProfile` model with 1-to-1 cascade FK to users and company profile fields.
-  - `base.py`: Central `DeclarativeBase` metadata class wired directly to Alembic autogeneration.
+  - `session.py`: `Session` model with user FK and indexed `token_hash`.
+  - `student_profile.py`: `StudentProfile` model with 1-to-1 cascade FK to users.
+  - `organization_profile.py`: `OrganizationProfile` model with 1-to-1 cascade FK to users.
+  - `course.py`: `Course` model with `CourseStatus` enum (`draft`, `published`), instructor FK, title, description, timestamps.
+  - `enrollment.py`: `Enrollment` model linking course and student with unique constraint.
+  - `base.py`: Central `DeclarativeBase` metadata class.
 - **Schemas (`schemas/`)**:
-  - `auth.py`: `RegisterRequest` (with required `organization_name` for org accounts), `LoginRequest`, and `UserResponse`.
-  - `student_profile.py`: `StudentProfileUpdateRequest` (`extra="forbid"`, skill and year validation) and `StudentProfileResponse`.
-  - `organization_profile.py`: `OrganizationProfileUpdateRequest` (`extra="forbid"`, URL and length validation) and `OrganizationProfileResponse`.
+  - `auth.py`: `RegisterRequest`, `LoginRequest`, `UserResponse`.
+  - `student_profile.py`: `StudentProfileUpdateRequest`, `StudentProfileResponse`.
+  - `organization_profile.py`: `OrganizationProfileUpdateRequest`, `OrganizationProfileResponse`.
+  - `course.py`: `CourseCreate` (extra="forbid"), `CourseUpdate` (extra="forbid"), `CourseResponse`, `CourseListResponse`.
+  - `enrollment.py`: `EnrolledStudentResponse`, `EnrollmentResponse`, `EnrollmentActionResponse`.
   - `health.py`: Health verification schemas.
 - **Routers (`routers/`)**:
-  - Thin FastAPI HTTP endpoints under `/api`. No business or database logic directly in router functions.
-  - `auth.py`: Public auth endpoints (`/register`, `/login`, `/logout`, `/me`).
-  - `student_profile.py`: Student profile endpoints (`/students/me`).
-  - `organization_profile.py`: Organization profile endpoints (`/organizations/me`).
+  - Thin FastAPI HTTP endpoints under `/api`.
+  - `auth.py`: `/register`, `/login`, `/logout`, `/me`.
+  - `student_profile.py`: `/students/me`.
+  - `organization_profile.py`: `/organizations/me`.
+  - `course.py`: `/courses`, `/courses/{id}`, `/instructors/me/courses`, `/students/me/courses`.
+  - `enrollment.py`: `/courses/{id}/enrollment`, `/courses/{id}/students`.
 - **Services (`services/`)**:
-  - Pure domain rules:
-    - `AuthService`: Registration (atomic user + profile insertion), timing-safe authentication, session lifecycle.
-    - `StudentProfileService`: Student profile retrieval and updates with whitespace normalization.
-    - `OrganizationProfileService`: Organization profile retrieval and updates with URL validation.
+  - `AuthService`: Registration (atomic user + profile), authentication, session lifecycle.
+  - `StudentProfileService`: Student profile retrieval and updates.
+  - `OrganizationProfileService`: Organization profile retrieval and updates.
+  - `course.py`: Course creation, search and pagination, detail lookup with draft visibility guard, update with draft-reversion lock.
+  - `enrollment.py`: Course enrollment with duplicate prevention, unenrollment, and roster retrieval.
 
 ### 2. Frontend Layer (`frontend/src/`)
 - **API (`api/`)**:
-  - `auth.ts`: HTTP wrappers for `/api/auth` endpoints with credentials included.
-  - `profile.ts`: HTTP wrappers for `/api/students/me` and `/api/organizations/me`.
-  - `health.ts`: System and database health probes.
-- **Context &amp; Hooks (`context/`, `hooks/`)**:
-  - `AuthContext`: Initial session probe on load (`/api/auth/me`), state storage, and login/register/logout actions.
-  - `useAuth`: Hook accessing authenticated user context.
-- **Routes &amp; Guards (`components/routes/`)**:
-  - `ProtectedRoute`: Redirects unauthenticated traffic to `/login`.
-  - `RoleRoute`: Renders plain access restricted notice for unauthorized roles.
+  - `auth.ts`, `profile.ts`, `course.ts`, `health.ts`.
+- **Context &amp; Navigation (`context/`, `config/`)**:
+  - `AuthContext`: Session lifecycle and user identity.
+  - `navigation.ts`: Navigation items filtered per role, role-based `getHomePath`.
 - **Components (`components/`)**:
-  - UI library adhering to platform design tokens (Button, TextField, Select, Textarea, Badge, Notice, etc.).
+  - `components/courses/`: `CourseForm`, `CourseTable`, `EnrollButton`, `StudentRosterTable`.
+  - `components/ui/`: `Button`, `TextField`, `Textarea`, `Select`, `Badge`, `DataTable`, `EmptyState`, `ErrorMessage`, `Notice`, `PageHeader`.
+  - `components/layout/`: `AppShell`.
+  - `components/routes/`: `ProtectedRoute`, `RoleRoute`.
 - **Pages (`pages/`)**:
-  - `/login`: Public centered login form.
-  - `/register`: Public centered registration form with role selection and dynamic Organization name field.
-  - `/profile`: Protected role-specific profile form for students (academic details, skills) and organizations (name, website, industry).
-  - `/account`: Protected user account summary (credentials, role, status).
-  - `/status`: Admin-only system status dashboard (`SystemStatusPage`).
-  - `/`: Root redirect to /login (unauthenticated) or role home page (authenticated).
+  - `/courses`: Course catalogue with title search, pagination, and admin status badges.
+  - `/my-courses`: Role-specific view (student enrolled courses; instructor courses with "New course" button).
+  - `/courses/new`: Instructor course creation form.
+  - `/courses/:id/edit`: Instructor/admin course editing form.
+  - `/courses/:id`: Course detail view with student enroll/leave button, owner publishing, and student roster table.
+  - `/profile`: Role-specific student and organization profile views.
+  - `/account`: Account details and credentials overview.
+  - `/status`: Admin system status view.
 
 ---
 
@@ -122,5 +140,14 @@ flowchart TD
 | `/api/students/me` | `PUT` | `student` | Update authenticated student profile | `200 OK` |
 | `/api/organizations/me` | `GET` | `organization` | Retrieve authenticated organization profile | `200 OK` |
 | `/api/organizations/me` | `PUT` | `organization` | Update authenticated organization profile | `200 OK` |
+| `/api/courses` | `POST` | `instructor` | Create course owned by authenticated instructor | `201 Created` |
+| `/api/courses` | `GET` | Authenticated | List published courses (or all for admin) with ?q= and pagination | `200 OK` |
+| `/api/courses/{id}` | `GET` | Authenticated | Get course details (visible if published, owned, or admin) | `200 OK` |
+| `/api/courses/{id}` | `PATCH` | `instructor` (owner), `admin` | Update course title, description, or publish | `200 OK` |
+| `/api/instructors/me/courses` | `GET` | `instructor` | Get instructor's own courses with enrolled count | `200 OK` |
+| `/api/students/me/courses` | `GET` | `student` | Get student's enrolled courses | `200 OK` |
+| `/api/courses/{id}/students` | `GET` | `instructor` (owner), `admin` | Get enrolled student roster with names and emails | `200 OK` |
+| `/api/courses/{id}/enrollment` | `POST` | `student` | Enroll student in published course | `201 Created` |
+| `/api/courses/{id}/enrollment` | `DELETE` | `student` | Unenroll student from course | `200 OK` |
 | `/api/health` | `GET` | Public | Basic platform status probe | `200 OK` |
 | `/api/health/db` | `GET` | Public | Database query connectivity probe | `200 OK` |
