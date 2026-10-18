@@ -35,7 +35,12 @@ def clean_tables_between_tests() -> Generator[None, None, None]:
     try:
         engine = create_engine(TEST_DB_URL, pool_pre_ping=True)
         with engine.connect() as conn, conn.begin():
-            conn.execute(text("TRUNCATE TABLE sessions, users RESTART IDENTITY CASCADE"))
+            conn.execute(
+                text(
+                    "TRUNCATE TABLE student_profiles, organization_profiles, "
+                    "sessions, users RESTART IDENTITY CASCADE"
+                )
+            )
         engine.dispose()
     except Exception:
         pass
