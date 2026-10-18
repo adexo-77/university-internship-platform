@@ -3,8 +3,10 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthApiError } from '../api/auth';
 import { Button, Notice, TextField } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 export const LoginPage: React.FC = () => {
+  usePageTitle('Log in');
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

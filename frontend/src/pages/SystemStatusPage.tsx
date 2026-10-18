@@ -2,8 +2,10 @@ import React from 'react';
 import { HealthCheck } from '../components/HealthCheck';
 import { AppShell } from '../components/layout/AppShell';
 import { PageHeader } from '../components/ui';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 export const SystemStatusPage: React.FC = () => {
+  usePageTitle('System status');
   return (
     <AppShell>
       <div className="space-y-8">

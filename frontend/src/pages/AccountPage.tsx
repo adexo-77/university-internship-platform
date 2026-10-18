@@ -2,6 +2,7 @@ import React from 'react';
 import { AppShell } from '../components/layout/AppShell';
 import { Badge, Column, DataTable, PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 interface AccountFieldRow {
   key: string;
@@ -10,6 +11,7 @@ interface AccountFieldRow {
 }
 
 export const AccountPage: React.FC = () => {
+  usePageTitle('Account');
   const { user } = useAuth();
 
   if (!user) {

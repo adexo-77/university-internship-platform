@@ -4,12 +4,14 @@ import { getCourseById, updateCourse } from '../api/course';
 import { CourseForm, CourseFormData } from '../components/courses/CourseForm';
 import { AppShell } from '../components/layout/AppShell';
 import { ErrorMessage, PageHeader } from '../components/ui';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { Course } from '../types/course';
 
 export const CourseEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [course, setCourse] = useState<Course | null>(null);
+  usePageTitle(course ? `Edit ${course.title}` : 'Edit course');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);

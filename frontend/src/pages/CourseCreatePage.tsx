@@ -4,8 +4,10 @@ import { createCourse } from '../api/course';
 import { CourseForm, CourseFormData } from '../components/courses/CourseForm';
 import { AppShell } from '../components/layout/AppShell';
 import { PageHeader } from '../components/ui';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 export const CourseCreatePage: React.FC = () => {
+  usePageTitle('New course');
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);

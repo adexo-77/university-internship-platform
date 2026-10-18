@@ -3,9 +3,11 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { AuthApiError } from '../api/auth';
 import { Button, Notice, Select, TextField } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { PublicRegisterRole } from '../types/auth';
 
 export const RegisterPage: React.FC = () => {
+  usePageTitle('Register');
   const { register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 

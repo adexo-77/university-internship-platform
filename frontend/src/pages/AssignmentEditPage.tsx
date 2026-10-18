@@ -4,12 +4,14 @@ import { getAssignment, updateAssignment } from '../api/assignment';
 import { AssignmentForm } from '../components/assignments/AssignmentForm';
 import { AppShell } from '../components/layout/AppShell';
 import { PageHeader } from '../components/ui/PageHeader';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { Assignment, AssignmentCreatePayload } from '../types/assignment';
 
 export const AssignmentEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [assignment, setAssignment] = useState<Assignment | null>(null);
+  usePageTitle(assignment ? `Edit ${assignment.title}` : 'Edit assignment');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

@@ -7,12 +7,14 @@ import { StudentRosterTable } from '../components/courses/StudentRosterTable';
 import { AppShell } from '../components/layout/AppShell';
 import { Badge, Button, ErrorMessage, Notice, PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { Course, EnrolledStudent } from '../types/course';
 
 export const CourseDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const [course, setCourse] = useState<Course | null>(null);
+  usePageTitle(course ? course.title : 'Course details');
   const [roster, setRoster] = useState<EnrolledStudent[]>([]);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);

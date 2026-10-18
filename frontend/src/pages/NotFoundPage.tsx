@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
 import { Button, EmptyState } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 export const NotFoundPage: React.FC = () => {
+  usePageTitle('Page not found');
   const { isAuthenticated } = useAuth();
 
   const content = (

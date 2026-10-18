@@ -14,6 +14,7 @@ import { Badge } from '../components/ui/Badge';
 import { Notice } from '../components/ui/Notice';
 import { PageHeader } from '../components/ui/PageHeader';
 import { useAuth } from '../hooks/useAuth';
+import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Assignment,
   StudentSubmissionRosterItem,
@@ -27,6 +28,7 @@ export const AssignmentDetailPage: React.FC = () => {
   const { user } = useAuth();
 
   const [assignment, setAssignment] = useState<Assignment | null>(null);
+  usePageTitle(assignment ? assignment.title : 'Assignment details');
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [roster, setRoster] = useState<StudentSubmissionRosterItem[]>([]);
   const [loading, setLoading] = useState(true);

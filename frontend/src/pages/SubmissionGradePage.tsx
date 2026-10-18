@@ -4,6 +4,7 @@ import { getAssignment, gradeSubmission, listAssignmentSubmissions } from '../ap
 import { GradeForm } from '../components/assignments/GradeForm';
 import { AppShell } from '../components/layout/AppShell';
 import { PageHeader } from '../components/ui/PageHeader';
+import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Assignment,
   StudentSubmissionRosterItem,
@@ -11,6 +12,7 @@ import {
 } from '../types/assignment';
 
 export const SubmissionGradePage: React.FC = () => {
+  usePageTitle('Grade submission');
   const { assignmentId, submissionId } = useParams<{
     assignmentId: string;
     submissionId: string;

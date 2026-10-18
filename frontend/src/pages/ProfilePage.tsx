@@ -4,8 +4,10 @@ import { OrganizationProfileForm } from '../components/profile/OrganizationProfi
 import { StudentProfileForm } from '../components/profile/StudentProfileForm';
 import { PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 export const ProfilePage: React.FC = () => {
+  usePageTitle('Profile');
   const { user } = useAuth();
 
   if (!user) {

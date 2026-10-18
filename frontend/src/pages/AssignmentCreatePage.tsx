@@ -4,9 +4,11 @@ import { createCourseAssignment } from '../api/assignment';
 import { AssignmentForm } from '../components/assignments/AssignmentForm';
 import { AppShell } from '../components/layout/AppShell';
 import { PageHeader } from '../components/ui/PageHeader';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { AssignmentCreatePayload } from '../types/assignment';
 
 export const AssignmentCreatePage: React.FC = () => {
+  usePageTitle('Create assignment');
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);

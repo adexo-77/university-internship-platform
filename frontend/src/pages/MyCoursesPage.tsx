@@ -5,9 +5,11 @@ import { CourseTable } from '../components/courses/CourseTable';
 import { AppShell } from '../components/layout/AppShell';
 import { EmptyState, ErrorMessage, PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { Course } from '../types/course';
 
 export const MyCoursesPage: React.FC = () => {
+  usePageTitle('My courses');
   const { user } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
