@@ -36,7 +36,8 @@ university-internship-platform/
 ├── backend/
 │   ├── alembic/               # Database migration environment
 │   │   ├── versions/          # Alembic revision migration files
-│   │   │   └── 6d7757d439a5_create_users_and_sessions_tables.py
+│   │   │   ├── 6d7757d439a5_create_users_and_sessions_tables.py
+│   │   │   └── d5196328fe27_create_student_and_organization_profiles.py
 │   │   ├── env.py             # Migration harness wired to Base metadata
 │   │   └── script.py.mako     # Migration template
 │   ├── alembic.ini            # Alembic configuration
@@ -52,23 +53,35 @@ university-internship-platform/
 │   │   │   └── security.py
 │   │   ├── models/            # SQLAlchemy declarative models
 │   │   │   ├── base.py
+│   │   │   ├── organization_profile.py
 │   │   │   ├── session.py
+│   │   │   ├── student_profile.py
 │   │   │   └── user.py
 │   │   ├── schemas/           # Pydantic validation schemas
 │   │   │   ├── auth.py
-│   │   │   └── health.py
+│   │   │   ├── health.py
+│   │   │   ├── organization_profile.py
+│   │   │   └── student_profile.py
 │   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only)
 │   │   │   ├── auth.py
-│   │   │   └── health.py
+│   │   │   ├── health.py
+│   │   │   ├── organization_profile.py
+│   │   │   └── student_profile.py
 │   │   ├── services/          # Pure business logic and domain rules
 │   │   │   ├── auth.py
-│   │   │   └── health.py
+│   │   │   ├── health.py
+│   │   │   ├── organization_profile.py
+│   │   │   └── student_profile.py
 │   │   └── main.py            # FastAPI app initialization and middleware
 │   └── tests/                 # Pytest test suite mirroring app/ domain modules
 │       ├── conftest.py        # Database harness and fixtures
-│       ├── test_auth.py       # Auth integration tests (mirrors auth.py)
+│       ├── test_auth_login.py # Auth login, invalid credentials & hash leak tests
+│       ├── test_auth_register.py # Registration & atomic profile provisioning tests
+│       ├── test_auth_session.py  # Session lifecycle, logout, expiry & role guard tests
 │       ├── test_health.py     # Health integration tests (mirrors health.py)
-│       └── test_script_create_user.py
+│       ├── test_organization_profile.py # Organization profile integration tests
+│       ├── test_script_create_user.py   # CLI user creation script tests
+│       └── test_student_profile.py      # Student profile integration tests
 └── frontend/
     ├── .prettierrc            # Prettier code formatting config
     ├── eslint.config.js       # ESLint 9 flat configuration
@@ -83,11 +96,17 @@ university-internship-platform/
     └── src/
         ├── api/               # API clients and HTTP request wrappers
         │   ├── auth.ts
-        │   └── health.ts
+        │   ├── health.ts
+        │   └── profile.ts
         ├── components/
         │   ├── layout/        # Application shell and structural layout
         │   │   ├── AppShell.tsx
         │   │   └── AppShell.test.tsx
+        │   ├── profile/       # Role-specific profile form components
+        │   │   ├── OrganizationProfileForm.tsx
+        │   │   ├── OrganizationProfileForm.test.tsx
+        │   │   ├── StudentProfileForm.tsx
+        │   │   └── StudentProfileForm.test.tsx
         │   ├── routes/        # Navigation route guards
         │   │   ├── ProtectedRoute.tsx
         │   │   ├── RoleRoute.tsx
@@ -115,13 +134,17 @@ university-internship-platform/
         ├── hooks/             # Custom React hooks
         │   ├── useAuth.ts
         │   └── useHealth.ts
-        ├── lib/               # Class name merging utility (cn)
-        │   └── cn.ts
+        ├── lib/               # Utility libraries (cn, skills parsing)
+        │   ├── cn.ts
+        │   ├── skills.ts
+        │   └── skills.test.ts
         ├── pages/             # Page-level route views
         │   ├── AccountPage.tsx
         │   ├── LoginPage.tsx
         │   ├── LoginPage.test.tsx
         │   ├── NotFoundPage.tsx
+        │   ├── ProfilePage.tsx
+        │   ├── ProfilePage.test.tsx
         │   ├── RegisterPage.tsx
         │   ├── RegisterPage.test.tsx
         │   └── SystemStatusPage.tsx
@@ -129,7 +152,8 @@ university-internship-platform/
         │   └── setup.ts
         ├── types/             # Shared TypeScript type definitions
         │   ├── auth.ts
-        │   └── health.ts
+        │   ├── health.ts
+        │   └── profile.ts
         ├── App.tsx            # Main router configuration
         ├── index.css          # Global styles and design system tokens
         └── main.tsx           # React entry point
@@ -219,3 +243,17 @@ npm run test
     Commit messages must use standard conventional commit prefixes (`feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`) and be small, focused, and verified before committing.
 11. **Strict Phase Discipline**:
     Never touch or implement code outside the active phase. Build Phase 0 foundation first, then progress phase by phase without premature feature bloat.
+
+---
+
+## 5. Definition of Done
+
+Every phase, feature, or refactoring task must satisfy the following checklist before completion:
+
+1. **Lint and format pass with 0 warnings** (`ruff check .`, `ruff format --check .`, `npm run lint`, `npm run format:check`).
+2. **All tests pass** (`pytest -v`, `npm run test`).
+3. **No unused files, imports, or dependencies**.
+4. **Documentation is complete** (`README.md`, `docs/architecture.md`, `docs/database.md`, `docs/design.md`).
+5. **Working tree is clean and committed** with small, focused conventional commits.
+6. **Report the 8 largest source files by line count; none may exceed 300 lines.**
+
