@@ -13,7 +13,10 @@ erDiagram
     users ||--o| organization_profiles : "has profile (organization)"
     users ||--o{ courses : "instructs (instructor)"
     users ||--o{ enrollments : "enrolled in (student)"
+    users ||--o{ submissions : "submits coursework (student)"
     courses ||--o{ enrollments : "has enrollments"
+    courses ||--o{ assignments : "has assignments"
+    assignments ||--o{ submissions : "has submissions"
 
     users {
         int id PK "autoincrement"
@@ -71,6 +74,32 @@ erDiagram
         int course_id FK "courses.id, ON DELETE CASCADE"
         int student_id FK "users.id, ON DELETE CASCADE, indexed"
         timestamp enrolled_at "with time zone, server default now()"
+    }
+
+    assignments {
+        int id PK "autoincrement"
+        int course_id FK "courses.id, ON DELETE CASCADE, indexed"
+        string title "max 120"
+        string description "nullable, max 2000"
+        timestamp due_at "with time zone, required"
+        int max_points "default 100, 1-1000"
+        timestamp created_at "with time zone, server default now()"
+        timestamp updated_at "with time zone, server default now(), on update"
+    }
+
+    submissions {
+        int id PK "autoincrement"
+        int assignment_id FK "assignments.id, ON DELETE CASCADE, indexed"
+        int student_id FK "users.id, ON DELETE CASCADE, indexed"
+        string content "text, 1-10000 chars"
+        string link_url "nullable, valid http/https, max 2048"
+        boolean is_late "default false"
+        timestamp submitted_at "with time zone, server default now()"
+        timestamp updated_at "with time zone, server default now(), on update"
+        int grade "nullable, 0 to max_points"
+        string feedback "nullable, max 2000"
+        timestamp graded_at "nullable, with time zone"
+        int graded_by FK "users.id, ON DELETE SET NULL, nullable"
     }
 ```
 
@@ -161,15 +190,55 @@ Represents student enrollment linking a student account to a course.
 | `enrolled_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Enrollment timestamp in UTC |
 | &mdash; | &mdash; | `UNIQUE (course_id, student_id)` | Prevents duplicate student enrollments |
 
+### `assignments`
+
+Represents coursework, problem sets, and practical assignments created by instructors.
+
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | `PRIMARY KEY`, `AUTOINCREMENT` | Unique assignment identifier |
+| `course_id` | `INTEGER` | `NOT NULL`, `FK courses(id) ON DELETE CASCADE`, `INDEX` | Owning course reference |
+| `title` | `VARCHAR(120)` | `NOT NULL` | Assignment title (3 to 120 characters) |
+| `description` | `TEXT` | `NULLABLE` | Assignment instructions and rubric (up to 2000 chars) |
+| `due_at` | `TIMESTAMPTZ` | `NOT NULL` | Timezone-aware due deadline (must be in future on creation) |
+| `max_points` | `INTEGER` | `NOT NULL`, `DEFAULT 100`, `1 <= points <= 1000` | Maximum points achievable |
+| `created_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Creation timestamp in UTC |
+| `updated_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Last update timestamp in UTC |
+
+### `submissions`
+
+Represents student work submitted for an assignment, along with grades and instructor feedback.
+
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | `PRIMARY KEY`, `AUTOINCREMENT` | Unique submission identifier |
+| `assignment_id` | `INTEGER` | `NOT NULL`, `FK assignments(id) ON DELETE CASCADE`, `INDEX` | Assignment reference |
+| `student_id` | `INTEGER` | `NOT NULL`, `FK users(id) ON DELETE CASCADE`, `INDEX` | Enrolled student reference |
+| `content` | `TEXT` | `NOT NULL` | Student written response (1 to 10000 characters) |
+| `link_url` | `VARCHAR(2048)` | `NULLABLE` | Optional artifact URL (must use http or https) |
+| `is_late` | `BOOLEAN` | `NOT NULL`, `DEFAULT FALSE` | Computed from server clock at submission time |
+| `submitted_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Initial submission timestamp |
+| `updated_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Last modification timestamp |
+| `grade` | `INTEGER` | `NULLABLE`, `0 <= grade <= max_points` | Awarded grade score |
+| `feedback` | `VARCHAR(2000)` | `NULLABLE` | Instructor feedback comments (up to 2000 characters) |
+| `graded_at` | `TIMESTAMPTZ` | `NULLABLE` | Grading timestamp in UTC |
+| `graded_by` | `INTEGER` | `NULLABLE`, `FK users(id) ON DELETE SET NULL` | Instructor user who graded the work |
+| &mdash; | &mdash; | `UNIQUE (assignment_id, student_id)` | One submission record per student per assignment |
+
 ---
 
 ## 3. Security &amp; Data Integrity Rules
 
 1. **Token Storage**: Raw session tokens are never stored in the database. Only the SHA-256 digest is persisted in `sessions.token_hash`.
 2. **Credential Privacy**: `password_hash` is never included in API responses or logs.
-3. **Cascade Invalidation**: Deleting a user account cascades to automatically drop all active sessions, associated profile records (`student_profiles` or `organization_profiles`), created courses (for instructors), and enrollments (for students).
+3. **Cascade Invalidation**: Deleting a user account cascades to automatically drop all active sessions, associated profile records (`student_profiles` or `organization_profiles`), created courses (for instructors), enrollments (for students), and submissions.
 4. **Stale Session Purging**: Expired sessions are checked against `expires_at` and automatically deleted upon access resolution.
 5. **Atomic Registration Transaction**: User creation and initial profile creation occur in the same database transaction; failure of either rolls back both.
 6. **Session-Bound Identity**: Endpoints resolving profiles, creating courses, or enrolling students derive user identity solely from the verified session, never allowing external modification or spoofing of foreign keys.
 7. **One-Way Status Transition**: Courses can transition from `draft` to `published`, but published courses cannot be reverted to `draft` (enforced with 409 Conflict).
 8. **Unique Enrollment**: Unique constraint on `(course_id, student_id)` prevents double-enrollment, backed by 409 Conflict handling.
+9. **Future Due Date on Assignment Creation**: Assignments must have a timezone-aware `due_at` date set in the future upon creation (enforced with 422 / 409 validation).
+10. **Grade Floor on Max Points Modification**: An assignment's `max_points` cannot be decreased below any already-awarded student grade (enforced with 409 Conflict).
+11. **Protected Assignment Deletion**: An assignment cannot be deleted if student submissions have been recorded (enforced with 409 Conflict).
+12. **Submission Lock Upon Grading**: Once a submission receives a grade and `graded_at` timestamp, further student edits or resubmissions are rejected with 409 Conflict.
+13. **Instructor-Only Grading**: Only the course owner instructor can grade or regrade student work; administrators possess read-only access (403 Forbidden).

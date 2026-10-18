@@ -83,6 +83,8 @@ flowchart TD
   - `organization_profile.py`: `OrganizationProfile` model with 1-to-1 cascade FK to users.
   - `course.py`: `Course` model with `CourseStatus` enum (`draft`, `published`), instructor FK, title, description, timestamps.
   - `enrollment.py`: `Enrollment` model linking course and student with unique constraint.
+  - `assignment.py`: `Assignment` model with course FK, title, description, timezone-aware `due_at`, `max_points`, timestamps.
+  - `submission.py`: `Submission` model linking assignment and student with unique constraint, content, link_url, is_late, grade, feedback, graded_at, graded_by.
   - `base.py`: Central `DeclarativeBase` metadata class.
 - **Schemas (`schemas/`)**:
   - `auth.py`: `RegisterRequest`, `LoginRequest`, `UserResponse`.
@@ -90,6 +92,8 @@ flowchart TD
   - `organization_profile.py`: `OrganizationProfileUpdateRequest`, `OrganizationProfileResponse`.
   - `course.py`: `CourseCreate` (extra="forbid"), `CourseUpdate` (extra="forbid"), `CourseResponse`, `CourseListResponse`.
   - `enrollment.py`: `EnrolledStudentResponse`, `EnrollmentResponse`, `EnrollmentActionResponse`.
+  - `assignment.py`: `AssignmentCreate` (extra="forbid", future due date), `AssignmentUpdate` (extra="forbid"), `AssignmentResponse`.
+  - `submission.py`: `SubmissionSubmit` (extra="forbid", http/https validation), `SubmissionGrade` (extra="forbid"), `SubmissionResponse`, `StudentSubmissionRosterItem`.
   - `health.py`: Health verification schemas.
 - **Routers (`routers/`)**:
   - Thin FastAPI HTTP endpoints under `/api`.
@@ -98,21 +102,30 @@ flowchart TD
   - `organization_profile.py`: `/organizations/me`.
   - `course.py`: `/courses`, `/courses/{id}`, `/instructors/me/courses`, `/students/me/courses`.
   - `enrollment.py`: `/courses/{id}/enrollment`, `/courses/{id}/students`.
+  - `assignment.py`: `/courses/{id}/assignments`, `/assignments/{id}`.
+  - `submission.py`: `/assignments/{id}/submission`, `/assignments/{id}/submissions`, `/submissions/{id}/grade`.
 - **Services (`services/`)**:
   - `AuthService`: Registration (atomic user + profile), authentication, session lifecycle.
   - `StudentProfileService`: Student profile retrieval and updates.
   - `OrganizationProfileService`: Organization profile retrieval and updates.
   - `course.py`: Course creation, search and pagination, detail lookup with draft visibility guard, update with draft-reversion lock.
   - `enrollment.py`: Course enrollment with duplicate prevention, unenrollment, and roster retrieval.
+  - `assignment.py`: Assignment creation, course assignment listing with student submission status mapping, assignment detail lookup, update with max_points grade floor check, and deletion protected against existing submissions.
+  - `submission.py`: Student assignment submission with server-clock late flag calculation and locked-after-graded protection, student submission lookup, instructor/admin submissions roster, and instructor grading with max_points bounds.
 
 ### 2. Frontend Layer (`frontend/src/`)
 - **API (`api/`)**:
-  - `auth.ts`, `profile.ts`, `course.ts`, `health.ts`.
+  - `auth.ts`, `profile.ts`, `course.ts`, `assignment.ts`, `health.ts`.
 - **Context &amp; Navigation (`context/`, `config/`)**:
   - `AuthContext`: Session lifecycle and user identity.
   - `navigation.ts`: Navigation items filtered per role, role-based `getHomePath`.
+- **Libraries (`lib/`)**:
+  - `cn.ts`: Tailwind class utility.
+  - `skills.ts`: Comma-separated skill string parsing.
+  - `dates.ts`: Viewer local timezone date formatting, due-soon (3 days), and past-due logic.
 - **Components (`components/`)**:
   - `components/courses/`: `CourseForm`, `CourseTable`, `EnrollButton`, `StudentRosterTable`.
+  - `components/assignments/`: `AssignmentForm`, `AssignmentTable`, `CourseAssignmentsSection`, `DueBadge`, `GradeForm`, `SubmissionForm`, `SubmissionStatusBadge`, `SubmissionsTable`.
   - `components/ui/`: `Button`, `TextField`, `Textarea`, `Select`, `Badge`, `DataTable`, `EmptyState`, `ErrorMessage`, `Notice`, `PageHeader`.
   - `components/layout/`: `AppShell`.
   - `components/routes/`: `ProtectedRoute`, `RoleRoute`.
@@ -121,7 +134,11 @@ flowchart TD
   - `/my-courses`: Role-specific view (student enrolled courses; instructor courses with "New course" button).
   - `/courses/new`: Instructor course creation form.
   - `/courses/:id/edit`: Instructor/admin course editing form.
-  - `/courses/:id`: Course detail view with student enroll/leave button, owner publishing, and student roster table.
+  - `/courses/:id`: Course detail view with student enroll/leave button, owner publishing, student roster table, and course assignments section.
+  - `/courses/:courseId/assignments/new`: Instructor assignment creation form.
+  - `/assignments/:id/edit`: Instructor assignment editing form.
+  - `/assignments/:id`: Assignment detail view with student submission form / locked grade or instructor submissions roster.
+  - `/assignments/:assignmentId/submissions/:submissionId/grade`: Instructor grading page.
   - `/profile`: Role-specific student and organization profile views.
   - `/account`: Account details and credentials overview.
   - `/status`: Admin system status view.
@@ -149,5 +166,14 @@ flowchart TD
 | `/api/courses/{id}/students` | `GET` | `instructor` (owner), `admin` | Get enrolled student roster with names and emails | `200 OK` |
 | `/api/courses/{id}/enrollment` | `POST` | `student` | Enroll student in published course | `201 Created` |
 | `/api/courses/{id}/enrollment` | `DELETE` | `student` | Unenroll student from course | `200 OK` |
+| `/api/courses/{id}/assignments` | `POST` | `instructor` (owner) | Create assignment with future due date | `201 Created` |
+| `/api/courses/{id}/assignments` | `GET` | `instructor` (owner), `admin`, `student` (enrolled) | List course assignments (with student submission state) | `200 OK` |
+| `/api/assignments/{id}` | `GET` | `instructor` (owner), `admin`, `student` (enrolled) | Get single assignment details | `200 OK` |
+| `/api/assignments/{id}` | `PATCH` | `instructor` (owner) | Update assignment (max_points floor checked) | `200 OK` |
+| `/api/assignments/{id}` | `DELETE` | `instructor` (owner) | Delete assignment (409 if submissions exist) | `204 No Content` |
+| `/api/assignments/{id}/submission` | `PUT` | `student` (enrolled) | Submit or update coursework (late computed, 409 if graded) | `200 OK` |
+| `/api/assignments/{id}/submission` | `GET` | `student` (enrolled) | Get student's own submission | `200 OK` |
+| `/api/assignments/{id}/submissions` | `GET` | `instructor` (owner), `admin` | List every enrolled student with submission or null | `200 OK` |
+| `/api/submissions/{id}/grade` | `PUT` | `instructor` (owner) | Grade submission (0 to max_points, feedback, regradable) | `200 OK` |
 | `/api/health` | `GET` | Public | Basic platform status probe | `200 OK` |
 | `/api/health/db` | `GET` | Public | Database query connectivity probe | `200 OK` |

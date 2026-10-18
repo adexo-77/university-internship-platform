@@ -1,8 +1,8 @@
-# University Learning &amp; Internship Platform &bull; Phase 3 Courses &amp; Enrollment
+# University Learning &amp; Internship Platform &bull; Phase 4 Assignments, Submissions &amp; Grading
 
 A production-grade, modular web platform designed for university student learning tracking, skill assessment, and internship placement matching. Built for the Brolf Tech internship technical challenge with a strict **MVP first, one phase at a time** methodology.
 
-> **Phase 3 Status**: Courses and enrollment fully operational. Instructor-authored courses with draft/published lifecycle, student enrollment and unenrollment, duplicate enrollment prevention (409 Conflict), course catalogue with title search (?q=) and limit/offset pagination, instructor course management with enrolled student counts, enrolled student roster tables for instructors and admins, and role-specific home page routing (`/my-courses` for students and instructors, `/courses` for admin, `/profile` for organizations).
+> **Phase 4 Status**: Assignments, submissions, and grading fully operational. Instructor assignment creation with future due dates, student coursework submission with server-clock late flag computation, locked-after-graded protection, instructor submissions roster displaying every enrolled student with status/grade, instructor grading and regrading with max_points bounds, assignment editing with grade floor constraints, assignment deletion protected against submissions, due-soon badge alerts (within 3 days), and local timezone formatting.
 
 ---
 
@@ -12,7 +12,7 @@ A production-grade, modular web platform designed for university student learnin
 | :--- | :--- |
 | **Backend** | Python 3.12+ / 3.14+, FastAPI, SQLAlchemy 2, PostgreSQL (via `psycopg` 3), Alembic, Pydantic v2 |
 | **Frontend** | React 18, React Router 6/7, Vite (proxy to backend :8001), TypeScript (strict, no `any`), Tailwind CSS, Lucide React |
-| **Testing** | Pytest + FastAPI `TestClient` (backend: 50 tests), Vitest + React Testing Library (frontend: 57 tests) |
+| **Testing** | Pytest + FastAPI `TestClient` (backend: 58 tests), Vitest + React Testing Library (frontend: 78 tests) |
 | **Tooling &amp; Quality** | Ruff (backend lint &amp; format), ESLint 9 + Prettier (frontend lint &amp; format) |
 | **Environment** | Windows PowerShell compatible, Unix LF line endings, no hardcoded Windows paths |
 
@@ -37,6 +37,10 @@ university-internship-platform/
 ├── backend/
 │   ├── alembic/               # Database migration environment
 │   │   ├── versions/          # Migration revision scripts
+│   │   │   ├── 6d7757d439a5_create_users_and_sessions_tables.py
+│   │   │   ├── c9e18918b114_create_student_and_organization_.py
+│   │   │   ├── f0197aea93a8_create_courses_and_enrollments_tables.py
+│   │   │   └── 340caf61d32f_create_assignments_and_submissions_.py
 │   │   └── env.py             # Migration harness wired to Base metadata
 │   ├── alembic.ini            # Alembic configuration
 │   ├── pyproject.toml         # Ruff and Pytest settings
@@ -44,13 +48,14 @@ university-internship-platform/
 │   ├── requirements-dev.txt   # Development and testing dependencies (pytest, ruff, httpx)
 │   ├── app/
 │   │   ├── core/              # Settings, database engine, security helpers, deps
-│   │   ├── models/            # SQLAlchemy models (User, Session, StudentProfile, OrganizationProfile, Course, Enrollment)
-│   │   ├── schemas/           # Pydantic schemas (Auth, StudentProfile, OrganizationProfile, Course, Enrollment, Health)
-│   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only: auth, student_profile, organization_profile, course, enrollment)
-│   │   ├── services/          # Pure business logic and domain rules (auth, student_profile, organization_profile, course, enrollment)
+│   │   ├── models/            # SQLAlchemy models (user, session, student_profile, organization_profile, course, enrollment, assignment, submission)
+│   │   ├── schemas/           # Pydantic schemas (auth, student_profile, organization_profile, course, enrollment, assignment, submission, health)
+│   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only: auth, student_profile, organization_profile, course, enrollment, assignment, submission, health)
+│   │   ├── services/          # Pure business logic and domain rules (auth, student_profile, organization_profile, course, enrollment, assignment, submission, health)
 │   │   └── main.py            # FastAPI entry point & CORS
 │   └── tests/
 │       ├── conftest.py        # Pytest fixtures and database test harnesses
+│       ├── test_assignment.py # Assignment lifecycle, access control, grade floor, and deletion tests
 │       ├── test_auth_login.py # Auth login tests
 │       ├── test_auth_register.py # Auth registration tests
 │       ├── test_auth_session.py  # Session lifecycle & role guard tests
@@ -59,7 +64,8 @@ university-internship-platform/
 │       ├── test_health.py     # System & DB health test suite
 │       ├── test_organization_profile.py # Organization profile integration tests
 │       ├── test_script_create_user.py   # CLI script integration tests
-│       └── test_student_profile.py      # Student profile integration tests
+│       ├── test_student_profile.py      # Student profile integration tests
+│       └── test_submission.py # Student submission, server-clock late flag, lock-after-graded, and grading tests
 └── frontend/
     ├── eslint.config.js       # ESLint 9 flat configuration
     ├── index.html             # HTML entry with typography and SEO metadata
@@ -70,8 +76,9 @@ university-internship-platform/
     ├── tsconfig.node.json     # Vite config TypeScript options
     ├── vite.config.ts         # Vite proxy configuration (/api -> :8001) and Vitest
     └── src/
-        ├── api/               # API clients (auth, health, profile, course)
+        ├── api/               # API clients (auth, health, profile, course, assignment)
         ├── components/
+        │   ├── assignments/   # AssignmentForm, AssignmentTable, CourseAssignmentsSection, DueBadge, GradeForm, SubmissionForm, SubmissionStatusBadge, SubmissionsTable
         │   ├── courses/       # CourseForm, CourseTable, EnrollButton, StudentRosterTable
         │   ├── layout/        # AppShell layout component
         │   ├── profile/       # StudentProfileForm, OrganizationProfileForm
@@ -80,9 +87,9 @@ university-internship-platform/
         ├── config/            # Centralized navigation configuration
         ├── context/           # React AuthContext and AuthProvider
         ├── hooks/             # Custom hooks (useAuth, useHealth)
-        ├── lib/               # Utility functions (cn, skills)
-        ├── pages/             # Pages (Login, Register, Account, Profile, Courses, MyCourses, CourseCreate, CourseEdit, CourseDetail, SystemStatus, NotFound)
-        ├── types/             # Shared TypeScript types (auth, health, profile, course)
+        ├── lib/               # Utility functions (cn, dates, skills)
+        ├── pages/             # Pages (Login, Register, Account, Profile, Courses, MyCourses, CourseCreate, CourseEdit, CourseDetail, AssignmentCreate, AssignmentEdit, AssignmentDetail, SubmissionGrade, SystemStatus, NotFound)
+        ├── types/             # Shared TypeScript types (auth, health, profile, course, assignment)
         ├── App.tsx            # Application routing entry point
         └── main.tsx           # React DOM root
 ```
@@ -187,13 +194,17 @@ Frontend Routes:
 - Create Course: [http://localhost:5173/courses/new](http://localhost:5173/courses/new) (Instructors)
 - Course Details: [http://localhost:5173/courses/:id](http://localhost:5173/courses/:id)
 - Edit Course: [http://localhost:5173/courses/:id/edit](http://localhost:5173/courses/:id/edit)
+- Create Assignment: [http://localhost:5173/courses/:courseId/assignments/new](http://localhost:5173/courses/:courseId/assignments/new) (Instructors)
+- Assignment Details: [http://localhost:5173/assignments/:id](http://localhost:5173/assignments/:id)
+- Edit Assignment: [http://localhost:5173/assignments/:id/edit](http://localhost:5173/assignments/:id/edit) (Instructors)
+- Grade Submission: [http://localhost:5173/assignments/:assignmentId/submissions/:submissionId/grade](http://localhost:5173/assignments/:assignmentId/submissions/:submissionId/grade) (Instructors)
 - Profile: [http://localhost:5173/profile](http://localhost:5173/profile) (Student and Organization roles)
 - Account Summary: [http://localhost:5173/account](http://localhost:5173/account)
 - System Status: [http://localhost:5173/status](http://localhost:5173/status) (Admin role only)
 
 ---
 
-### 7. Linting &amp; Formatting Commands
+### 7. Linting & Formatting Commands
 
 #### Backend (Ruff)
 
@@ -246,14 +257,14 @@ npm run test -- --run
 
 ---
 
-## Phase 3 Definition of Done Verification
+## Phase 4 Definition of Done Verification
 
 | Criteria | Status | Details |
 | :--- | :---: | :--- |
-| **1. Lint &amp; format pass with 0 warnings** | PASS | Ruff check &amp; format pass with 0 errors; ESLint &amp; Prettier pass with 0 warnings |
-| **2. All tests pass** | PASS | Pytest (50/50 passed against real PostgreSQL); Vitest (57/57 passed across 16 test files) |
+| **1. Lint & format pass with 0 warnings** | PASS | Ruff check & format pass with 0 errors; ESLint & Prettier pass with 0 warnings |
+| **2. All tests pass** | PASS | Pytest (58/58 passed against real PostgreSQL); Vitest (78/78 passed across 22 test files) |
 | **3. No unused files, imports, or dependencies** | PASS | All modules, imports, and packages verified clean against project guide |
-| **4. Documentation is complete** | PASS | Updated README, docs/architecture.md, docs/database.md |
+| **4. Documentation is complete** | PASS | Updated README, docs/architecture.md, docs/database.md, AGENTS.md |
 | **5. Working tree is clean and committed** | PASS | Small, focused conventional commits across every step |
 | **6. Build verification** | PASS | Frontend production bundle builds cleanly (`tsc --noEmit && vite build`) |
-| **7. File size limits** | PASS | All source files strictly under 300 lines limit |
+| **7. File size limits** | PASS | All source files strictly under 300 lines limit (all under 250 lines) |

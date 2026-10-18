@@ -38,7 +38,8 @@ university-internship-platform/
 │   │   ├── versions/          # Alembic revision migration files
 │   │   │   ├── 6d7757d439a5_create_users_and_sessions_tables.py
 │   │   │   ├── c9e18918b114_create_student_and_organization_.py
-│   │   │   └── f0197aea93a8_create_courses_and_enrollments_tables.py
+│   │   │   ├── f0197aea93a8_create_courses_and_enrollments_tables.py
+│   │   │   └── 340caf61d32f_create_assignments_and_submissions_.py
 │   │   ├── env.py             # Migration harness wired to Base metadata
 │   │   └── script.py.mako     # Migration template
 │   ├── alembic.ini            # Alembic configuration
@@ -53,37 +54,46 @@ university-internship-platform/
 │   │   │   ├── exceptions.py
 │   │   │   └── security.py
 │   │   ├── models/            # SQLAlchemy declarative models
+│   │   │   ├── assignment.py
 │   │   │   ├── base.py
 │   │   │   ├── course.py
 │   │   │   ├── enrollment.py
 │   │   │   ├── organization_profile.py
 │   │   │   ├── session.py
 │   │   │   ├── student_profile.py
+│   │   │   ├── submission.py
 │   │   │   └── user.py
 │   │   ├── schemas/           # Pydantic validation schemas
+│   │   │   ├── assignment.py
 │   │   │   ├── auth.py
 │   │   │   ├── course.py
 │   │   │   ├── enrollment.py
 │   │   │   ├── health.py
 │   │   │   ├── organization_profile.py
-│   │   │   └── student_profile.py
+│   │   │   ├── student_profile.py
+│   │   │   └── submission.py
 │   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only)
+│   │   │   ├── assignment.py
 │   │   │   ├── auth.py
 │   │   │   ├── course.py
 │   │   │   ├── enrollment.py
 │   │   │   ├── health.py
 │   │   │   ├── organization_profile.py
-│   │   │   └── student_profile.py
+│   │   │   ├── student_profile.py
+│   │   │   └── submission.py
 │   │   ├── services/          # Pure business logic and domain rules
+│   │   │   ├── assignment.py
 │   │   │   ├── auth.py
 │   │   │   ├── course.py
 │   │   │   ├── enrollment.py
 │   │   │   ├── health.py
 │   │   │   ├── organization_profile.py
-│   │   │   └── student_profile.py
+│   │   │   ├── student_profile.py
+│   │   │   └── submission.py
 │   │   └── main.py            # FastAPI app initialization and middleware
 │   └── tests/                 # Pytest test suite mirroring app/ domain modules
 │       ├── conftest.py        # Database harness and fixtures
+│       ├── test_assignment.py # Assignment lifecycle, access control, grade floor, and deletion tests
 │       ├── test_auth_login.py # Auth login, invalid credentials & hash leak tests
 │       ├── test_auth_register.py # Registration & atomic profile provisioning tests
 │       ├── test_auth_session.py  # Session lifecycle, logout, expiry & role guard tests
@@ -92,7 +102,8 @@ university-internship-platform/
 │       ├── test_health.py     # Health integration tests (mirrors health.py)
 │       ├── test_organization_profile.py # Organization profile integration tests
 │       ├── test_script_create_user.py   # CLI user creation script tests
-│       └── test_student_profile.py      # Student profile integration tests
+│       ├── test_student_profile.py      # Student profile integration tests
+│       └── test_submission.py # Student submission, server-clock late flag, lock-after-graded, and grading tests
 └── frontend/
     ├── .prettierrc            # Prettier code formatting config
     ├── eslint.config.js       # ESLint 9 flat configuration
@@ -106,11 +117,26 @@ university-internship-platform/
     ├── vite.config.ts         # Vite configuration with /api proxy to :8001 and Vitest
     └── src/
         ├── api/               # API clients and HTTP request wrappers
+        │   ├── assignment.ts
         │   ├── auth.ts
         │   ├── course.ts
         │   ├── health.ts
         │   └── profile.ts
         ├── components/
+        │   ├── assignments/   # Assignment domain components
+        │   │   ├── AssignmentForm.tsx
+        │   │   ├── AssignmentTable.tsx
+        │   │   ├── AssignmentTable.test.tsx
+        │   │   ├── CourseAssignmentsSection.tsx
+        │   │   ├── DueBadge.tsx
+        │   │   ├── DueBadge.test.tsx
+        │   │   ├── GradeForm.tsx
+        │   │   ├── GradeForm.test.tsx
+        │   │   ├── SubmissionForm.tsx
+        │   │   ├── SubmissionForm.test.tsx
+        │   │   ├── SubmissionStatusBadge.tsx
+        │   │   ├── SubmissionsTable.tsx
+        │   │   └── SubmissionsTable.test.tsx
         │   ├── courses/       # Course domain components
         │   │   ├── CourseForm.tsx
         │   │   ├── CourseForm.test.tsx
@@ -155,12 +181,17 @@ university-internship-platform/
         ├── hooks/             # Custom React hooks
         │   ├── useAuth.ts
         │   └── useHealth.ts
-        ├── lib/               # Utility libraries (cn, skills parsing)
+        ├── lib/               # Utility libraries (cn, dates, skills)
         │   ├── cn.ts
+        │   ├── dates.ts
+        │   ├── dates.test.ts
         │   ├── skills.ts
         │   └── skills.test.ts
         ├── pages/             # Page-level route views
         │   ├── AccountPage.tsx
+        │   ├── AssignmentCreatePage.tsx
+        │   ├── AssignmentDetailPage.tsx
+        │   ├── AssignmentEditPage.tsx
         │   ├── CourseCreatePage.tsx
         │   ├── CourseDetailPage.tsx
         │   ├── CourseEditPage.tsx
@@ -175,10 +206,12 @@ university-internship-platform/
         │   ├── ProfilePage.test.tsx
         │   ├── RegisterPage.tsx
         │   ├── RegisterPage.test.tsx
+        │   ├── SubmissionGradePage.tsx
         │   └── SystemStatusPage.tsx
         ├── test/              # Frontend testing setup
         │   └── setup.ts
         ├── types/             # Shared TypeScript type definitions
+        │   ├── assignment.ts
         │   ├── auth.ts
         │   ├── course.ts
         │   ├── health.ts
