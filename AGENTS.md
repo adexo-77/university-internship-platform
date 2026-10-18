@@ -215,6 +215,7 @@ university-internship-platform/
         │   ├── SubmissionGradePage.tsx
         │   └── SystemStatusPage.tsx
         ├── test/              # Frontend testing setup
+        │   ├── palette-guard.test.ts
         │   └── setup.ts
         ├── types/             # Shared TypeScript type definitions
         │   ├── assignment.ts

@@ -41,7 +41,7 @@ export const AssignmentCreatePage: React.FC = () => {
         />
 
         {error && (
-          <div className="rounded-control border border-brick bg-brick-tint/20 p-4 text-sm text-brick">
+          <div className="rounded-control border border-brick bg-surface p-4 text-sm text-brick">
             {error}
           </div>
         )}

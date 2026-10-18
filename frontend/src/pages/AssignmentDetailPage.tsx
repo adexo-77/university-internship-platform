@@ -98,7 +98,7 @@ export const AssignmentDetailPage: React.FC = () => {
         {loading ? (
           <div className="py-12 text-center text-pencil">Loading assignment details...</div>
         ) : error || !assignment ? (
-          <div className="rounded-control border border-brick bg-brick-tint/20 p-6 text-center text-brick">
+          <div className="rounded-control border border-brick bg-surface p-6 text-center text-brick">
             {error || 'Assignment not found.'}
           </div>
         ) : (

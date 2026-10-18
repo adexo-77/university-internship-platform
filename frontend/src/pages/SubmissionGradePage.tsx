@@ -89,7 +89,7 @@ export const SubmissionGradePage: React.FC = () => {
         {loading ? (
           <div className="py-12 text-center text-pencil">Loading student submission...</div>
         ) : error || !assignment || !rosterItem || !rosterItem.submission ? (
-          <div className="rounded-control border border-brick bg-brick-tint/20 p-6 text-center text-brick">
+          <div className="rounded-control border border-brick bg-surface p-6 text-center text-brick">
             {error || 'Unable to load submission.'}
           </div>
         ) : (

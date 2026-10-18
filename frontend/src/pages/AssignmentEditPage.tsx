@@ -72,7 +72,7 @@ export const AssignmentEditPage: React.FC = () => {
         {loading ? (
           <div className="py-12 text-center text-pencil">Loading assignment...</div>
         ) : error ? (
-          <div className="rounded-control border border-brick bg-brick-tint/20 p-4 text-sm text-brick">
+          <div className="rounded-control border border-brick bg-surface p-4 text-sm text-brick">
             {error}
           </div>
         ) : assignment ? (

@@ -63,7 +63,7 @@ export const CourseAssignmentsSection: React.FC<CourseAssignmentsSectionProps> =
       {loading ? (
         <div className="py-8 text-center text-sm text-pencil">Loading assignments...</div>
       ) : error ? (
-        <div className="rounded-control border border-brick bg-brick-tint/20 p-4 text-sm text-brick">
+        <div className="rounded-control border border-brick bg-surface p-4 text-sm text-brick">
           {error}
         </div>
       ) : (
