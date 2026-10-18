@@ -8,6 +8,8 @@ from app.core.config import settings
 from app.core.exceptions import AppException
 from app.routers.auth import router as auth_router
 from app.routers.health import router as health_router
+from app.routers.organization_profile import router as organization_profile_router
+from app.routers.student_profile import router as student_profile_router
 
 app = FastAPI(
     title="University Learning & Internship Platform API",
@@ -37,3 +39,5 @@ async def app_exception_handler(_: Request, exc: AppException) -> JSONResponse:
 # Mount routers under /api only
 app.include_router(health_router, prefix="/api")
 app.include_router(auth_router, prefix="/api")
+app.include_router(student_profile_router, prefix="/api")
+app.include_router(organization_profile_router, prefix="/api")
