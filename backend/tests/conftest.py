@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from alembic.config import Config
+from fastapi import APIRouter, Depends
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
@@ -14,9 +15,25 @@ from sqlalchemy.orm import Session, sessionmaker
 from alembic import command
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.deps import require_roles
 from app.main import app
+from app.models.user import User, UserRole
 
 TEST_DB_URL = os.getenv("TEST_DATABASE_URL", settings.TEST_DATABASE_URL)
+
+# Attach a test-only route to verify role enforcement dependencies across test suites
+role_test_router = APIRouter(prefix="/api/test-roles", tags=["test"])
+require_admin_role = require_roles(UserRole.ADMIN)
+
+
+@role_test_router.get("/admin-only")
+def admin_only_endpoint(
+    current_user: User = Depends(require_admin_role),
+) -> dict[str, str]:
+    return {"message": f"Welcome admin {current_user.full_name}"}
+
+
+app.include_router(role_test_router)
 
 
 @pytest.fixture(scope="session", autouse=True)
