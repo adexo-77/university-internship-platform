@@ -6,6 +6,9 @@ import { getHomePath } from './config/navigation';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './hooks/useAuth';
 import { AccountPage } from './pages/AccountPage';
+import { AssignmentCreatePage } from './pages/AssignmentCreatePage';
+import { AssignmentDetailPage } from './pages/AssignmentDetailPage';
+import { AssignmentEditPage } from './pages/AssignmentEditPage';
 import { CourseCreatePage } from './pages/CourseCreatePage';
 import { CourseDetailPage } from './pages/CourseDetailPage';
 import { CourseEditPage } from './pages/CourseEditPage';
@@ -15,6 +18,7 @@ import { MyCoursesPage } from './pages/MyCoursesPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { RegisterPage } from './pages/RegisterPage';
+import { SubmissionGradePage } from './pages/SubmissionGradePage';
 import { SystemStatusPage } from './pages/SystemStatusPage';
 
 /**
@@ -63,6 +67,12 @@ export const AppRoutes: React.FC = () => {
         {/* Create course: instructor only */}
         <Route element={<RoleRoute allowedRoles={['instructor']} />}>
           <Route path="/courses/new" element={<CourseCreatePage />} />
+          <Route path="/courses/:courseId/assignments/new" element={<AssignmentCreatePage />} />
+          <Route path="/assignments/:id/edit" element={<AssignmentEditPage />} />
+          <Route
+            path="/assignments/:assignmentId/submissions/:submissionId/grade"
+            element={<SubmissionGradePage />}
+          />
         </Route>
 
         {/* Edit course: instructor and admin */}
@@ -70,8 +80,9 @@ export const AppRoutes: React.FC = () => {
           <Route path="/courses/:id/edit" element={<CourseEditPage />} />
         </Route>
 
-        {/* Course details: any signed-in user */}
+        {/* Course and assignment details: any signed-in user */}
         <Route path="/courses/:id" element={<CourseDetailPage />} />
+        <Route path="/assignments/:id" element={<AssignmentDetailPage />} />
 
         {/* System status: admin role only */}
         <Route element={<RoleRoute allowedRoles={['admin']} />}>
