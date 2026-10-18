@@ -6,7 +6,12 @@ import { getHomePath } from './config/navigation';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './hooks/useAuth';
 import { AccountPage } from './pages/AccountPage';
+import { CourseCreatePage } from './pages/CourseCreatePage';
+import { CourseDetailPage } from './pages/CourseDetailPage';
+import { CourseEditPage } from './pages/CourseEditPage';
+import { CoursesPage } from './pages/CoursesPage';
 import { LoginPage } from './pages/LoginPage';
+import { MyCoursesPage } from './pages/MyCoursesPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -44,6 +49,29 @@ export const AppRoutes: React.FC = () => {
         <Route element={<RoleRoute allowedRoles={['student', 'organization']} />}>
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
+
+        {/* Course catalogue: student and admin */}
+        <Route element={<RoleRoute allowedRoles={['student', 'admin']} />}>
+          <Route path="/courses" element={<CoursesPage />} />
+        </Route>
+
+        {/* My courses: student and instructor */}
+        <Route element={<RoleRoute allowedRoles={['student', 'instructor']} />}>
+          <Route path="/my-courses" element={<MyCoursesPage />} />
+        </Route>
+
+        {/* Create course: instructor only */}
+        <Route element={<RoleRoute allowedRoles={['instructor']} />}>
+          <Route path="/courses/new" element={<CourseCreatePage />} />
+        </Route>
+
+        {/* Edit course: instructor and admin */}
+        <Route element={<RoleRoute allowedRoles={['instructor', 'admin']} />}>
+          <Route path="/courses/:id/edit" element={<CourseEditPage />} />
+        </Route>
+
+        {/* Course details: any signed-in user */}
+        <Route path="/courses/:id" element={<CourseDetailPage />} />
 
         {/* System status: admin role only */}
         <Route element={<RoleRoute allowedRoles={['admin']} />}>

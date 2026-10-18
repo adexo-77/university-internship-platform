@@ -1,4 +1,11 @@
-import { Activity, Contact, User as UserIcon, type LucideIcon } from 'lucide-react';
+import {
+  Activity,
+  BookMarked,
+  BookOpen,
+  Contact,
+  User as UserIcon,
+  type LucideIcon,
+} from 'lucide-react';
 import { UserRole } from '../types/auth';
 
 export interface NavItem {
@@ -14,6 +21,18 @@ export interface NavItem {
  * Each phase adds items here — no hard-coded items elsewhere.
  */
 export const navigationItems: NavItem[] = [
+  {
+    path: '/courses',
+    label: 'Courses',
+    icon: BookOpen,
+    roles: ['student', 'admin'],
+  },
+  {
+    path: '/my-courses',
+    label: 'My courses',
+    icon: BookMarked,
+    roles: ['student', 'instructor'],
+  },
   {
     path: '/profile',
     label: 'Profile',
@@ -35,10 +54,16 @@ export const navigationItems: NavItem[] = [
 
 /**
  * Returns the default home path for a given user role.
- * Later phases update this function to route each role to its own landing page.
  */
 export function getHomePath(role: UserRole): string {
-  // All roles currently land on /account. Future phases will branch on `role`.
-  void role;
+  if (role === 'student' || role === 'instructor') {
+    return '/my-courses';
+  }
+  if (role === 'organization') {
+    return '/profile';
+  }
+  if (role === 'admin') {
+    return '/courses';
+  }
   return '/account';
 }
