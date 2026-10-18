@@ -51,7 +51,7 @@ export const SubmissionsTable: React.FC<SubmissionsTableProps> = ({
         if (!item.submission) return <span className="text-pencil text-sm">—</span>;
         if (item.submission.grade !== null && item.submission.grade !== undefined) {
           return (
-            <span className="font-semibold text-navy text-sm">
+            <span className="font-semibold text-ink text-sm">
               {item.submission.grade} / {maxPoints}
             </span>
           );

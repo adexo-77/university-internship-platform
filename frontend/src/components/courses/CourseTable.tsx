@@ -26,7 +26,7 @@ export const CourseTable: React.FC<CourseTableProps> = ({
       key: 'title',
       header: 'Course title',
       render: (item) => (
-        <Link to={`/courses/${item.id}`} className="font-medium text-brand hover:underline">
+        <Link to={`/courses/${item.id}`} className="font-medium text-petrol hover:underline">
           {item.title}
         </Link>
       ),

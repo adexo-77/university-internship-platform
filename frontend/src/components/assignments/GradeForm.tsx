@@ -77,7 +77,7 @@ export const GradeForm: React.FC<GradeFormProps> = ({ submission, maxPoints, onS
               href={submission.link_url}
               target="_blank"
               rel="noreferrer"
-              className="text-navy hover:underline break-all"
+              className="text-petrol hover:underline break-all"
             >
               {submission.link_url}
             </a>

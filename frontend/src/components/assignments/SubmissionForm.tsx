@@ -77,7 +77,7 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
           <div className="rounded-control border border-line bg-surface p-6 space-y-3">
             <div className="flex items-center justify-between border-b border-line pb-3">
               <span className="text-sm font-semibold text-ink">Grade received</span>
-              <span className="text-lg font-bold text-navy">
+              <span className="text-lg font-bold text-ink">
                 {submission.grade} / {maxPoints}
               </span>
             </div>

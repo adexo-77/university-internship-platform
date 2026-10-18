@@ -117,7 +117,7 @@ export const MyCoursesPage: React.FC = () => {
                 ? (item) => (
                     <Link
                       to={`/courses/${item.id}/edit`}
-                      className="text-sm font-medium text-brand hover:underline"
+                      className="text-sm font-medium text-petrol hover:underline"
                     >
                       Edit
                     </Link>

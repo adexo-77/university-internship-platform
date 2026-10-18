@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Assignment } from '../../types/assignment';
+import { Button } from '../ui/Button';
 import { Column, DataTable } from '../ui/DataTable';
 import { EmptyState } from '../ui/EmptyState';
 import { DueBadge } from './DueBadge';
@@ -29,7 +30,7 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
         <div>
           <Link
             to={`/assignments/${item.id}`}
-            className="font-medium text-ink hover:text-navy underline-offset-2 hover:underline"
+            className="font-medium text-ink hover:text-petrol underline-offset-2 hover:underline"
           >
             {item.title}
           </Link>
@@ -75,7 +76,7 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
       <div className="flex items-center justify-end gap-2">
         <Link
           to={`/assignments/${item.id}`}
-          className="text-xs text-navy hover:underline font-medium"
+          className="text-xs text-petrol hover:underline font-medium"
         >
           View
         </Link>
@@ -102,11 +103,8 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
         }
         action={
           isOwner ? (
-            <Link
-              to={`/courses/${courseId}/assignments/new`}
-              className="inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-control px-4 py-2 text-sm bg-navy text-surface hover:bg-navy-dark"
-            >
-              Create assignment
+            <Link to={`/courses/${courseId}/assignments/new`}>
+              <Button>Create assignment</Button>
             </Link>
           ) : undefined
         }

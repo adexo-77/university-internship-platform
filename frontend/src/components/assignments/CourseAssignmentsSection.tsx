@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { listCourseAssignments } from '../../api/assignment';
 import { Assignment } from '../../types/assignment';
+import { Button } from '../ui/Button';
 import { AssignmentTable } from './AssignmentTable';
 
 export interface CourseAssignmentsSectionProps {
@@ -53,11 +54,8 @@ export const CourseAssignmentsSection: React.FC<CourseAssignmentsSectionProps> =
           </p>
         </div>
         {isOwner && (
-          <Link
-            to={`/courses/${courseId}/assignments/new`}
-            className="inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-control border px-3 py-1.5 text-xs bg-navy text-surface border-navy hover:bg-navy-dark"
-          >
-            New assignment
+          <Link to={`/courses/${courseId}/assignments/new`}>
+            <Button size="sm">New assignment</Button>
           </Link>
         )}
       </div>
