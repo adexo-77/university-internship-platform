@@ -38,8 +38,7 @@ university-internship-platform/
 │   │   ├── versions/          # Alembic revision migration files
 │   │   │   └── 6d7757d439a5_create_users_and_sessions_tables.py
 │   │   ├── env.py             # Migration harness wired to Base metadata
-│   │   ├── script.py.mako     # Migration template
-│   │   └── README
+│   │   └── script.py.mako     # Migration template
 │   ├── alembic.ini            # Alembic configuration
 │   ├── pyproject.toml         # Ruff and Pytest settings
 │   ├── requirements.txt       # Production dependencies
