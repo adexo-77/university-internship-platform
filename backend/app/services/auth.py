@@ -5,7 +5,11 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session, joinedload
 
-from app.core.exceptions import EmailAlreadyExistsException, InvalidCredentialsException
+from app.core.exceptions import (
+    AppException,
+    EmailAlreadyExistsException,
+    InvalidCredentialsException,
+)
 from app.core.security import (
     SESSION_LIFETIME_SECONDS,
     generate_session_token,
@@ -14,7 +18,9 @@ from app.core.security import (
     verify_dummy_password,
     verify_password,
 )
+from app.models.organization_profile import OrganizationProfile
 from app.models.session import Session as SessionModel
+from app.models.student_profile import StudentProfile
 from app.models.user import User, UserRole
 from app.schemas.auth import LoginRequest, RegisterRequest
 
@@ -26,8 +32,12 @@ class AuthService:
     def register(db: Session, request: RegisterRequest) -> tuple[User, str]:
         """Register a new user account with student or organization role.
 
+        Creates an empty profile row for a student or an organization profile with
+        organization_name in the same transaction. If either insert fails, nothing is saved.
+
         Raises:
             EmailAlreadyExistsException: If email is already registered.
+            AppException (422): If organization registration lacks organization_name.
         """
         existing_user = db.scalar(select(User).where(User.email == request.email))
         if existing_user is not None:
@@ -41,9 +51,33 @@ class AuthService:
             role=UserRole(request.role.value),
             is_active=True,
         )
-        db.add(user)
-        db.commit()
-        db.refresh(user)
+
+        try:
+            db.add(user)
+            db.flush()
+
+            if user.role == UserRole.STUDENT:
+                student_profile = StudentProfile(user_id=user.id, skills=[])
+                db.add(student_profile)
+            elif user.role == UserRole.ORGANIZATION:
+                org_name = request.organization_name.strip() if request.organization_name else ""
+                if not org_name:
+                    raise AppException(
+                        message="Organization name is required.",
+                        code="VALIDATION_ERROR",
+                        status_code=422,
+                    )
+                org_profile = OrganizationProfile(
+                    user_id=user.id,
+                    organization_name=org_name,
+                )
+                db.add(org_profile)
+
+            db.commit()
+            db.refresh(user)
+        except Exception:
+            db.rollback()
+            raise
 
         _, raw_token = AuthService.create_session(db=db, user_id=user.id)
         return user, raw_token

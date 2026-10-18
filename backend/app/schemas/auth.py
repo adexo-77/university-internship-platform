@@ -3,7 +3,7 @@
 import enum
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.models.user import UserRole
 
@@ -35,6 +35,10 @@ class RegisterRequest(BaseModel):
         ...,
         description="Account role: must be 'student' or 'organization'",
     )
+    organization_name: str | None = Field(
+        default=None,
+        description="Required when registering as an organization",
+    )
 
     @field_validator("email")
     @classmethod
@@ -53,6 +57,25 @@ class RegisterRequest(BaseModel):
         if not cleaned:
             raise ValueError("Full name cannot be blank.")
         return cleaned
+
+    @field_validator("organization_name")
+    @classmethod
+    def validate_organization_name(cls, value: str | None) -> str | None:
+        """Trim organization_name if provided."""
+        if value is None:
+            return None
+        trimmed = value.strip()
+        return trimmed if trimmed else None
+
+    @model_validator(mode="after")
+    def validate_organization_role(self) -> "RegisterRequest":
+        """Validate that organization registration includes organization_name."""
+        if self.role == PublicRegisterRole.ORGANIZATION:
+            if not self.organization_name:
+                raise ValueError("Organization name is required for organization registration.")
+            if len(self.organization_name) > 255:
+                raise ValueError("Organization name cannot exceed 255 characters.")
+        return self
 
 
 class LoginRequest(BaseModel):
