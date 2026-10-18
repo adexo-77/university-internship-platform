@@ -54,8 +54,9 @@ def clean_tables_between_tests() -> Generator[None, None, None]:
         with engine.connect() as conn, conn.begin():
             conn.execute(
                 text(
-                    "TRUNCATE TABLE enrollments, courses, student_profiles, "
-                    "organization_profiles, sessions, users RESTART IDENTITY CASCADE"
+                    "TRUNCATE TABLE submissions, assignments, enrollments, courses, "
+                    "student_profiles, organization_profiles, sessions, users "
+                    "RESTART IDENTITY CASCADE"
                 )
             )
         engine.dispose()

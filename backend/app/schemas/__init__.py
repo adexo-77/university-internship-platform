@@ -13,14 +13,13 @@ from app.schemas.auth import (
 )
 from app.schemas.course import (
     CourseCreate,
-    CourseDetailResponse,
-    CourseItemResponse,
     CourseListResponse,
+    CourseResponse,
     CourseUpdate,
-    InstructorCourseResponse,
 )
 from app.schemas.enrollment import (
-    CourseStudentItem,
+    EnrolledStudentResponse,
+    EnrollmentActionResponse,
     EnrollmentResponse,
 )
 from app.schemas.health import (
@@ -48,16 +47,15 @@ __all__ = [
     "AssignmentResponse",
     "AssignmentUpdate",
     "CourseCreate",
-    "CourseDetailResponse",
-    "CourseItemResponse",
     "CourseListResponse",
-    "CourseStudentItem",
+    "CourseResponse",
     "CourseUpdate",
     "DatabaseHealthResponse",
+    "EnrolledStudentResponse",
+    "EnrollmentActionResponse",
     "EnrollmentResponse",
     "ErrorDetailResponse",
     "HealthResponse",
-    "InstructorCourseResponse",
     "LoginRequest",
     "OrganizationProfileResponse",
     "OrganizationProfileUpdateRequest",
