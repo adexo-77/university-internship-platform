@@ -15,7 +15,9 @@ This document establishes the architecture, conventions, workflows, and strict r
 
 ---
 
-## 2. Repository & Folder Structure
+## 2. Project Structure Guide
+
+The official **PROJECT STRUCTURE GUIDE** outlines the file tree and structural conventions across all phases:
 
 ```text
 university-internship-platform/
@@ -26,41 +28,123 @@ university-internship-platform/
 ├── AGENTS.md                  # Project constitution and multi-phase agent guidelines
 ├── README.md                  # Setup instructions, exact PowerShell commands
 ├── docs/                      # Architectural designs, schemas, and specifications
-│   └── architecture.md
+│   ├── architecture.md        # Architecture topology and endpoint matrix
+│   ├── database.md            # Mermaid ER diagram and schema specifications
+│   └── design.md              # Design system tokens, components, and UX rules
+├── scripts/                   # CLI administrative and automation tools
+│   └── create_user.py         # Administrative user provisioning script
 ├── backend/
-│   ├── alembic/               # Database migration environment and versions
-│   │   ├── versions/
-│   │   └── env.py
+│   ├── alembic/               # Database migration environment
+│   │   ├── versions/          # Alembic revision migration files
+│   │   │   └── 6d7757d439a5_create_users_and_sessions_tables.py
+│   │   ├── env.py             # Migration harness wired to Base metadata
+│   │   ├── script.py.mako     # Migration template
+│   │   └── README
 │   ├── alembic.ini            # Alembic configuration
 │   ├── pyproject.toml         # Ruff and Pytest settings
 │   ├── requirements.txt       # Production dependencies
 │   ├── requirements-dev.txt   # Development & testing tools (ruff, pytest, httpx)
 │   ├── app/
-│   │   ├── core/              # Config, database engine, exceptions
+│   │   ├── core/              # Config, database engine, security helpers, deps, exceptions
+│   │   │   ├── config.py
+│   │   │   ├── database.py
+│   │   │   ├── deps.py
+│   │   │   ├── exceptions.py
+│   │   │   └── security.py
 │   │   ├── models/            # SQLAlchemy declarative models
+│   │   │   ├── base.py
+│   │   │   ├── session.py
+│   │   │   └── user.py
 │   │   ├── schemas/           # Pydantic validation schemas
-│   │   ├── routers/           # Thin FastAPI HTTP endpoints
+│   │   │   ├── auth.py
+│   │   │   └── health.py
+│   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only)
+│   │   │   ├── auth.py
+│   │   │   └── health.py
 │   │   ├── services/          # Pure business logic and domain rules
+│   │   │   ├── auth.py
+│   │   │   └── health.py
 │   │   └── main.py            # FastAPI app initialization and middleware
-│   └── tests/                 # Pytest test suite with TestClient
+│   └── tests/                 # Pytest test suite mirroring app/ domain modules
+│       ├── conftest.py        # Database harness and fixtures
+│       ├── test_auth.py       # Auth integration tests (mirrors auth.py)
+│       ├── test_health.py     # Health integration tests (mirrors health.py)
+│       └── test_script_create_user.py
 └── frontend/
+    ├── .prettierrc            # Prettier code formatting config
     ├── eslint.config.js       # ESLint 9 flat configuration
-    ├── index.html             # Single-page HTML entry with SEO metadata
+    ├── index.html             # Single-page HTML entry with typography and SEO metadata
     ├── package.json           # Frontend dependencies and npm scripts
+    ├── package-lock.json      # Locked npm dependency tree
     ├── postcss.config.js      # PostCSS configuration
-    ├── tailwind.config.js     # Tailwind CSS design system
+    ├── tailwind.config.js     # Tailwind CSS design system tokens
     ├── tsconfig.json          # Strict TypeScript compiler options
     ├── tsconfig.node.json     # Vite config TypeScript setup
     ├── vite.config.ts         # Vite configuration with /api proxy to :8001 and Vitest
     └── src/
         ├── api/               # API clients and HTTP request wrappers
-        ├── components/        # Reusable, typed UI components
+        │   ├── auth.ts
+        │   └── health.ts
+        ├── components/
+        │   ├── layout/        # Application shell and structural layout
+        │   │   ├── AppShell.tsx
+        │   │   └── AppShell.test.tsx
+        │   ├── routes/        # Navigation route guards
+        │   │   ├── ProtectedRoute.tsx
+        │   │   ├── RoleRoute.tsx
+        │   │   └── RouteGuards.test.tsx
+        │   ├── ui/            # Reusable, typed UI components (Button, Badge, etc.)
+        │   │   ├── Badge.tsx
+        │   │   ├── Button.tsx
+        │   │   ├── DataTable.tsx
+        │   │   ├── EmptyState.tsx
+        │   │   ├── ErrorMessage.tsx
+        │   │   ├── Notice.tsx
+        │   │   ├── PageHeader.tsx
+        │   │   ├── Select.tsx
+        │   │   ├── TextField.tsx
+        │   │   ├── Textarea.tsx
+        │   │   └── index.ts
+        │   ├── HealthCheck.tsx
+        │   └── HealthCheck.test.tsx
+        ├── config/            # Centralized configuration
+        │   └── navigation.ts
+        ├── context/           # React context providers
+        │   ├── AuthContext.tsx
+        │   ├── AuthContext.test.tsx
+        │   └── auth-context-def.ts
         ├── hooks/             # Custom React hooks
-        ├── lib/               # Utility functions and helpers
+        │   ├── useAuth.ts
+        │   └── useHealth.ts
+        ├── lib/               # Utility functions (cn class merging)
+        │   └── utils.ts
         ├── pages/             # Page-level route views
+        │   ├── AccountPage.tsx
+        │   ├── HomePage.tsx
+        │   ├── LoginPage.tsx
+        │   ├── LoginPage.test.tsx
+        │   ├── NotFoundPage.tsx
+        │   ├── RegisterPage.tsx
+        │   └── RegisterPage.test.tsx
+        ├── test/              # Frontend testing setup
+        │   └── setup.ts
         ├── types/             # Shared TypeScript type definitions
+        │   ├── auth.ts
+        │   └── health.ts
+        ├── App.tsx            # Main router configuration
+        ├── index.css          # Global styles and design system tokens
         └── main.tsx           # React entry point
 ```
+
+### Structure Rules for Every Future Phase
+
+- New code goes in the folder that matches its job. Business logic lives in services, never in routers.
+- One file per domain, with the same name across models, schemas, routers, services, and tests (for example `course.py`).
+- Each file has one job and stays under about 300 lines. Split before it grows past that.
+- No files named `utils` or `helpers` that collect unrelated code.
+- No scratch, backup, debug, or unused files. Only source and docs are committed.
+- Each phase updates README, docs/database.md, and docs/architecture.md when it changes them.
+- Before finishing any phase, run `git ls-files` and check it against this guide.
 
 ---
 
