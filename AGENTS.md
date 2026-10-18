@@ -97,13 +97,16 @@ university-internship-platform/
 │       ├── test_auth_login.py # Auth login, invalid credentials & hash leak tests
 │       ├── test_auth_register.py # Registration & atomic profile provisioning tests
 │       ├── test_auth_session.py  # Session lifecycle, logout, expiry & role guard tests
-│       ├── test_course.py     # Course lifecycle, catalog, search, and permissions tests
+│       ├── test_course_create.py     # Course creation permissions and field validation tests
+│       ├── test_course_update.py     # Course update and status transition tests
+│       ├── test_course_visibility.py # Course visibility, catalog search, and pagination tests
 │       ├── test_enrollment.py # Enrollment, double-enroll, leave, and roster tests
 │       ├── test_health.py     # Health integration tests (mirrors health.py)
 │       ├── test_organization_profile.py # Organization profile integration tests
 │       ├── test_script_create_user.py   # CLI user creation script tests
 │       ├── test_student_profile.py      # Student profile integration tests
-│       └── test_submission.py # Student submission, server-clock late flag, lock-after-graded, and grading tests
+│       ├── test_submission_grading.py   # Roster visibility and grading bounds tests
+│       └── test_submission_lifecycle.py # Submission lifecycle, late flag, and locking tests
 └── frontend/
     ├── .prettierrc            # Prettier code formatting config
     ├── eslint.config.js       # ESLint 9 flat configuration
