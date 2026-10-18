@@ -1,18 +1,30 @@
 import { describe, expect, it } from 'vitest';
-import { formatLocalDateTime, isDueSoon, isPastDue } from './dates';
+import { formatDate, formatDateTime, isDueSoon, isPastDue } from './dates';
 
 describe('dates utilities', () => {
-  it('formats date and time with local timezone indicator', () => {
-    const formatted = formatLocalDateTime('2026-10-25T15:30:00Z');
-    expect(formatted).toContain('2026');
-    expect(formatted).toContain('Oct');
+  it('formats unambiguous date without time or timezone name', () => {
+    const formatted = formatDate('2026-10-18T10:00:00Z');
+    expect(formatted).toMatch(/\b18 Oct 2026\b/);
+    expect(formatted).not.toContain('AM');
+    expect(formatted).not.toContain('PM');
+    expect(formatted).not.toContain(':');
+  });
+
+  it('formats unambiguous date and time with local timezone indicator', () => {
+    const formatted = formatDateTime('2026-10-25T15:30:00Z');
+    expect(formatted).toMatch(/\b25 Oct 2026\b/);
+    expect(formatted).toMatch(/\b(AM|PM)\b/);
     expect(formatted).not.toBe('—');
   });
 
   it('handles null, undefined, or invalid dates gracefully', () => {
-    expect(formatLocalDateTime(null)).toBe('—');
-    expect(formatLocalDateTime(undefined)).toBe('—');
-    expect(formatLocalDateTime('invalid-iso')).toBe('Invalid date');
+    expect(formatDate(null)).toBe('—');
+    expect(formatDate(undefined)).toBe('—');
+    expect(formatDate('invalid-iso')).toBe('Invalid date');
+
+    expect(formatDateTime(null)).toBe('—');
+    expect(formatDateTime(undefined)).toBe('—');
+    expect(formatDateTime('invalid-iso')).toBe('Invalid date');
   });
 
   describe('isDueSoon logic', () => {

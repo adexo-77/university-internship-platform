@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatLocalDateTime, isDueSoon, isPastDue } from '../../lib/dates';
+import { formatDateTime, isDueSoon, isPastDue } from '../../lib/dates';
 import { Badge } from '../ui/Badge';
 
 export interface DueBadgeProps {
@@ -9,7 +9,7 @@ export interface DueBadgeProps {
 }
 
 export const DueBadge: React.FC<DueBadgeProps> = ({ dueAt, className = '', showTime = true }) => {
-  const formattedTime = formatLocalDateTime(dueAt);
+  const formattedTime = formatDateTime(dueAt);
   const dueSoon = isDueSoon(dueAt);
   const pastDue = isPastDue(dueAt);
 

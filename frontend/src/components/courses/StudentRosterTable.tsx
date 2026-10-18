@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatDate } from '../../lib/dates';
 import { EnrolledStudent } from '../../types/course';
 import { Column, DataTable } from '../ui/DataTable';
 
@@ -25,14 +26,9 @@ export const StudentRosterTable: React.FC<StudentRosterTableProps> = ({
     {
       key: 'enrolled_at',
       header: 'Enrolled date',
-      render: (item) => {
-        const date = new Date(item.enrolled_at);
-        return (
-          <span className="text-pencil tabular-nums">
-            {Number.isNaN(date.getTime()) ? item.enrolled_at : date.toLocaleDateString()}
-          </span>
-        );
-      },
+      render: (item) => (
+        <span className="text-pencil tabular-nums">{formatDate(item.enrolled_at)}</span>
+      ),
     },
   ];
 

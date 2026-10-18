@@ -1,14 +1,14 @@
 /**
- * Date formatting and due-soon logic in viewer's local timezone.
+ * Unambiguous date formatting and due-soon logic in viewer's local timezone.
  */
 
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 
 /**
- * Format an ISO date string in the user's local timezone with timezone name.
- * Example output: "Oct 25, 2026, 11:59 PM EDT"
+ * Format an ISO date string as an unambiguous date without time or timezone.
+ * Example output: "18 Oct 2026"
  */
-export function formatLocalDateTime(isoString: string | null | undefined): string {
+export function formatDate(isoString: string | null | undefined): string {
   if (!isoString) {
     return '—';
   }
@@ -18,14 +18,38 @@ export function formatLocalDateTime(isoString: string | null | undefined): strin
     return 'Invalid date';
   }
 
-  return new Intl.DateTimeFormat(undefined, {
-    month: 'short',
+  return new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+}
+
+/**
+ * Format an ISO date string as an unambiguous date and time with local timezone indicator.
+ * Example output: "18 Oct 2026, 8:10 PM EDT"
+ */
+export function formatDateTime(isoString: string | null | undefined): string {
+  if (!isoString) {
+    return '—';
+  }
+
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) {
+    return 'Invalid date';
+  }
+
+  const raw = new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
     year: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
+    hour12: true,
     timeZoneName: 'short',
   }).format(date);
+
+  return raw.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
 }
 
 /**

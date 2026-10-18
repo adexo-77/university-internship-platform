@@ -26,6 +26,7 @@ describe('StudentRosterTable Component', () => {
     expect(screen.getByText('alice@uni.edu')).toBeInTheDocument();
     expect(screen.getByText('Bob Smith')).toBeInTheDocument();
     expect(screen.getByText('bob@uni.edu')).toBeInTheDocument();
+    expect(screen.getAllByText('18 Oct 2026')).toHaveLength(2);
   });
 
   it('renders empty message when roster has no students', () => {
