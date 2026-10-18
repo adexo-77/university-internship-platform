@@ -9,6 +9,8 @@ This document details the PostgreSQL schema managed via SQLAlchemy 2 declarative
 ```mermaid
 erDiagram
     users ||--o{ sessions : "has active sessions"
+    users ||--o| student_profiles : "has profile (student)"
+    users ||--o| organization_profiles : "has profile (organization)"
 
     users {
         int id PK "autoincrement"
@@ -27,6 +29,28 @@ erDiagram
         string token_hash UK "SHA-256 hex, indexed, 64 chars"
         timestamp created_at "with time zone, server default now()"
         timestamp expires_at "with time zone, indexed"
+    }
+
+    student_profiles {
+        int id PK "autoincrement"
+        int user_id FK "users.id, ON DELETE CASCADE, unique, indexed"
+        string university "nullable, max 255"
+        string department "nullable, max 255"
+        int year_of_study "nullable, check: 1 <= year <= 6"
+        string bio "nullable, max 1000"
+        string_array skills "text array, default empty, max 20 items"
+        timestamp updated_at "with time zone, server default now(), on update"
+    }
+
+    organization_profiles {
+        int id PK "autoincrement"
+        int user_id FK "users.id, ON DELETE CASCADE, unique, indexed"
+        string organization_name "required, max 255"
+        string industry "nullable, max 255"
+        string location "nullable, max 255"
+        string website "nullable, valid http/https URL, max 255"
+        string description "nullable, max 1000"
+        timestamp updated_at "with time zone, server default now(), on update"
     }
 ```
 
@@ -61,11 +85,43 @@ Represents active authentication sessions backed by HttpOnly cookies.
 | `created_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Session inception timestamp in UTC |
 | `expires_at` | `TIMESTAMPTZ` | `NOT NULL`, `INDEX` | Session expiry timestamp in UTC (default 7 days) |
 
+### `student_profiles`
+
+Represents optional academic background and skills profile for student accounts.
+
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | `PRIMARY KEY`, `AUTOINCREMENT` | Unique profile identifier |
+| `user_id` | `INTEGER` | `NOT NULL`, `UNIQUE`, `FK users(id) ON DELETE CASCADE`, `INDEX` | Owning student user account |
+| `university` | `VARCHAR(255)` | `NULLABLE` | Attending university or institution |
+| `department` | `VARCHAR(255)` | `NULLABLE` | Faculty or academic department |
+| `year_of_study` | `INTEGER` | `NULLABLE`, `CHECK (1 <= year_of_study <= 6)` | Academic progress year (1 to 6) |
+| `bio` | `VARCHAR(1000)` | `NULLABLE` | Student background and career interests |
+| `skills` | `VARCHAR(40)[]` | `NOT NULL`, `DEFAULT '{}'` | Array of up to 20 skill tags |
+| `updated_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Profile last modification timestamp |
+
+### `organization_profiles`
+
+Represents company details, industry sector, and contact points for organization accounts.
+
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | `PRIMARY KEY`, `AUTOINCREMENT` | Unique profile identifier |
+| `user_id` | `INTEGER` | `NOT NULL`, `UNIQUE`, `FK users(id) ON DELETE CASCADE`, `INDEX` | Owning organization user account |
+| `organization_name` | `VARCHAR(255)` | `NOT NULL` | Required name of the organization |
+| `industry` | `VARCHAR(255)` | `NULLABLE` | Operating industry or business vertical |
+| `location` | `VARCHAR(255)` | `NULLABLE` | Office city, country, or location |
+| `website` | `VARCHAR(255)` | `NULLABLE` | Valid HTTP or HTTPS web URL |
+| `description` | `VARCHAR(1000)` | `NULLABLE` | Organization mission, culture, and overview |
+| `updated_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Profile last modification timestamp |
+
 ---
 
 ## 3. Security &amp; Data Integrity Rules
 
 1. **Token Storage**: Raw session tokens are never stored in the database. Only the SHA-256 digest is persisted in `sessions.token_hash`.
 2. **Credential Privacy**: `password_hash` is never included in API responses or logs.
-3. **Cascade Invalidation**: Deleting a user account cascades to automatically drop all active sessions associated with that user.
+3. **Cascade Invalidation**: Deleting a user account cascades to automatically drop all active sessions and associated profile records (`student_profiles` or `organization_profiles`).
 4. **Stale Session Purging**: Expired sessions are checked against `expires_at` and automatically deleted upon access resolution.
+5. **Atomic Registration Transaction**: User creation and initial profile creation (`student_profiles` with empty skills or `organization_profiles` with `organization_name`) occur in the same database transaction; failure of either rolls back both.
+6. **Session-Bound Identity**: Endpoints resolving profiles derive user identity solely from the verified session, never allowing external modification of foreign keys.

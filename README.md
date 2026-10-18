@@ -1,8 +1,8 @@
-# University Learning &amp; Internship Platform &bull; Phase 1 Authentication &amp; Roles
+# University Learning &amp; Internship Platform &bull; Phase 2 Profiles
 
 A production-grade, modular web platform designed for university student learning tracking, skill assessment, and internship placement matching. Built for the Brolf Tech internship technical challenge with a strict **MVP first, one phase at a time** methodology.
 
-> **Phase 1 Status**: Authentication and role-based access control fully operational. Models and migrations for users and sessions, stdlib `scrypt` hashing, constant-time authentication timing defense, HttpOnly cookies, client route guards, and admin CLI tools.
+> **Phase 2 Status**: Student and organization profiles fully operational. Models and migrations for `student_profiles` and `organization_profiles`, atomic profile row creation during registration, strict role-based profile retrieval and update endpoints (`/api/students/me`, `/api/organizations/me`), input trimming and validation, and interactive `/profile` forms with server error notices and plain success states.
 
 ---
 
@@ -12,7 +12,7 @@ A production-grade, modular web platform designed for university student learnin
 | :--- | :--- |
 | **Backend** | Python 3.12+ / 3.14+, FastAPI, SQLAlchemy 2, PostgreSQL (via `psycopg` 3), Alembic, Pydantic v2 |
 | **Frontend** | React 18, React Router 6/7, Vite (proxy to backend :8001), TypeScript (strict, no `any`), Tailwind CSS, Lucide React |
-| **Testing** | Pytest + FastAPI `TestClient` (backend: 21 tests), Vitest + React Testing Library (frontend: 22 tests) |
+| **Testing** | Pytest + FastAPI `TestClient` (backend: 38 tests), Vitest + React Testing Library (frontend: 31 tests) |
 | **Tooling &amp; Quality** | Ruff (backend lint &amp; format), ESLint 9 + Prettier (frontend lint &amp; format) |
 | **Environment** | Windows PowerShell compatible, Unix LF line endings, no hardcoded Windows paths |
 
@@ -44,16 +44,18 @@ university-internship-platform/
 │   ├── requirements-dev.txt   # Development and testing dependencies (pytest, ruff, httpx)
 │   ├── app/
 │   │   ├── core/              # Settings, database engine, security helpers, deps
-│   │   ├── models/            # SQLAlchemy 2 declarative models (User, Session)
-│   │   ├── schemas/           # Pydantic schemas (Auth, Health, Errors)
+│   │   ├── models/            # SQLAlchemy 2 declarative models (User, Session, StudentProfile, OrganizationProfile)
+│   │   ├── schemas/           # Pydantic schemas (Auth, StudentProfile, OrganizationProfile, Health)
 │   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only)
 │   │   ├── services/          # Pure business logic and domain rules
 │   │   └── main.py            # FastAPI entry point & CORS
 │   └── tests/
 │       ├── conftest.py        # Pytest fixtures and database test harnesses
-│       ├── test_auth.py       # Authentication, security, and role tests
+│       ├── test_auth.py       # Authentication, security, and registration tests
 │       ├── test_health.py     # System & DB health test suite
-│       └── test_script_create_user.py # CLI script integration tests
+│       ├── test_organization_profile.py # Organization profile integration tests
+│       ├── test_script_create_user.py   # CLI script integration tests
+│       └── test_student_profile.py      # Student profile integration tests
 └── frontend/
     ├── eslint.config.js       # ESLint 9 flat configuration
     ├── index.html             # HTML entry with typography and SEO metadata
@@ -64,13 +66,13 @@ university-internship-platform/
     ├── tsconfig.node.json     # Vite config TypeScript options
     ├── vite.config.ts         # Vite proxy configuration (/api -> :8001) and Vitest
     └── src/
-        ├── api/               # API clients (auth, health)
+        ├── api/               # API clients (auth, health, profile)
         ├── components/        # Layout (AppShell), RouteGuards, and UI library
         ├── config/            # Centralized navigation configuration
         ├── context/           # React AuthContext and AuthProvider
         ├── hooks/             # Custom hooks (useAuth, useHealth)
         ├── lib/               # Utility functions (cn helper)
-        ├── pages/             # Pages (Login, Register, Account, SystemStatusPage, NotFound)
+        ├── pages/             # Pages (Login, Register, Account, Profile, SystemStatusPage, NotFound)
         ├── types/             # Shared TypeScript types
         ├── App.tsx            # Application routing entry point
         └── main.tsx           # React DOM root
@@ -179,6 +181,10 @@ Backend URLs:
   - `POST /api/auth/login`
   - `POST /api/auth/logout`
   - `GET /api/auth/me`
+  - `GET /api/students/me` (student only)
+  - `PUT /api/students/me` (student only)
+  - `GET /api/organizations/me` (organization only)
+  - `PUT /api/organizations/me` (organization only)
   - `GET /api/health`
   - `GET /api/health/db`
 
@@ -202,8 +208,9 @@ npm run dev
 Frontend Routes:
 - Sign in: [http://localhost:5173/login](http://localhost:5173/login)
 - Register: [http://localhost:5173/register](http://localhost:5173/register)
-- Account Profile: [http://localhost:5173/account](http://localhost:5173/account)
-- System Status: [http://localhost:5173/](http://localhost:5173/) (Admin role only)
+- Profile: [http://localhost:5173/profile](http://localhost:5173/profile) (Student and Organization roles)
+- Account Summary: [http://localhost:5173/account](http://localhost:5173/account)
+- System Status: [http://localhost:5173/status](http://localhost:5173/status) (Admin role only)
 
 ---
 
@@ -264,13 +271,13 @@ npm run test
 
 ---
 
-## Phase 1 Definition of Done Verification
+## Phase 2 Definition of Done Verification
 
 | Criteria | Status | Details |
 | :--- | :---: | :--- |
-| **1. Lint &amp; format pass with 0 warnings** | PASS | Ruff check &amp; format pass; ESLint &amp; Prettier pass with 0 warnings |
-| **2. All tests pass** | PASS | Pytest (21/21 passed, 0 warnings); Vitest (22/22 passed) |
-| **3. No unused files, imports, or dependencies** | PASS | All modules, imports, and packages verified clean |
+| **1. Lint &amp; format pass with 0 warnings** | PASS | Ruff check &amp; format pass with 0 errors; ESLint &amp; Prettier pass with 0 warnings |
+| **2. All tests pass** | PASS | Pytest (38/38 passed against PostgreSQL); Vitest (31/31 passed) |
+| **3. No unused files, imports, or dependencies** | PASS | All modules, imports, and packages verified clean against project guide |
 | **4. Documentation is complete** | PASS | Updated README, docs/architecture.md, docs/database.md, and docs/design.md |
 | **5. Working tree is clean and committed** | PASS | Small, focused conventional commits across every step |
 | **6. Build verification** | PASS | Frontend production bundle builds cleanly (`tsc --noEmit && vite build`) |
