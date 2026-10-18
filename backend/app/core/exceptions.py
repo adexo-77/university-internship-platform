@@ -69,3 +69,25 @@ class ForbiddenException(AppException):
         code: str = "FORBIDDEN",
     ) -> None:
         super().__init__(message=message, code=code, status_code=403)
+
+
+class NotFoundException(AppException):
+    """Raised when a requested resource is not found."""
+
+    def __init__(
+        self,
+        message: str = "Resource not found",
+        code: str = "NOT_FOUND",
+    ) -> None:
+        super().__init__(message=message, code=code, status_code=404)
+
+
+class ConflictException(AppException):
+    """Raised when an action conflicts with the current resource state."""
+
+    def __init__(
+        self,
+        message: str = "Conflict with current state",
+        code: str = "CONFLICT",
+    ) -> None:
+        super().__init__(message=message, code=code, status_code=409)
