@@ -113,6 +113,7 @@ def test_assignment_creation_instructor_only_and_future_due(
     assert data["title"] == "Assignment 1"
     assert data["max_points"] == 100
     assert data["course_id"] == course.id
+    assert data["course_title"] == "Web Systems Architecture"
 
 
 def test_assignment_visibility_rules(real_db_client: TestClient, real_db_session: Session) -> None:
@@ -158,10 +159,13 @@ def test_assignment_visibility_rules(real_db_client: TestClient, real_db_session
     items = res.json()
     assert len(items) == 1
     assert items[0]["submission_status"] == "not_submitted"
+    assert items[0]["course_title"] == "Web Systems Architecture"
 
     res = real_db_client.get(f"/api/assignments/{assignment.id}")
     assert res.status_code == 200
-    assert res.json()["submission_status"] == "not_submitted"
+    detail = res.json()
+    assert detail["submission_status"] == "not_submitted"
+    assert detail["course_title"] == "Web Systems Architecture"
 
     # Admin -> 200
     _login(real_db_client, admin.email)

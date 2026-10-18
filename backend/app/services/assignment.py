@@ -63,7 +63,9 @@ def create_assignment(
     db.add(assignment)
     db.commit()
     db.refresh(assignment)
-    return AssignmentResponse.model_validate(assignment)
+    resp = AssignmentResponse.model_validate(assignment)
+    resp.course_title = course.title
+    return resp
 
 
 def get_course_assignments(
@@ -102,6 +104,7 @@ def get_course_assignments(
     responses: list[AssignmentResponse] = []
     for item in assignments:
         resp = AssignmentResponse.model_validate(item)
+        resp.course_title = course.title
         if current_user.role == UserRole.STUDENT:
             sub = submissions_map.get(item.id)
             if sub:
@@ -132,6 +135,7 @@ def get_assignment_by_id(
         raise NotFoundException(message="Assignment not found", code="ASSIGNMENT_NOT_FOUND")
 
     resp = AssignmentResponse.model_validate(assignment)
+    resp.course_title = course.title
     if current_user.role == UserRole.STUDENT:
         sub = db.scalar(
             select(Submission).where(
@@ -193,7 +197,9 @@ def update_assignment(
 
     db.commit()
     db.refresh(assignment)
-    return AssignmentResponse.model_validate(assignment)
+    resp = AssignmentResponse.model_validate(assignment)
+    resp.course_title = course.title
+    return resp
 
 
 def delete_assignment(

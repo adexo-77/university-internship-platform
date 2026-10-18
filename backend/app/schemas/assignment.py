@@ -62,3 +62,4 @@ class AssignmentResponse(BaseModel):
     submission_status: str | None = None
     is_late: bool | None = None
     grade: int | None = None
+    course_title: str | None = None

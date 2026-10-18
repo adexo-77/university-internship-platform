@@ -16,6 +16,7 @@ export interface Assignment {
   submission_status?: SubmissionStatus | null;
   is_late?: boolean | null;
   grade?: number | null;
+  course_title?: string | null;
 }
 
 export interface AssignmentCreatePayload {

@@ -104,7 +104,14 @@ export const AssignmentDetailPage: React.FC = () => {
           <>
             <PageHeader
               title={assignment.title}
-              description={`Course #${assignment.course_id}`}
+              description={
+                <Link
+                  to={`/courses/${assignment.course_id}`}
+                  className="text-petrol hover:underline font-medium"
+                >
+                  {assignment.course_title || `Course #${assignment.course_id}`}
+                </Link>
+              }
               actions={
                 <div className="flex items-center gap-3">
                   <Link
