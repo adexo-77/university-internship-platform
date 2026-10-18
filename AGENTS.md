@@ -37,7 +37,7 @@ university-internship-platform/
 │   ├── alembic/               # Database migration environment
 │   │   ├── versions/          # Alembic revision migration files
 │   │   │   ├── 6d7757d439a5_create_users_and_sessions_tables.py
-│   │   │   ├── d5196328fe27_create_student_and_organization_profiles.py
+│   │   │   ├── c9e18918b114_create_student_and_organization_.py
 │   │   │   └── f0197aea93a8_create_courses_and_enrollments_tables.py
 │   │   ├── env.py             # Migration harness wired to Base metadata
 │   │   └── script.py.mako     # Migration template
