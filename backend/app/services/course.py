@@ -12,21 +12,6 @@ from app.schemas.course import (
     CourseResponse,
     CourseUpdate,
 )
-from app.services.course_catalog import (
-    get_course_by_id,
-    get_instructor_courses,
-    get_student_courses,
-    list_courses,
-)
-
-__all__ = [
-    "create_course",
-    "get_course_by_id",
-    "get_instructor_courses",
-    "get_student_courses",
-    "list_courses",
-    "update_course",
-]
 
 
 def create_course(db: Session, instructor_id: int, payload: CourseCreate) -> CourseResponse:

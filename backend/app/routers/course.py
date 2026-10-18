@@ -13,6 +13,7 @@ from app.schemas.course import (
     CourseUpdate,
 )
 from app.services import course as course_service
+from app.services import course_catalog as course_catalog_service
 
 router = APIRouter(tags=["courses"])
 
@@ -54,7 +55,7 @@ def list_courses(
     db: Session = Depends(get_db),
 ) -> CourseListResponse:
     """List published courses (or all statuses for admin) with title search."""
-    return course_service.list_courses(
+    return course_catalog_service.list_courses(
         db=db,
         current_user=current_user,
         q=q,
@@ -74,7 +75,7 @@ def get_my_instructor_courses(
     db: Session = Depends(get_db),
 ) -> list[CourseResponse]:
     """Retrieve all courses owned by the authenticated instructor with student counts."""
-    return course_service.get_instructor_courses(
+    return course_catalog_service.get_instructor_courses(
         db=db,
         instructor_id=current_user.id,
     )
@@ -91,7 +92,7 @@ def get_my_student_courses(
     db: Session = Depends(get_db),
 ) -> list[CourseResponse]:
     """Retrieve all courses currently enrolled by the authenticated student."""
-    return course_service.get_student_courses(
+    return course_catalog_service.get_student_courses(
         db=db,
         student_id=current_user.id,
     )
@@ -109,7 +110,7 @@ def get_course_by_id(
     db: Session = Depends(get_db),
 ) -> CourseResponse:
     """Retrieve course details if published, owned by user, or requested by admin."""
-    return course_service.get_course_by_id(
+    return course_catalog_service.get_course_by_id(
         db=db,
         course_id=id,
         current_user=current_user,
