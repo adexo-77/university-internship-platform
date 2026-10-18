@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { getCourseById, updateCourse } from '../api/course';
 import { CourseForm, CourseFormData } from '../components/courses/CourseForm';
 import { AppShell } from '../components/layout/AppShell';
@@ -71,6 +71,14 @@ export const CourseEditPage: React.FC = () => {
         <PageHeader
           title="Edit course"
           description={course ? `Editing "${course.title}"` : 'Update course details and syllabus.'}
+          actions={
+            <Link
+              to={`/courses/${id}`}
+              className="inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-control border px-3 py-1.5 text-xs bg-surface text-ink border-line hover:bg-chalk"
+            >
+              Back to course
+            </Link>
+          }
         />
 
         {error && (

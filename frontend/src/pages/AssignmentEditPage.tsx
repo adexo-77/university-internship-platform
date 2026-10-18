@@ -50,12 +50,22 @@ export const AssignmentEditPage: React.FC = () => {
           title="Edit assignment"
           description={assignment ? `Editing ${assignment.title}` : 'Update assignment parameters.'}
           actions={
-            <Link
-              to={`/assignments/${numericId}`}
-              className="inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-control border px-3 py-1.5 text-xs bg-surface text-ink border-line hover:bg-chalk"
-            >
-              Cancel
-            </Link>
+            <div className="flex items-center gap-3">
+              {assignment?.course_id && (
+                <Link
+                  to={`/courses/${assignment.course_id}`}
+                  className="inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-control border px-3 py-1.5 text-xs bg-surface text-ink border-line hover:bg-chalk"
+                >
+                  Back to course
+                </Link>
+              )}
+              <Link
+                to={`/assignments/${numericId}`}
+                className="inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-control border px-3 py-1.5 text-xs bg-surface text-ink border-line hover:bg-chalk"
+              >
+                Cancel
+              </Link>
+            </div>
           }
         />
 
