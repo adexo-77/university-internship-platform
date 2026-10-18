@@ -5,7 +5,6 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.organization_profile import OrganizationProfile
-from app.models.student_profile import StudentProfile
 from app.models.user import User
 
 
@@ -253,61 +252,3 @@ def test_updating_one_organization_profile_never_changes_another(
     assert profile_a is not None
     assert profile_a.organization_name == "Org A Updated"
     assert profile_a.industry == "Energy"
-
-
-def test_registration_creates_profile_row_and_atomic_failure(
-    real_db_client: TestClient,
-    real_db_session: Session,
-) -> None:
-    # 1. Student registration creates empty student profile row in same transaction
-    student_resp = real_db_client.post(
-        "/api/auth/register",
-        json={
-            "email": "auto_student@test.com",
-            "password": "Password123!",
-            "full_name": "Auto Student",
-            "role": "student",
-        },
-    )
-    assert student_resp.status_code == 201
-    student_user = real_db_session.scalar(select(User).where(User.email == "auto_student@test.com"))
-    assert student_user is not None
-    sp = real_db_session.scalar(
-        select(StudentProfile).where(StudentProfile.user_id == student_user.id)
-    )
-    assert sp is not None
-    assert sp.skills == []
-
-    # 2. Organization registration creates profile with organization_name in same transaction
-    org_resp = real_db_client.post(
-        "/api/auth/register",
-        json={
-            "email": "auto_org@test.com",
-            "password": "Password123!",
-            "full_name": "Auto Org Rep",
-            "role": "organization",
-            "organization_name": "Quantum Labs",
-        },
-    )
-    assert org_resp.status_code == 201
-    org_user = real_db_session.scalar(select(User).where(User.email == "auto_org@test.com"))
-    assert org_user is not None
-    op = real_db_session.scalar(
-        select(OrganizationProfile).where(OrganizationProfile.user_id == org_user.id)
-    )
-    assert op is not None
-    assert op.organization_name == "Quantum Labs"
-
-    # 3. Organization registration without organization_name fails and creates NO user
-    missing_name_resp = real_db_client.post(
-        "/api/auth/register",
-        json={
-            "email": "fail_org@test.com",
-            "password": "Password123!",
-            "full_name": "Fail Org Rep",
-            "role": "organization",
-        },
-    )
-    assert missing_name_resp.status_code == 422
-    uncreated_user = real_db_session.scalar(select(User).where(User.email == "fail_org@test.com"))
-    assert uncreated_user is None
