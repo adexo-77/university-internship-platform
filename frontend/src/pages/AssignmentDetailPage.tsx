@@ -8,6 +8,7 @@ import {
 } from '../api/assignment';
 import { DueBadge } from '../components/assignments/DueBadge';
 import { SubmissionForm } from '../components/assignments/SubmissionForm';
+import { SubmissionStatusPanel } from '../components/assignments/SubmissionStatusPanel';
 import { SubmissionsTable } from '../components/assignments/SubmissionsTable';
 import { AppShell } from '../components/layout/AppShell';
 import { Badge } from '../components/ui/Badge';
@@ -153,6 +154,7 @@ export const AssignmentDetailPage: React.FC = () => {
             {isStudent && (
               <section className="space-y-4 pt-4 border-t border-line">
                 <h2 className="text-lg font-semibold text-ink">Your submission</h2>
+                <SubmissionStatusPanel submission={submission} maxPoints={assignment.max_points} />
                 <SubmissionForm
                   submission={submission}
                   maxPoints={assignment.max_points}

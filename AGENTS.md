@@ -136,6 +136,8 @@ university-internship-platform/
         │   │   ├── SubmissionForm.tsx
         │   │   ├── SubmissionForm.test.tsx
         │   │   ├── SubmissionStatusBadge.tsx
+        │   │   ├── SubmissionStatusPanel.tsx
+        │   │   ├── SubmissionStatusPanel.test.tsx
         │   │   ├── SubmissionsTable.tsx
         │   │   └── SubmissionsTable.test.tsx
         │   ├── courses/       # Course domain components
