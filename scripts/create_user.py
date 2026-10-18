@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """CLI administrative tool to create instructor and admin accounts."""
 
 import argparse

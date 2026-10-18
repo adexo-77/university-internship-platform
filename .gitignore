@@ -32,6 +32,10 @@ wheels/
 .installed.cfg
 *.egg
 
+# Scripts and automation
+!scripts/
+!scripts/*.py
+
 # Testing & Linting
 .pytest_cache/
 .ruff_cache/
