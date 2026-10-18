@@ -10,8 +10,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
 
 if TYPE_CHECKING:
+    from app.models.application import Application
     from app.models.course import Course
     from app.models.enrollment import Enrollment
+    from app.models.internship import Internship
     from app.models.organization_profile import OrganizationProfile
     from app.models.session import Session
     from app.models.student_profile import StudentProfile
@@ -99,4 +101,16 @@ class User(Base):
         "Submission",
         foreign_keys="Submission.graded_by",
         back_populates="grader",
+    )
+    internships: Mapped[list["Internship"]] = relationship(
+        "Internship",
+        back_populates="organization",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    applications: Mapped[list["Application"]] = relationship(
+        "Application",
+        back_populates="student",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )

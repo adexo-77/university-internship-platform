@@ -13,12 +13,16 @@ if str(BACKEND_DIR) not in sys.path:
 
 from app.core.config import settings
 from app.models import (  # noqa: F401
+    Application,
+    Assignment,
     Base,
     Course,
     Enrollment,
+    Internship,
     OrganizationProfile,
     Session,
     StudentProfile,
+    Submission,
     User,
 )
 
