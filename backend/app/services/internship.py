@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import ConflictException, ForbiddenException, NotFoundException
+from app.core.exceptions import ConflictException, NotFoundException
 from app.models.application import Application
 from app.models.internship import Internship, InternshipStatus
 from app.models.organization_profile import OrganizationProfile
@@ -20,6 +20,7 @@ from app.schemas.internship import (
 def _get_org_name(db: Session, org_id: int) -> str | None:
     return db.scalar(
         select(func.coalesce(OrganizationProfile.organization_name, User.full_name))
+        .select_from(User)
         .outerjoin(OrganizationProfile, User.id == OrganizationProfile.user_id)
         .where(User.id == org_id)
     )
@@ -95,9 +96,7 @@ def update_internship(
     if not p:
         raise NotFoundException(message="Internship posting not found", code="NOT_FOUND")
     if p.organization_id != current_user.id:
-        raise ForbiddenException(
-            message="Only the owning organization can update this posting", code="FORBIDDEN"
-        )
+        raise NotFoundException(message="Internship posting not found", code="NOT_FOUND")
     if p.status == InternshipStatus.CLOSED:
         raise ConflictException(
             message="A closed internship posting cannot be edited", code="POSTING_CLOSED"

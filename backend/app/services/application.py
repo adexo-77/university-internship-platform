@@ -22,6 +22,7 @@ from app.schemas.application import (
 def _get_org_name(db: Session, org_id: int) -> str | None:
     return db.scalar(
         select(func.coalesce(OrganizationProfile.organization_name, User.full_name))
+        .select_from(User)
         .outerjoin(OrganizationProfile, User.id == OrganizationProfile.user_id)
         .where(User.id == org_id)
     )
