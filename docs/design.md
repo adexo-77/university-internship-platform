@@ -81,5 +81,21 @@ All UI components are built in-house with zero external widget kits:
 - **Sentence Case**: Standard capitalisation for all headings, labels, buttons, and badges (e.g., "System status", "Check again", "Core API").
 - **Plain Verbs**: Clear, direct actions ("Save changes", "Check again") instead of vague marketing terms ("Submit", "Explore").
 - **Error Clarity**: Errors must explicitly explain **what went wrong** and **how to fix it**.
-- **Empty States**: Must clearly state **what to do next**.
 - **No Placeholder Copy**: No placeholder, invented, or phase text anywhere in the UI (e.g. no mock academic terms, fictional environments, or phase badges). Navigation exclusively displays routes that actually exist via `frontend/src/config/navigation.ts`.
+
+---
+
+## 7. Page Layouts &amp; Routing
+
+- **Public Authentication Pages (`/login`, `/register`)**:
+  - Plain centered form on `bg-chalk` page background with a single card (`bg-surface`, 1px border `border-line`, rounded `rounded-control`).
+  - No sidebar, navigation links, or decorative heroes.
+  - Direct, sentence-case headings and plain actionable error notices.
+  - Submit buttons display active progress states (`Signing in...`, `Creating account...`) and prevent double submission.
+- **Authenticated Application Shell (`AppShell`)**:
+  - Left navigation sidebar dynamically filtered according to the active user's role (`roles` configuration in `src/config/navigation.ts`).
+  - Top header displays the active page title, current user's full name, role badge, and a quiet `Log out` action.
+- **Route Authorization Guards**:
+  - `ProtectedRoute`: Seamlessly redirects unauthenticated requests to `/login` preserving intended destination state.
+  - `RoleRoute`: Renders an accessible, plain-language access restriction view with a direct navigation action back to `/account`.
+

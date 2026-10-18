@@ -1,8 +1,8 @@
-# University Learning &amp; Internship Platform &bull; Phase 0 Foundation
+# University Learning &amp; Internship Platform &bull; Phase 1 Authentication &amp; Roles
 
 A production-grade, modular web platform designed for university student learning tracking, skill assessment, and internship placement matching. Built for the Brolf Tech internship technical challenge with a strict **MVP first, one phase at a time** methodology.
 
-> **Phase 0 Status**: Foundation &amp; Tooling only. Zero business features, no domain users, no courses. Strict type safety, clean code standards, proxy verification, and test suites.
+> **Phase 1 Status**: Authentication and role-based access control fully operational. Models and migrations for users and sessions, stdlib `scrypt` hashing, constant-time authentication timing defense, HttpOnly cookies, client route guards, and admin CLI tools.
 
 ---
 
@@ -11,8 +11,8 @@ A production-grade, modular web platform designed for university student learnin
 | Layer | Technologies |
 | :--- | :--- |
 | **Backend** | Python 3.12+ / 3.14+, FastAPI, SQLAlchemy 2, PostgreSQL (via `psycopg` 3), Alembic, Pydantic v2 |
-| **Frontend** | React 18, Vite (with dev proxy to backend at port 8001), TypeScript (strict, no `any`), Tailwind CSS, Lucide React |
-| **Testing** | Pytest + FastAPI `TestClient` (backend), Vitest + React Testing Library (frontend) |
+| **Frontend** | React 18, React Router 6/7, Vite (proxy to backend :8001), TypeScript (strict, no `any`), Tailwind CSS, Lucide React |
+| **Testing** | Pytest + FastAPI `TestClient` (backend: 21 tests), Vitest + React Testing Library (frontend: 22 tests) |
 | **Tooling &amp; Quality** | Ruff (backend lint &amp; format), ESLint 9 + Prettier (frontend lint &amp; format) |
 | **Environment** | Windows PowerShell compatible, Unix LF line endings, no hardcoded Windows paths |
 
@@ -29,7 +29,11 @@ university-internship-platform/
 ├── AGENTS.md                  # Project constitution & strict architectural guidelines
 ├── README.md                  # Setup instructions and PowerShell commands
 ├── docs/
-│   └── architecture.md        # Phase 0 architecture and proxy topology
+│   ├── architecture.md        # Architecture, topology, and endpoint contracts
+│   ├── database.md            # Mermaid ER diagram and schema specifications
+│   └── design.md              # Design tokens, components, and layout guidelines
+├── scripts/
+│   └── create_user.py         # CLI administrative user provisioning tool
 ├── backend/
 │   ├── alembic/               # Database migration environment
 │   │   ├── versions/          # Migration revision scripts
@@ -39,15 +43,17 @@ university-internship-platform/
 │   ├── requirements.txt       # Production dependencies
 │   ├── requirements-dev.txt   # Development and testing dependencies (pytest, ruff, httpx)
 │   ├── app/
-│   │   ├── core/              # Settings, database engine, exceptions
-│   │   ├── models/            # SQLAlchemy 2 declarative Base
-│   │   ├── schemas/           # Pydantic schemas (Health, Error)
+│   │   ├── core/              # Settings, database engine, security helpers, deps
+│   │   ├── models/            # SQLAlchemy 2 declarative models (User, Session)
+│   │   ├── schemas/           # Pydantic schemas (Auth, Health, Errors)
 │   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only)
-│   │   ├── services/          # Pure business logic and database queries
+│   │   ├── services/          # Pure business logic and domain rules
 │   │   └── main.py            # FastAPI entry point & CORS
 │   └── tests/
 │       ├── conftest.py        # Pytest fixtures and database test harnesses
-│       └── test_health.py     # System & DB health test suite
+│       ├── test_auth.py       # Authentication, security, and role tests
+│       ├── test_health.py     # System & DB health test suite
+│       └── test_script_create_user.py # CLI script integration tests
 └── frontend/
     ├── eslint.config.js       # ESLint 9 flat configuration
     ├── index.html             # HTML entry with typography and SEO metadata
@@ -58,13 +64,15 @@ university-internship-platform/
     ├── tsconfig.node.json     # Vite config TypeScript options
     ├── vite.config.ts         # Vite proxy configuration (/api -> :8001) and Vitest
     └── src/
-        ├── api/               # API clients (fetchHealth, fetchDatabaseHealth)
-        ├── components/        # HealthCheck card with rich status indicators
-        ├── hooks/             # Custom hooks (useHealth)
+        ├── api/               # API clients (auth, health)
+        ├── components/        # Layout (AppShell), RouteGuards, and UI library
+        ├── config/            # Centralized navigation configuration
+        ├── context/           # React AuthContext and AuthProvider
+        ├── hooks/             # Custom hooks (useAuth, useHealth)
         ├── lib/               # Utility functions (cn helper)
-        ├── pages/             # HomePage presentation view
+        ├── pages/             # Pages (Login, Register, Account, HomePage, NotFound)
         ├── types/             # Shared TypeScript types
-        ├── App.tsx            # Root application component
+        ├── App.tsx            # Application routing entry point
         └── main.tsx           # React DOM root
 ```
 
@@ -92,9 +100,7 @@ From the repository root:
 Copy-Item .env.example .env
 ```
 
-> **Important**: `DATABASE_URL` and `TEST_DATABASE_URL` are strictly required settings with **no hard-coded defaults**. If `.env` is missing or either variable is unset, application startup and tests will fail immediately with a clear error message instructing you to copy `.env.example` to `.env`.
->
-> Review `.env` to verify your PostgreSQL credentials (default: `postgres:postgres@localhost:5432/university_platform` and `university_platform_test`).
+> **Important**: `DATABASE_URL` and `TEST_DATABASE_URL` are strictly required settings with **no hard-coded defaults**. Review `.env` to verify your PostgreSQL credentials before starting servers or running tests.
 
 ---
 
@@ -112,7 +118,36 @@ psql -U postgres -c "CREATE DATABASE university_platform_test;"
 
 ---
 
-### 3. Backend Setup &amp; Run (Port 8001)
+### 3. Database Migrations (Alembic)
+
+Run database migrations to initialize or update the schema:
+
+```powershell
+Set-Location backend
+
+# Run migrations to the latest revision
+.\.venv\Scripts\alembic.exe upgrade head
+```
+
+---
+
+### 4. Administrative User Provisioning (`scripts/create_user.py`)
+
+Create instructor or admin accounts directly from the command line:
+
+```powershell
+# From project root (using the backend venv python)
+.\backend\.venv\Scripts\python.exe scripts/create_user.py --email admin@university.edu --name "Platform Administrator" --role admin
+
+# Create an instructor
+.\backend\.venv\Scripts\python.exe scripts/create_user.py --email instructor@university.edu --name "Dr. Alan Turing" --role instructor
+```
+
+> **Security Note**: Password entry uses Python's standard `getpass` module. Passwords are never passed as CLI arguments, stored in shell history, or printed to terminal logs. Running the command again with an existing email prevents duplicates.
+
+---
+
+### 5. Backend Setup &amp; Run (Port 8001)
 
 ```powershell
 # Navigate to backend directory
@@ -129,7 +164,7 @@ pip install --upgrade pip
 pip install -r requirements.txt       # Production dependencies
 pip install -r requirements-dev.txt   # Development & testing tools (ruff, pytest, httpx)
 
-# Run database migrations with Alembic
+# Run database migrations
 .\.venv\Scripts\alembic.exe upgrade head
 
 # Start the FastAPI server on port 8001
@@ -138,13 +173,18 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8001 --reload
 
 Backend URLs:
 - API Root: [http://localhost:8001](http://localhost:8001)
-- Health Check: [http://localhost:8001/api/health](http://localhost:8001/api/health)
-- Database Check: [http://localhost:8001/api/health/db](http://localhost:8001/api/health/db)
 - Interactive OpenAPI Docs: [http://localhost:8001/docs](http://localhost:8001/docs)
+- Endpoints:
+  - `POST /api/auth/register` (student, organization)
+  - `POST /api/auth/login`
+  - `POST /api/auth/logout`
+  - `GET /api/auth/me`
+  - `GET /api/health`
+  - `GET /api/health/db`
 
 ---
 
-### 4. Frontend Setup &amp; Run (Port 5173)
+### 6. Frontend Setup &amp; Run (Port 5173)
 
 Open a second PowerShell window:
 
@@ -159,13 +199,15 @@ npm install
 npm run dev
 ```
 
-Frontend URL:
-- [http://localhost:5173](http://localhost:5173)
-- API requests through Vite dev proxy: `http://localhost:5173/api/health` forwards directly to `http://localhost:8001/api/health`.
+Frontend Routes:
+- Sign in: [http://localhost:5173/login](http://localhost:5173/login)
+- Register: [http://localhost:5173/register](http://localhost:5173/register)
+- Account Profile: [http://localhost:5173/account](http://localhost:5173/account)
+- System Status: [http://localhost:5173/](http://localhost:5173/) (Admin role only)
 
 ---
 
-### 5. Linting &amp; Formatting Commands
+### 7. Linting &amp; Formatting Commands
 
 #### Backend (Ruff)
 
@@ -200,11 +242,9 @@ npm run format
 
 ---
 
-### 6. Automated Testing Commands
+### 8. Automated Testing Commands
 
 #### Backend Tests (Pytest)
-
-> **Note**: Backend tests require `.env` at the project root or the `TEST_DATABASE_URL` environment variable to run the real database test suite. Ensure `university_platform_test` database exists.
 
 ```powershell
 Set-Location backend
@@ -224,13 +264,13 @@ npm run test
 
 ---
 
-## Phase 0 Definition of Done Verification
+## Phase 1 Definition of Done Verification
 
 | Criteria | Status | Details |
 | :--- | :---: | :--- |
 | **1. Lint &amp; format pass with 0 warnings** | PASS | Ruff check &amp; format pass; ESLint &amp; Prettier pass with 0 warnings |
-| **2. All tests pass** | PASS | Pytest (5/5 passed, 0 warnings); Vitest (2/2 passed) |
+| **2. All tests pass** | PASS | Pytest (21/21 passed, 0 warnings); Vitest (22/22 passed) |
 | **3. No unused files, imports, or dependencies** | PASS | All modules, imports, and packages verified clean |
-| **4. README and docs are updated** | PASS | Full PowerShell guide, AGENTS.md, and docs/architecture.md created |
-| **5. Working tree is clean and committed** | PASS | Small, focused conventional commits across all changes |
-| **6. Verified both servers start** | PASS | FastAPI on 8001 and Vite on 5173 verified via proxy HTTP requests |
+| **4. Documentation is complete** | PASS | Updated README, docs/architecture.md, docs/database.md, and docs/design.md |
+| **5. Working tree is clean and committed** | PASS | Small, focused conventional commits across every step |
+| **6. Build verification** | PASS | Frontend production bundle builds cleanly (`tsc --noEmit && vite build`) |
