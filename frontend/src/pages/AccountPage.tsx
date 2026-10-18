@@ -41,11 +41,6 @@ export const AccountPage: React.FC = () => {
         </Badge>
       ),
     },
-    {
-      key: 'id',
-      field: 'Account ID',
-      value: <span className="tabular-nums text-pencil text-xs">#{user.id}</span>,
-    },
   ];
 
   const columns: Column<AccountFieldRow>[] = [

@@ -13,10 +13,12 @@ export const RegisterPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<PublicRegisterRole>('student');
+  const [organizationName, setOrganizationName] = useState('');
   const [fieldErrors, setFieldErrors] = useState<{
     fullName?: string;
     email?: string;
     password?: string;
+    organizationName?: string;
   }>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,7 +28,12 @@ export const RegisterPage: React.FC = () => {
   }
 
   const validate = (): boolean => {
-    const errors: { fullName?: string; email?: string; password?: string } = {};
+    const errors: {
+      fullName?: string;
+      email?: string;
+      password?: string;
+      organizationName?: string;
+    } = {};
 
     if (!fullName.trim()) {
       errors.fullName = 'Full name is required.';
@@ -45,6 +52,10 @@ export const RegisterPage: React.FC = () => {
       errors.password = 'Password must be at least 8 characters long.';
     } else if (password.length > 128) {
       errors.password = 'Password cannot exceed 128 characters.';
+    }
+
+    if (role === 'organization' && !organizationName.trim()) {
+      errors.organizationName = 'Organization name is required.';
     }
 
     setFieldErrors(errors);
@@ -66,6 +77,7 @@ export const RegisterPage: React.FC = () => {
         email: email.trim(),
         password,
         role,
+        organization_name: role === 'organization' ? organizationName.trim() : undefined,
       });
       navigate('/account', { replace: true });
     } catch (err) {
@@ -144,6 +156,18 @@ export const RegisterPage: React.FC = () => {
               { value: 'organization', label: 'Organization' },
             ]}
           />
+
+          {role === 'organization' && (
+            <TextField
+              id="register-orgname"
+              label="Organization name"
+              type="text"
+              value={organizationName}
+              onChange={(e) => setOrganizationName(e.target.value)}
+              error={fieldErrors.organizationName}
+              required
+            />
+          )}
 
           <div className="pt-2">
             <Button

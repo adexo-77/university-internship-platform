@@ -1,4 +1,4 @@
-import { Activity, User as UserIcon, type LucideIcon } from 'lucide-react';
+import { Activity, Contact, User as UserIcon, type LucideIcon } from 'lucide-react';
 import { UserRole } from '../types/auth';
 
 export interface NavItem {
@@ -14,6 +14,12 @@ export interface NavItem {
  * Each phase adds items here — no hard-coded items elsewhere.
  */
 export const navigationItems: NavItem[] = [
+  {
+    path: '/profile',
+    label: 'Profile',
+    icon: Contact,
+    roles: ['student', 'organization'],
+  },
   {
     path: '/account',
     label: 'Account',

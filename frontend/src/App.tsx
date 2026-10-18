@@ -8,6 +8,7 @@ import { useAuth } from './hooks/useAuth';
 import { AccountPage } from './pages/AccountPage';
 import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { RegisterPage } from './pages/RegisterPage';
 import { SystemStatusPage } from './pages/SystemStatusPage';
 
@@ -38,6 +39,11 @@ export const AppRoutes: React.FC = () => {
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/account" element={<AccountPage />} />
+
+        {/* Profile: student and organization roles only */}
+        <Route element={<RoleRoute allowedRoles={['student', 'organization']} />}>
+          <Route path="/profile" element={<ProfilePage />} />
+        </Route>
 
         {/* System status: admin role only */}
         <Route element={<RoleRoute allowedRoles={['admin']} />}>

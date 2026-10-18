@@ -29,6 +29,7 @@ export interface RegisterPayload {
   password: string;
   full_name: string;
   role: PublicRegisterRole;
+  organization_name?: string;
 }
 
 /**

@@ -29,7 +29,37 @@ describe('RegisterPage Component', () => {
     ).toBeInTheDocument();
   });
 
-  it('submits valid registration and redirects to /account', async () => {
+  it('shows required organization name field when Organization role is chosen and validates it', async () => {
+    render(
+      <MemoryRouter initialEntries={['/register']}>
+        <AuthProvider initialUser={null}>
+          <RegisterPage />
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    // Initially role is student, organization name field is not present
+    expect(screen.queryByLabelText('Organization name')).not.toBeInTheDocument();
+
+    // Select Organization role
+    fireEvent.change(screen.getByLabelText('Account role'), {
+      target: { value: 'organization' },
+    });
+
+    // Organization name field is now displayed
+    expect(screen.getByLabelText('Organization name')).toBeInTheDocument();
+
+    // Attempt submission without organization name
+    fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Jane Doe' } });
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'jane@example.com' } });
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'Password123!' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+
+    expect(await screen.findByText('Organization name is required.')).toBeInTheDocument();
+  });
+
+  it('submits valid organization registration with organization name and redirects to /account', async () => {
     vi.spyOn(globalThis, 'fetch').mockImplementation((input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString();
       if (url.includes('/api/auth/register')) {
@@ -70,6 +100,10 @@ describe('RegisterPage Component', () => {
     fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'Password123!' } });
     fireEvent.change(screen.getByLabelText('Account role'), {
       target: { value: 'organization' },
+    });
+
+    fireEvent.change(screen.getByLabelText('Organization name'), {
+      target: { value: 'Acme Corp' },
     });
 
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
