@@ -55,7 +55,9 @@ university-internship-platform/
 │   │   └── main.py            # FastAPI entry point & CORS
 │   └── tests/
 │       ├── conftest.py        # Pytest fixtures and database test harnesses
-│       ├── test_assignment.py # Assignment lifecycle, access control, grade floor, and deletion tests
+│       ├── factories.py       # Test data factories and authentication helpers
+│       ├── test_assignment_create.py # Assignment creation and visibility tests
+│       ├── test_assignment_lifecycle.py # Assignment grade floor and deletion guard tests
 │       ├── test_auth_login.py # Auth login tests
 │       ├── test_auth_register.py # Auth registration tests
 │       ├── test_auth_session.py  # Session lifecycle & role guard tests
@@ -64,7 +66,8 @@ university-internship-platform/
 │       ├── test_course_visibility.py # Course visibility, catalog search, and pagination tests
 │       ├── test_enrollment.py # Enrollment, roster inspection, and cascade delete tests
 │       ├── test_health.py     # System & DB health test suite
-│       ├── test_organization_profile.py # Organization profile integration tests
+│       ├── test_organization_profile_access.py # Organization profile access & guards tests
+│       ├── test_organization_profile_update.py # Organization profile update & validation tests
 │       ├── test_script_create_user.py   # CLI script integration tests
 │       ├── test_student_profile.py      # Student profile integration tests
 │       ├── test_submission_grading.py   # Submissions roster, grading and regrading tests

@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.models.user import UserRole
-from tests.conftest import create_test_user, login_test_user
+from tests.factories import create_test_user, login_test_user
 
 
 def test_course_creation_instructor_only(

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models.course import Course, CourseStatus
 from app.models.user import UserRole
-from tests.conftest import create_test_user, login_test_user
+from tests.factories import create_test_user, login_test_user
 
 
 def test_course_update_and_status_transition_rules(

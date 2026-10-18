@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.models.enrollment import Enrollment
 from app.models.user import UserRole
-from tests.conftest import create_test_user, login_test_user, seed_course_and_assignment
+from tests.factories import create_test_user, login_test_user, seed_course_and_assignment
 
 
 def test_submission_lifecycle_and_late_calculation(
