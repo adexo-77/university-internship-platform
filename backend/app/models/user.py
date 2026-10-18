@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from app.models.organization_profile import OrganizationProfile
     from app.models.session import Session
     from app.models.student_profile import StudentProfile
+    from app.models.submission import Submission
 
 
 class UserRole(enum.StrEnum):
@@ -86,4 +87,16 @@ class User(Base):
         back_populates="student",
         cascade="all, delete-orphan",
         passive_deletes=True,
+    )
+    submissions: Mapped[list["Submission"]] = relationship(
+        "Submission",
+        foreign_keys="Submission.student_id",
+        back_populates="student",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    graded_submissions: Mapped[list["Submission"]] = relationship(
+        "Submission",
+        foreign_keys="Submission.graded_by",
+        back_populates="grader",
     )
