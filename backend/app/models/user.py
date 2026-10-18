@@ -10,6 +10,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
 
 if TYPE_CHECKING:
+    from app.models.course import Course
+    from app.models.enrollment import Enrollment
     from app.models.organization_profile import OrganizationProfile
     from app.models.session import Session
     from app.models.student_profile import StudentProfile
@@ -70,6 +72,18 @@ class User(Base):
         "OrganizationProfile",
         back_populates="user",
         uselist=False,
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    courses: Mapped[list["Course"]] = relationship(
+        "Course",
+        back_populates="instructor",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    enrollments: Mapped[list["Enrollment"]] = relationship(
+        "Enrollment",
+        back_populates="student",
         cascade="all, delete-orphan",
         passive_deletes=True,
     )

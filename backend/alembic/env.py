@@ -12,7 +12,15 @@ if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
 from app.core.config import settings
-from app.models import Base, OrganizationProfile, Session, StudentProfile, User  # noqa: F401
+from app.models import (  # noqa: F401
+    Base,
+    Course,
+    Enrollment,
+    OrganizationProfile,
+    Session,
+    StudentProfile,
+    User,
+)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
