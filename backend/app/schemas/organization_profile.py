@@ -5,6 +5,8 @@ from urllib.parse import urlsplit
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.models.organization_profile import ApprovalStatus
+
 
 class OrganizationProfileUpdateRequest(BaseModel):
     """Schema for updating organization profile details."""
@@ -98,6 +100,8 @@ class OrganizationProfileResponse(BaseModel):
     location: str | None = None
     website: str | None = None
     description: str | None = None
+    approval_status: ApprovalStatus = ApprovalStatus.PENDING
+    approval_note: str | None = None
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True, frozen=True)

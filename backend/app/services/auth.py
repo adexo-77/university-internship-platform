@@ -18,11 +18,11 @@ from app.core.security import (
     verify_dummy_password,
     verify_password,
 )
-from app.models.organization_profile import OrganizationProfile
+from app.models.organization_profile import ApprovalStatus, OrganizationProfile
 from app.models.session import Session as SessionModel
 from app.models.student_profile import StudentProfile
 from app.models.user import User, UserRole
-from app.schemas.auth import LoginRequest, RegisterRequest
+from app.schemas.auth import ChangePasswordRequest, LoginRequest, RegisterRequest
 
 
 class AuthService:
@@ -70,6 +70,7 @@ class AuthService:
                 org_profile = OrganizationProfile(
                     user_id=user.id,
                     organization_name=org_name,
+                    approval_status=ApprovalStatus.PENDING,
                 )
                 db.add(org_profile)
 
@@ -164,3 +165,37 @@ class AuthService:
             return None
 
         return session_record.user
+
+    @staticmethod
+    def change_password(
+        db: Session,
+        user: User,
+        current_token: str | None,
+        request: ChangePasswordRequest,
+    ) -> None:
+        """Change authenticated user password, invalidate all other sessions, and keep current."""
+        if not verify_password(request.current_password, user.password_hash):
+            verify_dummy_password(request.current_password)
+            raise InvalidCredentialsException()
+
+        if verify_password(request.new_password, user.password_hash):
+            raise AppException(
+                message="New password must be different from current password.",
+                code="SAME_PASSWORD",
+                status_code=422,
+            )
+
+        user.password_hash = hash_password(request.new_password)
+
+        if current_token:
+            current_token_hash = hash_session_token(current_token)
+            db.execute(
+                delete(SessionModel).where(
+                    SessionModel.user_id == user.id,
+                    SessionModel.token_hash != current_token_hash,
+                )
+            )
+        else:
+            db.execute(delete(SessionModel).where(SessionModel.user_id == user.id))
+
+        db.commit()

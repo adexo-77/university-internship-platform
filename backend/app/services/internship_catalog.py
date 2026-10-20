@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import ForbiddenException, NotFoundException
 from app.models.application import Application
 from app.models.internship import Internship, InternshipStatus, InternshipWorkMode
-from app.models.organization_profile import OrganizationProfile
+from app.models.organization_profile import ApprovalStatus, OrganizationProfile
 from app.models.user import User, UserRole
 from app.schemas.internship import (
     InternshipListResponse,
@@ -88,8 +88,13 @@ def list_internships(
     )
 
     if current_user.role == UserRole.STUDENT:
-        stmt = stmt.where(Internship.status == InternshipStatus.OPEN)
-        count_stmt = count_stmt.where(Internship.status == InternshipStatus.OPEN)
+        student_filter = (
+            Internship.status == InternshipStatus.OPEN,
+            User.is_active.is_(True),
+            OrganizationProfile.approval_status == ApprovalStatus.APPROVED,
+        )
+        stmt = stmt.where(*student_filter)
+        count_stmt = count_stmt.where(*student_filter)
 
     if work_mode is not None:
         stmt = stmt.where(Internship.work_mode == work_mode)
@@ -143,8 +148,19 @@ def get_internship_by_id(db: Session, internship_id: int, current_user: User) ->
     is_owner = p.organization_id == current_user.id
     is_admin = current_user.role == UserRole.ADMIN
     if current_user.role == UserRole.STUDENT:
-        if p.status != InternshipStatus.OPEN:
+        org_user = db.scalar(select(User).where(User.id == p.organization_id))
+        org_prof = db.scalar(
+            select(OrganizationProfile).where(OrganizationProfile.user_id == p.organization_id)
+        )
+        if (
+            p.status != InternshipStatus.OPEN
+            or not org_user
+            or not org_user.is_active
+            or not org_prof
+            or org_prof.approval_status != ApprovalStatus.APPROVED
+        ):
             raise NotFoundException(message="Internship posting not found", code="NOT_FOUND")
+
     elif current_user.role == UserRole.ORGANIZATION:
         if not is_owner:
             raise NotFoundException(message="Internship posting not found", code="NOT_FOUND")

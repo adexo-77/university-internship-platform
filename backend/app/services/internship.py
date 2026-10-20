@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import ConflictException, NotFoundException
 from app.models.application import Application
 from app.models.internship import Internship, InternshipStatus
-from app.models.organization_profile import OrganizationProfile
+from app.models.organization_profile import ApprovalStatus, OrganizationProfile
 from app.models.user import User
 from app.schemas.internship import (
     InternshipCreate,
@@ -112,6 +112,17 @@ def update_internship(
                 message=f"Invalid status transition from {p.status} to {payload.status}",
                 code="INVALID_STATUS_TRANSITION",
             )
+
+        if p.status == InternshipStatus.DRAFT and payload.status == InternshipStatus.OPEN:
+            org_profile = db.scalar(
+                select(OrganizationProfile).where(OrganizationProfile.user_id == p.organization_id)
+            )
+            if not org_profile or org_profile.approval_status != ApprovalStatus.APPROVED:
+                raise ConflictException(
+                    message="Your organization must be approved before you can publish internships",
+                    code="ORGANIZATION_NOT_APPROVED",
+                )
+
         p.status = payload.status
 
     for field in (

@@ -103,3 +103,24 @@ class UserResponse(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True, frozen=True)
+
+
+class ChangePasswordRequest(BaseModel):
+    """Schema for authenticated password change."""
+
+    current_password: str = Field(..., min_length=1, description="Current account password")
+    new_password: str = Field(
+        ...,
+        min_length=8,
+        max_length=128,
+        description="New account password between 8 and 128 characters",
+    )
+
+    model_config = ConfigDict(extra="forbid")
+
+    @model_validator(mode="after")
+    def validate_new_differs_from_current(self) -> "ChangePasswordRequest":
+        """Enforce new password is different from current password."""
+        if self.current_password == self.new_password:
+            raise ValueError("New password must be different from current password.")
+        return self
