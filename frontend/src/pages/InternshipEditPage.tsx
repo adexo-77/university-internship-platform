@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getInternshipById, updateInternship } from '../api/internship';
+import { getOrganizationProfile } from '../api/profile';
 import { InternshipForm, InternshipFormData } from '../components/internships/InternshipForm';
+import { OrganizationApprovalNotice } from '../components/internships/OrganizationApprovalNotice';
 import { AppShell } from '../components/layout/AppShell';
 import { ErrorMessage, PageHeader } from '../components/ui';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Internship } from '../types/internship';
+import { OrganizationProfile } from '../types/profile';
 
 export const InternshipEditPage: React.FC = () => {
   usePageTitle('Edit internship');
@@ -14,6 +17,7 @@ export const InternshipEditPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [internship, setInternship] = useState<Internship | null>(null);
+  const [profile, setProfile] = useState<OrganizationProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,8 +25,9 @@ export const InternshipEditPage: React.FC = () => {
   useEffect(() => {
     if (!postingId) return;
     setLoading(true);
-    getInternshipById(postingId)
-      .then((data) => {
+    Promise.all([getInternshipById(postingId), getOrganizationProfile().catch(() => null)])
+      .then(([data, prof]) => {
+        setProfile(prof);
         if (data.status === 'closed') {
           setError('A closed internship posting cannot be edited.');
         } else {
@@ -77,6 +82,8 @@ export const InternshipEditPage: React.FC = () => {
             description="Update the details of your internship posting."
           />
         </div>
+
+        <OrganizationApprovalNotice profile={profile} />
 
         {error && !internship ? (
           <ErrorMessage

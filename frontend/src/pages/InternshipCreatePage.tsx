@@ -1,16 +1,26 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createInternship } from '../api/internship';
+import { getOrganizationProfile } from '../api/profile';
 import { InternshipForm, InternshipFormData } from '../components/internships/InternshipForm';
+import { OrganizationApprovalNotice } from '../components/internships/OrganizationApprovalNotice';
 import { AppShell } from '../components/layout/AppShell';
 import { PageHeader } from '../components/ui';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { OrganizationProfile } from '../types/profile';
 
 export const InternshipCreatePage: React.FC = () => {
   usePageTitle('New internship');
   const navigate = useNavigate();
+  const [profile, setProfile] = useState<OrganizationProfile | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getOrganizationProfile()
+      .then((data) => setProfile(data))
+      .catch(() => null);
+  }, []);
 
   const handleSubmit = async (data: InternshipFormData) => {
     setSubmitting(true);
@@ -44,6 +54,8 @@ export const InternshipCreatePage: React.FC = () => {
             description="Create an internship posting in draft status."
           />
         </div>
+
+        <OrganizationApprovalNotice profile={profile} />
 
         <InternshipForm
           onSubmit={handleSubmit}

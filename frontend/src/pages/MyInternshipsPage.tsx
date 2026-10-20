@@ -1,16 +1,20 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getOrganizationInternships, updateInternship } from '../api/internship';
+import { getOrganizationProfile } from '../api/profile';
 import { InternshipTable } from '../components/internships/InternshipTable';
+import { OrganizationApprovalNotice } from '../components/internships/OrganizationApprovalNotice';
 import { AppShell } from '../components/layout/AppShell';
 import { Button, ErrorMessage, PageHeader } from '../components/ui';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Internship } from '../types/internship';
+import { OrganizationProfile } from '../types/profile';
 
 export const MyInternshipsPage: React.FC = () => {
   usePageTitle('My internships');
   const navigate = useNavigate();
   const [internships, setInternships] = useState<Internship[]>([]);
+  const [profile, setProfile] = useState<OrganizationProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,8 +22,12 @@ export const MyInternshipsPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getOrganizationInternships();
+      const [data, prof] = await Promise.all([
+        getOrganizationInternships(),
+        getOrganizationProfile().catch(() => null),
+      ]);
       setInternships(data);
+      setProfile(prof);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -68,6 +76,8 @@ export const MyInternshipsPage: React.FC = () => {
           </Button>
         </div>
 
+        <OrganizationApprovalNotice profile={profile} />
+
         {error && (
           <ErrorMessage whatHappened={error} howToFix="Please try again or refresh the page." />
         )}
@@ -84,7 +94,19 @@ export const MyInternshipsPage: React.FC = () => {
             actionRenderer={(item) => (
               <div className="flex items-center gap-2">
                 {item.status === 'draft' && (
-                  <Button type="button" variant="quiet" onClick={() => handlePublish(item.id)}>
+                  <Button
+                    type="button"
+                    variant="quiet"
+                    disabled={profile?.approval_status !== 'approved'}
+                    title={
+                      profile?.approval_status !== 'approved'
+                        ? profile?.approval_status === 'rejected'
+                          ? (profile.approval_note ?? 'Your organization application was rejected.')
+                          : 'Your organization is awaiting approval. You can prepare drafts, but you cannot publish until an admin approves you.'
+                        : undefined
+                    }
+                    onClick={() => handlePublish(item.id)}
+                  >
                     Publish
                   </Button>
                 )}

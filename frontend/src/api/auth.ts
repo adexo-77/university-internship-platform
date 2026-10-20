@@ -1,4 +1,4 @@
-import { LoginPayload, RegisterPayload, User } from '../types/auth';
+import { ChangePasswordPayload, LoginPayload, RegisterPayload, User } from '../types/auth';
 
 /**
  * Custom error thrown by authentication API calls with HTTP status and machine code.
@@ -112,4 +112,23 @@ export async function getCurrentUser(): Promise<User> {
   }
 
   return (await response.json()) as User;
+}
+
+/**
+ * Change authenticated user's password.
+ */
+export async function changePassword(payload: ChangePasswordPayload): Promise<void> {
+  const response = await fetch('/api/auth/change-password', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    await handleResponseError(response);
+  }
 }

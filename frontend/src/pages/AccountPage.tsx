@@ -1,4 +1,4 @@
-import React from 'react';
+import { ChangePasswordForm } from '../components/account/ChangePasswordForm';
 import { AppShell } from '../components/layout/AppShell';
 import { Badge, Column, DataTable, PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
@@ -71,6 +71,14 @@ export const AccountPage: React.FC = () => {
             <h2 className="text-base font-semibold text-ink">Account details</h2>
           </div>
           <DataTable columns={columns} data={rows} keyExtractor={(item) => item.key} />
+        </div>
+
+        <div className="space-y-4 pt-4 border-t border-line">
+          <h2 className="text-base font-semibold text-ink">Change password</h2>
+          <p className="text-sm text-pencil">
+            Update your account password. You will remain logged in on this device.
+          </p>
+          <ChangePasswordForm />
         </div>
       </div>
     </AppShell>

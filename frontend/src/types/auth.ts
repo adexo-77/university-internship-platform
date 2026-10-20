@@ -41,6 +41,14 @@ export interface LoginPayload {
 }
 
 /**
+ * Payload for changing password.
+ */
+export interface ChangePasswordPayload {
+  current_password: string;
+  new_password: string;
+}
+
+/**
  * Standard API error format returned by backend.
  */
 export interface ApiErrorResponse {

@@ -21,6 +21,8 @@ export interface StudentProfileUpdatePayload {
   skills?: string[];
 }
 
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected';
+
 export interface OrganizationProfile {
   id: number;
   user_id: number;
@@ -29,6 +31,8 @@ export interface OrganizationProfile {
   location: string | null;
   website: string | null;
   description: string | null;
+  approval_status: ApprovalStatus;
+  approval_note: string | null;
   updated_at: string;
 }
 

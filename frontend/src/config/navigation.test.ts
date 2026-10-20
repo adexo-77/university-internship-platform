@@ -6,7 +6,7 @@ describe('Navigation Configuration', () => {
     expect(getHomePath('student')).toBe('/my-courses');
     expect(getHomePath('instructor')).toBe('/my-courses');
     expect(getHomePath('organization')).toBe('/my-internships');
-    expect(getHomePath('admin')).toBe('/courses');
+    expect(getHomePath('admin')).toBe('/admin/users');
   });
 
   it('filters navigation items for student role', () => {
@@ -61,6 +61,8 @@ describe('Navigation Configuration', () => {
     );
     const labels = adminItems.map((i) => i.label);
 
+    expect(labels).toContain('Users');
+    expect(labels).toContain('Organizations');
     expect(labels).toContain('Courses');
     expect(labels).toContain('Internships');
     expect(labels).toContain('Account');

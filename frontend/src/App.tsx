@@ -6,6 +6,9 @@ import { getHomePath } from './config/navigation';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './hooks/useAuth';
 import { AccountPage } from './pages/AccountPage';
+import { AdminOrganizationsPage } from './pages/AdminOrganizationsPage';
+import { AdminUserCreatePage } from './pages/AdminUserCreatePage';
+import { AdminUsersPage } from './pages/AdminUsersPage';
 import { ApplicationDetailPage } from './pages/ApplicationDetailPage';
 import { AssignmentCreatePage } from './pages/AssignmentCreatePage';
 import { AssignmentDetailPage } from './pages/AssignmentDetailPage';
@@ -106,8 +109,11 @@ export const AppRoutes: React.FC = () => {
         <Route path="/internships/:id" element={<InternshipDetailPage />} />
         <Route path="/applications/:id" element={<ApplicationDetailPage />} />
 
-        {/* System status: admin role only */}
+        {/* Admin management routes: admin role only */}
         <Route element={<RoleRoute allowedRoles={['admin']} />}>
+          <Route path="/admin/users" element={<AdminUsersPage />} />
+          <Route path="/admin/users/new" element={<AdminUserCreatePage />} />
+          <Route path="/admin/organizations" element={<AdminOrganizationsPage />} />
           <Route path="/status" element={<SystemStatusPage />} />
         </Route>
       </Route>

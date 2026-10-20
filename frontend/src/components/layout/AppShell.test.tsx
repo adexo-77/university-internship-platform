@@ -38,6 +38,8 @@ describe('AppShell Component', () => {
       </MemoryRouter>
     );
 
+    expect(screen.getByRole('link', { name: 'Users' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Organizations' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Courses' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Account' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'System status' })).toBeInTheDocument();
