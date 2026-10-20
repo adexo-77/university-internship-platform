@@ -81,4 +81,41 @@ describe('InternshipForm Component', () => {
       })
     );
   });
+
+  it('sets max date input attribute and shows helper text with latest allowed deadline', () => {
+    render(<InternshipForm onSubmit={vi.fn()} />);
+
+    const input = screen.getByLabelText(/application deadline/i);
+    expect(input).toHaveAttribute('max');
+    expect(screen.getByText(/Latest allowed deadline:/i)).toBeInTheDocument();
+  });
+
+  it('calculates latest allowed deadline from reviewed_at for open postings', () => {
+    const initialData = {
+      id: 1,
+      title: 'Open Posting',
+      status: 'open' as const,
+      reviewed_at: '2026-10-14T00:00:00Z',
+      application_deadline: '2026-11-01T00:00:00Z',
+    };
+    render(<InternshipForm initialData={initialData} onSubmit={vi.fn()} isEdit={true} />);
+
+    const input = screen.getByLabelText(/application deadline/i);
+    expect(input.getAttribute('max')).toContain('2027-01-12');
+    expect(screen.getByText('Latest allowed deadline: 12 Jan 2027')).toBeInTheDocument();
+  });
+
+  it('displays the server message when rejected', () => {
+    render(
+      <InternshipForm
+        onSubmit={vi.fn()}
+        error="Application deadline cannot be later than 12 Jan 2027"
+      />
+    );
+
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(
+      screen.getByText('Application deadline cannot be later than 12 Jan 2027')
+    ).toBeInTheDocument();
+  });
 });

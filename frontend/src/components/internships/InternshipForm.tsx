@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { formatDate } from '../../lib/dates';
 import { Internship, InternshipWorkMode } from '../../types/internship';
 import { Button } from '../ui/Button';
 import { ErrorMessage } from '../ui/ErrorMessage';
 import { Select } from '../ui/Select';
 import { TextField } from '../ui/TextField';
 import { Textarea } from '../ui/Textarea';
+
+const MAX_DEADLINE_DAYS = 90;
 
 export interface InternshipFormData {
   title: string;
@@ -57,6 +60,17 @@ export const InternshipForm: React.FC<InternshipFormProps> = ({
   const [deadline, setDeadline] = useState(
     toLocalDatetimeString(initialData?.application_deadline)
   );
+
+  const maxAllowedDate = useMemo(() => {
+    const ref =
+      initialData?.status === 'open' && initialData.reviewed_at
+        ? new Date(initialData.reviewed_at)
+        : new Date();
+    return new Date(ref.getTime() + MAX_DEADLINE_DAYS * 24 * 60 * 60 * 1000);
+  }, [initialData?.status, initialData?.reviewed_at]);
+
+  const maxAllowedLocal = toLocalDatetimeString(maxAllowedDate.toISOString());
+  const maxAllowedHelper = `Latest allowed deadline: ${formatDate(maxAllowedDate.toISOString())}`;
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -184,6 +198,8 @@ export const InternshipForm: React.FC<InternshipFormProps> = ({
           value={deadline}
           onChange={(e) => setDeadline(e.target.value)}
           error={fieldErrors.deadline}
+          max={maxAllowedLocal}
+          helperText={maxAllowedHelper}
           required
         />
       </div>
