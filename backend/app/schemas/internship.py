@@ -78,6 +78,9 @@ class InternshipResponse(BaseModel):
     applications_accepted: bool = True
     applied: bool | None = None
     application_status: str | None = None
+    review_note: str | None = None
+    reviewed_at: datetime | None = None
+    reviewed_by: int | None = None
 
 
 class InternshipListResponse(BaseModel):

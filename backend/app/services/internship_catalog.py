@@ -32,6 +32,7 @@ def _to_response(
     applied: bool | None = None,
     app_status: str | None = None,
     now: datetime | None = None,
+    include_review: bool = False,
 ) -> InternshipResponse:
     current_time = now or datetime.now(UTC)
     is_open = p.status == InternshipStatus.OPEN
@@ -53,6 +54,9 @@ def _to_response(
         applications_accepted=(is_open and p.application_deadline > current_time),
         applied=applied,
         application_status=app_status,
+        review_note=p.review_note if include_review else None,
+        reviewed_at=p.reviewed_at if include_review else None,
+        reviewed_by=p.reviewed_by if include_review else None,
     )
 
 
@@ -189,4 +193,5 @@ def get_internship_by_id(db: Session, internship_id: int, current_user: User) ->
         applicant_count=count,
         applied=applied,
         app_status=app_status,
+        include_review=(is_owner or is_admin),
     )

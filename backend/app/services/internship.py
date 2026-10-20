@@ -31,6 +31,7 @@ def _to_response(
     org_name: str | None,
     applicant_count: int = 0,
     now: datetime | None = None,
+    include_review: bool = False,
 ) -> InternshipResponse:
     current_time = now or datetime.now(UTC)
     is_open = p.status == InternshipStatus.OPEN
@@ -50,6 +51,9 @@ def _to_response(
         updated_at=p.updated_at,
         applicant_count=applicant_count,
         applications_accepted=(is_open and p.application_deadline > current_time),
+        review_note=p.review_note if include_review else None,
+        reviewed_at=p.reviewed_at if include_review else None,
+        reviewed_by=p.reviewed_by if include_review else None,
     )
 
 
@@ -71,7 +75,7 @@ def create_internship(
     db.add(posting)
     db.commit()
     db.refresh(posting)
-    return _to_response(posting, _get_org_name(db, organization_id))
+    return _to_response(posting, _get_org_name(db, organization_id), include_review=True)
 
 
 def get_organization_internships(db: Session, organization_id: int) -> list[InternshipResponse]:
@@ -85,60 +89,151 @@ def get_organization_internships(db: Session, organization_id: int) -> list[Inte
         .group_by(Internship.id)
         .order_by(Internship.created_at.desc())
     )
-    return [_to_response(p, org_name, count, now=now) for p, count in db.execute(stmt).all()]
+    return [
+        _to_response(p, org_name, count, now=now, include_review=True)
+        for p, count in db.execute(stmt).all()
+    ]
+
+
+def _get_owned_posting(db: Session, internship_id: int, user_id: int) -> Internship:
+    p = db.scalar(select(Internship).where(Internship.id == internship_id))
+    if not p or p.organization_id != user_id:
+        raise NotFoundException(message="Internship posting not found", code="NOT_FOUND")
+    return p
+
+
+def _transition_posting(
+    db: Session, p: Internship, new_status: InternshipStatus
+) -> InternshipResponse:
+    p.status = new_status
+    db.commit()
+    db.refresh(p)
+    count = db.scalar(select(func.count(Application.id)).where(Application.posting_id == p.id)) or 0
+    return _to_response(
+        p, _get_org_name(db, p.organization_id), applicant_count=count, include_review=True
+    )
+
+
+def submit_internship(db: Session, internship_id: int, current_user: User) -> InternshipResponse:
+    """Submit a draft or rejected posting for administrative review."""
+    p = _get_owned_posting(db, internship_id, current_user.id)
+    if p.status not in (InternshipStatus.DRAFT, InternshipStatus.REJECTED):
+        raise ConflictException(
+            message=f"Cannot submit an internship in {p.status.value} status",
+            code="INVALID_STATUS_TRANSITION",
+        )
+    org_profile = db.scalar(
+        select(OrganizationProfile).where(OrganizationProfile.user_id == current_user.id)
+    )
+    if not org_profile or org_profile.approval_status != ApprovalStatus.APPROVED:
+        raise ConflictException(
+            message="Your organization must be approved before you can submit internships",
+            code="ORGANIZATION_NOT_APPROVED",
+        )
+    return _transition_posting(db, p, InternshipStatus.PENDING_REVIEW)
+
+
+def withdraw_internship(db: Session, internship_id: int, current_user: User) -> InternshipResponse:
+    """Withdraw a pending_review posting back to draft status for editing."""
+    p = _get_owned_posting(db, internship_id, current_user.id)
+    if p.status != InternshipStatus.PENDING_REVIEW:
+        raise ConflictException(
+            message=f"Cannot withdraw an internship in {p.status.value} status",
+            code="INVALID_STATUS_TRANSITION",
+        )
+    return _transition_posting(db, p, InternshipStatus.DRAFT)
+
+
+def close_internship(db: Session, internship_id: int, current_user: User) -> InternshipResponse:
+    """Close an open internship posting."""
+    p = _get_owned_posting(db, internship_id, current_user.id)
+    if p.status != InternshipStatus.OPEN:
+        raise ConflictException(
+            message=f"Cannot close an internship in {p.status.value} status",
+            code="INVALID_STATUS_TRANSITION",
+        )
+    return _transition_posting(db, p, InternshipStatus.CLOSED)
 
 
 def update_internship(
     db: Session, internship_id: int, payload: InternshipUpdate, current_user: User
 ) -> InternshipResponse:
     """Update internship posting fields and enforce strict status transition rules."""
-    p = db.scalar(select(Internship).where(Internship.id == internship_id))
-    if not p:
-        raise NotFoundException(message="Internship posting not found", code="NOT_FOUND")
-    if p.organization_id != current_user.id:
-        raise NotFoundException(message="Internship posting not found", code="NOT_FOUND")
+    p = _get_owned_posting(db, internship_id, current_user.id)
     if p.status == InternshipStatus.CLOSED:
         raise ConflictException(
             message="A closed internship posting cannot be edited", code="POSTING_CLOSED"
         )
+    if p.status == InternshipStatus.PENDING_REVIEW:
+        raise ConflictException(
+            message="Posting is pending review and cannot be edited. Withdraw to draft to edit.",
+            code="POSTING_LOCKED",
+        )
 
-    if payload.status is not None and payload.status != p.status:
-        valid_moves = {
-            (InternshipStatus.DRAFT, InternshipStatus.OPEN),
-            (InternshipStatus.OPEN, InternshipStatus.CLOSED),
-        }
-        if (p.status, payload.status) not in valid_moves:
+    if payload.status is not None:
+        if payload.status == InternshipStatus.OPEN:
             raise ConflictException(
-                message=f"Invalid status transition from {p.status} to {payload.status}",
-                code="INVALID_STATUS_TRANSITION",
+                message="Submit for review instead", code="SUBMIT_FOR_REVIEW_REQUIRED"
             )
-
-        if p.status == InternshipStatus.DRAFT and payload.status == InternshipStatus.OPEN:
-            org_profile = db.scalar(
-                select(OrganizationProfile).where(OrganizationProfile.user_id == p.organization_id)
-            )
-            if not org_profile or org_profile.approval_status != ApprovalStatus.APPROVED:
+        if payload.status != p.status:
+            valid_moves = {
+                (InternshipStatus.OPEN, InternshipStatus.CLOSED),
+            }
+            if (p.status, payload.status) not in valid_moves:
                 raise ConflictException(
-                    message="Your organization must be approved before you can publish internships",
-                    code="ORGANIZATION_NOT_APPROVED",
+                    message=(
+                        f"Invalid status transition from {p.status.value} to {payload.status.value}"
+                    ),
+                    code="INVALID_STATUS_TRANSITION",
                 )
+            p.status = payload.status
 
-        p.status = payload.status
-
-    for field in (
+    content_fields = [
         "title",
         "description",
         "requirements",
         "location",
         "work_mode",
         "duration_weeks",
-        "application_deadline",
-    ):
-        val = getattr(payload, field)
-        if val is not None:
-            setattr(p, field, val)
+    ]
+    if p.status == InternshipStatus.OPEN:
+        for field in content_fields:
+            val = getattr(payload, field)
+            if val is not None and val != getattr(p, field):
+                raise ConflictException(
+                    message=(
+                        "Cannot edit content of an open posting; only deadline extension is allowed"
+                    ),
+                    code="CONTENT_LOCKED",
+                )
+        if payload.application_deadline is not None:
+            new_dl = (
+                payload.application_deadline
+                if payload.application_deadline.tzinfo is not None
+                else payload.application_deadline.replace(tzinfo=UTC)
+            )
+            cur_dl = (
+                p.application_deadline
+                if p.application_deadline.tzinfo is not None
+                else p.application_deadline.replace(tzinfo=UTC)
+            )
+            if new_dl <= cur_dl:
+                raise ConflictException(
+                    message="Application deadline can only be extended, not shortened",
+                    code="DEADLINE_CANNOT_BE_SHORTENED",
+                )
+            p.application_deadline = new_dl
+    elif p.status in (InternshipStatus.DRAFT, InternshipStatus.REJECTED):
+        for field in content_fields:
+            val = getattr(payload, field)
+            if val is not None:
+                setattr(p, field, val)
+        if payload.application_deadline is not None:
+            p.application_deadline = payload.application_deadline
 
     db.commit()
     db.refresh(p)
     count = db.scalar(select(func.count(Application.id)).where(Application.posting_id == p.id)) or 0
-    return _to_response(p, _get_org_name(db, p.organization_id), applicant_count=count)
+    return _to_response(
+        p, _get_org_name(db, p.organization_id), applicant_count=count, include_review=True
+    )
