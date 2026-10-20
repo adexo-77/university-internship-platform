@@ -6,6 +6,8 @@ from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.exceptions import AppException
+from app.routers.admin_organization import router as admin_organization_router
+from app.routers.admin_user import router as admin_user_router
 from app.routers.application import router as application_router
 from app.routers.assignment import router as assignment_router
 from app.routers.auth import router as auth_router
@@ -53,3 +55,5 @@ app.include_router(assignment_router, prefix="/api")
 app.include_router(submission_router, prefix="/api")
 app.include_router(internship_router, prefix="/api")
 app.include_router(application_router, prefix="/api")
+app.include_router(admin_user_router, prefix="/api")
+app.include_router(admin_organization_router, prefix="/api")

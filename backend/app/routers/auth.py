@@ -8,7 +8,12 @@ from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.core.security import SESSION_COOKIE_NAME, SESSION_LIFETIME_SECONDS
 from app.models.user import User
-from app.schemas.auth import LoginRequest, RegisterRequest, UserResponse
+from app.schemas.auth import (
+    ChangePasswordRequest,
+    LoginRequest,
+    RegisterRequest,
+    UserResponse,
+)
 from app.services.auth import AuthService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -100,3 +105,25 @@ def get_me(
 ) -> User:
     """Return identity and profile of currently authenticated user."""
     return current_user
+
+
+@router.post(
+    "/change-password",
+    status_code=status.HTTP_200_OK,
+    summary="Change user password",
+)
+def change_password(
+    request: Request,
+    payload: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict[str, str]:
+    """Change authenticated user password and invalidate all other sessions."""
+    raw_token = request.cookies.get(SESSION_COOKIE_NAME)
+    AuthService.change_password(
+        db=db,
+        user=current_user,
+        current_token=raw_token,
+        request=payload,
+    )
+    return {"message": "Password changed successfully"}
