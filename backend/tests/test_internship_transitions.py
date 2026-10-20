@@ -101,13 +101,16 @@ def test_open_posting_deadline_extension_and_locks(
     owner, _ = create_test_organization(
         real_db_session, "owner_ext@test.com", approval_status=ApprovalStatus.APPROVED
     )
-    base_deadline = datetime.now(UTC) + timedelta(days=15)
+    approval_date = datetime.now(UTC) - timedelta(days=10)
+    base_deadline = approval_date + timedelta(days=20)
     posting = create_test_internship(
         real_db_session,
         owner,
         status=InternshipStatus.OPEN,
         application_deadline=base_deadline,
     )
+    posting.reviewed_at = approval_date
+    real_db_session.commit()
     login_test_user(real_db_client, owner.email)
 
     # Attempting to edit content on open posting gives 409
@@ -122,21 +125,29 @@ def test_open_posting_deadline_extension_and_locks(
     )
 
     # Shortening deadline gives 409
-    earlier_deadline = (base_deadline - timedelta(days=5)).isoformat()
     shorten_resp = real_db_client.patch(
         f"/api/internships/{posting.id}",
-        json={"application_deadline": earlier_deadline},
+        json={"application_deadline": (base_deadline - timedelta(days=5)).isoformat()},
     )
     assert shorten_resp.status_code == 409
     assert (
         shorten_resp.json()["detail"] == "Application deadline can only be extended, not shortened"
     )
 
-    # Extending deadline succeeds
-    later_deadline = (base_deadline + timedelta(days=10)).isoformat()
+    # Beyond 90 days from approval is refused (409) with latest allowed date
+    max_date = approval_date + timedelta(days=90)
+    max_str = max_date.strftime("%d %b %Y")
+    beyond_resp = real_db_client.patch(
+        f"/api/internships/{posting.id}",
+        json={"application_deadline": (approval_date + timedelta(days=91)).isoformat()},
+    )
+    assert beyond_resp.status_code == 409
+    assert max_str in beyond_resp.json()["detail"]
+
+    # Extending within cap (within 90 days of approval) succeeds
     extend_resp = real_db_client.patch(
         f"/api/internships/{posting.id}",
-        json={"application_deadline": later_deadline},
+        json={"application_deadline": (approval_date + timedelta(days=85)).isoformat()},
     )
     assert extend_resp.status_code == 200
 
@@ -159,3 +170,72 @@ def test_pending_review_posting_locked(
         resp.json()["detail"]
         == "Posting is pending review and cannot be edited. Withdraw to draft to edit."
     )
+
+
+def test_draft_and_rejected_deadline_cap_rules(
+    real_db_client: TestClient, real_db_session: Session
+) -> None:
+    owner, _ = create_test_organization(real_db_session, "owner_rules@test.com")
+    login_test_user(real_db_client, owner.email)
+    now = datetime.now(UTC)
+
+    # Creation beyond 90 days fails
+    create_fail = real_db_client.post(
+        "/api/internships",
+        json={
+            "title": "Too Far",
+            "description": "Desc",
+            "requirements": "Reqs",
+            "location": "Loc",
+            "work_mode": "remote",
+            "application_deadline": (now + timedelta(days=95)).isoformat(),
+        },
+    )
+    assert create_fail.status_code == 409
+    assert (now + timedelta(days=90)).strftime("%d %b %Y") in create_fail.json()["detail"]
+
+    # Draft posting: cap counts from today, not creation
+    old_created = now - timedelta(days=20)
+    draft_posting = create_test_internship(
+        real_db_session, owner, status=InternshipStatus.DRAFT, created_at=old_created
+    )
+    resp = real_db_client.patch(
+        f"/api/internships/{draft_posting.id}",
+        json={"application_deadline": (now + timedelta(days=95)).isoformat()},
+    )
+    assert resp.status_code == 409
+
+    # 80 days from today (100 days from creation) succeeds
+    resp = real_db_client.patch(
+        f"/api/internships/{draft_posting.id}",
+        json={"application_deadline": (now + timedelta(days=80)).isoformat()},
+    )
+    assert resp.status_code == 200
+
+    # Rejected posting: cap counts from today, not old reviewed_at
+    rej_posting = create_test_internship(
+        real_db_session,
+        owner,
+        status=InternshipStatus.REJECTED,
+        review_note="Need better requirements",
+    )
+    rej_posting.reviewed_at = now - timedelta(days=30)
+    real_db_session.commit()
+
+    # Beyond 90 days from today fails
+    resp = real_db_client.patch(
+        f"/api/internships/{rej_posting.id}",
+        json={"application_deadline": (now + timedelta(days=95)).isoformat()},
+    )
+    assert resp.status_code == 409
+
+    # Within 90 days from today succeeds and can be resubmitted
+    resp = real_db_client.patch(
+        f"/api/internships/{rej_posting.id}",
+        json={"application_deadline": (now + timedelta(days=80)).isoformat()},
+    )
+    assert resp.status_code == 200
+
+    sub_resp = real_db_client.post(f"/api/internships/{rej_posting.id}/submit")
+    assert sub_resp.status_code == 200
+    assert sub_resp.json()["status"] == "pending_review"
