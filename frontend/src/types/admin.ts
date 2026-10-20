@@ -51,3 +51,8 @@ export interface AdminOrganizationApprovalPayload {
   approval_status: ApprovalStatus;
   approval_note?: string | null;
 }
+
+export interface AdminInternshipReviewPayload {
+  decision: 'approved' | 'rejected';
+  review_note?: string | null;
+}

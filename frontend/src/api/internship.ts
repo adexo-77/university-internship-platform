@@ -129,3 +129,45 @@ export async function updateInternship(
 
   return (await response.json()) as Internship;
 }
+
+export async function submitInternship(id: number): Promise<Internship> {
+  const response = await fetch(`/api/internships/${id}/submit`, {
+    method: 'POST',
+    headers: { Accept: 'application/json' },
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    await handleResponseError(response);
+  }
+
+  return (await response.json()) as Internship;
+}
+
+export async function withdrawInternship(id: number): Promise<Internship> {
+  const response = await fetch(`/api/internships/${id}/withdraw`, {
+    method: 'POST',
+    headers: { Accept: 'application/json' },
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    await handleResponseError(response);
+  }
+
+  return (await response.json()) as Internship;
+}
+
+export async function closeInternship(id: number): Promise<Internship> {
+  const response = await fetch(`/api/internships/${id}/close`, {
+    method: 'POST',
+    headers: { Accept: 'application/json' },
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    await handleResponseError(response);
+  }
+
+  return (await response.json()) as Internship;
+}

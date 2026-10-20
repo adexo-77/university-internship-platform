@@ -210,6 +210,10 @@ export const InternshipForm: React.FC<InternshipFormProps> = ({
         placeholder="Key skills, qualifications, or technologies..."
       />
 
+      <p className="text-sm text-pencil">
+        Postings are reviewed by an admin before students can see them.
+      </p>
+
       <div className="flex items-center gap-3 pt-2">
         <Button type="submit" variant="primary" disabled={isSubmitting}>
           {isSubmitting ? 'Saving...' : isEdit ? 'Save changes' : 'Create internship'}

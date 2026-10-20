@@ -4,7 +4,7 @@
 
 export type InternshipWorkMode = 'onsite' | 'remote' | 'hybrid';
 
-export type InternshipStatus = 'draft' | 'open' | 'closed';
+export type InternshipStatus = 'draft' | 'pending_review' | 'open' | 'rejected' | 'closed';
 
 export interface Internship {
   id: number;
@@ -24,6 +24,9 @@ export interface Internship {
   applications_accepted?: boolean;
   applied?: boolean | null;
   application_status?: string | null;
+  review_note?: string | null;
+  reviewed_at?: string | null;
+  reviewed_by?: number | null;
 }
 
 export interface InternshipListResponse {

@@ -6,6 +6,7 @@ import { getHomePath } from './config/navigation';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './hooks/useAuth';
 import { AccountPage } from './pages/AccountPage';
+import { AdminInternshipReviewsPage } from './pages/AdminInternshipReviewsPage';
 import { AdminOrganizationsPage } from './pages/AdminOrganizationsPage';
 import { AdminUserCreatePage } from './pages/AdminUserCreatePage';
 import { AdminUsersPage } from './pages/AdminUsersPage';
@@ -114,6 +115,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/admin/users" element={<AdminUsersPage />} />
           <Route path="/admin/users/new" element={<AdminUserCreatePage />} />
           <Route path="/admin/organizations" element={<AdminOrganizationsPage />} />
+          <Route path="/admin/internship-reviews" element={<AdminInternshipReviewsPage />} />
           <Route path="/status" element={<SystemStatusPage />} />
         </Route>
       </Route>

@@ -1,6 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { getInternshipById, updateInternship } from '../api/internship';
+import { Link, useParams } from 'react-router-dom';
+import {
+  closeInternship,
+  getInternshipById,
+  submitInternship,
+  withdrawInternship,
+} from '../api/internship';
 import {
   applyToInternship,
   getInternshipApplications,
@@ -8,12 +13,12 @@ import {
   withdrawApplication,
 } from '../api/application';
 import { getStudentProfile } from '../api/profile';
-import { DueBadge } from '../components/assignments/DueBadge';
+import { InternshipActionsBar } from '../components/internships/InternshipActionsBar';
 import { InternshipApplicantsSection } from '../components/internships/InternshipApplicantsSection';
-import { InternshipStatusBadge } from '../components/internships/InternshipStatusBadge';
+import { InternshipInfoCard } from '../components/internships/InternshipInfoCard';
 import { StudentApplicationPanel } from '../components/internships/StudentApplicationPanel';
 import { AppShell } from '../components/layout/AppShell';
-import { Button, ErrorMessage, PageHeader } from '../components/ui';
+import { ErrorMessage, Notice, PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Application } from '../types/application';
@@ -23,7 +28,6 @@ import { StudentProfile } from '../types/profile';
 export const InternshipDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const postingId = Number(id);
-  const navigate = useNavigate();
   const { user } = useAuth();
 
   const [internship, setInternship] = useState<Internship | null>(null);
@@ -33,6 +37,7 @@ export const InternshipDetailPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   usePageTitle(internship?.title ?? 'Internship details');
@@ -48,22 +53,18 @@ export const InternshipDetailPage: React.FC = () => {
     try {
       const data = await getInternshipById(postingId);
       setInternship(data);
-
       if (user?.role === 'student') {
         const [profData, myApps] = await Promise.all([
           getStudentProfile().catch(() => null),
           getStudentApplications().catch(() => []),
         ]);
         setProfile(profData);
-        const match = myApps.find((a) => a.posting_id === postingId);
-        setMyApp(match ?? null);
+        setMyApp(myApps.find((a) => a.posting_id === postingId) ?? null);
       } else if (user?.role === 'organization' || user?.role === 'admin') {
-        const apps = await getInternshipApplications(postingId, statusFilter || undefined);
-        setRoster(apps);
+        setRoster(await getInternshipApplications(postingId, statusFilter || undefined));
       }
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError('Failed to load internship.');
+      setError(err instanceof Error ? err.message : 'Failed to load internship.');
     } finally {
       setLoading(false);
     }
@@ -75,13 +76,12 @@ export const InternshipDetailPage: React.FC = () => {
 
   const handleApply = async (coverLetter: string) => {
     setSubmitting(true);
-    setError(null);
+    setActionError(null);
     try {
       await applyToInternship(postingId, { cover_letter: coverLetter });
       await loadData();
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError('Failed to submit application.');
+      setActionError(err instanceof Error ? err.message : 'Failed to submit application.');
     } finally {
       setSubmitting(false);
     }
@@ -90,37 +90,48 @@ export const InternshipDetailPage: React.FC = () => {
   const handleWithdraw = async () => {
     if (!myApp) return;
     setSubmitting(true);
-    setError(null);
+    setActionError(null);
     try {
       await withdrawApplication(myApp.id);
       await loadData();
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError('Failed to withdraw application.');
+      setActionError(err instanceof Error ? err.message : 'Failed to withdraw application.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handlePublish = async () => {
+  const handleSubmitForReview = async () => {
     if (!internship) return;
-    if (!window.confirm('Publish this internship to make it open for applications?')) return;
+    setActionError(null);
     try {
-      await updateInternship(internship.id, { status: 'open' });
+      await submitInternship(internship.id);
       await loadData();
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
+      setActionError(err instanceof Error ? err.message : 'Failed to submit for review.');
+    }
+  };
+
+  const handleWithdrawToDraft = async () => {
+    if (!internship) return;
+    setActionError(null);
+    try {
+      await withdrawInternship(internship.id);
+      await loadData();
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : 'Failed to withdraw to draft.');
     }
   };
 
   const handleClose = async () => {
     if (!internship) return;
     if (!window.confirm('Close this internship? Closed postings cannot be reopened.')) return;
+    setActionError(null);
     try {
-      await updateInternship(internship.id, { status: 'closed' });
+      await closeInternship(internship.id);
       await loadData();
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
+      setActionError(err instanceof Error ? err.message : 'Failed to close internship.');
     }
   };
 
@@ -157,54 +168,39 @@ export const InternshipDetailPage: React.FC = () => {
             title={internship.title}
             description={internship.organization_name ?? 'Organization'}
           />
-          <div className="flex items-center gap-2 flex-wrap">
-            <InternshipStatusBadge status={internship.status} />
-            {isOwner && internship.status !== 'closed' && (
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => navigate(`/internships/${internship.id}/edit`)}
-              >
-                Edit
-              </Button>
-            )}
-            {isOwner && internship.status === 'draft' && (
-              <Button type="button" variant="primary" onClick={handlePublish}>
-                Publish
-              </Button>
-            )}
-            {isOwner && internship.status === 'open' && (
-              <Button type="button" variant="danger" onClick={handleClose}>
-                Close
-              </Button>
-            )}
-          </div>
+          <InternshipActionsBar
+            internship={internship}
+            isOwner={Boolean(isOwner)}
+            onSubmitForReview={handleSubmitForReview}
+            onWithdrawToDraft={handleWithdrawToDraft}
+            onClose={handleClose}
+          />
         </div>
 
-        {error && (
-          <ErrorMessage whatHappened={error} howToFix="Please try again or refresh the page." />
+        {actionError && (
+          <ErrorMessage
+            whatHappened={actionError}
+            howToFix="Review requirements or contact support if the issue persists."
+          />
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-surface rounded-card border border-line text-sm">
-          <div>
-            <span className="text-pencil block">Location</span>
-            <span className="font-medium text-ink">{internship.location}</span>
-          </div>
-          <div>
-            <span className="text-pencil block">Work mode</span>
-            <span className="font-medium text-ink capitalize">{internship.work_mode}</span>
-          </div>
-          <div>
-            <span className="text-pencil block">Duration</span>
-            <span className="font-medium text-ink">
-              {internship.duration_weeks ? `${internship.duration_weeks} weeks` : 'Flexible'}
-            </span>
-          </div>
-          <div className="md:col-span-3">
-            <span className="text-pencil block">Application deadline</span>
-            <DueBadge dueAt={internship.application_deadline} />
-          </div>
-        </div>
+        {internship.status === 'rejected' && internship.review_note && (
+          <Notice variant="error" title="Review note">
+            <p className="whitespace-pre-line">{internship.review_note}</p>
+            {isOwner && (
+              <p className="mt-2">
+                <Link
+                  to={`/internships/${internship.id}/edit`}
+                  className="font-semibold text-petrol underline"
+                >
+                  Edit posting to address feedback
+                </Link>
+              </p>
+            )}
+          </Notice>
+        )}
+
+        <InternshipInfoCard internship={internship} />
 
         <div className="space-y-4">
           <h2 className="text-lg font-semibold text-ink">Description</h2>
@@ -222,7 +218,7 @@ export const InternshipDetailPage: React.FC = () => {
             myApp={myApp}
             isProfileComplete={isProfileComplete}
             submitting={submitting}
-            error={error}
+            error={actionError}
             onApply={handleApply}
             onWithdraw={handleWithdraw}
           />

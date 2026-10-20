@@ -10,6 +10,10 @@ export const InternshipStatusBadge: React.FC<InternshipStatusBadgeProps> = ({ st
   switch (status) {
     case 'open':
       return <Badge variant="success">Open</Badge>;
+    case 'pending_review':
+      return <Badge variant="attention">Pending review</Badge>;
+    case 'rejected':
+      return <Badge variant="error">Rejected</Badge>;
     case 'closed':
       return <Badge variant="neutral">Closed</Badge>;
     case 'draft':

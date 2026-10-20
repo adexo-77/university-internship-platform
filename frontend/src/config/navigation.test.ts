@@ -63,6 +63,7 @@ describe('Navigation Configuration', () => {
 
     expect(labels).toContain('Users');
     expect(labels).toContain('Organizations');
+    expect(labels).toContain('Internship reviews');
     expect(labels).toContain('Courses');
     expect(labels).toContain('Internships');
     expect(labels).toContain('Account');

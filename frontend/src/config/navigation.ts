@@ -4,6 +4,7 @@ import {
   BookOpen,
   Briefcase,
   Building2,
+  ClipboardCheck,
   Contact,
   FileText,
   User as UserIcon,
@@ -35,6 +36,12 @@ export const navigationItems: NavItem[] = [
     path: '/admin/organizations',
     label: 'Organizations',
     icon: Building2,
+    roles: ['admin'],
+  },
+  {
+    path: '/admin/internship-reviews',
+    label: 'Internship reviews',
+    icon: ClipboardCheck,
     roles: ['admin'],
   },
   {
