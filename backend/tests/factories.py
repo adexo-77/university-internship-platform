@@ -10,6 +10,7 @@ from app.models.application import Application, ApplicationStatus
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
 from app.models.internship import Internship, InternshipStatus, InternshipWorkMode
+from app.models.organization_profile import ApprovalStatus, OrganizationProfile
 from app.models.user import User, UserRole
 
 
@@ -80,6 +81,16 @@ def create_test_internship(
     duration_weeks: int | None = 12,
 ) -> Internship:
     """Helper to seed an internship posting directly in the database."""
+    if not organization.organization_profile:
+        prof = OrganizationProfile(
+            user_id=organization.id,
+            organization_name=organization.full_name or "Acme Corp",
+            approval_status=ApprovalStatus.APPROVED,
+        )
+        db.add(prof)
+        db.commit()
+        db.refresh(organization)
+
     posting = Internship(
         organization_id=organization.id,
         title=title,
@@ -115,3 +126,29 @@ def create_test_application(
     db.commit()
     db.refresh(app)
     return app
+
+
+def create_test_organization(
+    db: Session,
+    email: str,
+    organization_name: str = "Acme Corp",
+    password: str = "Password123!",
+    approval_status: ApprovalStatus = ApprovalStatus.APPROVED,
+) -> tuple[User, OrganizationProfile]:
+    """Helper to seed an organization user and profile in the database."""
+    user = create_test_user(
+        db=db,
+        email=email,
+        role=UserRole.ORGANIZATION,
+        password=password,
+        full_name=organization_name,
+    )
+    org_profile = OrganizationProfile(
+        user_id=user.id,
+        organization_name=organization_name,
+        approval_status=approval_status,
+    )
+    db.add(org_profile)
+    db.commit()
+    db.refresh(org_profile)
+    return user, org_profile

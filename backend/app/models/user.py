@@ -73,6 +73,7 @@ class User(Base):
     )
     organization_profile: Mapped["OrganizationProfile | None"] = relationship(
         "OrganizationProfile",
+        foreign_keys="OrganizationProfile.user_id",
         back_populates="user",
         uselist=False,
         cascade="all, delete-orphan",

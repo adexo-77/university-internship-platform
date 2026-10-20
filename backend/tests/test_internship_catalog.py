@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.models.internship import InternshipStatus, InternshipWorkMode
-from app.models.organization_profile import OrganizationProfile
+from app.models.organization_profile import ApprovalStatus, OrganizationProfile
 from app.models.user import UserRole
 from tests.factories import (
     create_test_application,
@@ -94,7 +94,11 @@ def test_search_and_work_mode_filter_and_pagination(
     org = create_test_user(
         real_db_session, "org_search@test.com", UserRole.ORGANIZATION, full_name="Apex Corp"
     )
-    prof = OrganizationProfile(user_id=org.id, organization_name="Apex Innovations")
+    prof = OrganizationProfile(
+        user_id=org.id,
+        organization_name="Apex Innovations",
+        approval_status=ApprovalStatus.APPROVED,
+    )
     real_db_session.add(prof)
     real_db_session.commit()
 

@@ -71,4 +71,3 @@ class OrganizationProfile(Base):
         "User",
         foreign_keys=[reviewed_by],
     )
-
