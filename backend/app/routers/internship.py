@@ -69,11 +69,68 @@ def update_internship(
     current_user: User = Depends(require_organization),
     db: Session = Depends(get_db),
 ) -> InternshipResponse:
-    """Update internship details or lifecycle status (draft -> open -> closed)."""
+    """Update internship details or lifecycle status."""
     return internship_service.update_internship(
         db=db,
         internship_id=id,
         payload=payload,
+        current_user=current_user,
+    )
+
+
+@router.post(
+    "/internships/{id}/submit",
+    response_model=InternshipResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Submit an internship posting for admin review",
+)
+def submit_internship(
+    id: int,
+    current_user: User = Depends(require_organization),
+    db: Session = Depends(get_db),
+) -> InternshipResponse:
+    """Submit a draft or rejected internship posting for administrative review."""
+    return internship_service.submit_internship(
+        db=db,
+        internship_id=id,
+        current_user=current_user,
+    )
+
+
+@router.post(
+    "/internships/{id}/withdraw",
+    response_model=InternshipResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Withdraw an internship posting to draft",
+)
+def withdraw_internship(
+    id: int,
+    current_user: User = Depends(require_organization),
+    db: Session = Depends(get_db),
+) -> InternshipResponse:
+    """Withdraw a pending_review internship posting back to draft status."""
+    return internship_service.withdraw_internship(
+        db=db,
+        internship_id=id,
+        current_user=current_user,
+    )
+
+
+@router.post(
+    "/internships/{id}/close",
+    response_model=InternshipResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Close an open internship posting",
+)
+def close_internship(
+    id: int,
+    current_user: User = Depends(require_organization),
+    db: Session = Depends(get_db),
+) -> InternshipResponse:
+    """Close an active open internship posting."""
+    return internship_service.close_internship(
+        db=db,
+        internship_id=id,
         current_user=current_user,
     )
 
