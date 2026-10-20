@@ -142,13 +142,18 @@ def test_internship_status_transition_rules(
     real_db_client: TestClient, real_db_session: Session
 ) -> None:
     org = create_test_user(real_db_session, "status@corp.org", UserRole.ORGANIZATION)
-    posting = create_test_internship(real_db_session, org, status=InternshipStatus.DRAFT)
+    posting = create_test_internship(real_db_session, org, status=InternshipStatus.OPEN)
     login_test_user(real_db_client, org.email)
 
-    # draft -> open
-    resp = real_db_client.patch(f"/api/internships/{posting.id}", json={"status": "open"})
-    assert resp.status_code == 200
-    assert resp.json()["status"] == "open"
+    # moving draft directly to open via patch returns 409
+    draft_posting = create_test_internship(
+        real_db_session, org, title="Draft Post", status=InternshipStatus.DRAFT
+    )
+    direct_open_resp = real_db_client.patch(
+        f"/api/internships/{draft_posting.id}", json={"status": "open"}
+    )
+    assert direct_open_resp.status_code == 409
+    assert direct_open_resp.json()["detail"] == "Submit for review instead"
 
     # open -> closed
     resp = real_db_client.patch(f"/api/internships/{posting.id}", json={"status": "closed"})

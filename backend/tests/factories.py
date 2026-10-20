@@ -11,6 +11,7 @@ from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
 from app.models.internship import Internship, InternshipStatus, InternshipWorkMode
 from app.models.organization_profile import ApprovalStatus, OrganizationProfile
+from app.models.student_profile import StudentProfile
 from app.models.user import User, UserRole
 
 
@@ -79,6 +80,9 @@ def create_test_internship(
     deadline_delta_days: int = 14,
     work_mode: InternshipWorkMode = InternshipWorkMode.HYBRID,
     duration_weeks: int | None = 12,
+    created_at: datetime | None = None,
+    review_note: str | None = None,
+    application_deadline: datetime | None = None,
 ) -> Internship:
     """Helper to seed an internship posting directly in the database."""
     if not organization.organization_profile:
@@ -91,6 +95,12 @@ def create_test_internship(
         db.commit()
         db.refresh(organization)
 
+    posting_deadline = (
+        application_deadline
+        if application_deadline is not None
+        else datetime.now(UTC) + timedelta(days=deadline_delta_days)
+    )
+
     posting = Internship(
         organization_id=organization.id,
         title=title,
@@ -99,9 +109,12 @@ def create_test_internship(
         location="Nairobi, Kenya",
         work_mode=work_mode,
         duration_weeks=duration_weeks,
-        application_deadline=datetime.now(UTC) + timedelta(days=deadline_delta_days),
+        application_deadline=posting_deadline,
         status=status,
+        review_note=review_note,
     )
+    if created_at is not None:
+        posting.created_at = created_at
     db.add(posting)
     db.commit()
     db.refresh(posting)
@@ -152,3 +165,28 @@ def create_test_organization(
     db.commit()
     db.refresh(org_profile)
     return user, org_profile
+
+
+def create_test_student(
+    db: Session,
+    email: str,
+    university: str = "State University",
+    department: str = "Computer Science",
+    password: str = "Password123!",
+) -> tuple[User, StudentProfile]:
+    """Helper to seed a student user and completed student profile in the database."""
+    user = create_test_user(
+        db=db,
+        email=email,
+        role=UserRole.STUDENT,
+        password=password,
+    )
+    student_profile = StudentProfile(
+        user_id=user.id,
+        university=university,
+        department=department,
+    )
+    db.add(student_profile)
+    db.commit()
+    db.refresh(student_profile)
+    return user, student_profile

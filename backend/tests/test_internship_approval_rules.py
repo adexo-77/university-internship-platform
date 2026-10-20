@@ -46,35 +46,40 @@ def test_unapproved_organization_cannot_publish_internship(
     assert draft_resp.status_code == 201
     posting_id = draft_resp.json()["id"]
 
-    # Publishing as pending organization gives 409 with exact message
-    pub_resp = real_db_client.patch(f"/api/internships/{posting_id}", json={"status": "open"})
-    assert pub_resp.status_code == 409
+    # Submitting as pending organization gives 409 with exact message
+    sub_resp = real_db_client.post(f"/api/internships/{posting_id}/submit")
+    assert sub_resp.status_code == 409
     assert (
-        pub_resp.json()["detail"]
-        == "Your organization must be approved before you can publish internships"
+        sub_resp.json()["detail"]
+        == "Your organization must be approved before you can submit internships"
     )
-    assert pub_resp.json()["code"] == "ORGANIZATION_NOT_APPROVED"
+    assert sub_resp.json()["code"] == "ORGANIZATION_NOT_APPROVED"
+
+    # Attempting to directly patch status to open gives 409
+    patch_open_resp = real_db_client.patch(
+        f"/api/internships/{posting_id}", json={"status": "open"}
+    )
+    assert patch_open_resp.status_code == 409
+    assert patch_open_resp.json()["detail"] == "Submit for review instead"
 
     # Set status to rejected
     profile.approval_status = ApprovalStatus.REJECTED
     real_db_session.commit()
 
-    rej_pub_resp = real_db_client.patch(f"/api/internships/{posting_id}", json={"status": "open"})
-    assert rej_pub_resp.status_code == 409
+    rej_sub_resp = real_db_client.post(f"/api/internships/{posting_id}/submit")
+    assert rej_sub_resp.status_code == 409
     assert (
-        rej_pub_resp.json()["detail"]
-        == "Your organization must be approved before you can publish internships"
+        rej_sub_resp.json()["detail"]
+        == "Your organization must be approved before you can submit internships"
     )
 
-    # Once approved, organization can publish
+    # Once approved, organization can submit for review
     profile.approval_status = ApprovalStatus.APPROVED
     real_db_session.commit()
 
-    approved_pub_resp = real_db_client.patch(
-        f"/api/internships/{posting_id}", json={"status": "open"}
-    )
-    assert approved_pub_resp.status_code == 200
-    assert approved_pub_resp.json()["status"] == "open"
+    approved_sub_resp = real_db_client.post(f"/api/internships/{posting_id}/submit")
+    assert approved_sub_resp.status_code == 200
+    assert approved_sub_resp.json()["status"] == "pending_review"
 
 
 def test_catalogue_hides_unapproved_or_inactive_organization_postings(
