@@ -26,7 +26,7 @@ The **University Learning & Internship Platform** is engineered with a modular, 
 - **Phase 5c**: Internship Posting Review & Moderation Workflow:
   - **Extended Posting Lifecycle**: Postings progress through `draft`, `pending_review`, `open`, `rejected`, `closed`. Direct transitions to `open` via PATCH are prohibited (409 "Submit for review instead").
   - **Organization Actions**: Submission to `pending_review` requires approved organization status; pending postings can be withdrawn back to draft; rejected postings can be edited and resubmitted; open postings can be closed.
-  - **Content Lock & Deadline Extension**: Content is editable only in `draft` or `rejected` states. Open postings allow extending deadlines (shortening returns 409 Conflict) or closing. Pending and closed postings are immutable.
+  - **Content Lock & Deadline Extension Cap**: Content is editable only in `draft` or `rejected` states. Open postings allow extending deadlines (shortening returns 409 Conflict) or closing. Deadlines are capped at 90 days (`MAX_DEADLINE_DAYS = 90`) after reference date (approval timestamp for open postings; today for draft/rejected postings). Violations return 409 Conflict. Pending and closed postings are immutable.
   - **Admin Moderation Queue & Takedown**: Admins review postings via `/api/admin/internships?status=pending_review` (ordered oldest first) and `/admin/internship-reviews`. Decisions: approve (`open`) or reject (`rejected`, note required). Open postings can be taken down (`rejected`, note required). Admins never edit posting content.
   - **Review Metadata Privacy**: `review_note`, `reviewed_at`, and `reviewed_by` are set from the session and visible solely to the owner organization and platform administrators. Students and other organizations never see review notes.
   - **Catalogue & Application Isolation**: Rejected or taken-down postings are hidden from student catalogue and detail views (404 Not Found), block new applications (409 Conflict), but preserve existing submitted applications.
@@ -211,7 +211,7 @@ flowchart TD
 | `/api/submissions/{id}/grade` | `PUT` | `instructor` (owner) | Grade submission (0 to max_points, feedback, regradable) | `200 OK` |
 | `/api/internships` | `POST` | `organization` | Create internship posting with future deadline | `201 Created` |
 | `/api/organizations/me/internships` | `GET` | `organization` | Get organization's own postings with applicant count | `200 OK` |
-| `/api/internships/{id}` | `PATCH` | `organization` (owner) | Update posting fields in draft/rejected, or extend deadline if open | `200 OK` |
+| `/api/internships/{id}` | `PATCH` | `organization` (owner) | Update posting fields in draft/rejected, or extend deadline up to 90 days if open | `200 OK` |
 | `/api/internships/{id}/submit` | `POST` | `organization` (owner) | Submit draft or rejected posting for admin review (requires approved org) | `200 OK` |
 | `/api/internships/{id}/withdraw` | `POST` | `organization` (owner) | Withdraw pending_review posting back to draft for further editing | `200 OK` |
 | `/api/internships/{id}/close` | `POST` | `organization` (owner) | Close open internship posting | `200 OK` |

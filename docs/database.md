@@ -280,7 +280,7 @@ Represents company-published internship opportunities with work mode, duration, 
 | `location` | `VARCHAR(255)` | `NOT NULL` | Location description or city (1 to 255 characters) |
 | `work_mode` | `work_mode` | `NOT NULL` | Enum: `onsite`, `remote`, `hybrid` |
 | `duration_weeks` | `INTEGER` | `NULLABLE`, `1 <= duration_weeks <= 104` | Estimated duration in weeks |
-| `application_deadline` | `TIMESTAMPTZ` | `NOT NULL` | Timezone-aware deadline (must be in the future on creation) |
+| `application_deadline` | `TIMESTAMPTZ` | `NOT NULL` | Timezone-aware deadline (future date on creation; capped at 90 days from reference date) |
 | `status` | `internship_status` | `NOT NULL`, `DEFAULT 'draft'` | Enum: `draft`, `pending_review`, `open`, `rejected`, `closed` |
 | `review_note` | `VARCHAR(500)` | `NULLABLE` | Optional administrator review / takedown note |
 | `reviewed_at` | `TIMESTAMPTZ` | `NULLABLE` | Administrator review timestamp in UTC |
@@ -340,7 +340,7 @@ stateDiagram-v2
 12. **Submission Lock Upon Grading**: Once a submission receives a grade and `graded_at` timestamp, further student edits or resubmissions are rejected with 409 Conflict.
 13. **Instructor-Only Grading**: Only the course owner instructor can grade or regrade student work; administrators possess read-only access (403 Forbidden).
 14. **Internship Review Lifecycle**: Organizations cannot publish postings directly to `open` (PATCH with status `open` returns 409 "Submit for review instead"). Submission to `pending_review` requires an approved organization account (409 Conflict).
-15. **Content Modification Lock**: Posting content is editable only while in `draft` or `rejected` status. An `open` posting accepts only deadline extension (shortening returns 409 Conflict) or close. `pending_review` and `closed` postings are strictly locked.
+15. **Content Modification Lock & Deadline Cap**: Posting content is editable only while in `draft` or `rejected` status. An `open` posting accepts only deadline extension (shortening returns 409 Conflict) or close. A posting's application deadline may never exceed `MAX_DEADLINE_DAYS = 90` days after its reference date (the approval date `reviewed_at` for open postings, and today for draft or rejected postings). Violations on creation, editing, or extension return 409 Conflict with the latest allowed date. `pending_review` and `closed` postings are strictly locked.
 16. **Admin Review Privileges & Note Requirement**: Only admins can approve or reject postings. Rejections and takedowns strictly require a non-empty `review_note` (up to 500 characters). Admins never edit posting content.
 17. **Review Metadata Privacy**: `review_note`, `reviewed_at`, and `reviewed_by` are set from the server session and visible only to the posting owner organization and administrators. They are never exposed to students or other organizations.
 18. **Takedown & Rejection Visibility Isolation**: A taken-down or rejected posting disappears from student catalogue search and detail views (404 Not Found) and blocks new student applications (409 Conflict), but preserves existing applications for both student and organization review.

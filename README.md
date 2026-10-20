@@ -5,7 +5,7 @@ A production-grade, modular web platform designed for university student learnin
 > **Phase 5c Status**: Internship posting review, moderation queue, and lifecycle actions fully operational.
 > - **Extended Status Lifecycle**: Internship postings progress through `draft`, `pending_review`, `open`, `rejected`, and `closed`. Direct publishing via PATCH is disabled (returns 409 "Submit for review instead").
 > - **Organization Review Workflow**: Approved organizations submit postings for review via `POST /api/internships/{id}/submit`. Postings in `pending_review` can be withdrawn back to `draft` via `POST /api/internships/{id}/withdraw`. Rejected postings can be edited and resubmitted. Open postings can be closed via `POST /api/internships/{id}/close`.
-> - **Content Lock &amp; Deadline Guards**: Content is editable only in `draft` or `rejected` status. An `open` posting permits only deadline extensions (shortening deadline returns 409 Conflict) or closure. `pending_review` and `closed` postings are strictly immutable.
+> - **Content Lock &amp; Deadline Extension Cap**: Content is editable only in `draft` or `rejected` status. An `open` posting permits only deadline extensions (shortening returns 409 Conflict) or closure. Application deadlines may never exceed `MAX_DEADLINE_DAYS = 90` days after their reference date (approval date `reviewed_at` for open postings, and today for draft or rejected postings). Violations on create, edit, or extension return 409 Conflict with the latest allowed date. `pending_review` and `closed` postings are strictly immutable.
 > - **Admin Review Queue &amp; Takedowns**: Administrators review submitted postings at `/admin/internship-reviews` (`GET /api/admin/internships?status=`, ordered oldest first). Review panel displays full posting details and organization profile with Approve and Reject actions (review note required on rejection). Open postings support administrative takedown with a mandatory note and plain confirmation.
 > - **Metadata Privacy &amp; Student Isolation**: `reviewed_by`, `reviewed_at`, and `review_note` are derived from the session and visible exclusively to the posting owner and administrators. Taken-down or rejected postings disappear from student catalogue and detail views (404 Not Found) and reject new applications (409 Conflict) while preserving existing student applications.
 
@@ -17,7 +17,7 @@ A production-grade, modular web platform designed for university student learnin
 | :--- | :--- |
 | **Backend** | Python 3.12+ / 3.14+, FastAPI, SQLAlchemy 2, PostgreSQL (via `psycopg` 3), Alembic, Pydantic v2 |
 | **Frontend** | React 18, React Router 6/7, Vite (proxy to backend :8001), TypeScript (strict, no `any`), Tailwind CSS, Lucide React |
-| **Testing** | Pytest + FastAPI `TestClient` (backend: 111 tests), Vitest + React Testing Library (frontend: 162 tests) |
+| **Testing** | Pytest + FastAPI `TestClient` (backend: 112 tests), Vitest + React Testing Library (frontend: 165 tests) |
 | **Tooling &amp; Quality** | Ruff (backend lint &amp; format), ESLint 9 + Prettier (frontend lint &amp; format) |
 | **Environment** | Windows PowerShell compatible, Unix LF line endings, no hardcoded Windows paths |
 
