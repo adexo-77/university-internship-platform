@@ -119,7 +119,10 @@ erDiagram
         work_mode work_mode "enum: onsite | remote | hybrid"
         int duration_weeks "nullable, 1-104"
         timestamp application_deadline "with time zone, required"
-        internship_status status "enum: draft | open | closed, default draft"
+        internship_status status "enum: draft | pending_review | open | rejected | closed, default draft"
+        string review_note "nullable, max 500 chars"
+        timestamp reviewed_at "with time zone, nullable"
+        int reviewed_by FK "users.id, ON DELETE SET NULL, nullable"
         timestamp created_at "with time zone, server default now()"
         timestamp updated_at "with time zone, server default now(), on update"
     }
@@ -278,7 +281,10 @@ Represents company-published internship opportunities with work mode, duration, 
 | `work_mode` | `work_mode` | `NOT NULL` | Enum: `onsite`, `remote`, `hybrid` |
 | `duration_weeks` | `INTEGER` | `NULLABLE`, `1 <= duration_weeks <= 104` | Estimated duration in weeks |
 | `application_deadline` | `TIMESTAMPTZ` | `NOT NULL` | Timezone-aware deadline (must be in the future on creation) |
-| `status` | `internship_status` | `NOT NULL`, `DEFAULT 'draft'` | Enum: `draft`, `open`, `closed` |
+| `status` | `internship_status` | `NOT NULL`, `DEFAULT 'draft'` | Enum: `draft`, `pending_review`, `open`, `rejected`, `closed` |
+| `review_note` | `VARCHAR(500)` | `NULLABLE` | Optional administrator review / takedown note |
+| `reviewed_at` | `TIMESTAMPTZ` | `NULLABLE` | Administrator review timestamp in UTC |
+| `reviewed_by` | `INTEGER` | `NULLABLE`, `FK users(id) ON DELETE SET NULL` | Reviewing administrator user identifier |
 | `created_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Creation timestamp in UTC |
 | `updated_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Last update timestamp in UTC |
 
@@ -301,7 +307,24 @@ Represents student applications for published internship postings.
 
 ---
 
-## 3. Security &amp; Data Integrity Rules
+## 3. Internship Posting Lifecycle State Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> draft: Organization creates posting
+    draft --> pending_review: Organization submits for review (POST /api/internships/{id}/submit)
+    pending_review --> draft: Organization withdraws to draft (POST /api/internships/{id}/withdraw)
+    pending_review --> open: Admin approves (PUT /api/admin/internships/{id}/review)
+    pending_review --> rejected: Admin rejects with note (PUT /api/admin/internships/{id}/review)
+    rejected --> pending_review: Organization resubmits after editing (POST /api/internships/{id}/submit)
+    open --> rejected: Admin takes down with note (PUT /api/admin/internships/{id}/review)
+    open --> closed: Organization closes (POST /api/internships/{id}/close)
+    closed --> [*]
+```
+
+---
+
+## 4. Security &amp; Data Integrity Rules
 
 1. **Token Storage**: Raw session tokens are never stored in the database. Only the SHA-256 digest is persisted in `sessions.token_hash`.
 2. **Credential Privacy**: `password_hash` is never included in API responses or logs.
@@ -316,11 +339,14 @@ Represents student applications for published internship postings.
 11. **Protected Assignment Deletion**: An assignment cannot be deleted if student submissions have been recorded (enforced with 409 Conflict).
 12. **Submission Lock Upon Grading**: Once a submission receives a grade and `graded_at` timestamp, further student edits or resubmissions are rejected with 409 Conflict.
 13. **Instructor-Only Grading**: Only the course owner instructor can grade or regrade student work; administrators possess read-only access (403 Forbidden).
-14. **Internship Status Transitions**: Postings can transition only from `draft` to `open`, and `open` to `closed`. Closed postings are final and cannot be reopened or edited (409 Conflict).
-15. **Future Application Deadline on Posting Creation**: Internship postings must have a timezone-aware `application_deadline` set in the future upon creation (enforced with 422 validation).
-16. **Profile Completeness Prerequisite**: Students must have both `university` and `department` populated in their student profile before submitting an application (409 Conflict: "Complete your profile before applying").
-17. **Unique Application Per Posting**: Unique constraint on `(posting_id, student_id)` prevents duplicate applications by a student for the same posting (409 Conflict).
-18. **Application Lifecycle Transitions**: Applications can transition from `submitted` to `shortlisted`, `accepted`, or `rejected`; and from `shortlisted` to `accepted` or `rejected`. `accepted` and `rejected` statuses are terminal (409 Conflict). Withdrawn applications cannot be decided.
-19. **Withdrawal Window**: Students can withdraw their own application only while in `submitted` or `shortlisted` status (409 Conflict).
-20. **Applicant Data Isolation**: Detailed applicant profile data and cover letters are strictly confined to the posting's owner organization and platform administrators. Other organizations receive 404 Not Found.
+14. **Internship Review Lifecycle**: Organizations cannot publish postings directly to `open` (PATCH with status `open` returns 409 "Submit for review instead"). Submission to `pending_review` requires an approved organization account (409 Conflict).
+15. **Content Modification Lock**: Posting content is editable only while in `draft` or `rejected` status. An `open` posting accepts only deadline extension (shortening returns 409 Conflict) or close. `pending_review` and `closed` postings are strictly locked.
+16. **Admin Review Privileges & Note Requirement**: Only admins can approve or reject postings. Rejections and takedowns strictly require a non-empty `review_note` (up to 500 characters). Admins never edit posting content.
+17. **Review Metadata Privacy**: `review_note`, `reviewed_at`, and `reviewed_by` are set from the server session and visible only to the posting owner organization and administrators. They are never exposed to students or other organizations.
+18. **Takedown & Rejection Visibility Isolation**: A taken-down or rejected posting disappears from student catalogue search and detail views (404 Not Found) and blocks new student applications (409 Conflict), but preserves existing applications for both student and organization review.
+19. **Profile Completeness Prerequisite**: Students must have both `university` and `department` populated in their student profile before submitting an application (409 Conflict: "Complete your profile before applying").
+20. **Unique Application Per Posting**: Unique constraint on `(posting_id, student_id)` prevents duplicate applications by a student for the same posting (409 Conflict).
+21. **Application Lifecycle Transitions**: Applications can transition from `submitted` to `shortlisted`, `accepted`, or `rejected`; and from `shortlisted` to `accepted` or `rejected`. `accepted` and `rejected` statuses are terminal (409 Conflict). Withdrawn applications cannot be decided.
+22. **Withdrawal Window**: Students can withdraw their own application only while in `submitted` or `shortlisted` status (409 Conflict).
+23. **Applicant Data Isolation**: Detailed applicant profile data and cover letters are strictly confined to the posting's owner organization and platform administrators. Other organizations receive 404 Not Found.
 

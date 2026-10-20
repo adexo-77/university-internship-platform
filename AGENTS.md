@@ -41,7 +41,8 @@ university-internship-platform/
 │   │   │   ├── f0197aea93a8_create_courses_and_enrollments_tables.py
 │   │   │   ├── 340caf61d32f_create_assignments_and_submissions_.py
 │   │   │   ├── e17d6f716230_create_internship_postings_and_.py
-│   │   │   └── 7a040b1cdfb8_add_approval_fields_to_organization_.py
+│   │   │   ├── 7a040b1cdfb8_add_approval_fields_to_organization_.py
+│   │   │   └── c4d9a28e57f1_add_review_fields_and_statuses_to_.py
 │   │   ├── env.py             # Migration harness wired to Base metadata
 │   │   └── script.py.mako     # Migration template
 │   ├── alembic.ini            # Alembic configuration
@@ -68,6 +69,7 @@ university-internship-platform/
 │   │   │   ├── submission.py
 │   │   │   └── user.py
 │   │   ├── schemas/           # Pydantic validation schemas
+│   │   │   ├── admin_internship.py
 │   │   │   ├── admin_organization.py
 │   │   │   ├── admin_user.py
 │   │   │   ├── application.py
@@ -81,6 +83,7 @@ university-internship-platform/
 │   │   │   ├── student_profile.py
 │   │   │   └── submission.py
 │   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only)
+│   │   │   ├── admin_internship.py
 │   │   │   ├── admin_organization.py
 │   │   │   ├── admin_user.py
 │   │   │   ├── application.py
@@ -94,6 +97,7 @@ university-internship-platform/
 │   │   │   ├── student_profile.py
 │   │   │   └── submission.py
 │   │   ├── services/          # Pure business logic and domain rules
+│   │   │   ├── admin_internship.py
 │   │   │   ├── admin_organization.py
 │   │   │   ├── admin_user.py
 │   │   │   ├── application.py
@@ -131,6 +135,8 @@ university-internship-platform/
 │       ├── test_internship_approval_rules.py # Approval requirements for internship publishing & catalog hiding
 │       ├── test_internship_catalog.py   # Internship catalogue search, work mode filters, and visibility tests
 │       ├── test_internship_manage.py    # Internship creation, owner editing, and status transition tests
+│       ├── test_internship_review.py    # Admin review queue, approve, reject with note, takedown, and privacy tests
+│       ├── test_internship_transitions.py # Posting state transitions, submit, withdraw, close, and deadline guards
 │       ├── test_organization_profile_access.py # Organization profile access & guards tests
 │       ├── test_organization_profile_update.py # Organization profile update & validation tests
 │       ├── test_script_create_user.py   # CLI user creation script tests
@@ -150,6 +156,7 @@ university-internship-platform/
     ├── vite.config.ts         # Vite configuration with /api proxy to :8001 and Vitest
     └── src/
         ├── api/               # API clients and HTTP request wrappers
+        │   ├── admin_internship.ts
         │   ├── admin_organization.ts
         │   ├── admin_user.ts
         │   ├── application.ts
@@ -164,6 +171,10 @@ university-internship-platform/
         │   │   ├── ChangePasswordForm.tsx
         │   │   └── ChangePasswordForm.test.tsx
         │   ├── admin/         # Admin management components
+        │   │   ├── AdminInternshipReviewModal.tsx
+        │   │   ├── AdminInternshipReviewModal.test.tsx
+        │   │   ├── AdminInternshipReviewsTable.tsx
+        │   │   ├── AdminInternshipReviewsTable.test.tsx
         │   │   ├── AdminOrganizationApprovalModal.tsx
         │   │   ├── AdminOrganizationsTable.tsx
         │   │   ├── AdminOrganizationsTable.test.tsx
@@ -207,10 +218,14 @@ university-internship-platform/
         │   │   ├── ApplyForm.test.tsx
         │   │   ├── DecisionForm.tsx
         │   │   ├── DecisionForm.test.tsx
+        │   │   ├── InternshipActionsBar.tsx
+        │   │   ├── InternshipActionsBar.test.tsx
         │   │   ├── InternshipApplicantsSection.tsx
         │   │   ├── InternshipForm.tsx
         │   │   ├── InternshipForm.test.tsx
+        │   │   ├── InternshipInfoCard.tsx
         │   │   ├── InternshipStatusBadge.tsx
+        │   │   ├── InternshipStatusBadge.test.tsx
         │   │   ├── InternshipTable.tsx
         │   │   ├── MyApplicationsTable.tsx
         │   │   ├── OrganizationApprovalNotice.tsx
@@ -264,6 +279,8 @@ university-internship-platform/
         │   └── skills.test.ts
         ├── pages/             # Page-level route views
         │   ├── AccountPage.tsx
+        │   ├── AdminInternshipReviewsPage.tsx
+        │   ├── AdminInternshipReviewsPage.test.tsx
         │   ├── AdminOrganizationsPage.tsx
         │   ├── AdminOrganizationsPage.test.tsx
         │   ├── AdminUserCreatePage.tsx
@@ -289,6 +306,7 @@ university-internship-platform/
         │   ├── MyCoursesPage.tsx
         │   ├── MyCoursesPage.test.tsx
         │   ├── MyInternshipsPage.tsx
+        │   ├── MyInternshipsPage.test.tsx
         │   ├── NotFoundPage.tsx
         │   ├── ProfilePage.tsx
         │   ├── ProfilePage.test.tsx

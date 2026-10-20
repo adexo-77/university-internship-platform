@@ -23,6 +23,13 @@ The **University Learning & Internship Platform** is engineered with a modular, 
   - **Admin User Management**: Admin-only provisioning of instructor and admin accounts, searching, role filtering, account activation/deactivation with session invalidation, and password resets.
   - **Organization Approval Workflow**: Review and approval/rejection of organization accounts with optional review notes; publishing of internships restricted to approved organizations.
   - **Self-Service Password Change**: Authenticated password change with session invalidation (keeps current session active) and credential rotation.
+- **Phase 5c**: Internship Posting Review & Moderation Workflow:
+  - **Extended Posting Lifecycle**: Postings progress through `draft`, `pending_review`, `open`, `rejected`, `closed`. Direct transitions to `open` via PATCH are prohibited (409 "Submit for review instead").
+  - **Organization Actions**: Submission to `pending_review` requires approved organization status; pending postings can be withdrawn back to draft; rejected postings can be edited and resubmitted; open postings can be closed.
+  - **Content Lock & Deadline Extension**: Content is editable only in `draft` or `rejected` states. Open postings allow extending deadlines (shortening returns 409 Conflict) or closing. Pending and closed postings are immutable.
+  - **Admin Moderation Queue & Takedown**: Admins review postings via `/api/admin/internships?status=pending_review` (ordered oldest first) and `/admin/internship-reviews`. Decisions: approve (`open`) or reject (`rejected`, note required). Open postings can be taken down (`rejected`, note required). Admins never edit posting content.
+  - **Review Metadata Privacy**: `review_note`, `reviewed_at`, and `reviewed_by` are set from the session and visible solely to the owner organization and platform administrators. Students and other organizations never see review notes.
+  - **Catalogue & Application Isolation**: Rejected or taken-down postings are hidden from student catalogue and detail views (404 Not Found), block new applications (409 Conflict), but preserve existing submitted applications.
 
 ```mermaid
 flowchart TD
@@ -204,9 +211,14 @@ flowchart TD
 | `/api/submissions/{id}/grade` | `PUT` | `instructor` (owner) | Grade submission (0 to max_points, feedback, regradable) | `200 OK` |
 | `/api/internships` | `POST` | `organization` | Create internship posting with future deadline | `201 Created` |
 | `/api/organizations/me/internships` | `GET` | `organization` | Get organization's own postings with applicant count | `200 OK` |
-| `/api/internships/{id}` | `PATCH` | `organization` (owner) | Update posting fields or advance status (`draft`->`open`, `open`->`closed`) | `200 OK` |
+| `/api/internships/{id}` | `PATCH` | `organization` (owner) | Update posting fields in draft/rejected, or extend deadline if open | `200 OK` |
+| `/api/internships/{id}/submit` | `POST` | `organization` (owner) | Submit draft or rejected posting for admin review (requires approved org) | `200 OK` |
+| `/api/internships/{id}/withdraw` | `POST` | `organization` (owner) | Withdraw pending_review posting back to draft for further editing | `200 OK` |
+| `/api/internships/{id}/close` | `POST` | `organization` (owner) | Close open internship posting | `200 OK` |
 | `/api/internships` | `GET` | `student`, `admin` | Search catalogue (?q=, ?work_mode=, pagination); 403 for others | `200 OK` |
 | `/api/internships/{id}` | `GET` | `student` (if open), owner `organization`, `admin` | Get internship details (404 for others) | `200 OK` |
+| `/api/admin/internships` | `GET` | `admin` | List postings for review queue (?status=, oldest first) | `200 OK` |
+| `/api/admin/internships/{id}/review` | `PUT` | `admin` | Approve, reject, or take down posting (note required for reject/takedown) | `200 OK` |
 | `/api/internships/{id}/applications` | `POST` | `student` | Submit application (guards profile completeness, deadline, duplicates) | `201 Created` |
 | `/api/students/me/applications` | `GET` | `student` | Get authenticated student's applications | `200 OK` |
 | `/api/applications/{id}/withdraw` | `POST` | `student` (owner) | Withdraw application while submitted/shortlisted | `200 OK` |

@@ -1,11 +1,13 @@
-# University Learning &amp; Internship Platform &bull; Phase 5b Admin Management &amp; Approvals
+# University Learning &amp; Internship Platform &bull; Phase 5c Internship Posting Review
 
 A production-grade, modular web platform designed for university student learning tracking, skill assessment, and internship placement matching. Built for the Brolf Tech internship technical challenge with a strict **MVP first, one phase at a time** methodology.
 
-> **Phase 5b Status**: Administrative user management, organization approval workflow, and self-service password change fully operational.
-> - **Admin User Management**: Admin-only user directory with search (?q=), role and active status filters, pagination, instructor/admin account provisioning, account activation/deactivation with self-deactivation and last-admin protection, automatic session invalidation on deactivation, and administrator password resets.
-> - **Organization Approvals**: Approval workflow for organization accounts (`pending`, `approved`, `rejected`) with reviewer stamping and optional review notes; student catalogue and detail views hide unapproved or inactive organizations; publishing draft internships requires an approved organization account.
-> - **Self-Service Password Change**: Signed-in credential updates for all roles with server-clock session rotation (keeps current session active, invalidates other sessions) and identical 401 error messaging on wrong current password.
+> **Phase 5c Status**: Internship posting review, moderation queue, and lifecycle actions fully operational.
+> - **Extended Status Lifecycle**: Internship postings progress through `draft`, `pending_review`, `open`, `rejected`, and `closed`. Direct publishing via PATCH is disabled (returns 409 "Submit for review instead").
+> - **Organization Review Workflow**: Approved organizations submit postings for review via `POST /api/internships/{id}/submit`. Postings in `pending_review` can be withdrawn back to `draft` via `POST /api/internships/{id}/withdraw`. Rejected postings can be edited and resubmitted. Open postings can be closed via `POST /api/internships/{id}/close`.
+> - **Content Lock &amp; Deadline Guards**: Content is editable only in `draft` or `rejected` status. An `open` posting permits only deadline extensions (shortening deadline returns 409 Conflict) or closure. `pending_review` and `closed` postings are strictly immutable.
+> - **Admin Review Queue &amp; Takedowns**: Administrators review submitted postings at `/admin/internship-reviews` (`GET /api/admin/internships?status=`, ordered oldest first). Review panel displays full posting details and organization profile with Approve and Reject actions (review note required on rejection). Open postings support administrative takedown with a mandatory note and plain confirmation.
+> - **Metadata Privacy &amp; Student Isolation**: `reviewed_by`, `reviewed_at`, and `review_note` are derived from the session and visible exclusively to the posting owner and administrators. Taken-down or rejected postings disappear from student catalogue and detail views (404 Not Found) and reject new applications (409 Conflict) while preserving existing student applications.
 
 ---
 
@@ -15,7 +17,7 @@ A production-grade, modular web platform designed for university student learnin
 | :--- | :--- |
 | **Backend** | Python 3.12+ / 3.14+, FastAPI, SQLAlchemy 2, PostgreSQL (via `psycopg` 3), Alembic, Pydantic v2 |
 | **Frontend** | React 18, React Router 6/7, Vite (proxy to backend :8001), TypeScript (strict, no `any`), Tailwind CSS, Lucide React |
-| **Testing** | Pytest + FastAPI `TestClient` (backend: 102 tests), Vitest + React Testing Library (frontend: 142 tests) |
+| **Testing** | Pytest + FastAPI `TestClient` (backend: 111 tests), Vitest + React Testing Library (frontend: 162 tests) |
 | **Tooling &amp; Quality** | Ruff (backend lint &amp; format), ESLint 9 + Prettier (frontend lint &amp; format) |
 | **Environment** | Windows PowerShell compatible, Unix LF line endings, no hardcoded Windows paths |
 
@@ -33,7 +35,7 @@ university-internship-platform/
 ├── README.md                  # Setup instructions and PowerShell commands
 ├── docs/
 │   ├── architecture.md        # Architecture, topology, and endpoint contracts
-│   ├── database.md            # Mermaid ER diagram and schema specifications
+│   ├── database.md            # Mermaid ER diagram, status lifecycle diagram, and schema specifications
 │   └── design.md              # Design tokens, components, and layout guidelines
 ├── scripts/
 │   └── create_user.py         # CLI administrative user provisioning tool
@@ -45,7 +47,8 @@ university-internship-platform/
 │   │   │   ├── f0197aea93a8_create_courses_and_enrollments_tables.py
 │   │   │   ├── 340caf61d32f_create_assignments_and_submissions_.py
 │   │   │   ├── e17d6f716230_create_internship_postings_and_.py
-│   │   │   └── 7a040b1cdfb8_add_approval_fields_to_organization_.py
+│   │   │   ├── 7a040b1cdfb8_add_approval_fields_to_organization_.py
+│   │   │   └── c4d9a28e57f1_add_review_fields_and_statuses_to_.py
 │   │   └── env.py             # Migration harness wired to Base metadata
 │   ├── alembic.ini            # Alembic configuration
 │   ├── pyproject.toml         # Ruff and Pytest settings
@@ -54,9 +57,9 @@ university-internship-platform/
 │   ├── app/
 │   │   ├── core/              # Settings, database engine, security helpers, deps
 │   │   ├── models/            # SQLAlchemy models (user, session, student_profile, organization_profile, course, enrollment, assignment, submission, internship, application)
-│   │   ├── schemas/           # Pydantic schemas (auth, student_profile, organization_profile, course, enrollment, assignment, submission, internship, application, health, admin_user, admin_organization)
-│   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only: auth, student_profile, organization_profile, course, enrollment, assignment, submission, internship, application, health, admin_user, admin_organization)
-│   │   ├── services/          # Pure business logic and domain rules (auth, student_profile, organization_profile, course, course_catalog, enrollment, assignment, submission, internship, internship_catalog, application, health, admin_user, admin_organization)
+│   │   ├── schemas/           # Pydantic schemas (auth, student_profile, organization_profile, course, enrollment, assignment, submission, internship, application, health, admin_user, admin_organization, admin_internship)
+│   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only: auth, student_profile, organization_profile, course, enrollment, assignment, submission, internship, application, health, admin_user, admin_organization, admin_internship)
+│   │   ├── services/          # Pure business logic and domain rules (auth, student_profile, organization_profile, course, course_catalog, enrollment, assignment, submission, internship, internship_catalog, application, health, admin_user, admin_organization, admin_internship)
 │   │   └── main.py            # FastAPI entry point & CORS
 │   └── tests/
 │       ├── conftest.py        # Pytest fixtures and database test harnesses
@@ -80,6 +83,8 @@ university-internship-platform/
 │       ├── test_internship_approval_rules.py # Approval requirements for internship publishing & catalog hiding
 │       ├── test_internship_catalog.py   # Internship catalogue search, work mode filters, and visibility tests
 │       ├── test_internship_manage.py    # Internship creation, owner editing, and status transition tests
+│       ├── test_internship_review.py    # Admin review queue, approve, reject with note, takedown, and privacy tests
+│       ├── test_internship_transitions.py # Posting state transitions, submit, withdraw, close, and deadline guards
 │       ├── test_organization_profile_access.py # Organization profile access & guards tests
 │       ├── test_organization_profile_update.py # Organization profile update & validation tests
 │       ├── test_script_create_user.py   # CLI script integration tests
@@ -96,13 +101,13 @@ university-internship-platform/
     ├── tsconfig.node.json     # Vite config TypeScript options
     ├── vite.config.ts         # Vite proxy configuration (/api -> :8001) and Vitest
     └── src/
-        ├── api/               # API clients (auth, health, profile, course, assignment, internship, application, admin_user, admin_organization)
+        ├── api/               # API clients (auth, health, profile, course, assignment, internship, application, admin_user, admin_organization, admin_internship)
         ├── components/
         │   ├── account/       # ChangePasswordForm
-        │   ├── admin/         # AdminUsersTable, AdminUserForm, AdminUserStatusModal, AdminResetPasswordModal, AdminOrganizationsTable, AdminOrganizationApprovalModal
+        │   ├── admin/         # AdminUsersTable, AdminUserForm, AdminUserStatusModal, AdminResetPasswordModal, AdminOrganizationsTable, AdminOrganizationApprovalModal, AdminInternshipReviewsTable, AdminInternshipReviewModal
         │   ├── assignments/   # AssignmentForm, AssignmentTable, CourseAssignmentsSection, DueBadge, GradeForm, SubmissionForm, SubmissionStatusBadge, SubmissionsTable
         │   ├── courses/       # CourseForm, CourseTable, EnrollButton, StudentRosterTable
-        │   ├── internships/   # InternshipForm, InternshipTable, InternshipStatusBadge, ApplyForm, ApplicationStatusBadge, ApplicantsTable, DecisionForm, MyApplicationsTable, StudentApplicationPanel, InternshipApplicantsSection, OrganizationApprovalNotice
+        │   ├── internships/   # InternshipForm, InternshipTable, InternshipStatusBadge, ApplyForm, ApplicationStatusBadge, ApplicantsTable, DecisionForm, MyApplicationsTable, StudentApplicationPanel, InternshipApplicantsSection, OrganizationApprovalNotice, InternshipActionsBar, InternshipInfoCard
         │   ├── layout/        # AppShell layout component
         │   ├── profile/       # StudentProfileForm, OrganizationProfileForm
         │   ├── routes/        # ProtectedRoute, RoleRoute
@@ -111,7 +116,7 @@ university-internship-platform/
         ├── context/           # React AuthContext and AuthProvider
         ├── hooks/             # Custom hooks (useAuth, useHealth, usePageTitle)
         ├── lib/               # Utility functions (cn, dates, skills)
-        ├── pages/             # Pages (Login, Register, Account, Profile, Courses, MyCourses, CourseCreate, CourseEdit, CourseDetail, AssignmentCreate, AssignmentEdit, AssignmentDetail, SubmissionGrade, Internships, InternshipCreate, InternshipEdit, InternshipDetail, MyInternships, MyApplications, ApplicationDetail, AdminUsers, AdminUserCreate, AdminOrganizations, SystemStatus, NotFound)
+        ├── pages/             # Pages (Login, Register, Account, Profile, Courses, MyCourses, CourseCreate, CourseEdit, CourseDetail, AssignmentCreate, AssignmentEdit, AssignmentDetail, SubmissionGrade, Internships, InternshipCreate, InternshipEdit, InternshipDetail, MyInternships, MyApplications, ApplicationDetail, AdminUsers, AdminUserCreate, AdminOrganizations, AdminInternshipReviews, SystemStatus, NotFound)
         ├── types/             # Shared TypeScript types (auth, health, profile, course, assignment, internship, application, admin)
         ├── App.tsx            # Application routing entry point
         └── main.tsx           # React DOM root
@@ -190,6 +195,7 @@ python scripts/create_user.py --email instructor@example.com --password "Instruc
    ```
 2. Sign in at `/login` and navigate to `/admin/users` to provision instructor/admin accounts, toggle user activation statuses, or reset passwords.
 3. Navigate to `/admin/organizations` to review pending organization registrations and approve or reject their publishing privileges.
+4. Navigate to `/admin/internship-reviews` to inspect the moderation queue (`pending_review` by default), review full posting details alongside the organization profile, and approve or reject postings (note required on rejection). On active `open` listings, perform administrative takedowns with a mandatory justification note.
 
 ---
 
@@ -239,13 +245,14 @@ Frontend Routes:
 - User Management: [http://localhost:5173/admin/users](http://localhost:5173/admin/users) (Admin role only)
 - Create User: [http://localhost:5173/admin/users/new](http://localhost:5173/admin/users/new) (Admin role only)
 - Organization Approvals: [http://localhost:5173/admin/organizations](http://localhost:5173/admin/organizations) (Admin role only)
+- Internship Reviews: [http://localhost:5173/admin/internship-reviews](http://localhost:5173/admin/internship-reviews) (Admin role only)
 - Profile: [http://localhost:5173/profile](http://localhost:5173/profile) (Student and Organization roles)
-- Account Summary & Password Change: [http://localhost:5173/account](http://localhost:5173/account)
+- Account Summary &amp; Password Change: [http://localhost:5173/account](http://localhost:5173/account)
 - System Status: [http://localhost:5173/status](http://localhost:5173/status) (Admin role only)
 
 ---
 
-### 7. Linting & Formatting Commands
+### 7. Linting &amp; Formatting Commands
 
 #### Backend (Ruff)
 
@@ -298,14 +305,14 @@ npm run test -- --run
 
 ---
 
-## Phase 5b Definition of Done Verification
+## Phase 5c Definition of Done Verification
 
 | Criteria | Status | Details |
 | :--- | :---: | :--- |
-| **1. Lint & format pass with 0 warnings** | PASS | Ruff check & format pass with 0 errors; ESLint & Prettier pass with 0 warnings |
-| **2. All tests pass** | PASS | Pytest (102/102 passed against real PostgreSQL); Vitest (142/142 passed across 42 test files) |
+| **1. Lint &amp; format pass with 0 warnings** | PASS | Ruff check &amp; format pass with 0 errors; ESLint &amp; Prettier pass with 0 warnings |
+| **2. All tests pass** | PASS | Pytest (111/111 passed against real PostgreSQL); Vitest (162/162 passed across 47 test files) |
 | **3. No unused files, imports, or dependencies** | PASS | All modules, imports, and packages verified clean against project guide |
 | **4. Documentation is complete** | PASS | Updated README, docs/architecture.md, docs/database.md, AGENTS.md |
 | **5. Working tree is clean and committed** | PASS | Small, focused conventional commits across every step |
 | **6. Build verification** | PASS | Frontend production bundle builds cleanly (`tsc --noEmit && vite build`) |
-| **7. File size limits** | PASS | Count physical lines with `(Get-Content <file>).Count`, including blank lines and test files. From now on, any file above 250 physical lines must be split before the phase is called done. (Reported via: `Get-ChildItem backend\app, backend\tests, frontend\src -Recurse -Include *.py,*.ts,*.tsx \| ForEach-Object { [pscustomobject]@{Lines=(Get-Content $_.FullName).Count; File=$_.Name} } \| Sort-Object Lines -Descending \| Select-Object -First 8`) |
+| **7. File size limits** | PASS | Count physical lines with `(Get-Content <file>).Count`, including blank lines and test files. None exceeds 250 physical lines. (Reported via: `Get-ChildItem backend\app, backend\tests, frontend\src -Recurse -Include *.py,*.ts,*.tsx \| ForEach-Object { [pscustomobject]@{Lines=(Get-Content $_.FullName).Count; File=$_.Name} } \| Sort-Object Lines -Descending \| Select-Object -First 8`) |
