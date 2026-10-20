@@ -1,8 +1,11 @@
-# University Learning &amp; Internship Platform &bull; Phase 5 Internship Postings &amp; Applications
+# University Learning &amp; Internship Platform &bull; Phase 5b Admin Management &amp; Approvals
 
 A production-grade, modular web platform designed for university student learning tracking, skill assessment, and internship placement matching. Built for the Brolf Tech internship technical challenge with a strict **MVP first, one phase at a time** methodology.
 
-> **Phase 5 Status**: Internship postings and applications fully operational. Organization internship posting creation with future application deadlines, posting lifecycle transitions (`draft` -> `open` -> `closed`), student and admin searchable catalogue with keyword search and work mode filters, student application submission with cover letter, profile completeness validation (university and department required), duplicate prevention, withdrawal capability, organization applicant background profile and cover letter review, decision workflow (`shortlisted`, `accepted`, `rejected`) with feedback messages, terminal state locks, and role-based access control.
+> **Phase 5b Status**: Administrative user management, organization approval workflow, and self-service password change fully operational.
+> - **Admin User Management**: Admin-only user directory with search (?q=), role and active status filters, pagination, instructor/admin account provisioning, account activation/deactivation with self-deactivation and last-admin protection, automatic session invalidation on deactivation, and administrator password resets.
+> - **Organization Approvals**: Approval workflow for organization accounts (`pending`, `approved`, `rejected`) with reviewer stamping and optional review notes; student catalogue and detail views hide unapproved or inactive organizations; publishing draft internships requires an approved organization account.
+> - **Self-Service Password Change**: Signed-in credential updates for all roles with server-clock session rotation (keeps current session active, invalidates other sessions) and identical 401 error messaging on wrong current password.
 
 ---
 
@@ -12,7 +15,7 @@ A production-grade, modular web platform designed for university student learnin
 | :--- | :--- |
 | **Backend** | Python 3.12+ / 3.14+, FastAPI, SQLAlchemy 2, PostgreSQL (via `psycopg` 3), Alembic, Pydantic v2 |
 | **Frontend** | React 18, React Router 6/7, Vite (proxy to backend :8001), TypeScript (strict, no `any`), Tailwind CSS, Lucide React |
-| **Testing** | Pytest + FastAPI `TestClient` (backend: 86 tests), Vitest + React Testing Library (frontend: 120 tests) |
+| **Testing** | Pytest + FastAPI `TestClient` (backend: 102 tests), Vitest + React Testing Library (frontend: 142 tests) |
 | **Tooling &amp; Quality** | Ruff (backend lint &amp; format), ESLint 9 + Prettier (frontend lint &amp; format) |
 | **Environment** | Windows PowerShell compatible, Unix LF line endings, no hardcoded Windows paths |
 
@@ -41,7 +44,8 @@ university-internship-platform/
 │   │   │   ├── c9e18918b114_create_student_and_organization_.py
 │   │   │   ├── f0197aea93a8_create_courses_and_enrollments_tables.py
 │   │   │   ├── 340caf61d32f_create_assignments_and_submissions_.py
-│   │   │   └── e17d6f716230_create_internship_postings_and_.py
+│   │   │   ├── e17d6f716230_create_internship_postings_and_.py
+│   │   │   └── 7a040b1cdfb8_add_approval_fields_to_organization_.py
 │   │   └── env.py             # Migration harness wired to Base metadata
 │   ├── alembic.ini            # Alembic configuration
 │   ├── pyproject.toml         # Ruff and Pytest settings
@@ -50,18 +54,22 @@ university-internship-platform/
 │   ├── app/
 │   │   ├── core/              # Settings, database engine, security helpers, deps
 │   │   ├── models/            # SQLAlchemy models (user, session, student_profile, organization_profile, course, enrollment, assignment, submission, internship, application)
-│   │   ├── schemas/           # Pydantic schemas (auth, student_profile, organization_profile, course, enrollment, assignment, submission, internship, application, health)
-│   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only: auth, student_profile, organization_profile, course, enrollment, assignment, submission, internship, application, health)
-│   │   ├── services/          # Pure business logic and domain rules (auth, student_profile, organization_profile, course, course_catalog, enrollment, assignment, submission, internship, internship_catalog, application, health)
+│   │   ├── schemas/           # Pydantic schemas (auth, student_profile, organization_profile, course, enrollment, assignment, submission, internship, application, health, admin_user, admin_organization)
+│   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only: auth, student_profile, organization_profile, course, enrollment, assignment, submission, internship, application, health, admin_user, admin_organization)
+│   │   ├── services/          # Pure business logic and domain rules (auth, student_profile, organization_profile, course, course_catalog, enrollment, assignment, submission, internship, internship_catalog, application, health, admin_user, admin_organization)
 │   │   └── main.py            # FastAPI entry point & CORS
 │   └── tests/
 │       ├── conftest.py        # Pytest fixtures and database test harnesses
 │       ├── factories.py       # Test data factories and authentication helpers
+│       ├── test_admin_organization.py   # Admin organization approval and status filter tests
+│       ├── test_admin_user.py           # Admin user search, role filter, and provisioning tests
+│       ├── test_admin_user_lifecycle.py # Admin user activation, self-protection, and password reset tests
 │       ├── test_application_apply.py    # Application submission, profile prerequisite, and withdrawal tests
 │       ├── test_application_decision.py # Organization application review, decision transitions, and locking tests
 │       ├── test_assignment_create.py    # Assignment creation and visibility tests
 │       ├── test_assignment_lifecycle.py # Assignment grade floor and deletion guard tests
 │       ├── test_auth_login.py           # Auth login tests
+│       ├── test_auth_password_change.py # Authenticated password change and session invalidation tests
 │       ├── test_auth_register.py        # Auth registration tests
 │       ├── test_auth_session.py         # Session lifecycle & role guard tests
 │       ├── test_course_create.py        # Course creation permissions and field validation tests
@@ -69,6 +77,7 @@ university-internship-platform/
 │       ├── test_course_visibility.py    # Course visibility, catalog search, and pagination tests
 │       ├── test_enrollment.py           # Enrollment, roster inspection, and cascade delete tests
 │       ├── test_health.py               # System & DB health test suite
+│       ├── test_internship_approval_rules.py # Approval requirements for internship publishing & catalog hiding
 │       ├── test_internship_catalog.py   # Internship catalogue search, work mode filters, and visibility tests
 │       ├── test_internship_manage.py    # Internship creation, owner editing, and status transition tests
 │       ├── test_organization_profile_access.py # Organization profile access & guards tests
@@ -87,11 +96,13 @@ university-internship-platform/
     ├── tsconfig.node.json     # Vite config TypeScript options
     ├── vite.config.ts         # Vite proxy configuration (/api -> :8001) and Vitest
     └── src/
-        ├── api/               # API clients (auth, health, profile, course, assignment, internship, application)
+        ├── api/               # API clients (auth, health, profile, course, assignment, internship, application, admin_user, admin_organization)
         ├── components/
+        │   ├── account/       # ChangePasswordForm
+        │   ├── admin/         # AdminUsersTable, AdminUserForm, AdminUserStatusModal, AdminResetPasswordModal, AdminOrganizationsTable, AdminOrganizationApprovalModal
         │   ├── assignments/   # AssignmentForm, AssignmentTable, CourseAssignmentsSection, DueBadge, GradeForm, SubmissionForm, SubmissionStatusBadge, SubmissionsTable
         │   ├── courses/       # CourseForm, CourseTable, EnrollButton, StudentRosterTable
-        │   ├── internships/   # InternshipForm, InternshipTable, InternshipStatusBadge, ApplyForm, ApplicationStatusBadge, ApplicantsTable, DecisionForm, MyApplicationsTable, StudentApplicationPanel, InternshipApplicantsSection
+        │   ├── internships/   # InternshipForm, InternshipTable, InternshipStatusBadge, ApplyForm, ApplicationStatusBadge, ApplicantsTable, DecisionForm, MyApplicationsTable, StudentApplicationPanel, InternshipApplicantsSection, OrganizationApprovalNotice
         │   ├── layout/        # AppShell layout component
         │   ├── profile/       # StudentProfileForm, OrganizationProfileForm
         │   ├── routes/        # ProtectedRoute, RoleRoute
@@ -100,8 +111,8 @@ university-internship-platform/
         ├── context/           # React AuthContext and AuthProvider
         ├── hooks/             # Custom hooks (useAuth, useHealth, usePageTitle)
         ├── lib/               # Utility functions (cn, dates, skills)
-        ├── pages/             # Pages (Login, Register, Account, Profile, Courses, MyCourses, CourseCreate, CourseEdit, CourseDetail, AssignmentCreate, AssignmentEdit, AssignmentDetail, SubmissionGrade, Internships, InternshipCreate, InternshipEdit, InternshipDetail, MyInternships, MyApplications, ApplicationDetail, SystemStatus, NotFound)
-        ├── types/             # Shared TypeScript types (auth, health, profile, course, assignment, internship, application)
+        ├── pages/             # Pages (Login, Register, Account, Profile, Courses, MyCourses, CourseCreate, CourseEdit, CourseDetail, AssignmentCreate, AssignmentEdit, AssignmentDetail, SubmissionGrade, Internships, InternshipCreate, InternshipEdit, InternshipDetail, MyInternships, MyApplications, ApplicationDetail, AdminUsers, AdminUserCreate, AdminOrganizations, SystemStatus, NotFound)
+        ├── types/             # Shared TypeScript types (auth, health, profile, course, assignment, internship, application, admin)
         ├── App.tsx            # Application routing entry point
         └── main.tsx           # React DOM root
 ```
@@ -172,6 +183,14 @@ python scripts/create_user.py --email admin@example.com --password "SecureAdminP
 python scripts/create_user.py --email instructor@example.com --password "InstructorPassword123!" --full-name "Prof. Turing" --role instructor
 ```
 
+#### Admin Guide
+1. Create the initial administrator account via CLI:
+   ```powershell
+   python scripts/create_user.py --email admin@example.com --password "SecurePassword123!" --full-name "Admin User" --role admin
+   ```
+2. Sign in at `/login` and navigate to `/admin/users` to provision instructor/admin accounts, toggle user activation statuses, or reset passwords.
+3. Navigate to `/admin/organizations` to review pending organization registrations and approve or reject their publishing privileges.
+
 ---
 
 ### 5. Backend Server Execution
@@ -210,8 +229,18 @@ Frontend Routes:
 - Assignment Details: [http://localhost:5173/assignments/:id](http://localhost:5173/assignments/:id)
 - Edit Assignment: [http://localhost:5173/assignments/:id/edit](http://localhost:5173/assignments/:id/edit) (Instructors)
 - Grade Submission: [http://localhost:5173/assignments/:assignmentId/submissions/:submissionId/grade](http://localhost:5173/assignments/:assignmentId/submissions/:submissionId/grade) (Instructors)
+- Internships Catalogue: [http://localhost:5173/internships](http://localhost:5173/internships) (Students and Admin)
+- My Internships: [http://localhost:5173/my-internships](http://localhost:5173/my-internships) (Organizations)
+- Create Internship: [http://localhost:5173/internships/new](http://localhost:5173/internships/new) (Organizations)
+- Internship Details: [http://localhost:5173/internships/:id](http://localhost:5173/internships/:id)
+- Edit Internship: [http://localhost:5173/internships/:id/edit](http://localhost:5173/internships/:id/edit) (Organizations)
+- My Applications: [http://localhost:5173/my-applications](http://localhost:5173/my-applications) (Students)
+- Application Details: [http://localhost:5173/applications/:id](http://localhost:5173/applications/:id) (Students, Organizations, Admin)
+- User Management: [http://localhost:5173/admin/users](http://localhost:5173/admin/users) (Admin role only)
+- Create User: [http://localhost:5173/admin/users/new](http://localhost:5173/admin/users/new) (Admin role only)
+- Organization Approvals: [http://localhost:5173/admin/organizations](http://localhost:5173/admin/organizations) (Admin role only)
 - Profile: [http://localhost:5173/profile](http://localhost:5173/profile) (Student and Organization roles)
-- Account Summary: [http://localhost:5173/account](http://localhost:5173/account)
+- Account Summary & Password Change: [http://localhost:5173/account](http://localhost:5173/account)
 - System Status: [http://localhost:5173/status](http://localhost:5173/status) (Admin role only)
 
 ---
@@ -269,12 +298,12 @@ npm run test -- --run
 
 ---
 
-## Phase 4 Definition of Done Verification
+## Phase 5b Definition of Done Verification
 
 | Criteria | Status | Details |
 | :--- | :---: | :--- |
 | **1. Lint & format pass with 0 warnings** | PASS | Ruff check & format pass with 0 errors; ESLint & Prettier pass with 0 warnings |
-| **2. All tests pass** | PASS | Pytest (58/58 passed against real PostgreSQL); Vitest (78/78 passed across 22 test files) |
+| **2. All tests pass** | PASS | Pytest (102/102 passed against real PostgreSQL); Vitest (142/142 passed across 42 test files) |
 | **3. No unused files, imports, or dependencies** | PASS | All modules, imports, and packages verified clean against project guide |
 | **4. Documentation is complete** | PASS | Updated README, docs/architecture.md, docs/database.md, AGENTS.md |
 | **5. Working tree is clean and committed** | PASS | Small, focused conventional commits across every step |

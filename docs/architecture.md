@@ -19,6 +19,10 @@ The **University Learning & Internship Platform** is engineered with a modular, 
   - **Catalogue & Search**: Students browse open postings with title/organization search and work mode filter; admin views all statuses.
   - **Student Applications**: Student applications with cover letter, profile completeness guard (university and department required), duplicate prevention, and withdrawal window.
   - **Review & Decisions**: Organization review of applicant background profiles and cover letters with decision workflow (shortlisted, accepted, rejected) and decision messages. Terminal states locked. Admin read-only access.
+- **Phase 5b**: Administrative User Management, Organization Approval & Password Change:
+  - **Admin User Management**: Admin-only provisioning of instructor and admin accounts, searching, role filtering, account activation/deactivation with session invalidation, and password resets.
+  - **Organization Approval Workflow**: Review and approval/rejection of organization accounts with optional review notes; publishing of internships restricted to approved organizations.
+  - **Self-Service Password Change**: Authenticated password change with session invalidation (keeps current session active) and credential rotation.
 
 ```mermaid
 flowchart TD
@@ -209,6 +213,13 @@ flowchart TD
 | `/api/internships/{id}/applications` | `GET` | `organization` (owner), `admin` | List applicant background profiles, cover letters, and statuses | `200 OK` |
 | `/api/applications/{id}` | `GET` | `student` (owner), `organization` (owner), `admin` | Get application details (404 for others) | `200 OK` |
 | `/api/applications/{id}/decision` | `PUT` | `organization` (owner) | Decide application (`shortlisted`, `accepted`, `rejected`) | `200 OK` |
+| `/api/auth/change-password` | `POST` | Authenticated | Change user's own password (invalidates other sessions) | `200 OK` |
+| `/api/admin/users` | `GET` | `admin` | Search & paginate users (?q=, ?role=, ?is_active=) | `200 OK` |
+| `/api/admin/users` | `POST` | `admin` | Provision instructor or admin account (422 for other roles) | `201 Created` |
+| `/api/admin/users/{id}` | `PATCH` | `admin` | Toggle user is_active (guards self/last-admin, kills sessions) | `200 OK` |
+| `/api/admin/users/{id}/password` | `PUT` | `admin` | Reset user password (invalidates user sessions) | `200 OK` |
+| `/api/admin/organizations` | `GET` | `admin` | List organizations with ?approval_status= filter & pagination | `200 OK` |
+| `/api/admin/organizations/{user_id}/approval` | `PUT` | `admin` | Approve, reject, or reset organization approval with note | `200 OK` |
 | `/api/health` | `GET` | Public | Basic platform status probe | `200 OK` |
 | `/api/health/db` | `GET` | Public | Database query connectivity probe | `200 OK` |
 

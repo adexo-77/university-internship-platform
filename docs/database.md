@@ -59,6 +59,10 @@ erDiagram
         string location "nullable, max 255"
         string website "nullable, valid http/https URL, max 255"
         string description "nullable, max 1000"
+        organization_approval_status approval_status "enum: pending | approved | rejected, default pending"
+        string approval_note "nullable, max 500"
+        timestamp reviewed_at "with time zone, nullable"
+        int reviewed_by FK "users.id, ON DELETE SET NULL, nullable"
         timestamp updated_at "with time zone, server default now(), on update"
     }
 
@@ -192,6 +196,10 @@ Represents company details, industry sector, and contact points for organization
 | `location` | `VARCHAR(255)` | `NULLABLE` | Office city, country, or location |
 | `website` | `VARCHAR(255)` | `NULLABLE` | Valid HTTP or HTTPS web URL |
 | `description` | `VARCHAR(1000)` | `NULLABLE` | Organization mission, culture, and overview |
+| `approval_status` | `organization_approval_status` | `NOT NULL`, `DEFAULT 'pending'` | Approval status (`pending`, `approved`, `rejected`) |
+| `approval_note` | `VARCHAR(500)` | `NULLABLE` | Optional administrator review notes |
+| `reviewed_at` | `TIMESTAMPTZ` | `NULLABLE` | Administrator review timestamp |
+| `reviewed_by` | `INTEGER` | `NULLABLE`, `FK users(id) ON DELETE SET NULL` | Reviewing administrator user identifier |
 | `updated_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Profile last modification timestamp |
 
 ### `courses`

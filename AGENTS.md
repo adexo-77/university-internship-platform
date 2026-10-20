@@ -40,7 +40,8 @@ university-internship-platform/
 │   │   │   ├── c9e18918b114_create_student_and_organization_.py
 │   │   │   ├── f0197aea93a8_create_courses_and_enrollments_tables.py
 │   │   │   ├── 340caf61d32f_create_assignments_and_submissions_.py
-│   │   │   └── e17d6f716230_create_internship_postings_and_.py
+│   │   │   ├── e17d6f716230_create_internship_postings_and_.py
+│   │   │   └── 7a040b1cdfb8_add_approval_fields_to_organization_.py
 │   │   ├── env.py             # Migration harness wired to Base metadata
 │   │   └── script.py.mako     # Migration template
 │   ├── alembic.ini            # Alembic configuration
@@ -67,6 +68,8 @@ university-internship-platform/
 │   │   │   ├── submission.py
 │   │   │   └── user.py
 │   │   ├── schemas/           # Pydantic validation schemas
+│   │   │   ├── admin_organization.py
+│   │   │   ├── admin_user.py
 │   │   │   ├── application.py
 │   │   │   ├── assignment.py
 │   │   │   ├── auth.py
@@ -78,6 +81,8 @@ university-internship-platform/
 │   │   │   ├── student_profile.py
 │   │   │   └── submission.py
 │   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only)
+│   │   │   ├── admin_organization.py
+│   │   │   ├── admin_user.py
 │   │   │   ├── application.py
 │   │   │   ├── assignment.py
 │   │   │   ├── auth.py
@@ -89,6 +94,8 @@ university-internship-platform/
 │   │   │   ├── student_profile.py
 │   │   │   └── submission.py
 │   │   ├── services/          # Pure business logic and domain rules
+│   │   │   ├── admin_organization.py
+│   │   │   ├── admin_user.py
 │   │   │   ├── application.py
 │   │   │   ├── assignment.py
 │   │   │   ├── auth.py
@@ -105,11 +112,15 @@ university-internship-platform/
 │   └── tests/                 # Pytest test suite mirroring app/ domain modules
 │       ├── conftest.py        # Database harness and fixtures
 │       ├── factories.py       # Test data factories and authentication helpers
+│       ├── test_admin_organization.py   # Admin organization approval and status filter tests
+│       ├── test_admin_user.py           # Admin user search, role filter, and provisioning tests
+│       ├── test_admin_user_lifecycle.py # Admin user activation, self-protection, and password reset tests
 │       ├── test_application_apply.py    # Application submission, profile prerequisite, and withdrawal tests
 │       ├── test_application_decision.py # Organization application review, decision transitions, and locking tests
 │       ├── test_assignment_create.py    # Assignment creation and visibility tests
 │       ├── test_assignment_lifecycle.py # Assignment grade floor and deletion guard tests
 │       ├── test_auth_login.py           # Auth login, invalid credentials & hash leak tests
+│       ├── test_auth_password_change.py # Authenticated password change and session invalidation tests
 │       ├── test_auth_register.py        # Registration & atomic profile provisioning tests
 │       ├── test_auth_session.py         # Session lifecycle, logout, expiry & role guard tests
 │       ├── test_course_create.py        # Course creation permissions and field validation tests
@@ -117,6 +128,7 @@ university-internship-platform/
 │       ├── test_course_visibility.py    # Course visibility, catalog search, and pagination tests
 │       ├── test_enrollment.py           # Enrollment, double-enroll, leave, and roster tests
 │       ├── test_health.py               # Health integration tests (mirrors health.py)
+│       ├── test_internship_approval_rules.py # Approval requirements for internship publishing & catalog hiding
 │       ├── test_internship_catalog.py   # Internship catalogue search, work mode filters, and visibility tests
 │       ├── test_internship_manage.py    # Internship creation, owner editing, and status transition tests
 │       ├── test_organization_profile_access.py # Organization profile access & guards tests
@@ -138,6 +150,8 @@ university-internship-platform/
     ├── vite.config.ts         # Vite configuration with /api proxy to :8001 and Vitest
     └── src/
         ├── api/               # API clients and HTTP request wrappers
+        │   ├── admin_organization.ts
+        │   ├── admin_user.ts
         │   ├── application.ts
         │   ├── assignment.ts
         │   ├── auth.ts
@@ -146,6 +160,20 @@ university-internship-platform/
         │   ├── internship.ts
         │   └── profile.ts
         ├── components/
+        │   ├── account/       # Account self-service components
+        │   │   ├── ChangePasswordForm.tsx
+        │   │   └── ChangePasswordForm.test.tsx
+        │   ├── admin/         # Admin management components
+        │   │   ├── AdminOrganizationApprovalModal.tsx
+        │   │   ├── AdminOrganizationsTable.tsx
+        │   │   ├── AdminOrganizationsTable.test.tsx
+        │   │   ├── AdminResetPasswordModal.tsx
+        │   │   ├── AdminUserForm.tsx
+        │   │   ├── AdminUserForm.test.tsx
+        │   │   ├── AdminUserStatusModal.tsx
+        │   │   ├── AdminUserStatusModal.test.tsx
+        │   │   ├── AdminUsersTable.tsx
+        │   │   └── AdminUsersTable.test.tsx
         │   ├── assignments/   # Assignment domain components
         │   │   ├── AssignmentForm.tsx
         │   │   ├── AssignmentTable.tsx
@@ -185,6 +213,8 @@ university-internship-platform/
         │   │   ├── InternshipStatusBadge.tsx
         │   │   ├── InternshipTable.tsx
         │   │   ├── MyApplicationsTable.tsx
+        │   │   ├── OrganizationApprovalNotice.tsx
+        │   │   ├── OrganizationApprovalNotice.test.tsx
         │   │   ├── StudentApplicationPanel.tsx
         │   │   └── StudentApplicationPanel.test.tsx
         │   ├── layout/        # Application shell and structural layout
@@ -234,6 +264,11 @@ university-internship-platform/
         │   └── skills.test.ts
         ├── pages/             # Page-level route views
         │   ├── AccountPage.tsx
+        │   ├── AdminOrganizationsPage.tsx
+        │   ├── AdminOrganizationsPage.test.tsx
+        │   ├── AdminUserCreatePage.tsx
+        │   ├── AdminUsersPage.tsx
+        │   ├── AdminUsersPage.test.tsx
         │   ├── ApplicationDetailPage.tsx
         │   ├── AssignmentCreatePage.tsx
         │   ├── AssignmentDetailPage.tsx
@@ -265,6 +300,7 @@ university-internship-platform/
         │   ├── palette-guard.test.ts
         │   └── setup.ts
         ├── types/             # Shared TypeScript type definitions
+        │   ├── admin.ts
         │   ├── application.ts
         │   ├── assignment.ts
         │   ├── auth.ts
