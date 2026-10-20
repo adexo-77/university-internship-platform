@@ -105,6 +105,7 @@ class User(Base):
     )
     internships: Mapped[list["Internship"]] = relationship(
         "Internship",
+        foreign_keys="Internship.organization_id",
         back_populates="organization",
         cascade="all, delete-orphan",
         passive_deletes=True,

@@ -26,7 +26,9 @@ class InternshipStatus(enum.StrEnum):
     """Lifecycle status for an internship posting."""
 
     DRAFT = "draft"
+    PENDING_REVIEW = "pending_review"
     OPEN = "open"
+    REJECTED = "rejected"
     CLOSED = "closed"
 
 
@@ -70,6 +72,16 @@ class Internship(Base):
         nullable=False,
         server_default="draft",
     )
+    review_note: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    reviewed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    reviewed_by: Mapped[int | None] = mapped_column(
+        Integer,
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -82,7 +94,15 @@ class Internship(Base):
         nullable=False,
     )
 
-    organization: Mapped["User"] = relationship("User", back_populates="internships")
+    organization: Mapped["User"] = relationship(
+        "User",
+        foreign_keys=[organization_id],
+        back_populates="internships",
+    )
+    reviewer: Mapped["User | None"] = relationship(
+        "User",
+        foreign_keys=[reviewed_by],
+    )
     applications: Mapped[list["Application"]] = relationship(
         "Application",
         back_populates="posting",
