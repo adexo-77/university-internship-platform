@@ -109,6 +109,7 @@ university-internship-platform/
 │   │   │   ├── health.py
 │   │   │   ├── internship.py
 │   │   │   ├── internship_catalog.py
+│   │   │   ├── internship_deadline.py
 │   │   │   ├── organization_profile.py
 │   │   │   ├── student_profile.py
 │   │   │   └── submission.py
@@ -221,9 +222,12 @@ university-internship-platform/
         │   │   ├── InternshipActionsBar.tsx
         │   │   ├── InternshipActionsBar.test.tsx
         │   │   ├── InternshipApplicantsSection.tsx
+        │   │   ├── InternshipBodySections.tsx
+        │   │   ├── InternshipDeadlineField.tsx
         │   │   ├── InternshipForm.tsx
         │   │   ├── InternshipForm.test.tsx
         │   │   ├── InternshipInfoCard.tsx
+        │   │   ├── InternshipReviewNotice.tsx
         │   │   ├── InternshipStatusBadge.tsx
         │   │   ├── InternshipStatusBadge.test.tsx
         │   │   ├── InternshipTable.tsx
@@ -269,12 +273,14 @@ university-internship-platform/
         ├── hooks/             # Custom React hooks
         │   ├── useAuth.ts
         │   ├── useHealth.ts
+        │   ├── useInternshipActions.ts
         │   ├── usePageTitle.test.ts
         │   └── usePageTitle.ts
         ├── lib/               # Utility libraries (cn, dates, skills)
         │   ├── cn.ts
         │   ├── dates.ts
         │   ├── dates.test.ts
+        │   ├── internship-rules.ts
         │   ├── skills.ts
         │   └── skills.test.ts
         ├── pages/             # Page-level route views
