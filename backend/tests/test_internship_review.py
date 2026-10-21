@@ -22,7 +22,6 @@ def test_admin_internship_review_queue(
     real_db_client: TestClient, real_db_session: Session
 ) -> None:
     admin = create_test_user(real_db_session, "adm_queue@test.com", UserRole.ADMIN)
-    student = create_test_user(real_db_session, "stud_queue@test.com", UserRole.STUDENT)
     org, _ = create_test_organization(
         real_db_session, "org_queue@test.com", approval_status=ApprovalStatus.APPROVED
     )
@@ -46,11 +45,6 @@ def test_admin_internship_review_queue(
         real_db_session, org, title="Open Post", status=InternshipStatus.OPEN
     )
 
-    # Student forbidden
-    login_test_user(real_db_client, student.email)
-    assert real_db_client.get("/api/admin/internships").status_code == 403
-
-    # Admin lists pending_review by default, ordered oldest first
     login_test_user(real_db_client, admin.email)
     resp = real_db_client.get("/api/admin/internships")
     assert resp.status_code == 200
@@ -58,15 +52,36 @@ def test_admin_internship_review_queue(
     assert ids.index(p1.id) < ids.index(p2.id)
     assert p_open.id not in ids
 
-    # Filter by open and all
+
+def test_admin_internships_status_filters_and_role_guards(
+    real_db_client: TestClient, real_db_session: Session
+) -> None:
+    admin = create_test_user(real_db_session, "adm_flt@test.com", UserRole.ADMIN)
+    student = create_test_user(real_db_session, "stud_flt@test.com", UserRole.STUDENT)
+    instructor = create_test_user(real_db_session, "inst_flt@test.com", UserRole.INSTRUCTOR)
+    org, _ = create_test_organization(
+        real_db_session, "org_flt@test.com", approval_status=ApprovalStatus.APPROVED
+    )
+
+    p_pending = create_test_internship(real_db_session, org, status=InternshipStatus.PENDING_REVIEW)
+    p_open = create_test_internship(real_db_session, org, status=InternshipStatus.OPEN)
+
+    for role_user in (student, instructor, org):
+        login_test_user(real_db_client, role_user.email)
+        assert real_db_client.get("/api/admin/internships").status_code == 403
+        assert real_db_client.get("/api/admin/internships?status=open").status_code == 403
+        assert real_db_client.get("/api/admin/internships?status=all").status_code == 403
+
+    login_test_user(real_db_client, admin.email)
     resp_open = real_db_client.get("/api/admin/internships?status=open")
     assert resp_open.status_code == 200
-    assert any(i["id"] == p_open.id for i in resp_open.json()["items"])
+    open_ids = [i["id"] for i in resp_open.json()["items"]]
+    assert p_open.id in open_ids and p_pending.id not in open_ids
 
     resp_all = real_db_client.get("/api/admin/internships?status=all")
     assert resp_all.status_code == 200
     all_ids = [i["id"] for i in resp_all.json()["items"]]
-    assert p1.id in all_ids and p_open.id in all_ids
+    assert p_open.id in all_ids and p_pending.id in all_ids
 
 
 def test_admin_approve_and_reject_transitions(
