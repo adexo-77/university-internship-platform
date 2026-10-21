@@ -13,6 +13,7 @@ from app.routers.application import router as application_router
 from app.routers.assignment import router as assignment_router
 from app.routers.auth import router as auth_router
 from app.routers.course import router as course_router
+from app.routers.dashboard import router as dashboard_router
 from app.routers.enrollment import router as enrollment_router
 from app.routers.health import router as health_router
 from app.routers.internship import router as internship_router
@@ -59,3 +60,4 @@ app.include_router(application_router, prefix="/api")
 app.include_router(admin_user_router, prefix="/api")
 app.include_router(admin_organization_router, prefix="/api")
 app.include_router(admin_internship_router, prefix="/api")
+app.include_router(dashboard_router, prefix="/api")
