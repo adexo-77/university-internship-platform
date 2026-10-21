@@ -55,12 +55,11 @@ def _to_response(
 
 def list_admin_internships(
     db: Session,
-    status: InternshipStatus | None = None,
+    status: InternshipStatus | str | None = None,
     limit: int = 20,
     offset: int = 0,
 ) -> InternshipListResponse:
     """List postings for administrative review ordered oldest first."""
-    target_status = status if status is not None else InternshipStatus.PENDING_REVIEW
     clamped_limit = min(max(limit, 1), 100)
     clamped_offset = max(offset, 0)
     now = datetime.now(UTC)
@@ -70,9 +69,17 @@ def list_admin_internships(
         select(Internship, org_col.label("org_name"))
         .join(User, Internship.organization_id == User.id)
         .outerjoin(OrganizationProfile, User.id == OrganizationProfile.user_id)
-        .where(Internship.status == target_status)
     )
-    count_stmt = select(func.count(Internship.id)).where(Internship.status == target_status)
+    count_stmt = select(func.count(Internship.id))
+
+    if status != "all":
+        target_status = (
+            InternshipStatus(status)
+            if isinstance(status, str)
+            else (status if status is not None else InternshipStatus.PENDING_REVIEW)
+        )
+        stmt = stmt.where(Internship.status == target_status)
+        count_stmt = count_stmt.where(Internship.status == target_status)
 
     total = db.scalar(count_stmt) or 0
     rows = db.execute(

@@ -42,7 +42,9 @@ def test_admin_internship_review_queue(
         status=InternshipStatus.PENDING_REVIEW,
         created_at=now - timedelta(days=1),
     )
-    create_test_internship(real_db_session, org, title="Open Post", status=InternshipStatus.OPEN)
+    p_open = create_test_internship(
+        real_db_session, org, title="Open Post", status=InternshipStatus.OPEN
+    )
 
     # Student forbidden
     login_test_user(real_db_client, student.email)
@@ -52,10 +54,19 @@ def test_admin_internship_review_queue(
     login_test_user(real_db_client, admin.email)
     resp = real_db_client.get("/api/admin/internships")
     assert resp.status_code == 200
-    data = resp.json()["items"]
-    assert len(data) >= 2
-    ids = [item["id"] for item in data]
+    ids = [item["id"] for item in resp.json()["items"]]
     assert ids.index(p1.id) < ids.index(p2.id)
+    assert p_open.id not in ids
+
+    # Filter by open and all
+    resp_open = real_db_client.get("/api/admin/internships?status=open")
+    assert resp_open.status_code == 200
+    assert any(i["id"] == p_open.id for i in resp_open.json()["items"])
+
+    resp_all = real_db_client.get("/api/admin/internships?status=all")
+    assert resp_all.status_code == 200
+    all_ids = [i["id"] for i in resp_all.json()["items"]]
+    assert p1.id in all_ids and p_open.id in all_ids
 
 
 def test_admin_approve_and_reject_transitions(
@@ -72,8 +83,7 @@ def test_admin_approve_and_reject_transitions(
 
     # Approve
     resp_app = real_db_client.put(
-        f"/api/admin/internships/{p_app.id}/review",
-        json={"decision": "approved"},
+        f"/api/admin/internships/{p_app.id}/review", json={"decision": "approved"}
     )
     assert resp_app.status_code == 200
     data_app = resp_app.json()
@@ -83,8 +93,7 @@ def test_admin_approve_and_reject_transitions(
 
     # Rejection requires note (422)
     resp_no_note = real_db_client.put(
-        f"/api/admin/internships/{p_rej.id}/review",
-        json={"decision": "rejected"},
+        f"/api/admin/internships/{p_rej.id}/review", json={"decision": "rejected"}
     )
     assert resp_no_note.status_code == 422
 
@@ -111,14 +120,31 @@ def test_admin_takedown_and_catalog_and_application_effects(
     posting = create_test_internship(real_db_session, org, status=InternshipStatus.OPEN)
     create_test_application(real_db_session, posting, student_user)
 
-    # Admin takes down open posting
+    # Non-admin forbidden (403)
+    login_test_user(real_db_client, student_user.email)
+    forbidden_resp = real_db_client.put(
+        f"/api/admin/internships/{posting.id}/review",
+        json={"decision": "rejected", "review_note": "Violated terms."},
+    )
+    assert forbidden_resp.status_code == 403
+
+    # Admin takedown without note gives 422
     login_test_user(real_db_client, admin.email)
+    resp_missing_note = real_db_client.put(
+        f"/api/admin/internships/{posting.id}/review", json={"decision": "rejected"}
+    )
+    assert resp_missing_note.status_code == 422
+
+    # Admin takes down open posting with note (200, status=rejected, reviewed_by & reviewed_at set)
     resp_tkd = real_db_client.put(
         f"/api/admin/internships/{posting.id}/review",
         json={"decision": "rejected", "review_note": "Violated terms."},
     )
     assert resp_tkd.status_code == 200
-    assert resp_tkd.json()["status"] == "rejected"
+    data_tkd = resp_tkd.json()
+    assert data_tkd["status"] == "rejected"
+    assert data_tkd["reviewed_by"] == admin.id
+    assert data_tkd["reviewed_at"] is not None
 
     # Student cannot see taken-down posting in catalog
     login_test_user(real_db_client, student_user.email)

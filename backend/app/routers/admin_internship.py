@@ -1,4 +1,4 @@
-"""Thin router for administrator internship review operations."""
+from typing import Literal
 
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
@@ -15,6 +15,15 @@ router = APIRouter(prefix="/admin/internships", tags=["admin-internships"])
 
 require_admin = require_roles(UserRole.ADMIN)
 
+ReviewStatusParam = Literal[
+    "all",
+    InternshipStatus.PENDING_REVIEW,
+    InternshipStatus.OPEN,
+    InternshipStatus.REJECTED,
+    InternshipStatus.CLOSED,
+    InternshipStatus.DRAFT,
+]
+
 
 @router.get(
     "",
@@ -23,10 +32,10 @@ require_admin = require_roles(UserRole.ADMIN)
     summary="List internship postings for admin review",
 )
 def list_admin_internships(
-    review_status: InternshipStatus | None = Query(
+    review_status: ReviewStatusParam | None = Query(
         default=None,
         alias="status",
-        description="Filter by posting status (defaults to pending_review)",
+        description="Filter by posting status (defaults to pending_review, or 'all')",
     ),
     limit: int = Query(default=20, ge=1, le=100, description="Page limit"),
     offset: int = Query(default=0, ge=0, description="Page offset"),
