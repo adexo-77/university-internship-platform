@@ -18,6 +18,7 @@ import { CourseCreatePage } from './pages/CourseCreatePage';
 import { CourseDetailPage } from './pages/CourseDetailPage';
 import { CourseEditPage } from './pages/CourseEditPage';
 import { CoursesPage } from './pages/CoursesPage';
+import { DashboardPage } from './pages/DashboardPage';
 import { InternshipCreatePage } from './pages/InternshipCreatePage';
 import { InternshipDetailPage } from './pages/InternshipDetailPage';
 import { InternshipEditPage } from './pages/InternshipEditPage';
@@ -58,6 +59,7 @@ export const AppRoutes: React.FC = () => {
 
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/account" element={<AccountPage />} />
 
         {/* Profile: student and organization roles only */}

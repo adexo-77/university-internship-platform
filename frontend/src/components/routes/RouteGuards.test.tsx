@@ -136,19 +136,19 @@ describe('Root redirect', () => {
     expect(screen.getByText('Login Page')).toBeInTheDocument();
   });
 
-  it('redirects authenticated student from / to /my-courses', () => {
+  it('redirects authenticated student from / to /dashboard', () => {
     render(
       <MemoryRouter initialEntries={['/']}>
         <AuthProvider initialUser={mockStudentUser}>
           <Routes>
             <Route path="/" element={<RootRedirectTestHelper />} />
-            <Route path="/my-courses" element={<div>My Courses Destination</div>} />
+            <Route path="/dashboard" element={<div>Dashboard Destination</div>} />
           </Routes>
         </AuthProvider>
       </MemoryRouter>
     );
 
-    expect(screen.getByText('My Courses Destination')).toBeInTheDocument();
+    expect(screen.getByText('Dashboard Destination')).toBeInTheDocument();
   });
 });
 

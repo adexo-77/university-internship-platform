@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   Contact,
   FileText,
+  LayoutDashboard,
   User as UserIcon,
   Users,
   type LucideIcon,
@@ -26,6 +27,11 @@ export interface NavItem {
  * Each phase adds items here — no hard-coded items elsewhere.
  */
 export const navigationItems: NavItem[] = [
+  {
+    path: '/dashboard',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+  },
   {
     path: '/admin/users',
     label: 'Users',
@@ -96,15 +102,9 @@ export const navigationItems: NavItem[] = [
 /**
  * Returns the default home path for a given user role.
  */
-export function getHomePath(role: UserRole): string {
-  if (role === 'student' || role === 'instructor') {
-    return '/my-courses';
+export function getHomePath(role?: UserRole): string {
+  if (role) {
+    return '/dashboard';
   }
-  if (role === 'organization') {
-    return '/my-internships';
-  }
-  if (role === 'admin') {
-    return '/admin/users';
-  }
-  return '/account';
+  return '/dashboard';
 }

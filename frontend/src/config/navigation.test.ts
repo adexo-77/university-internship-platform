@@ -2,11 +2,23 @@ import { describe, expect, it } from 'vitest';
 import { getHomePath, navigationItems } from './navigation';
 
 describe('Navigation Configuration', () => {
-  it('returns role-specific home paths', () => {
-    expect(getHomePath('student')).toBe('/my-courses');
-    expect(getHomePath('instructor')).toBe('/my-courses');
-    expect(getHomePath('organization')).toBe('/my-internships');
-    expect(getHomePath('admin')).toBe('/admin/users');
+  it('returns /dashboard home path for every role', () => {
+    expect(getHomePath('student')).toBe('/dashboard');
+    expect(getHomePath('instructor')).toBe('/dashboard');
+    expect(getHomePath('organization')).toBe('/dashboard');
+    expect(getHomePath('admin')).toBe('/dashboard');
+  });
+
+  it('has Dashboard as the first navigation item for all roles', () => {
+    expect(navigationItems[0].label).toBe('Dashboard');
+    expect(navigationItems[0].path).toBe('/dashboard');
+
+    const roles = ['student', 'instructor', 'organization', 'admin'] as const;
+    for (const role of roles) {
+      const items = navigationItems.filter((item) => !item.roles || item.roles.includes(role));
+      expect(items[0].label).toBe('Dashboard');
+      expect(items[0].path).toBe('/dashboard');
+    }
   });
 
   it('filters navigation items for student role', () => {
@@ -15,6 +27,7 @@ describe('Navigation Configuration', () => {
     );
     const labels = studentItems.map((i) => i.label);
 
+    expect(labels).toContain('Dashboard');
     expect(labels).toContain('Courses');
     expect(labels).toContain('My courses');
     expect(labels).toContain('Internships');
@@ -31,6 +44,7 @@ describe('Navigation Configuration', () => {
     );
     const labels = instructorItems.map((i) => i.label);
 
+    expect(labels).toContain('Dashboard');
     expect(labels).toContain('My courses');
     expect(labels).toContain('Account');
     expect(labels).not.toContain('Courses');
@@ -47,6 +61,7 @@ describe('Navigation Configuration', () => {
     );
     const labels = orgItems.map((i) => i.label);
 
+    expect(labels).toContain('Dashboard');
     expect(labels).toContain('My internships');
     expect(labels).toContain('Profile');
     expect(labels).toContain('Account');
@@ -61,6 +76,7 @@ describe('Navigation Configuration', () => {
     );
     const labels = adminItems.map((i) => i.label);
 
+    expect(labels).toContain('Dashboard');
     expect(labels).toContain('Users');
     expect(labels).toContain('Organizations');
     expect(labels).toContain('Internship reviews');
