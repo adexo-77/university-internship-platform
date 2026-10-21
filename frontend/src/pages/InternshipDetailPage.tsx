@@ -1,25 +1,20 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import {
-  closeInternship,
-  getInternshipById,
-  submitInternship,
-  withdrawInternship,
-} from '../api/internship';
-import {
-  applyToInternship,
-  getInternshipApplications,
-  getStudentApplications,
-  withdrawApplication,
-} from '../api/application';
+import { useParams } from 'react-router-dom';
+import { getInternshipById } from '../api/internship';
+import { reviewInternship } from '../api/admin_internship';
+import { getInternshipApplications, getStudentApplications } from '../api/application';
 import { getStudentProfile } from '../api/profile';
+import { AdminInternshipReviewModal } from '../components/admin/AdminInternshipReviewModal';
 import { InternshipActionsBar } from '../components/internships/InternshipActionsBar';
 import { InternshipApplicantsSection } from '../components/internships/InternshipApplicantsSection';
+import { InternshipBodySections } from '../components/internships/InternshipBodySections';
 import { InternshipInfoCard } from '../components/internships/InternshipInfoCard';
+import { InternshipReviewNotice } from '../components/internships/InternshipReviewNotice';
 import { StudentApplicationPanel } from '../components/internships/StudentApplicationPanel';
 import { AppShell } from '../components/layout/AppShell';
-import { ErrorMessage, Notice, PageHeader } from '../components/ui';
+import { ErrorMessage, PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
+import { useInternshipActions } from '../hooks/useInternshipActions';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Application } from '../types/application';
 import { Internship } from '../types/internship';
@@ -36,9 +31,10 @@ export const InternshipDetailPage: React.FC = () => {
   const [roster, setRoster] = useState<Application[]>([]);
   const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [actionError, setActionError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [modalSubmitting, setModalSubmitting] = useState(false);
+  const [modalError, setModalError] = useState<string | null>(null);
 
   usePageTitle(internship?.title ?? 'Internship details');
 
@@ -74,64 +70,28 @@ export const InternshipDetailPage: React.FC = () => {
     loadData();
   }, [loadData]);
 
-  const handleApply = async (coverLetter: string) => {
-    setSubmitting(true);
-    setActionError(null);
+  const {
+    submitting,
+    actionError,
+    handleApply,
+    handleWithdraw,
+    handleSubmitForReview,
+    handleWithdrawToDraft,
+    handleClose,
+  } = useInternshipActions(internship, postingId, loadData);
+
+  const handleAdminTakedown = async (decision: 'approved' | 'rejected', reviewNote?: string) => {
+    if (!internship) return;
+    setModalSubmitting(true);
+    setModalError(null);
     try {
-      await applyToInternship(postingId, { cover_letter: coverLetter });
-      await loadData();
+      const updated = await reviewInternship(internship.id, { decision, review_note: reviewNote });
+      setInternship(updated);
+      setIsReviewModalOpen(false);
     } catch (err: unknown) {
-      setActionError(err instanceof Error ? err.message : 'Failed to submit application.');
+      setModalError(err instanceof Error ? err.message : 'Failed to take down posting.');
     } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleWithdraw = async () => {
-    if (!myApp) return;
-    setSubmitting(true);
-    setActionError(null);
-    try {
-      await withdrawApplication(myApp.id);
-      await loadData();
-    } catch (err: unknown) {
-      setActionError(err instanceof Error ? err.message : 'Failed to withdraw application.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleSubmitForReview = async () => {
-    if (!internship) return;
-    setActionError(null);
-    try {
-      await submitInternship(internship.id);
-      await loadData();
-    } catch (err: unknown) {
-      setActionError(err instanceof Error ? err.message : 'Failed to submit for review.');
-    }
-  };
-
-  const handleWithdrawToDraft = async () => {
-    if (!internship) return;
-    setActionError(null);
-    try {
-      await withdrawInternship(internship.id);
-      await loadData();
-    } catch (err: unknown) {
-      setActionError(err instanceof Error ? err.message : 'Failed to withdraw to draft.');
-    }
-  };
-
-  const handleClose = async () => {
-    if (!internship) return;
-    if (!window.confirm('Close this internship? Closed postings cannot be reopened.')) return;
-    setActionError(null);
-    try {
-      await closeInternship(internship.id);
-      await loadData();
-    } catch (err: unknown) {
-      setActionError(err instanceof Error ? err.message : 'Failed to close internship.');
+      setModalSubmitting(false);
     }
   };
 
@@ -156,9 +116,7 @@ export const InternshipDetailPage: React.FC = () => {
     );
   }
 
-  const isProfileComplete = Boolean(
-    profile && profile.university?.trim() && profile.department?.trim()
-  );
+  const isProfileComplete = Boolean(profile?.university?.trim() && profile?.department?.trim());
 
   return (
     <AppShell>
@@ -171,9 +129,14 @@ export const InternshipDetailPage: React.FC = () => {
           <InternshipActionsBar
             internship={internship}
             isOwner={Boolean(isOwner)}
+            isAdmin={Boolean(isAdmin)}
             onSubmitForReview={handleSubmitForReview}
             onWithdrawToDraft={handleWithdrawToDraft}
             onClose={handleClose}
+            onTakeDown={() => {
+              setModalError(null);
+              setIsReviewModalOpen(true);
+            }}
           />
         </div>
 
@@ -184,33 +147,17 @@ export const InternshipDetailPage: React.FC = () => {
           />
         )}
 
-        {internship.status === 'rejected' && internship.review_note && (
-          <Notice variant="error" title="Review note">
-            <p className="whitespace-pre-line">{internship.review_note}</p>
-            {isOwner && (
-              <p className="mt-2">
-                <Link
-                  to={`/internships/${internship.id}/edit`}
-                  className="font-semibold text-petrol underline"
-                >
-                  Edit posting to address feedback
-                </Link>
-              </p>
-            )}
-          </Notice>
-        )}
-
+        <InternshipReviewNotice
+          status={internship.status}
+          reviewNote={internship.review_note}
+          isOwner={Boolean(isOwner)}
+          internshipId={internship.id}
+        />
         <InternshipInfoCard internship={internship} />
-
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-ink">Description</h2>
-          <p className="text-ink whitespace-pre-line leading-relaxed">{internship.description}</p>
-        </div>
-
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-ink">Requirements</h2>
-          <p className="text-ink whitespace-pre-line leading-relaxed">{internship.requirements}</p>
-        </div>
+        <InternshipBodySections
+          description={internship.description}
+          requirements={internship.requirements}
+        />
 
         {isStudent && (
           <StudentApplicationPanel
@@ -220,7 +167,7 @@ export const InternshipDetailPage: React.FC = () => {
             submitting={submitting}
             error={actionError}
             onApply={handleApply}
-            onWithdraw={handleWithdraw}
+            onWithdraw={() => handleWithdraw(myApp?.id)}
           />
         )}
 
@@ -231,6 +178,18 @@ export const InternshipDetailPage: React.FC = () => {
             onStatusFilterChange={setStatusFilter}
           />
         )}
+
+        <AdminInternshipReviewModal
+          internship={internship}
+          isOpen={isReviewModalOpen}
+          onClose={() => {
+            setIsReviewModalOpen(false);
+            setModalError(null);
+          }}
+          onReview={handleAdminTakedown}
+          isSubmitting={modalSubmitting}
+          error={modalError}
+        />
       </div>
     </AppShell>
   );

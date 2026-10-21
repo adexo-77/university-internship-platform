@@ -12,7 +12,7 @@ const STATUS_OPTIONS = [
   { value: 'open', label: 'Open' },
   { value: 'rejected', label: 'Rejected' },
   { value: 'closed', label: 'Closed' },
-  { value: '', label: 'All statuses' },
+  { value: 'all', label: 'All' },
 ];
 
 export const AdminInternshipReviewsPage: React.FC = () => {
@@ -31,7 +31,7 @@ export const AdminInternshipReviewsPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await listAdminInternships({ status: statusFilter || undefined });
+      const data = await listAdminInternships({ status: statusFilter });
       setInternships(data.items);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load internship reviews.');
@@ -49,12 +49,12 @@ export const AdminInternshipReviewsPage: React.FC = () => {
     setSubmitting(true);
     setModalError(null);
     try {
-      await reviewInternship(selectedPosting.id, {
+      const updated = await reviewInternship(selectedPosting.id, {
         decision,
         review_note: reviewNote,
       });
       setSelectedPosting(null);
-      await loadData();
+      setInternships((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
     } catch (err: unknown) {
       setModalError(err instanceof Error ? err.message : 'Failed to submit review decision.');
     } finally {

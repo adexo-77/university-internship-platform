@@ -50,11 +50,23 @@ export const AdminInternshipReviewsTable: React.FC<AdminInternshipReviewsTablePr
     {
       key: 'actions',
       header: 'Actions',
-      render: (item) => (
-        <Button type="button" variant="quiet" size="sm" onClick={() => onSelect(item)}>
-          Review
-        </Button>
-      ),
+      render: (item) => {
+        if (item.status === 'open') {
+          return (
+            <Button type="button" variant="danger" size="sm" onClick={() => onSelect(item)}>
+              Take down
+            </Button>
+          );
+        }
+        if (item.status === 'pending_review') {
+          return (
+            <Button type="button" variant="quiet" size="sm" onClick={() => onSelect(item)}>
+              Review
+            </Button>
+          );
+        }
+        return <span className="text-pencil text-sm">—</span>;
+      },
     },
   ];
 

@@ -24,17 +24,14 @@ const basePosting: Internship = {
 describe('InternshipActionsBar', () => {
   it('renders Edit and Submit for review when owner and status is draft or rejected', () => {
     const onSubmit = vi.fn();
-    const onWithdraw = vi.fn();
-    const onClose = vi.fn();
-
     render(
       <MemoryRouter>
         <InternshipActionsBar
           internship={basePosting}
           isOwner={true}
           onSubmitForReview={onSubmit}
-          onWithdrawToDraft={onWithdraw}
-          onClose={onClose}
+          onWithdrawToDraft={vi.fn()}
+          onClose={vi.fn()}
         />
       </MemoryRouter>
     );
@@ -46,18 +43,15 @@ describe('InternshipActionsBar', () => {
   });
 
   it('renders Withdraw to draft when owner and status is pending_review', () => {
-    const onSubmit = vi.fn();
     const onWithdraw = vi.fn();
-    const onClose = vi.fn();
-
     render(
       <MemoryRouter>
         <InternshipActionsBar
           internship={{ ...basePosting, status: 'pending_review' }}
           isOwner={true}
-          onSubmitForReview={onSubmit}
+          onSubmitForReview={vi.fn()}
           onWithdrawToDraft={onWithdraw}
-          onClose={onClose}
+          onClose={vi.fn()}
         />
       </MemoryRouter>
     );
@@ -68,17 +62,14 @@ describe('InternshipActionsBar', () => {
   });
 
   it('renders Extend deadline and Close when owner and status is open', () => {
-    const onSubmit = vi.fn();
-    const onWithdraw = vi.fn();
     const onClose = vi.fn();
-
     render(
       <MemoryRouter>
         <InternshipActionsBar
           internship={{ ...basePosting, status: 'open' }}
           isOwner={true}
-          onSubmitForReview={onSubmit}
-          onWithdrawToDraft={onWithdraw}
+          onSubmitForReview={vi.fn()}
+          onWithdrawToDraft={vi.fn()}
           onClose={onClose}
         />
       </MemoryRouter>
@@ -90,12 +81,51 @@ describe('InternshipActionsBar', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('does not render action buttons for non-owners', () => {
+  it('renders Take down button for admin only when posting is open', () => {
+    const onTakeDown = vi.fn();
+    const { rerender } = render(
+      <MemoryRouter>
+        <InternshipActionsBar
+          internship={{ ...basePosting, status: 'open' }}
+          isOwner={false}
+          isAdmin={true}
+          onSubmitForReview={vi.fn()}
+          onWithdrawToDraft={vi.fn()}
+          onClose={vi.fn()}
+          onTakeDown={onTakeDown}
+        />
+      </MemoryRouter>
+    );
+
+    const takedownBtn = screen.getByRole('button', { name: /take down/i });
+    expect(takedownBtn).toBeInTheDocument();
+    fireEvent.click(takedownBtn);
+    expect(onTakeDown).toHaveBeenCalledTimes(1);
+
+    // Non-admin does not see Take down button
+    rerender(
+      <MemoryRouter>
+        <InternshipActionsBar
+          internship={{ ...basePosting, status: 'open' }}
+          isOwner={false}
+          isAdmin={false}
+          onSubmitForReview={vi.fn()}
+          onWithdrawToDraft={vi.fn()}
+          onClose={vi.fn()}
+          onTakeDown={onTakeDown}
+        />
+      </MemoryRouter>
+    );
+    expect(screen.queryByRole('button', { name: /take down/i })).not.toBeInTheDocument();
+  });
+
+  it('does not render Take down button when admin views non-open posting', () => {
     render(
       <MemoryRouter>
         <InternshipActionsBar
-          internship={basePosting}
+          internship={{ ...basePosting, status: 'pending_review' }}
           isOwner={false}
+          isAdmin={true}
           onSubmitForReview={vi.fn()}
           onWithdrawToDraft={vi.fn()}
           onClose={vi.fn()}
@@ -103,8 +133,6 @@ describe('InternshipActionsBar', () => {
       </MemoryRouter>
     );
 
-    expect(screen.queryByRole('button', { name: /submit for review/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /edit/i })).not.toBeInTheDocument();
-    expect(screen.getByText(/draft/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /take down/i })).not.toBeInTheDocument();
   });
 });

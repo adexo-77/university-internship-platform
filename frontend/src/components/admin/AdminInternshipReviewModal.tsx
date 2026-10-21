@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Internship } from '../../types/internship';
 import { formatDate } from '../../lib/dates';
 import { Button, ErrorMessage, Notice, Textarea } from '../ui';
@@ -13,6 +13,9 @@ export interface AdminInternshipReviewModalProps {
   error?: string | null;
 }
 
+const CONFIRM_MSG =
+  'Take down this open internship posting? It will be removed from student views.';
+
 export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProps> = ({
   internship,
   isOpen,
@@ -24,6 +27,13 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
   const [note, setNote] = useState('');
   const [noteError, setNoteError] = useState('');
 
+  useEffect(() => {
+    if (isOpen) {
+      setNote('');
+      setNoteError('');
+    }
+  }, [isOpen, internship?.id]);
+
   if (!isOpen || !internship) return null;
 
   const handleApprove = async () => {
@@ -31,36 +41,18 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
     await onReview('approved', note.trim() || undefined);
   };
 
-  const handleReject = async () => {
+  const validateAndSubmitNote = async (actionPrompt: string, isTakedown = false) => {
     setNoteError('');
     const trimmed = note.trim();
     if (!trimmed) {
-      setNoteError('Review note is required when rejecting a posting.');
+      setNoteError(`Review note is required ${actionPrompt}.`);
       return;
     }
     if (trimmed.length > 500) {
       setNoteError('Review note cannot exceed 500 characters.');
       return;
     }
-    await onReview('rejected', trimmed);
-  };
-
-  const handleTakedown = async () => {
-    setNoteError('');
-    const trimmed = note.trim();
-    if (!trimmed) {
-      setNoteError('Review note is required to take down an open posting.');
-      return;
-    }
-    if (trimmed.length > 500) {
-      setNoteError('Review note cannot exceed 500 characters.');
-      return;
-    }
-    if (
-      !window.confirm(
-        'Take down this open internship posting? It will be removed from student views.'
-      )
-    ) {
+    if (isTakedown && !window.confirm(CONFIRM_MSG)) {
       return;
     }
     await onReview('rejected', trimmed);
@@ -142,7 +134,12 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
               <Button type="button" variant="quiet" onClick={onClose} disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button type="button" variant="danger" onClick={handleReject} disabled={isSubmitting}>
+              <Button
+                type="button"
+                variant="danger"
+                onClick={() => validateAndSubmitNote('when rejecting a posting')}
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? 'Submitting...' : 'Reject'}
               </Button>
               <Button
@@ -180,7 +177,7 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
               <Button
                 type="button"
                 variant="danger"
-                onClick={handleTakedown}
+                onClick={() => validateAndSubmitNote('to take down an open posting', true)}
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Taking down...' : 'Take down'}

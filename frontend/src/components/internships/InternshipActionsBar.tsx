@@ -4,20 +4,24 @@ import { Button } from '../ui';
 import { InternshipStatusBadge } from './InternshipStatusBadge';
 import { Internship } from '../../types/internship';
 
-interface InternshipActionsBarProps {
+export interface InternshipActionsBarProps {
   internship: Internship;
   isOwner: boolean;
+  isAdmin?: boolean;
   onSubmitForReview: () => void;
   onWithdrawToDraft: () => void;
   onClose: () => void;
+  onTakeDown?: () => void;
 }
 
 export const InternshipActionsBar: React.FC<InternshipActionsBarProps> = ({
   internship,
   isOwner,
+  isAdmin = false,
   onSubmitForReview,
   onWithdrawToDraft,
   onClose,
+  onTakeDown,
 }) => {
   const navigate = useNavigate();
 
@@ -56,6 +60,11 @@ export const InternshipActionsBar: React.FC<InternshipActionsBarProps> = ({
             Close
           </Button>
         </>
+      )}
+      {isAdmin && internship.status === 'open' && (
+        <Button type="button" variant="danger" onClick={onTakeDown}>
+          Take down
+        </Button>
       )}
     </div>
   );

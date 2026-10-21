@@ -102,7 +102,7 @@ export const MyInternshipsPage: React.FC = () => {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <span>
                       <strong>{i.title}</strong> was rejected by an admin: &ldquo;{i.review_note}
-                      &rdquo;
+                      &rdquo; — you can edit and resubmit it for review.
                     </span>
                     <Link
                       to={`/internships/${i.id}/edit`}
