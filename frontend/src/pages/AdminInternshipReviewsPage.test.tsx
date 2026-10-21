@@ -144,7 +144,6 @@ describe('AdminInternshipReviewsPage', () => {
       status: 'rejected',
       review_note: 'Terms violation',
     });
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
 
     render(
       <MemoryRouter>

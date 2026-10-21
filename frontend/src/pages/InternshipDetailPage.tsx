@@ -12,7 +12,7 @@ import { InternshipInfoCard } from '../components/internships/InternshipInfoCard
 import { InternshipReviewNotice } from '../components/internships/InternshipReviewNotice';
 import { StudentApplicationPanel } from '../components/internships/StudentApplicationPanel';
 import { AppShell } from '../components/layout/AppShell';
-import { ErrorMessage, PageHeader } from '../components/ui';
+import { ConfirmModal, ErrorMessage, PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { useInternshipActions } from '../hooks/useInternshipActions';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -35,6 +35,7 @@ export const InternshipDetailPage: React.FC = () => {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [modalSubmitting, setModalSubmitting] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
 
   usePageTitle(internship?.title ?? 'Internship details');
 
@@ -132,7 +133,7 @@ export const InternshipDetailPage: React.FC = () => {
             isAdmin={Boolean(isAdmin)}
             onSubmitForReview={handleSubmitForReview}
             onWithdrawToDraft={handleWithdrawToDraft}
-            onClose={handleClose}
+            onClose={() => setIsCloseModalOpen(true)}
             onTakeDown={() => {
               setModalError(null);
               setIsReviewModalOpen(true);
@@ -189,6 +190,19 @@ export const InternshipDetailPage: React.FC = () => {
           onReview={handleAdminTakedown}
           isSubmitting={modalSubmitting}
           error={modalError}
+        />
+
+        <ConfirmModal
+          isOpen={isCloseModalOpen}
+          title="Close internship"
+          message="Close this internship? Closed postings cannot be reopened."
+          confirmLabel="Close internship"
+          confirmVariant="danger"
+          onClose={() => setIsCloseModalOpen(false)}
+          onConfirm={async () => {
+            await handleClose();
+            setIsCloseModalOpen(false);
+          }}
         />
       </div>
     </AppShell>

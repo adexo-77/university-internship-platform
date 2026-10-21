@@ -10,7 +10,7 @@ import { getOrganizationProfile } from '../api/profile';
 import { InternshipTable } from '../components/internships/InternshipTable';
 import { OrganizationApprovalNotice } from '../components/internships/OrganizationApprovalNotice';
 import { AppShell } from '../components/layout/AppShell';
-import { Button, ErrorMessage, Notice, PageHeader } from '../components/ui';
+import { Button, ConfirmModal, ErrorMessage, Notice, PageHeader } from '../components/ui';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Internship } from '../types/internship';
 import { OrganizationProfile } from '../types/profile';
@@ -66,13 +66,17 @@ export const MyInternshipsPage: React.FC = () => {
     }
   };
 
-  const handleClose = async (id: number) => {
-    if (!window.confirm('Close this internship? Closed postings cannot be reopened.')) return;
+  const [closingPostingId, setClosingPostingId] = useState<number | null>(null);
+
+  const handleConfirmClose = async () => {
+    if (!closingPostingId) return;
     try {
-      await closeInternship(id);
+      await closeInternship(closingPostingId);
       await fetchPostings();
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
+    } finally {
+      setClosingPostingId(null);
     }
   };
 
@@ -169,7 +173,11 @@ export const MyInternshipsPage: React.FC = () => {
                     >
                       Edit
                     </Button>
-                    <Button type="button" variant="quiet" onClick={() => handleClose(item.id)}>
+                    <Button
+                      type="button"
+                      variant="quiet"
+                      onClick={() => setClosingPostingId(item.id)}
+                    >
                       Close
                     </Button>
                   </>
@@ -178,6 +186,16 @@ export const MyInternshipsPage: React.FC = () => {
             )}
           />
         )}
+
+        <ConfirmModal
+          isOpen={closingPostingId !== null}
+          title="Close internship"
+          message="Close this internship? Closed postings cannot be reopened."
+          confirmLabel="Close internship"
+          confirmVariant="danger"
+          onClose={() => setClosingPostingId(null)}
+          onConfirm={handleConfirmClose}
+        />
       </div>
     </AppShell>
   );

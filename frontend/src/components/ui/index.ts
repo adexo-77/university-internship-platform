@@ -8,3 +8,4 @@ export * from './EmptyState';
 export * from './ErrorMessage';
 export * from './Notice';
 export * from './PageHeader';
+export * from './ConfirmModal';

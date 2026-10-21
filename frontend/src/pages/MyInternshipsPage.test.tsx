@@ -170,4 +170,38 @@ describe('MyInternshipsPage Organization Approval Notice and Review Controls', (
       '/internships/101/edit'
     );
   });
+
+  it('opens in-app confirm modal on close click and calls close API when confirmed', async () => {
+    const openPosting: Internship = {
+      ...mockDraftPosting,
+      status: 'open',
+    };
+    vi.mocked(internshipApi.getOrganizationInternships).mockResolvedValue([openPosting]);
+    vi.mocked(profileApi.getOrganizationProfile).mockResolvedValue(approvedProfile);
+    vi.mocked(internshipApi.closeInternship).mockResolvedValue({
+      ...openPosting,
+      status: 'closed',
+    });
+
+    render(
+      <MemoryRouter>
+        <AuthProvider initialUser={mockOrgUser}>
+          <MyInternshipsPage />
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    const closeBtn = await screen.findByRole('button', { name: /^close$/i });
+    fireEvent.click(closeBtn);
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(
+      screen.getByText(/close this internship\? closed postings cannot be reopened\./i)
+    ).toBeInTheDocument();
+
+    const confirmCloseBtn = screen.getByRole('button', { name: /close internship/i });
+    fireEvent.click(confirmCloseBtn);
+
+    expect(internshipApi.closeInternship).toHaveBeenCalledWith(101);
+  });
 });

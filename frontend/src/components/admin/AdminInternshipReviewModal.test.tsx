@@ -71,13 +71,12 @@ describe('AdminInternshipReviewModal', () => {
     expect(onReview).toHaveBeenCalledWith('rejected', 'Incomplete requirements section.');
   });
 
-  it('requires a takedown note and user confirmation for open postings', async () => {
+  it('requires a takedown note and displays in-app confirmation for open postings', async () => {
     const openPosting: Internship = {
       ...pendingPosting,
       status: 'open',
     };
     const onReview = vi.fn().mockResolvedValue(undefined);
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
 
     render(
       <AdminInternshipReviewModal
@@ -88,6 +87,12 @@ describe('AdminInternshipReviewModal', () => {
         isSubmitting={false}
       />
     );
+
+    expect(
+      screen.getByText(
+        /take down this open internship posting\? it will be removed from student views\./i
+      )
+    ).toBeInTheDocument();
 
     const takedownBtn = screen.getByRole('button', { name: /take down/i });
     fireEvent.click(takedownBtn);
@@ -101,7 +106,6 @@ describe('AdminInternshipReviewModal', () => {
     fireEvent.change(noteInput, { target: { value: 'Company violated platform terms.' } });
     fireEvent.click(takedownBtn);
 
-    expect(confirmSpy).toHaveBeenCalled();
     expect(onReview).toHaveBeenCalledWith('rejected', 'Company violated platform terms.');
   });
 

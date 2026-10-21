@@ -62,7 +62,6 @@ export function useInternshipActions(
 
   const handleClose = async () => {
     if (!internship) return;
-    if (!window.confirm('Close this internship? Closed postings cannot be reopened.')) return;
     setActionError(null);
     try {
       await closeInternship(internship.id);

@@ -13,9 +13,6 @@ export interface AdminInternshipReviewModalProps {
   error?: string | null;
 }
 
-const CONFIRM_MSG =
-  'Take down this open internship posting? It will be removed from student views.';
-
 export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProps> = ({
   internship,
   isOpen,
@@ -41,7 +38,7 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
     await onReview('approved', note.trim() || undefined);
   };
 
-  const validateAndSubmitNote = async (actionPrompt: string, isTakedown = false) => {
+  const validateAndSubmitNote = async (actionPrompt: string) => {
     setNoteError('');
     const trimmed = note.trim();
     if (!trimmed) {
@@ -50,9 +47,6 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
     }
     if (trimmed.length > 500) {
       setNoteError('Review note cannot exceed 500 characters.');
-      return;
-    }
-    if (isTakedown && !window.confirm(CONFIRM_MSG)) {
       return;
     }
     await onReview('rejected', trimmed);
@@ -156,6 +150,9 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
 
         {internship.status === 'open' && (
           <div className="pt-2 space-y-4 border-t border-line">
+            <Notice variant="attention" title="Take down posting">
+              Take down this open internship posting? It will be removed from student views.
+            </Notice>
             <Textarea
               id="admin-takedown-note"
               label="Takedown reason"
@@ -177,7 +174,7 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
               <Button
                 type="button"
                 variant="danger"
-                onClick={() => validateAndSubmitNote('to take down an open posting', true)}
+                onClick={() => validateAndSubmitNote('to take down an open posting')}
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Taking down...' : 'Take down'}

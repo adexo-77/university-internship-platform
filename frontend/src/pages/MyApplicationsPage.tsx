@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getStudentApplications, withdrawApplication } from '../api/application';
 import { MyApplicationsTable } from '../components/internships/MyApplicationsTable';
 import { AppShell } from '../components/layout/AppShell';
-import { Button, ErrorMessage, PageHeader } from '../components/ui';
+import { Button, ConfirmModal, ErrorMessage, PageHeader } from '../components/ui';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Application } from '../types/application';
 
@@ -36,8 +36,12 @@ export const MyApplicationsPage: React.FC = () => {
     fetchApps();
   }, [fetchApps]);
 
-  const handleWithdraw = async (id: number) => {
-    if (!window.confirm('Are you sure you want to withdraw this application?')) return;
+  const [pendingWithdrawId, setPendingWithdrawId] = useState<number | null>(null);
+
+  const handleConfirmWithdraw = async () => {
+    if (!pendingWithdrawId) return;
+    const id = pendingWithdrawId;
+    setPendingWithdrawId(null);
     setWithdrawingId(id);
     setError(null);
     try {
@@ -76,11 +80,21 @@ export const MyApplicationsPage: React.FC = () => {
         ) : (
           <MyApplicationsTable
             applications={applications}
-            onWithdraw={handleWithdraw}
+            onWithdraw={(id) => setPendingWithdrawId(id)}
             isWithdrawing={withdrawingId}
             emptyMessage="You have not submitted any internship applications yet."
           />
         )}
+
+        <ConfirmModal
+          isOpen={pendingWithdrawId !== null}
+          title="Withdraw application"
+          message="Are you sure you want to withdraw this application?"
+          confirmLabel="Withdraw"
+          confirmVariant="danger"
+          onClose={() => setPendingWithdrawId(null)}
+          onConfirm={handleConfirmWithdraw}
+        />
       </div>
     </AppShell>
   );
