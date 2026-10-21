@@ -30,6 +30,15 @@ The **University Learning & Internship Platform** is engineered with a modular, 
   - **Admin Moderation Queue & Takedown**: Admins review postings via `/api/admin/internships?status=pending_review` (ordered oldest first) and `/admin/internship-reviews`. Decisions: approve (`open`) or reject (`rejected`, note required). Open postings can be taken down (`rejected`, note required). Admins never edit posting content.
   - **Review Metadata Privacy**: `review_note`, `reviewed_at`, and `reviewed_by` are set from the session and visible solely to the owner organization and platform administrators. Students and other organizations never see review notes.
   - **Catalogue & Application Isolation**: Rejected or taken-down postings are hidden from student catalogue and detail views (404 Not Found), block new applications (409 Conflict), but preserve existing submitted applications.
+- **Phase 6**: Role Dashboards & Progress Tracking:
+  - **Role-Specific Dashboards**: Dedicated endpoints for each role delivering aggregated statistics, action queues, and progress indicators in a single bounded request:
+    - `GET /api/dashboard/student`: Upcoming assignment deadlines (due_next), recent graded work, course progress indicators, internship application summary, and profile completeness guard notice.
+    - `GET /api/dashboard/instructor`: Course summaries with enrolled student counts, total assignments, submissions awaiting grading, and a needs_grading queue (oldest submitted items with late flags).
+    - `GET /api/dashboard/organization`: Organization approval status and review note, postings breakdown by status, applications awaiting decision count, and recent applications with review links.
+    - `GET /api/dashboard/admin`: Platform-wide oversight: active users and users by role, organizations pending approval, internship postings pending moderation review, open internships count, course statuses, and application statuses.
+  - **Progress and Average Grade Calculation Rules**:
+    - **Course Progress (`progress_percent`)**: Calculated as `assignments_submitted / assignments_total * 100`, rounded to the nearest whole integer. If a course has no assignments (`assignments_total == 0`), progress is strictly `0`.
+    - **Average Grade (`average_grade_percent`)**: Computed as the arithmetic mean of `(grade / max_points) * 100` over all graded submissions in that course, rounded to 1 decimal place. Ungraded submissions are strictly excluded. If no graded submissions exist, the value is `null`.
 
 ```mermaid
 flowchart TD
@@ -232,6 +241,10 @@ flowchart TD
 | `/api/admin/users/{id}/password` | `PUT` | `admin` | Reset user password (invalidates user sessions) | `200 OK` |
 | `/api/admin/organizations` | `GET` | `admin` | List organizations with ?approval_status= filter & pagination | `200 OK` |
 | `/api/admin/organizations/{user_id}/approval` | `PUT` | `admin` | Approve, reject, or reset organization approval with note | `200 OK` |
+| `/api/dashboard/student` | `GET` | `student` | Student coursework progress, due_next assignments, recent grades, and applications summary | `200 OK` |
+| `/api/dashboard/instructor` | `GET` | `instructor` | Instructor courses overview, awaiting grading counts, and needs_grading queue | `200 OK` |
+| `/api/dashboard/organization` | `GET` | `organization` | Organization approval status, posting status counts, and latest applications | `200 OK` |
+| `/api/dashboard/admin` | `GET` | `admin` | Admin platform metrics, pending approvals and reviews, and status breakdowns | `200 OK` |
 | `/api/health` | `GET` | Public | Basic platform status probe | `200 OK` |
 | `/api/health/db` | `GET` | Public | Database query connectivity probe | `200 OK` |
 

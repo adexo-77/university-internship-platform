@@ -1,13 +1,14 @@
-# University Learning &amp; Internship Platform &bull; Phase 5c Internship Posting Review
+# University Learning &amp; Internship Platform &bull; Phase 6 Role Dashboards
 
 A production-grade, modular web platform designed for university student learning tracking, skill assessment, and internship placement matching. Built for the Brolf Tech internship technical challenge with a strict **MVP first, one phase at a time** methodology.
 
-> **Phase 5c Status**: Internship posting review, moderation queue, and lifecycle actions fully operational.
-> - **Extended Status Lifecycle**: Internship postings progress through `draft`, `pending_review`, `open`, `rejected`, and `closed`. Direct publishing via PATCH is disabled (returns 409 "Submit for review instead").
-> - **Organization Review Workflow**: Approved organizations submit postings for review via `POST /api/internships/{id}/submit`. Postings in `pending_review` can be withdrawn back to `draft` via `POST /api/internships/{id}/withdraw`. Rejected postings can be edited and resubmitted. Open postings can be closed via `POST /api/internships/{id}/close`.
-> - **Content Lock &amp; Deadline Extension Cap**: Content is editable only in `draft` or `rejected` status. An `open` posting permits only deadline extensions (shortening returns 409 Conflict) or closure. Application deadlines may never exceed `MAX_DEADLINE_DAYS = 90` days after their reference date (approval date `reviewed_at` for open postings, and today for draft or rejected postings). Violations on create, edit, or extension return 409 Conflict with the latest allowed date. `pending_review` and `closed` postings are strictly immutable.
-> - **Admin Review Queue &amp; Takedowns**: Administrators review submitted postings at `/admin/internship-reviews` (`GET /api/admin/internships?status=`, ordered oldest first). Review panel displays full posting details and organization profile with Approve and Reject actions (review note required on rejection). Open postings support administrative takedown with a mandatory note and plain confirmation.
-> - **Metadata Privacy &amp; Student Isolation**: `reviewed_by`, `reviewed_at`, and `review_note` are derived from the session and visible exclusively to the posting owner and administrators. Taken-down or rejected postings disappear from student catalogue and detail views (404 Not Found) and reject new applications (409 Conflict) while preserving existing student applications.
+> **Phase 6 Status**: Role dashboards and progress tracking fully operational across all four platform roles.
+> - **Student Dashboard**: Real-time progress tracking across enrolled courses, upcoming deadlines (`due_next` with `DueBadge`), recent grades, active internship applications, and incomplete profile notice.
+> - **Instructor Dashboard**: Summary metrics across instructed courses (enrolled counts, assignments, pending submissions), course summary table, and a needs-grading action queue (`needs_grading` with student details, submission timestamps, and late indicators).
+> - **Organization Dashboard**: Organization approval status and review notes, posting counts by status, applications awaiting decision count, and latest candidate submissions with direct review links.
+> - **Admin Dashboard**: System-wide platform metrics: active users and users by role, organizations pending approval, internship postings pending moderation review, open postings, course statuses, and application pipeline overview.
+> - **Visual Excellence &amp; Restraint**: Compact summary strips (`StatStrip`), petrol progress bars (`ProgressBar`), tabular numerals for all metrics, sentence-case copy, and clear empty states guiding next actions.
+> - **Navigation &amp; Home Route**: Central `/dashboard` home route for all authenticated users, configured as the primary navigation item across all roles.
 
 ---
 
@@ -17,9 +18,10 @@ A production-grade, modular web platform designed for university student learnin
 | :--- | :--- |
 | **Backend** | Python 3.12+ / 3.14+, FastAPI, SQLAlchemy 2, PostgreSQL (via `psycopg` 3), Alembic, Pydantic v2 |
 | **Frontend** | React 18, React Router 6/7, Vite (proxy to backend :8001), TypeScript (strict, no `any`), Tailwind CSS, Lucide React |
-| **Testing** | Pytest + FastAPI `TestClient` (backend: 112 tests), Vitest + React Testing Library (frontend: 165 tests) |
+| **Testing** | Pytest + FastAPI `TestClient` (backend: 125 tests), Vitest + React Testing Library (frontend: 192 tests) |
 | **Tooling &amp; Quality** | Ruff (backend lint &amp; format), ESLint 9 + Prettier (frontend lint &amp; format) |
 | **Environment** | Windows PowerShell compatible, Unix LF line endings, no hardcoded Windows paths |
+
 
 ---
 
@@ -57,9 +59,9 @@ university-internship-platform/
 │   ├── app/
 │   │   ├── core/              # Settings, database engine, security helpers, deps
 │   │   ├── models/            # SQLAlchemy models (user, session, student_profile, organization_profile, course, enrollment, assignment, submission, internship, application)
-│   │   ├── schemas/           # Pydantic schemas (auth, student_profile, organization_profile, course, enrollment, assignment, submission, internship, application, health, admin_user, admin_organization, admin_internship)
-│   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only: auth, student_profile, organization_profile, course, enrollment, assignment, submission, internship, application, health, admin_user, admin_organization, admin_internship)
-│   │   ├── services/          # Pure business logic and domain rules (auth, student_profile, organization_profile, course, course_catalog, enrollment, assignment, submission, internship, internship_catalog, application, health, admin_user, admin_organization, admin_internship)
+│   │   ├── schemas/           # Pydantic schemas (auth, student_profile, organization_profile, course, enrollment, assignment, submission, internship, application, health, admin_user, admin_organization, admin_internship, dashboard_student, dashboard_instructor, dashboard_organization, dashboard_admin)
+│   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only: auth, student_profile, organization_profile, course, enrollment, assignment, submission, internship, application, health, admin_user, admin_organization, admin_internship, dashboard)
+│   │   ├── services/          # Pure business logic and domain rules (auth, student_profile, organization_profile, course, course_catalog, enrollment, assignment, submission, internship, internship_catalog, application, health, admin_user, admin_organization, admin_internship, dashboard_student, dashboard_instructor, dashboard_organization, dashboard_admin)
 │   │   └── main.py            # FastAPI entry point & CORS
 │   └── tests/
 │       ├── conftest.py        # Pytest fixtures and database test harnesses
@@ -78,6 +80,11 @@ university-internship-platform/
 │       ├── test_course_create.py        # Course creation permissions and field validation tests
 │       ├── test_course_update.py        # Course update and status transition tests
 │       ├── test_course_visibility.py    # Course visibility, catalog search, and pagination tests
+│       ├── test_dashboard_admin.py      # Admin dashboard metrics and platform status breakdown tests
+│       ├── test_dashboard_instructor.py # Instructor course summary and needs_grading queue tests
+│       ├── test_dashboard_organization.py # Organization postings breakdown and latest applications tests
+│       ├── test_dashboard_student_guards.py # Student dashboard role guards and empty states tests
+│       ├── test_dashboard_student_metrics.py # Student coursework progress, due_next, and grade average tests
 │       ├── test_enrollment.py           # Enrollment, roster inspection, and cascade delete tests
 │       ├── test_health.py               # System & DB health test suite
 │       ├── test_internship_approval_rules.py # Approval requirements for internship publishing & catalog hiding
@@ -101,23 +108,24 @@ university-internship-platform/
     ├── tsconfig.node.json     # Vite config TypeScript options
     ├── vite.config.ts         # Vite proxy configuration (/api -> :8001) and Vitest
     └── src/
-        ├── api/               # API clients (auth, health, profile, course, assignment, internship, application, admin_user, admin_organization, admin_internship)
+        ├── api/               # API clients (auth, health, profile, course, assignment, internship, application, admin_user, admin_organization, admin_internship, dashboard)
         ├── components/
         │   ├── account/       # ChangePasswordForm
         │   ├── admin/         # AdminUsersTable, AdminUserForm, AdminUserStatusModal, AdminResetPasswordModal, AdminOrganizationsTable, AdminOrganizationApprovalModal, AdminInternshipReviewsTable, AdminInternshipReviewModal
         │   ├── assignments/   # AssignmentForm, AssignmentTable, CourseAssignmentsSection, DueBadge, GradeForm, SubmissionForm, SubmissionStatusBadge, SubmissionsTable
         │   ├── courses/       # CourseForm, CourseTable, EnrollButton, StudentRosterTable
+        │   ├── dashboard/     # StudentDashboard, InstructorDashboard, OrganizationDashboard, AdminDashboard, StatStrip, ProgressBar
         │   ├── internships/   # InternshipForm, InternshipTable, InternshipStatusBadge, ApplyForm, ApplicationStatusBadge, ApplicantsTable, DecisionForm, MyApplicationsTable, StudentApplicationPanel, InternshipApplicantsSection, OrganizationApprovalNotice, InternshipActionsBar, InternshipInfoCard
         │   ├── layout/        # AppShell layout component
         │   ├── profile/       # StudentProfileForm, OrganizationProfileForm
         │   ├── routes/        # ProtectedRoute, RoleRoute
-        │   └── ui/            # Reusable UI component library (Button, TextField, DataTable, etc.)
+        │   └── ui/            # Reusable UI component library (Button, TextField, DataTable, ConfirmModal, etc.)
         ├── config/            # Centralized navigation configuration
         ├── context/           # React AuthContext and AuthProvider
-        ├── hooks/             # Custom hooks (useAuth, useHealth, usePageTitle)
-        ├── lib/               # Utility functions (cn, dates, skills)
-        ├── pages/             # Pages (Login, Register, Account, Profile, Courses, MyCourses, CourseCreate, CourseEdit, CourseDetail, AssignmentCreate, AssignmentEdit, AssignmentDetail, SubmissionGrade, Internships, InternshipCreate, InternshipEdit, InternshipDetail, MyInternships, MyApplications, ApplicationDetail, AdminUsers, AdminUserCreate, AdminOrganizations, AdminInternshipReviews, SystemStatus, NotFound)
-        ├── types/             # Shared TypeScript types (auth, health, profile, course, assignment, internship, application, admin)
+        ├── hooks/             # Custom hooks (useAuth, useHealth, usePageTitle, useInternshipActions)
+        ├── lib/               # Utility functions (cn, dates, skills, internship-rules)
+        ├── pages/             # Pages (Dashboard, Login, Register, Account, Profile, Courses, MyCourses, CourseCreate, CourseEdit, CourseDetail, AssignmentCreate, AssignmentEdit, AssignmentDetail, SubmissionGrade, Internships, InternshipCreate, InternshipEdit, InternshipDetail, MyInternships, MyApplications, ApplicationDetail, AdminUsers, AdminUserCreate, AdminOrganizations, AdminInternshipReviews, SystemStatus, NotFound)
+        ├── types/             # Shared TypeScript types (auth, health, profile, course, assignment, internship, application, admin, dashboard)
         ├── App.tsx            # Application routing entry point
         └── main.tsx           # React DOM root
 ```
