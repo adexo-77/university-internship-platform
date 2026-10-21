@@ -1,6 +1,6 @@
 """Business logic and database operations for internship posting management."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -15,28 +15,20 @@ from app.schemas.internship import (
     InternshipResponse,
     InternshipUpdate,
 )
+from app.services.internship_deadline import (
+    check_deadline_cap,
+    to_internship_response,
+    update_posting_deadline,
+)
 
-MAX_DEADLINE_DAYS = 90
-
-
-def _ensure_utc(dt: datetime) -> datetime:
-    return dt.astimezone(UTC) if dt.tzinfo is not None else dt.replace(tzinfo=UTC)
-
-
-def _check_deadline_cap(deadline: datetime, p: Internship | None = None) -> None:
-    dl = _ensure_utc(deadline)
-    ref = (
-        _ensure_utc(p.reviewed_at)
-        if p and p.status == InternshipStatus.OPEN and p.reviewed_at
-        else datetime.now(UTC)
-    )
-    max_dl = ref + timedelta(days=MAX_DEADLINE_DAYS)
-    if dl > max_dl:
-        max_str = max_dl.strftime("%d %b %Y")
-        raise ConflictException(
-            message=f"Application deadline cannot be later than {max_str}",
-            code="DEADLINE_CAP_EXCEEDED",
-        )
+CONTENT_FIELDS = (
+    "title",
+    "description",
+    "requirements",
+    "location",
+    "work_mode",
+    "duration_weeks",
+)
 
 
 def _get_org_name(db: Session, org_id: int) -> str | None:
@@ -48,42 +40,11 @@ def _get_org_name(db: Session, org_id: int) -> str | None:
     )
 
 
-def _to_response(
-    p: Internship,
-    org_name: str | None,
-    applicant_count: int = 0,
-    now: datetime | None = None,
-    include_review: bool = False,
-) -> InternshipResponse:
-    current_time = now or datetime.now(UTC)
-    is_open = p.status == InternshipStatus.OPEN
-    return InternshipResponse(
-        id=p.id,
-        organization_id=p.organization_id,
-        organization_name=org_name,
-        title=p.title,
-        description=p.description,
-        requirements=p.requirements,
-        location=p.location,
-        work_mode=p.work_mode,
-        duration_weeks=p.duration_weeks,
-        application_deadline=p.application_deadline,
-        status=p.status,
-        created_at=p.created_at,
-        updated_at=p.updated_at,
-        applicant_count=applicant_count,
-        applications_accepted=(is_open and p.application_deadline > current_time),
-        review_note=p.review_note if include_review else None,
-        reviewed_at=p.reviewed_at if include_review else None,
-        reviewed_by=p.reviewed_by if include_review else None,
-    )
-
-
 def create_internship(
     db: Session, organization_id: int, payload: InternshipCreate
 ) -> InternshipResponse:
     """Create a new internship posting in draft status."""
-    _check_deadline_cap(payload.application_deadline)
+    check_deadline_cap(payload.application_deadline)
     posting = Internship(
         organization_id=organization_id,
         status=InternshipStatus.DRAFT,
@@ -92,7 +53,7 @@ def create_internship(
     db.add(posting)
     db.commit()
     db.refresh(posting)
-    return _to_response(posting, _get_org_name(db, organization_id), include_review=True)
+    return to_internship_response(posting, _get_org_name(db, organization_id), include_review=True)
 
 
 def get_organization_internships(db: Session, organization_id: int) -> list[InternshipResponse]:
@@ -107,7 +68,7 @@ def get_organization_internships(db: Session, organization_id: int) -> list[Inte
         .order_by(Internship.created_at.desc())
     )
     return [
-        _to_response(p, org_name, count, now=now, include_review=True)
+        to_internship_response(p, org_name, count, now=now, include_review=True)
         for p, count in db.execute(stmt).all()
     ]
 
@@ -123,7 +84,7 @@ def _save_and_response(db: Session, p: Internship) -> InternshipResponse:
     db.commit()
     db.refresh(p)
     count = db.scalar(select(func.count(Application.id)).where(Application.posting_id == p.id)) or 0
-    return _to_response(
+    return to_internship_response(
         p, _get_org_name(db, p.organization_id), applicant_count=count, include_review=True
     )
 
@@ -206,16 +167,8 @@ def update_internship(
                 )
             p.status = payload.status
 
-    content_fields = (
-        "title",
-        "description",
-        "requirements",
-        "location",
-        "work_mode",
-        "duration_weeks",
-    )
     if p.status == InternshipStatus.OPEN:
-        for field in content_fields:
+        for field in CONTENT_FIELDS:
             val = getattr(payload, field)
             if val is not None and val != getattr(p, field):
                 raise ConflictException(
@@ -224,23 +177,13 @@ def update_internship(
                     ),
                     code="CONTENT_LOCKED",
                 )
-        if payload.application_deadline is not None:
-            new_dl = _ensure_utc(payload.application_deadline)
-            cur_dl = _ensure_utc(p.application_deadline)
-            if new_dl <= cur_dl:
-                raise ConflictException(
-                    message="Application deadline can only be extended, not shortened",
-                    code="DEADLINE_CANNOT_BE_SHORTENED",
-                )
-            _check_deadline_cap(new_dl, p)
-            p.application_deadline = new_dl
     elif p.status in (InternshipStatus.DRAFT, InternshipStatus.REJECTED):
-        for field in content_fields:
+        for field in CONTENT_FIELDS:
             val = getattr(payload, field)
             if val is not None:
                 setattr(p, field, val)
-        if payload.application_deadline is not None:
-            _check_deadline_cap(payload.application_deadline, p)
-            p.application_deadline = payload.application_deadline
+
+    if payload.application_deadline is not None:
+        update_posting_deadline(p, payload.application_deadline)
 
     return _save_and_response(db, p)

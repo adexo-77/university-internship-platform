@@ -1,13 +1,17 @@
-import React, { useMemo, useState } from 'react';
-import { formatDate } from '../../lib/dates';
+import React, { useState } from 'react';
 import { Internship, InternshipWorkMode } from '../../types/internship';
 import { Button } from '../ui/Button';
 import { ErrorMessage } from '../ui/ErrorMessage';
 import { Select } from '../ui/Select';
 import { TextField } from '../ui/TextField';
 import { Textarea } from '../ui/Textarea';
-
-const MAX_DEADLINE_DAYS = 90;
+import { InternshipDeadlineField } from './InternshipDeadlineField';
+import {
+  checkRequiredText,
+  toLocalDatetimeString,
+  validateDeadline,
+  WORK_MODE_OPTIONS,
+} from '../../lib/internship-rules';
 
 export interface InternshipFormData {
   title: string;
@@ -26,19 +30,6 @@ export interface InternshipFormProps {
   isEdit?: boolean;
   error?: string | null;
   onCancel?: () => void;
-}
-
-function toLocalDatetimeString(isoString?: string): string {
-  if (!isoString) return '';
-  const d = new Date(isoString);
-  if (isNaN(d.getTime())) return '';
-  const pad = (n: number) => String(n).padStart(2, '0');
-  const yyyy = d.getFullYear();
-  const MM = pad(d.getMonth() + 1);
-  const dd = pad(d.getDate());
-  const hh = pad(d.getHours());
-  const mm = pad(d.getMinutes());
-  return `${yyyy}-${MM}-${dd}T${hh}:${mm}`;
 }
 
 export const InternshipForm: React.FC<InternshipFormProps> = ({
@@ -60,46 +51,18 @@ export const InternshipForm: React.FC<InternshipFormProps> = ({
   const [deadline, setDeadline] = useState(
     toLocalDatetimeString(initialData?.application_deadline)
   );
-
-  const maxAllowedDate = useMemo(() => {
-    const ref =
-      initialData?.status === 'open' && initialData.reviewed_at
-        ? new Date(initialData.reviewed_at)
-        : new Date();
-    return new Date(ref.getTime() + MAX_DEADLINE_DAYS * 24 * 60 * 60 * 1000);
-  }, [initialData?.status, initialData?.reviewed_at]);
-
-  const maxAllowedLocal = toLocalDatetimeString(maxAllowedDate.toISOString());
-  const maxAllowedHelper = `Latest allowed deadline: ${formatDate(maxAllowedDate.toISOString())}`;
-
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const validate = (): boolean => {
     const errs: Record<string, string> = {};
-
-    if (!title.trim()) {
-      errs.title = 'Title is required.';
-    } else if (title.trim().length > 150) {
-      errs.title = 'Title cannot exceed 150 characters.';
-    }
-
-    if (!description.trim()) {
-      errs.description = 'Description is required.';
-    } else if (description.trim().length > 5000) {
-      errs.description = 'Description cannot exceed 5000 characters.';
-    }
-
-    if (!requirements.trim()) {
-      errs.requirements = 'Requirements are required.';
-    } else if (requirements.trim().length > 5000) {
-      errs.requirements = 'Requirements cannot exceed 5000 characters.';
-    }
-
-    if (!location.trim()) {
-      errs.location = 'Location is required.';
-    } else if (location.trim().length > 150) {
-      errs.location = 'Location cannot exceed 150 characters.';
-    }
+    const titleErr = checkRequiredText(title, 'Title', 150);
+    if (titleErr) errs.title = titleErr;
+    const descErr = checkRequiredText(description, 'Description', 5000);
+    if (descErr) errs.description = descErr;
+    const reqErr = checkRequiredText(requirements, 'Requirements', 5000, true);
+    if (reqErr) errs.requirements = reqErr;
+    const locErr = checkRequiredText(location, 'Location', 150);
+    if (locErr) errs.location = locErr;
 
     if (durationWeeks.trim()) {
       const parsed = parseInt(durationWeeks, 10);
@@ -107,17 +70,8 @@ export const InternshipForm: React.FC<InternshipFormProps> = ({
         errs.durationWeeks = 'Duration must be between 1 and 104 weeks.';
       }
     }
-
-    if (!deadline) {
-      errs.deadline = 'Application deadline is required.';
-    } else {
-      const selected = new Date(deadline).getTime();
-      if (isNaN(selected)) {
-        errs.deadline = 'Invalid deadline date format.';
-      } else if (!isEdit && selected <= Date.now()) {
-        errs.deadline = 'Application deadline must be set in the future.';
-      }
-    }
+    const dlErr = validateDeadline(deadline, isEdit);
+    if (dlErr) errs.deadline = dlErr;
 
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
@@ -126,8 +80,7 @@ export const InternshipForm: React.FC<InternshipFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-
-    const payload: InternshipFormData = {
+    await onSubmit({
       title: title.trim(),
       description: description.trim(),
       requirements: requirements.trim(),
@@ -135,9 +88,7 @@ export const InternshipForm: React.FC<InternshipFormProps> = ({
       work_mode: workMode,
       duration_weeks: durationWeeks.trim() ? parseInt(durationWeeks, 10) : null,
       application_deadline: new Date(deadline).toISOString(),
-    };
-
-    await onSubmit(payload);
+    });
   };
 
   return (
@@ -170,11 +121,7 @@ export const InternshipForm: React.FC<InternshipFormProps> = ({
           label="Work mode"
           value={workMode}
           onChange={(e) => setWorkMode(e.target.value as InternshipWorkMode)}
-          options={[
-            { value: 'hybrid', label: 'Hybrid' },
-            { value: 'onsite', label: 'Onsite' },
-            { value: 'remote', label: 'Remote' },
-          ]}
+          options={WORK_MODE_OPTIONS}
         />
       </div>
 
@@ -191,15 +138,12 @@ export const InternshipForm: React.FC<InternshipFormProps> = ({
           placeholder="e.g. 12"
         />
 
-        <TextField
-          id="internship-deadline"
-          label="Application deadline"
-          type="datetime-local"
+        <InternshipDeadlineField
           value={deadline}
-          onChange={(e) => setDeadline(e.target.value)}
+          onChange={setDeadline}
           error={fieldErrors.deadline}
-          max={maxAllowedLocal}
-          helperText={maxAllowedHelper}
+          status={initialData?.status}
+          reviewedAt={initialData?.reviewed_at}
           required
         />
       </div>
