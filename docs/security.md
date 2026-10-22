@@ -1,0 +1,64 @@
+# Security Architecture &bull; Threat Model &amp; Controls Matrix
+
+This document details the security posture, threat model, control mechanisms, known limitations, and production operational hardening recommendations for the **University Learning & Internship Platform**.
+
+---
+
+## 1. Threat Model &amp; Attack Surface Analysis
+
+| Threat / Attack Vector | Risk Level | Target Assets | Mitigation Strategy |
+| :--- | :--- | :--- | :--- |
+| **Credential Stuffing &amp; Brute Force** | High | `/api/auth/login`, `/api/auth/register`, `/api/auth/change-password` | Sliding-window in-memory rate limiting with per-IP and per-(IP+email) buckets. Frontend countdown &amp; button locking. |
+| **Cross-Site Request Forgery (CSRF)** | High | State-modifying endpoints (`POST`, `PUT`, `PATCH`, `DELETE`) | Origin and Referer validation middleware blocking requests from unapproved third-party origins. |
+| **Clickjacking** | Medium | Web UI and authenticated sessions | `X-Frame-Options: DENY` header prevents framing in hostile sites. |
+| **MIME Sniffing** | Medium | API and media responses | `X-Content-Type-Options: nosniff` header blocks content sniffing. |
+| **Denial of Service (Large Payloads)** | High | API request handling &amp; memory | Request size limiting middleware blocking requests exceeding 256 KB (`HTTP 413 Payload Too Large`). |
+| **PostgreSQL Driver Crashes (NUL Bytes)** | High | Database driver (`psycopg`) and auth queries | Pydantic string sanitization rejecting NUL bytes (`\x00`) and control characters with `422 Unprocessable Entity`. |
+| **Session Hijacking &amp; Token Exposure** | High | User credentials &amp; session states | `HttpOnly`, `SameSite=Lax`, `Secure` (production) cookies. Database stores SHA-256 token hashes, never raw tokens. |
+| **Sensitive Data Exposure in Errors/Logs** | Medium | Stack traces, password hashes, secrets | Structured logging filtering passwords and tokens; generic JSON 500 handler returning only UUID `request_id`. |
+
+---
+
+## 2. Security Controls Matrix
+
+| Control Category | Implementation File | Key Configurations &amp; Enforcement Rules |
+| :--- | :--- | :--- |
+| **Rate Limiter** | `backend/app/core/rate_limit.py` | Sliding window: 5 failed logins / 15 min per (IP+email), 20 / 15 min per IP, 10 registrations / hr per IP, 5 password changes / 15 min per user. Returns `429` with `Retry-After`. |
+| **Rate Limit Frontend** | `frontend/src/hooks/useRateLimitCooldown.ts` | Listens for `429` responses with `Retry-After` header, displays live countdown notice, disables submit button. |
+| **CSRF Defense** | `backend/app/core/csrf.py` | Validates `Origin` and `Referer` against `CORS_ORIGINS` for mutations. Allows non-browser clients (missing headers). |
+| **Security Headers** | `backend/app/core/security_headers.py` | Sets `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, and `Cache-Control: no-store` on auth/dashboards. |
+| **Cookie &amp; Session Hygiene** | `backend/app/core/config.py` | In production (`ENVIRONMENT=production`), enforces `COOKIE_SECURE=True` and rejects localhost in `CORS_ORIGINS`. Purges expired sessions at startup &amp; login. |
+| **Request Size Limits** | `backend/app/core/request_size.py` | Rejects request payloads greater than 256 KB with `HTTP 413`. |
+| **Input Sanitization** | `backend/app/core/sanitization.py` | Strips control characters, rejects `\x00` bytes, and normalizes email addresses via safe NFKC unicode conversion. |
+| **Logging &amp; Error Masking** | `backend/app/core/logging.py` | Request logger masking auth payloads; 500 handler logging stack traces server-side and returning clean `{detail, code, request_id}`. |
+| **Role Authorization** | `backend/app/core/deps.py` | Mandatory server-side session resolution; `/api/admin/*` enforced strictly for admin role with `HTTP 403`. |
+
+---
+
+## 3. Known Limitations &amp; Design Tradeoffs
+
+1. **In-Memory Rate Limiting**:
+   - The sliding-window rate limiter stores attempt timestamps in process memory.
+   - *Limitation*: Rate counters reset when the server restarts and are not synchronized across multiple worker processes or instances.
+   - *Multi-Instance Requirement*: Production clusters with multiple uvicorn workers or container replicas should substitute an external Redis-backed sliding-window limiter.
+2. **Email Verification**:
+   - Accounts are active immediately upon registration without email confirmation.
+3. **Password Recovery**:
+   - No self-service email-based password reset exists; password resets are performed by platform administrators via `/api/admin/users/{id}/password`.
+4. **Audit Trail Storage**:
+   - Structured security events are emitted to standard output (stdout) for ingestion by log collectors; they are not saved to an immutable database audit log.
+
+---
+
+## 4. Production Deployment Recommendations
+
+1. **TLS / HTTPS Termination**:
+   - Deploy backend behind a secure reverse proxy (Nginx, Traefik, Caddy, or Cloud Load Balancer) terminating TLS 1.3.
+2. **Reverse Proxy Configuration**:
+   - Enable `TRUSTED_PROXY=True` in environment variables so `X-Forwarded-For` is securely parsed for client IP tracking.
+3. **Content Security Policy (CSP)**:
+   - Configure a strict CSP header at the reverse proxy or CDN layer (e.g., `default-src 'self'`).
+4. **Database Transport Security**:
+   - Set PostgreSQL connection strings with `sslmode=require` or `sslmode=verify-full`.
+5. **Secret Rotation**:
+   - Regularly rotate `SECRET_KEY` and database credentials in production `.env`.

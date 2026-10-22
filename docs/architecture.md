@@ -4,41 +4,12 @@
 
 The **University Learning & Internship Platform** is engineered with a modular, decoupled architecture prioritizing maintainability, strict typing, and high reliability.
 
-- **Phase 1**: Authentication, session lifecycle, and role-based access control across four primary roles: `student`, `instructor`, `organization`, and `admin`.
-- **Phase 2**: Domain profile management:
-  - **Student profiles**: academic tracking (university, department, year of study 1-6), bio, and skill inventory.
-  - **Organization profiles**: enterprise representation (company name, industry, location, verified website URL, description).
-  - **Atomic transactions**: registration automatically creates the role-appropriate profile row in the same transaction.
-- **Phase 3**: Courses and Enrollment:
-  - **Courses**: instructor-authored learning syllabi with draft/published lifecycle.
-  - **Enrollment**: student enrollment and unenrollment in published courses with unique constraints.
-  - **Rosters**: instructor and admin visibility into enrolled student names, emails, and enrollment dates.
-  - **Discovery**: title search and limit/offset pagination with per-student enrollment flags.
-- **Phase 5**: Internship Postings and Applications:
-  - **Internship Postings**: Organization-authored postings with draft/open/closed lifecycle, work mode (onsite, remote, hybrid), duration, and application deadline.
-  - **Catalogue & Search**: Students browse open postings with title/organization search and work mode filter; admin views all statuses.
-  - **Student Applications**: Student applications with cover letter, profile completeness guard (university and department required), duplicate prevention, and withdrawal window.
-  - **Review & Decisions**: Organization review of applicant background profiles and cover letters with decision workflow (shortlisted, accepted, rejected) and decision messages. Terminal states locked. Admin read-only access.
-- **Phase 5b**: Administrative User Management, Organization Approval & Password Change:
-  - **Admin User Management**: Admin-only provisioning of instructor and admin accounts, searching, role filtering, account activation/deactivation with session invalidation, and password resets.
-  - **Organization Approval Workflow**: Review and approval/rejection of organization accounts with optional review notes; publishing of internships restricted to approved organizations.
-  - **Self-Service Password Change**: Authenticated password change with session invalidation (keeps current session active) and credential rotation.
-- **Phase 5c**: Internship Posting Review & Moderation Workflow:
-  - **Extended Posting Lifecycle**: Postings progress through `draft`, `pending_review`, `open`, `rejected`, `closed`. Direct transitions to `open` via PATCH are prohibited (409 "Submit for review instead").
-  - **Organization Actions**: Submission to `pending_review` requires approved organization status; pending postings can be withdrawn back to draft; rejected postings can be edited and resubmitted; open postings can be closed.
-  - **Content Lock & Deadline Extension Cap**: Content is editable only in `draft` or `rejected` states. Open postings allow extending deadlines (shortening returns 409 Conflict) or closing. Deadlines are capped at 90 days (`MAX_DEADLINE_DAYS = 90`) after reference date (approval timestamp for open postings; today for draft/rejected postings). Violations return 409 Conflict. Pending and closed postings are immutable.
-  - **Admin Moderation Queue & Takedown**: Admins review postings via `/api/admin/internships?status=pending_review` (ordered oldest first) and `/admin/internship-reviews`. Decisions: approve (`open`) or reject (`rejected`, note required). Open postings can be taken down (`rejected`, note required). Admins never edit posting content.
-  - **Review Metadata Privacy**: `review_note`, `reviewed_at`, and `reviewed_by` are set from the session and visible solely to the owner organization and platform administrators. Students and other organizations never see review notes.
-  - **Catalogue & Application Isolation**: Rejected or taken-down postings are hidden from student catalogue and detail views (404 Not Found), block new applications (409 Conflict), but preserve existing submitted applications.
-- **Phase 6**: Role Dashboards & Progress Tracking:
-  - **Role-Specific Dashboards**: Dedicated endpoints for each role delivering aggregated statistics, action queues, and progress indicators in a single bounded request:
-    - `GET /api/dashboard/student`: Upcoming assignment deadlines (due_next), recent graded work, course progress indicators, internship application summary, and profile completeness guard notice.
-    - `GET /api/dashboard/instructor`: Course summaries with enrolled student counts, total assignments, submissions awaiting grading, and a needs_grading queue (oldest submitted items with late flags).
-    - `GET /api/dashboard/organization`: Organization approval status and review note, postings breakdown by status, applications awaiting decision count, and recent applications with review links.
-    - `GET /api/dashboard/admin`: Platform-wide oversight: active users and users by role, organizations pending approval, internship postings pending moderation review, open internships count, course statuses, and application statuses.
-  - **Progress and Average Grade Calculation Rules**:
-    - **Course Progress (`progress_percent`)**: Calculated as `assignments_submitted / assignments_total * 100`, rounded to the nearest whole integer. If a course has no assignments (`assignments_total == 0`), progress is strictly `0`.
-    - **Average Grade (`average_grade_percent`)**: Computed as the arithmetic mean of `(grade / max_points) * 100` over all graded submissions in that course, rounded to 1 decimal place. Ungraded submissions are strictly excluded. If no graded submissions exist, the value is `null`.
+- **Phase 1-2**: Authentication, sessions, RBAC (`student`, `instructor`, `organization`, `admin`), atomic user & profile provisioning.
+- **Phase 3-4**: Courses, syllabi, enrollments, rosters, coursework submissions with late flags, and grading with score floors.
+- **Phase 5**: Internship postings (draft/open/closed), search, applications with profile guards, and decision workflows.
+- **Phase 5b-c**: Admin user management, organization approval, password changes, moderation review queue, and 90-day deadline extension caps.
+- **Phase 6**: Role dashboards with aggregated metrics, progress percentages, and average grades.
+- **Phase 7a**: Security hardening: sliding-window rate limiting, CSRF defense, security headers (`X-Frame-Options: DENY`, `no-store` cache), production cookie guards, 256 KB request limits, string/null-byte sanitization, structured logging, and generic 500 handlers.
 
 ```mermaid
 flowchart TD
@@ -96,11 +67,17 @@ flowchart TD
 
 ### 1. Backend Layer (`backend/app/`)
 - **Core (`core/`)**:
-  - `config.py`: Environment settings via `pydantic-settings`.
+  - `config.py`: Environment settings via `pydantic-settings` with production security guards.
   - `database.py`: SQLAlchemy 2 engine with connection pooling and `get_db()` dependency.
   - `security.py`: Password hashing with stdlib `hashlib.scrypt` and SHA-256 session token hashing.
+  - `rate_limit.py`: Sliding-window in-memory limiter with injectable clock.
+  - `csrf.py`: Mutation request Origin and Referer validation middleware.
+  - `security_headers.py`: Security headers (`X-Frame-Options: DENY`, `no-store` cache).
+  - `request_size.py`: 256 KB request payload size limiter.
+  - `sanitization.py`: String sanitization and unicode email normalization.
+  - `logging.py`: Structured request logging and generic 500 error handler with request IDs.
   - `deps.py`: `get_current_user` and `require_roles(*roles)` enforcing role authorization.
-  - `exceptions.py`: Application exceptions mapped to standard HTTP status codes (`NotFoundException`, `ConflictException`, `ForbiddenException`, `UnauthorizedException`).
+  - `exceptions.py`: Application exceptions mapped to standard HTTP status codes.
 - **Models (`models/`)**:
   - `user.py`: `User` account model with `UserRole` enum (`student`, `instructor`, `organization`, `admin`).
   - `session.py`: `Session` model with user FK and indexed `token_hash`.

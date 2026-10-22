@@ -1,14 +1,16 @@
-# University Learning &amp; Internship Platform &bull; Phase 6 Role Dashboards
+# University Learning &amp; Internship Platform &bull; Phase 7a Security Hardening
 
 A production-grade, modular web platform designed for university student learning tracking, skill assessment, and internship placement matching. Built for the Brolf Tech internship technical challenge with a strict **MVP first, one phase at a time** methodology.
 
-> **Phase 6 Status**: Role dashboards and progress tracking fully operational across all four platform roles.
-> - **Student Dashboard**: Real-time progress tracking across enrolled courses, upcoming deadlines (`due_next` with `DueBadge`), recent grades, active internship applications, and incomplete profile notice.
-> - **Instructor Dashboard**: Summary metrics across instructed courses (enrolled counts, assignments, pending submissions), course summary table, and a needs-grading action queue (`needs_grading` with student details, submission timestamps, and late indicators).
-> - **Organization Dashboard**: Organization approval status and review notes, posting counts by status, applications awaiting decision count, and latest candidate submissions with direct review links.
-> - **Admin Dashboard**: System-wide platform metrics: active users and users by role, organizations pending approval, internship postings pending moderation review, open postings, course statuses, and application pipeline overview.
-> - **Visual Excellence &amp; Restraint**: Compact summary strips (`StatStrip`), petrol progress bars (`ProgressBar`), tabular numerals for all metrics, sentence-case copy, and clear empty states guiding next actions.
-> - **Navigation &amp; Home Route**: Central `/dashboard` home route for all authenticated users, configured as the primary navigation item across all roles.
+> **Phase 7a Status**: Comprehensive security hardening and defense-in-depth implemented across backend and frontend.
+> - **Rate Limiting**: Sliding-window limiter with injectable clock protecting login, registration, and password changes. Frontend 429 countdown notice and submit button locking.
+> - **CSRF Defense**: Origin and Referer validation middleware safeguarding all state-mutating requests (`POST`, `PUT`, `PATCH`, `DELETE`).
+> - **Security Headers**: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, and `Cache-Control: no-store` on auth/dashboards.
+> - **Cookie & Session Hygiene**: Production enforcement of `COOKIE_SECURE=True` with localhost origin guards, and automatic purging of expired sessions at startup and login.
+> - **Input Robustness**: 256 KB request payload limit (`HTTP 413`), string sanitization rejecting NUL bytes (`\x00`) and control characters, and unicode email normalization.
+> - **Observability & Error Masking**: Structured request logging without secret leakage and generic JSON 500 error handler with unique request IDs.
+> - **Route Authorization Sweeps**: Comprehensive automated test sweeps verifying 100% route session guards and admin role restrictions.
+> - **Full Documentation**: Architectural threat model, controls matrix, and production guidelines documented in `docs/security.md`.
 
 ---
 
@@ -18,8 +20,8 @@ A production-grade, modular web platform designed for university student learnin
 | :--- | :--- |
 | **Backend** | Python 3.12+ / 3.14+, FastAPI, SQLAlchemy 2, PostgreSQL (via `psycopg` 3), Alembic, Pydantic v2 |
 | **Frontend** | React 18, React Router 6/7, Vite (proxy to backend :8001), TypeScript (strict, no `any`), Tailwind CSS, Lucide React |
-| **Testing** | Pytest + FastAPI `TestClient` (backend: 125 tests), Vitest + React Testing Library (frontend: 192 tests) |
-| **Tooling &amp; Quality** | Ruff (backend lint &amp; format), ESLint 9 + Prettier (frontend lint &amp; format) |
+| **Testing** | Pytest + FastAPI `TestClient` (backend: 177 tests), Vitest + React Testing Library (frontend: 196 tests) |
+| **Tooling &amp; Quality** | Ruff (backend lint &amp; format), ESLint 9 + Prettier (frontend lint &amp; format), `pip-audit`, `npm audit` |
 | **Environment** | Windows PowerShell compatible, Unix LF line endings, no hardcoded Windows paths |
 
 
@@ -308,19 +310,42 @@ Set-Location backend
 Set-Location frontend
 
 # Run Vitest suite
-npm run test -- --run
+npm run test
 ```
 
 ---
 
-## Phase 5c Definition of Done Verification
+### 9. Security & Dependency Audits
+
+#### Backend Audit (`pip-audit`)
+
+```powershell
+Set-Location backend
+
+# Audit Python dependencies against known CVEs
+.\.venv\Scripts\pip-audit.exe
+```
+
+#### Frontend Audit (`npm audit`)
+
+```powershell
+Set-Location frontend
+
+# Audit production runtime packages
+npm audit --omit=dev
+```
+
+---
+
+## Phase 7a Definition of Done Verification
 
 | Criteria | Status | Details |
 | :--- | :---: | :--- |
 | **1. Lint &amp; format pass with 0 warnings** | PASS | Ruff check &amp; format pass with 0 errors; ESLint &amp; Prettier pass with 0 warnings |
-| **2. All tests pass** | PASS | Pytest (111/111 passed against real PostgreSQL); Vitest (162/162 passed across 47 test files) |
-| **3. No unused files, imports, or dependencies** | PASS | All modules, imports, and packages verified clean against project guide |
-| **4. Documentation is complete** | PASS | Updated README, docs/architecture.md, docs/database.md, AGENTS.md |
-| **5. Working tree is clean and committed** | PASS | Small, focused conventional commits across every step |
-| **6. Build verification** | PASS | Frontend production bundle builds cleanly (`tsc --noEmit && vite build`) |
-| **7. File size limits** | PASS | Count physical lines with `(Get-Content <file>).Count`, including blank lines and test files. None exceeds 250 physical lines. (Reported via: `Get-ChildItem backend\app, backend\tests, frontend\src -Recurse -Include *.py,*.ts,*.tsx \| ForEach-Object { [pscustomobject]@{Lines=(Get-Content $_.FullName).Count; File=$_.Name} } \| Sort-Object Lines -Descending \| Select-Object -First 8`) |
+| **2. All tests pass** | PASS | Pytest (177/177 passed against real PostgreSQL); Vitest (196/196 passed across 57 test files) |
+| **3. Security audits pass** | PASS | `pip-audit` reports 0 vulnerabilities; `npm audit --omit=dev` reports 0 vulnerabilities |
+| **4. No unused files, imports, or dependencies** | PASS | All modules, imports, and packages verified clean against project guide |
+| **5. Documentation is complete** | PASS | Created `docs/security.md`, updated `docs/architecture.md`, `README.md` |
+| **6. Working tree is clean and committed** | PASS | Small, focused conventional commits across every step |
+| **7. Build verification** | PASS | Frontend production bundle builds cleanly (`tsc --noEmit && vite build`) |
+| **8. File size limits** | PASS | Count physical lines with `(Get-Content <file>).Count`, including blank lines and test files. None exceeds 250 physical lines. (Reported via: `Get-ChildItem backend\app, backend\tests, frontend\src -Recurse -Include *.py,*.ts,*.tsx \| ForEach-Object { [pscustomobject]@{Lines=(Get-Content $_.FullName).Count; File=$_.Name} } \| Sort-Object Lines -Descending \| Select-Object -First 8`) |
