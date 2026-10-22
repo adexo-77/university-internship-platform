@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.core.csrf import CSRFMiddleware
 from app.core.exceptions import AppException
+from app.core.security_headers import SecurityHeadersMiddleware
 from app.routers.admin_internship import router as admin_internship_router
 from app.routers.admin_organization import router as admin_organization_router
 from app.routers.admin_user import router as admin_user_router
@@ -28,7 +29,8 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# Configure CSRF & CORS
+# Configure Security Headers, CSRF & CORS
+app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(CSRFMiddleware)
 app.add_middleware(
     CORSMiddleware,
