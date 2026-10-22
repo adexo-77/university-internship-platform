@@ -1,3 +1,4 @@
+import uuid
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -9,6 +10,7 @@ from app.core.config import settings, validate_production_configuration
 from app.core.csrf import CSRFMiddleware
 from app.core.database import SessionLocal
 from app.core.exceptions import AppException
+from app.core.logging import RequestLoggingMiddleware, logger
 from app.core.request_size import RequestSizeLimitMiddleware
 from app.core.security_headers import SecurityHeadersMiddleware
 from app.routers.admin_internship import router as admin_internship_router
@@ -47,7 +49,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Configure Request Size, Security Headers, CSRF & CORS
+# Configure Logging, Request Size, Security Headers, CSRF & CORS
+app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(CSRFMiddleware)
 app.add_middleware(RequestSizeLimitMiddleware)
@@ -67,6 +70,27 @@ async def app_exception_handler(_: Request, exc: AppException) -> JSONResponse:
         status_code=exc.status_code,
         content={"detail": exc.message, "code": exc.code or "INTERNAL_ERROR"},
         headers=getattr(exc, "headers", None),
+    )
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, _: Exception) -> JSONResponse:
+    """Return generic JSON 500 with request id and never leak stack traces."""
+    request_id = getattr(request.state, "request_id", None) or uuid.uuid4().hex
+    logger.error(
+        "request_id=%s method=%s path=%s status=500 unhandled_exception",
+        request_id,
+        request.method,
+        request.url.path,
+    )
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "An internal server error occurred.",
+            "code": "INTERNAL_SERVER_ERROR",
+            "request_id": request_id,
+        },
+        headers={"X-Request-ID": request_id},
     )
 
 
