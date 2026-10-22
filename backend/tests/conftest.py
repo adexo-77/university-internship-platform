@@ -1,6 +1,7 @@
 """Pytest configuration and fixtures for backend testing."""
 
 import os
+import time
 import warnings
 from collections.abc import Generator
 from pathlib import Path
@@ -145,3 +146,17 @@ def client_with_failing_db() -> Generator[TestClient, None, None]:
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limiter_fixture() -> Generator[None, None, None]:
+    """Ensure the in-memory rate limiter is disabled and reset for standard tests."""
+    from app.core.rate_limit import rate_limiter
+
+    rate_limiter.reset()
+    rate_limiter.enabled = False
+    rate_limiter.set_clock(time.time)
+    yield
+    rate_limiter.reset()
+    rate_limiter.enabled = False
+    rate_limiter.set_clock(time.time)

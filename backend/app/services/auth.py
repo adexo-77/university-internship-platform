@@ -10,6 +10,7 @@ from app.core.exceptions import (
     EmailAlreadyExistsException,
     InvalidCredentialsException,
 )
+from app.core.rate_limit import rate_limiter
 from app.core.security import (
     SESSION_LIFETIME_SECONDS,
     generate_session_token,
@@ -29,7 +30,9 @@ class AuthService:
     """Authentication and session management business logic."""
 
     @staticmethod
-    def register(db: Session, request: RegisterRequest) -> tuple[User, str]:
+    def register(
+        db: Session, request: RegisterRequest, client_ip: str = "127.0.0.1"
+    ) -> tuple[User, str]:
         """Register a new user account with student or organization role.
 
         Creates an empty profile row for a student or an organization profile with
@@ -39,6 +42,7 @@ class AuthService:
             EmailAlreadyExistsException: If email is already registered.
             AppException (422): If organization registration lacks organization_name.
         """
+        rate_limiter.check_and_record_register(client_ip=client_ip)
         existing_user = db.scalar(select(User).where(User.email == request.email))
         if existing_user is not None:
             raise EmailAlreadyExistsException()
@@ -84,7 +88,9 @@ class AuthService:
         return user, raw_token
 
     @staticmethod
-    def authenticate(db: Session, request: LoginRequest) -> tuple[User, str]:
+    def authenticate(
+        db: Session, request: LoginRequest, client_ip: str = "127.0.0.1"
+    ) -> tuple[User, str]:
         """Authenticate user credentials and create a session.
 
         Always performs constant-time hash verification even for non-existent users
@@ -93,16 +99,20 @@ class AuthService:
         Raises:
             InvalidCredentialsException: On unknown email, wrong password, or inactive user.
         """
+        rate_limiter.check_login_attempt(client_ip=client_ip, email=request.email)
         user = db.scalar(select(User).where(User.email == request.email))
 
         if user is None:
+            rate_limiter.record_login_failure(client_ip=client_ip, email=request.email)
             verify_dummy_password(request.password)
             raise InvalidCredentialsException()
 
         is_valid = verify_password(request.password, user.password_hash)
         if not is_valid or not user.is_active:
+            rate_limiter.record_login_failure(client_ip=client_ip, email=request.email)
             raise InvalidCredentialsException()
 
+        rate_limiter.reset_login_failures(client_ip=client_ip, email=request.email)
         _, raw_token = AuthService.create_session(db=db, user_id=user.id)
         return user, raw_token
 
@@ -174,6 +184,7 @@ class AuthService:
         request: ChangePasswordRequest,
     ) -> None:
         """Change authenticated user password, invalidate all other sessions, and keep current."""
+        rate_limiter.check_and_record_change_password(user_id=user.id)
         if not verify_password(request.current_password, user.password_hash):
             verify_dummy_password(request.current_password)
             raise InvalidCredentialsException()

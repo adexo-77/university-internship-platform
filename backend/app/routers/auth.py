@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_user
+from app.core.rate_limit import get_client_ip
 from app.core.security import SESSION_COOKIE_NAME, SESSION_LIFETIME_SECONDS
 from app.models.user import User
 from app.schemas.auth import (
@@ -50,12 +51,14 @@ def _clear_auth_cookie(response: Response) -> None:
     summary="Register new user account",
 )
 def register(
-    request: RegisterRequest,
+    request: Request,
+    payload: RegisterRequest,
     response: Response,
     db: Session = Depends(get_db),
 ) -> User:
     """Register student or organization account and establish an authenticated session."""
-    user, raw_token = AuthService.register(db=db, request=request)
+    client_ip = get_client_ip(request)
+    user, raw_token = AuthService.register(db=db, request=payload, client_ip=client_ip)
     _set_auth_cookie(response=response, raw_token=raw_token)
     return user
 
@@ -67,12 +70,14 @@ def register(
     summary="Authenticate user credentials",
 )
 def login(
-    request: LoginRequest,
+    request: Request,
+    payload: LoginRequest,
     response: Response,
     db: Session = Depends(get_db),
 ) -> User:
     """Verify user credentials and establish an authenticated session."""
-    user, raw_token = AuthService.authenticate(db=db, request=request)
+    client_ip = get_client_ip(request)
+    user, raw_token = AuthService.authenticate(db=db, request=payload, client_ip=client_ip)
     _set_auth_cookie(response=response, raw_token=raw_token)
     return user
 

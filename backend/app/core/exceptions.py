@@ -9,11 +9,13 @@ class AppException(Exception):
         message: str,
         code: str | None = None,
         status_code: int = 500,
+        headers: dict[str, str] | None = None,
     ) -> None:
         super().__init__(message)
         self.message = message
         self.code = code
         self.status_code = status_code
+        self.headers = headers
 
 
 class DatabaseUnavailableException(AppException):
@@ -91,3 +93,22 @@ class ConflictException(AppException):
         code: str = "CONFLICT",
     ) -> None:
         super().__init__(message=message, code=code, status_code=409)
+
+
+class RateLimitExceededException(AppException):
+    """Raised when request rate limit threshold is exceeded."""
+
+    def __init__(
+        self,
+        retry_after: int,
+        message: str | None = None,
+        code: str = "RATE_LIMIT_EXCEEDED",
+    ) -> None:
+        detail = message or f"Too many requests. Please try again in {retry_after} seconds."
+        super().__init__(
+            message=detail,
+            code=code,
+            status_code=429,
+            headers={"Retry-After": str(retry_after)},
+        )
+        self.retry_after = retry_after

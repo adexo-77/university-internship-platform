@@ -20,6 +20,16 @@ class Settings(BaseSettings):
     TEST_DATABASE_URL: str
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
     COOKIE_SECURE: bool | None = None
+    TRUSTED_PROXY: bool = False
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_LOGIN_FAIL_LIMIT: int = 5
+    RATE_LIMIT_LOGIN_FAIL_WINDOW: int = 900
+    RATE_LIMIT_LOGIN_IP_LIMIT: int = 20
+    RATE_LIMIT_LOGIN_IP_WINDOW: int = 900
+    RATE_LIMIT_REGISTER_LIMIT: int = 10
+    RATE_LIMIT_REGISTER_WINDOW: int = 3600
+    RATE_LIMIT_CHANGE_PASSWORD_LIMIT: int = 5
+    RATE_LIMIT_CHANGE_PASSWORD_WINDOW: int = 900
 
     @model_validator(mode="after")
     def set_cookie_secure_default(self) -> "Settings":

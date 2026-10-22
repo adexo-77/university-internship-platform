@@ -43,6 +43,7 @@ async def app_exception_handler(_: Request, exc: AppException) -> JSONResponse:
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.message, "code": exc.code or "INTERNAL_ERROR"},
+        headers=getattr(exc, "headers", None),
     )
 
 
