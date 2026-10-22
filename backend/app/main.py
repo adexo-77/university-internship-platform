@@ -9,6 +9,7 @@ from app.core.config import settings, validate_production_configuration
 from app.core.csrf import CSRFMiddleware
 from app.core.database import SessionLocal
 from app.core.exceptions import AppException
+from app.core.request_size import RequestSizeLimitMiddleware
 from app.core.security_headers import SecurityHeadersMiddleware
 from app.routers.admin_internship import router as admin_internship_router
 from app.routers.admin_organization import router as admin_organization_router
@@ -46,9 +47,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Configure Security Headers, CSRF & CORS
+# Configure Request Size, Security Headers, CSRF & CORS
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(CSRFMiddleware)
+app.add_middleware(RequestSizeLimitMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,

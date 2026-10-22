@@ -4,6 +4,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.sanitization import clean_optional_text, clean_text
+
 
 class StudentProfileUpdateRequest(BaseModel):
     """Schema for updating student profile details."""
@@ -34,15 +36,8 @@ class StudentProfileUpdateRequest(BaseModel):
     @field_validator("university", "department")
     @classmethod
     def validate_optional_text(cls, value: str | None) -> str | None:
-        """Trim string and normalize empty to None."""
-        if value is None:
-            return None
-        trimmed = value.strip()
-        if not trimmed:
-            return None
-        if len(trimmed) > 255:
-            raise ValueError("Field cannot exceed 255 characters.")
-        return trimmed
+        """Trim string, reject null bytes/control chars, and normalize empty to None."""
+        return clean_optional_text(value, max_length=255, allow_newlines=False)
 
     @field_validator("year_of_study")
     @classmethod
@@ -57,15 +52,8 @@ class StudentProfileUpdateRequest(BaseModel):
     @field_validator("bio")
     @classmethod
     def validate_bio(cls, value: str | None) -> str | None:
-        """Trim bio and enforce maximum length of 1000 characters."""
-        if value is None:
-            return None
-        trimmed = value.strip()
-        if not trimmed:
-            return None
-        if len(trimmed) > 1000:
-            raise ValueError("Bio cannot exceed 1000 characters.")
-        return trimmed
+        """Trim bio, reject null bytes, and enforce maximum length of 1000 characters."""
+        return clean_optional_text(value, field_name="Bio", max_length=1000, allow_newlines=True)
 
     @field_validator("skills")
     @classmethod
@@ -75,11 +63,9 @@ class StudentProfileUpdateRequest(BaseModel):
         seen_lower: set[str] = set()
 
         for raw_skill in value:
-            trimmed = raw_skill.strip()
+            trimmed = clean_text(raw_skill, field_name="Skill", max_length=40, allow_newlines=False)
             if not trimmed:
                 continue
-            if len(trimmed) > 40:
-                raise ValueError("Each skill cannot exceed 40 characters.")
             lower = trimmed.lower()
             if lower not in seen_lower:
                 seen_lower.add(lower)

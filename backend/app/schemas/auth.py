@@ -5,6 +5,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.core.sanitization import clean_optional_text, clean_text, normalize_email
 from app.models.user import UserRole
 
 
@@ -43,17 +44,20 @@ class RegisterRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def validate_and_normalize_email(cls, value: str) -> str:
-        """Validate and lowercase email address."""
-        normalized = value.strip().lower()
-        if not normalized or "@" not in normalized or "." not in normalized.split("@")[-1]:
-            raise ValueError("A valid email address is required.")
-        return normalized
+        """Validate and safely normalize email address."""
+        return normalize_email(value)
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, value: str) -> str:
+        """Reject null bytes and control chars in password."""
+        return clean_text(value, "Password", max_length=128)
 
     @field_validator("full_name")
     @classmethod
     def validate_full_name(cls, value: str) -> str:
-        """Validate full name is not just whitespace."""
-        cleaned = value.strip()
+        """Validate full name is not just whitespace and contains no null bytes."""
+        cleaned = clean_text(value, "Full name", max_length=255)
         if not cleaned:
             raise ValueError("Full name cannot be blank.")
         return cleaned
@@ -61,11 +65,8 @@ class RegisterRequest(BaseModel):
     @field_validator("organization_name")
     @classmethod
     def validate_organization_name(cls, value: str | None) -> str | None:
-        """Trim organization_name if provided."""
-        if value is None:
-            return None
-        trimmed = value.strip()
-        return trimmed if trimmed else None
+        """Trim and sanitize organization_name if provided."""
+        return clean_optional_text(value, "Organization name", max_length=255)
 
     @model_validator(mode="after")
     def validate_organization_role(self) -> "RegisterRequest":
@@ -87,8 +88,14 @@ class LoginRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def normalize_email(cls, value: str) -> str:
-        """Normalize email address to lowercase."""
-        return value.strip().lower()
+        """Safely normalize email address."""
+        return normalize_email(value)
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, value: str) -> str:
+        """Reject null bytes and control chars in password."""
+        return clean_text(value, "Password", max_length=128)
 
 
 class UserResponse(BaseModel):
@@ -117,6 +124,18 @@ class ChangePasswordRequest(BaseModel):
     )
 
     model_config = ConfigDict(extra="forbid")
+
+    @field_validator("current_password")
+    @classmethod
+    def validate_current_password(cls, value: str) -> str:
+        """Reject null bytes and control chars in current password."""
+        return clean_text(value, "Current password", max_length=128)
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, value: str) -> str:
+        """Reject null bytes and control chars in new password."""
+        return clean_text(value, "New password", max_length=128)
 
     @model_validator(mode="after")
     def validate_new_differs_from_current(self) -> "ChangePasswordRequest":

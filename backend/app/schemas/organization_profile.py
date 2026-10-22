@@ -5,6 +5,7 @@ from urllib.parse import urlsplit
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.sanitization import clean_optional_text, clean_text
 from app.models.organization_profile import ApprovalStatus
 
 
@@ -39,55 +40,37 @@ class OrganizationProfileUpdateRequest(BaseModel):
     @field_validator("organization_name")
     @classmethod
     def validate_organization_name(cls, value: str) -> str:
-        """Enforce non-empty organization name."""
-        trimmed = value.strip()
-        if not trimmed:
+        """Enforce non-empty organization name without null bytes."""
+        cleaned = clean_text(value, "Organization name", max_length=255)
+        if not cleaned:
             raise ValueError("Organization name cannot be blank.")
-        if len(trimmed) > 255:
-            raise ValueError("Organization name cannot exceed 255 characters.")
-        return trimmed
+        return cleaned
 
     @field_validator("industry", "location")
     @classmethod
     def validate_optional_text(cls, value: str | None) -> str | None:
-        """Trim string and normalize empty to None."""
-        if value is None:
-            return None
-        trimmed = value.strip()
-        if not trimmed:
-            return None
-        if len(trimmed) > 255:
-            raise ValueError("Field cannot exceed 255 characters.")
-        return trimmed
+        """Trim string, reject null bytes, and normalize empty to None."""
+        return clean_optional_text(value, max_length=255, allow_newlines=False)
 
     @field_validator("website")
     @classmethod
     def validate_website(cls, value: str | None) -> str | None:
         """Ensure website is a valid http or https URL if provided."""
-        if value is None:
+        cleaned = clean_optional_text(value, "Website", max_length=255)
+        if cleaned is None:
             return None
-        trimmed = value.strip()
-        if not trimmed:
-            return None
-        if len(trimmed) > 255:
-            raise ValueError("Website URL cannot exceed 255 characters.")
-        parsed = urlsplit(trimmed)
+        parsed = urlsplit(cleaned)
         if parsed.scheme not in ("http", "https") or not parsed.netloc:
             raise ValueError("Website must be a valid http or https URL.")
-        return trimmed
+        return cleaned
 
     @field_validator("description")
     @classmethod
     def validate_description(cls, value: str | None) -> str | None:
         """Trim description and enforce maximum length of 1000 characters."""
-        if value is None:
-            return None
-        trimmed = value.strip()
-        if not trimmed:
-            return None
-        if len(trimmed) > 1000:
-            raise ValueError("Description cannot exceed 1000 characters.")
-        return trimmed
+        return clean_optional_text(
+            value, field_name="Description", max_length=1000, allow_newlines=True
+        )
 
 
 class OrganizationProfileResponse(BaseModel):
