@@ -1,11 +1,13 @@
-"""Main FastAPI application entry point."""
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.core.config import settings
+from app.core.config import settings, validate_production_configuration
 from app.core.csrf import CSRFMiddleware
+from app.core.database import SessionLocal
 from app.core.exceptions import AppException
 from app.core.security_headers import SecurityHeadersMiddleware
 from app.routers.admin_internship import router as admin_internship_router
@@ -22,11 +24,26 @@ from app.routers.internship import router as internship_router
 from app.routers.organization_profile import router as organization_profile_router
 from app.routers.student_profile import router as student_profile_router
 from app.routers.submission import router as submission_router
+from app.services.auth import AuthService
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
+    """Execute startup security validation and session maintenance."""
+    validate_production_configuration(settings)
+    try:
+        with SessionLocal() as db:
+            AuthService.purge_expired_sessions(db)
+    except Exception:
+        pass
+    yield
+
 
 app = FastAPI(
     title="University Learning & Internship Platform API",
     description="Backend API for Brolf Tech University Learning & Internship Platform",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 # Configure Security Headers, CSRF & CORS

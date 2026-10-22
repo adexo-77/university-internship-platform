@@ -113,8 +113,17 @@ class AuthService:
             raise InvalidCredentialsException()
 
         rate_limiter.reset_login_failures(client_ip=client_ip, email=request.email)
+        AuthService.purge_expired_sessions(db)
         _, raw_token = AuthService.create_session(db=db, user_id=user.id)
         return user, raw_token
+
+    @staticmethod
+    def purge_expired_sessions(db: Session) -> int:
+        """Purge expired sessions across all users."""
+        now = datetime.now(UTC)
+        result = db.execute(delete(SessionModel).where(SessionModel.expires_at <= now))
+        db.commit()
+        return int(result.rowcount)
 
     @staticmethod
     def create_session(db: Session, user_id: int) -> tuple[SessionModel, str]:

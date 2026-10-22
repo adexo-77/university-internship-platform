@@ -32,10 +32,22 @@ class Settings(BaseSettings):
     RATE_LIMIT_CHANGE_PASSWORD_WINDOW: int = 900
 
     @model_validator(mode="after")
-    def set_cookie_secure_default(self) -> "Settings":
-        """Default COOKIE_SECURE to True in production, False otherwise."""
+    def validate_production_settings(self) -> "Settings":
+        """Default COOKIE_SECURE and validate production constraints."""
         if self.COOKIE_SECURE is None:
             self.COOKIE_SECURE = self.ENVIRONMENT == "production"
+        if self.ENVIRONMENT == "production":
+            if not self.COOKIE_SECURE:
+                raise ValueError(
+                    "Production configuration error: COOKIE_SECURE must be True "
+                    "when ENVIRONMENT=production."
+                )
+            for origin in self.CORS_ORIGINS:
+                if "localhost" in origin.lower() or "127.0.0.1" in origin:
+                    raise ValueError(
+                        "Production configuration error: CORS_ORIGINS cannot contain "
+                        f"localhost or 127.0.0.1 in production (found '{origin}')."
+                    )
         return self
 
     model_config = SettingsConfigDict(
@@ -43,6 +55,21 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
     )
+
+
+def validate_production_configuration(cfg: Settings) -> None:
+    """Validate production security requirements at application startup."""
+    if cfg.ENVIRONMENT == "production":
+        if not cfg.COOKIE_SECURE:
+            raise RuntimeError(
+                "Production startup failed: COOKIE_SECURE must be True when ENVIRONMENT=production."
+            )
+        for origin in cfg.CORS_ORIGINS:
+            if "localhost" in origin.lower() or "127.0.0.1" in origin:
+                raise RuntimeError(
+                    "Production startup failed: CORS_ORIGINS cannot contain localhost "
+                    f"or 127.0.0.1 in production (found '{origin}')."
+                )
 
 
 def load_settings(env_file_path: Path | str | None = None) -> Settings:
@@ -56,20 +83,24 @@ def load_settings(env_file_path: Path | str | None = None) -> Settings:
         missing_fields = [
             str(err["loc"][0]) for err in exc.errors() if err.get("type") == "missing"
         ]
-        missing_str = ", ".join(missing_fields) if missing_fields else str(exc)
-        error_msg = (
-            f"\n{'=' * 78}\n"
-            f"[FATAL CONFIGURATION ERROR] Missing required setting(s): {missing_str}\n"
-            "Please copy '.env.example' to '.env' at the project root and configure settings:\n"
-            "  PowerShell: Copy-Item .env.example .env\n"
-            "  Bash:       cp .env.example .env\n"
-            f"{'=' * 78}\n"
-        )
-        sys.stderr.write(error_msg)
-        raise RuntimeError(
-            f"Missing required environment variable(s): {missing_str}. "
-            "Please copy '.env.example' to '.env' at the project root."
-        ) from exc
+        if missing_fields:
+            missing_str = ", ".join(missing_fields)
+            error_msg = (
+                f"\n{'=' * 78}\n"
+                f"[FATAL CONFIGURATION ERROR] Missing required setting(s): {missing_str}\n"
+                "Please copy '.env.example' to '.env' at the project root and configure settings:\n"
+                "  PowerShell: Copy-Item .env.example .env\n"
+                "  Bash:       cp .env.example .env\n"
+                f"{'=' * 78}\n"
+            )
+            sys.stderr.write(error_msg)
+            raise RuntimeError(
+                f"Missing required environment variable(s): {missing_str}. "
+                "Please copy '.env.example' to '.env' at the project root."
+            ) from exc
+
+        err_msg = exc.errors()[0]["msg"] if exc.errors() else str(exc)
+        raise RuntimeError(f"[FATAL CONFIGURATION ERROR] {err_msg}") from exc
 
 
 settings = load_settings()
