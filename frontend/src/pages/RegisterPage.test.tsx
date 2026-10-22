@@ -151,4 +151,50 @@ describe('RegisterPage Component', () => {
       expect(screen.getByText('An account with this email already exists')).toBeInTheDocument();
     });
   });
+
+  it('displays rate limit cooldown notice and disables submit button on 429 response', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation((input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      if (url.includes('/api/auth/register')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              detail: 'Rate limit exceeded. Try again in 60 minutes.',
+              code: 'RATE_LIMITED',
+            }),
+            {
+              status: 429,
+              headers: {
+                'Content-Type': 'application/json',
+                'Retry-After': '3600',
+              },
+            }
+          )
+        );
+      }
+      return Promise.reject(new Error('Unknown url'));
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/register']}>
+        <AuthProvider initialUser={null}>
+          <RegisterPage />
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Jane Doe' } });
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'jane@example.com' } });
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'Password123!' } });
+
+    const submitBtn = screen.getByRole('button', { name: 'Create account' });
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/too many attempts\. try again in 60 minutes\./i)
+      ).toBeInTheDocument();
+    });
+    expect(screen.getByRole('button', { name: 'Create account' })).toBeDisabled();
+  });
 });

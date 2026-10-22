@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { changePassword } from '../../api/auth';
+import { useRateLimitCooldown } from '../../hooks/useRateLimitCooldown';
 import { Button, ErrorMessage, Notice, TextField } from '../ui';
 
 export interface ChangePasswordFormProps {
@@ -7,6 +8,7 @@ export interface ChangePasswordFormProps {
 }
 
 export const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({ onSuccess }) => {
+  const { isRateLimited, cooldownMessage, handleRateLimitError } = useRateLimitCooldown();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -62,7 +64,9 @@ export const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({ onSucces
       setFieldErrors({});
       onSuccess?.();
     } catch (err: unknown) {
-      if (err instanceof Error) {
+      if (handleRateLimitError(err)) {
+        setErrorMessage(null);
+      } else if (err instanceof Error) {
         setErrorMessage(err.message);
       } else {
         setErrorMessage(
@@ -82,7 +86,13 @@ export const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({ onSucces
         </Notice>
       )}
 
-      {errorMessage && (
+      {cooldownMessage && (
+        <Notice variant="error" title="Too many attempts">
+          {cooldownMessage}
+        </Notice>
+      )}
+
+      {errorMessage && !cooldownMessage && (
         <ErrorMessage
           whatHappened={errorMessage}
           howToFix="Please verify your current password and password requirements."
@@ -142,7 +152,7 @@ export const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({ onSucces
       />
 
       <div className="pt-2">
-        <Button type="submit" variant="primary" disabled={isSubmitting}>
+        <Button type="submit" variant="primary" disabled={isSubmitting || isRateLimited}>
           {isSubmitting ? 'Updating password...' : 'Update password'}
         </Button>
       </div>

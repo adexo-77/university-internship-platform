@@ -138,4 +138,53 @@ describe('LoginPage Component', () => {
       expect(screen.getByText('Account Destination')).toBeInTheDocument();
     });
   });
+
+  it('displays rate limit cooldown notice and disables submit button on 429 response', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation((input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      if (url.includes('/api/auth/login')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              detail: 'Rate limit exceeded. Try again in 15 minutes.',
+              code: 'RATE_LIMITED',
+            }),
+            {
+              status: 429,
+              headers: {
+                'Content-Type': 'application/json',
+                'Retry-After': '900',
+              },
+            }
+          )
+        );
+      }
+      return Promise.reject(new Error('Unknown url'));
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/login']}>
+        <AuthProvider initialUser={null}>
+          <LoginPage />
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText('Email'), {
+      target: { value: 'limited@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText('Password'), {
+      target: { value: 'Password123!' },
+    });
+
+    const submitBtn = screen.getByRole('button', { name: 'Sign in' });
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/too many attempts\. try again in 15 minutes\./i)
+      ).toBeInTheDocument();
+    });
+    expect(screen.getByRole('button', { name: 'Sign in' })).toBeDisabled();
+  });
 });

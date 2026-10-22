@@ -4,10 +4,12 @@ import { AuthApiError } from '../api/auth';
 import { Button, Notice, TextField } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useRateLimitCooldown } from '../hooks/useRateLimitCooldown';
 
 export const LoginPage: React.FC = () => {
   usePageTitle('Log in');
   const { login, isAuthenticated } = useAuth();
+  const { isRateLimited, cooldownMessage, handleRateLimitError } = useRateLimitCooldown();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -59,7 +61,9 @@ export const LoginPage: React.FC = () => {
         (location.state as { from?: { pathname?: string } })?.from?.pathname ?? '/account';
       navigate(destination, { replace: true });
     } catch (err) {
-      if (err instanceof AuthApiError) {
+      if (handleRateLimitError(err)) {
+        setServerError(null);
+      } else if (err instanceof AuthApiError) {
         setServerError(err.message);
       } else if (err instanceof Error) {
         setServerError(err.message);
@@ -81,13 +85,19 @@ export const LoginPage: React.FC = () => {
           </p>
         </div>
 
-        {serverError && (
+        {cooldownMessage ? (
+          <div className="mb-5">
+            <Notice variant="error" title="Too many attempts">
+              {cooldownMessage}
+            </Notice>
+          </div>
+        ) : serverError ? (
           <div className="mb-5">
             <Notice variant="error" title="Sign in failed">
               {serverError}
             </Notice>
           </div>
-        )}
+        ) : null}
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <TextField
@@ -118,7 +128,7 @@ export const LoginPage: React.FC = () => {
               type="submit"
               variant="primary"
               className="w-full"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isRateLimited}
             >
               {isSubmitting ? 'Signing in...' : 'Sign in'}
             </Button>

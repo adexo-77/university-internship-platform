@@ -6,12 +6,14 @@ import { ChangePasswordPayload, LoginPayload, RegisterPayload, User } from '../t
 export class AuthApiError extends Error {
   readonly status: number;
   readonly code?: string;
+  readonly retryAfter?: number;
 
-  constructor(message: string, status: number, code?: string) {
+  constructor(message: string, status: number, code?: string, retryAfter?: number) {
     super(message);
     this.name = 'AuthApiError';
     this.status = status;
     this.code = code;
+    this.retryAfter = retryAfter;
   }
 }
 
@@ -33,7 +35,11 @@ async function handleResponseError(response: Response): Promise<never> {
     // Ignore JSON parse failure and use fallback statusText
   }
 
-  throw new AuthApiError(message, response.status, code);
+  const retryHeader = response.headers.get('Retry-After');
+  const parsedRetry = retryHeader ? parseInt(retryHeader, 10) : undefined;
+  const retryAfter = Number.isFinite(parsedRetry) ? parsedRetry : undefined;
+
+  throw new AuthApiError(message, response.status, code, retryAfter);
 }
 
 /**

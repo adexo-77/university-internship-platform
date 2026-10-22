@@ -3,9 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as authApi from '../../api/auth';
 import { ChangePasswordForm } from './ChangePasswordForm';
 
-vi.mock('../../api/auth', () => ({
-  changePassword: vi.fn(),
-}));
+vi.mock('../../api/auth', async (importOriginal) => {
+  const actual = await importOriginal<typeof authApi>();
+  return {
+    ...actual,
+    changePassword: vi.fn(),
+  };
+});
 
 describe('ChangePasswordForm Component', () => {
   beforeEach(() => {
@@ -118,5 +122,31 @@ describe('ChangePasswordForm Component', () => {
     fireEvent.click(screen.getByRole('button', { name: /update password/i }));
 
     expect(await screen.findByText(/invalid email or password/i)).toBeInTheDocument();
+  });
+
+  it('displays rate limit cooldown notice and disables submit button on 429 error', async () => {
+    vi.mocked(authApi.changePassword).mockRejectedValueOnce(
+      new authApi.AuthApiError('Rate limited', 429, 'RATE_LIMITED', 900)
+    );
+
+    render(<ChangePasswordForm />);
+
+    fireEvent.change(screen.getByLabelText(/current password/i), {
+      target: { value: 'OldPassword123!' },
+    });
+    fireEvent.change(screen.getByLabelText(/^new password/i), {
+      target: { value: 'NewSecretPassword123!' },
+    });
+    fireEvent.change(screen.getByLabelText(/confirm new password/i), {
+      target: { value: 'NewSecretPassword123!' },
+    });
+
+    const submitBtn = screen.getByRole('button', { name: /update password/i });
+    fireEvent.click(submitBtn);
+
+    expect(
+      await screen.findByText(/too many attempts\. try again in 15 minutes\./i)
+    ).toBeInTheDocument();
+    expect(submitBtn).toBeDisabled();
   });
 });
