@@ -11,7 +11,10 @@ export interface InstructorDashboardProps {
 
 export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({ data }) => {
   const totalEnrolled = data.courses.reduce((sum, c) => sum + c.enrolled_count, 0);
-  const totalAwaiting = data.courses.reduce((sum, c) => sum + c.awaiting_grading_count, 0);
+  const totalAwaiting = data.courses.reduce(
+    (sum, c) => sum + (c.submissions_awaiting_grading ?? c.awaiting_grading_count ?? 0),
+    0
+  );
 
   const stats = [
     { label: 'Active courses', value: data.courses.length, to: '/my-courses' },
@@ -88,8 +91,11 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({ data }
                   {course.assignments_count}
                 </div>
                 <div className="col-span-3 sm:text-right mt-1 sm:mt-0">
-                  {course.awaiting_grading_count > 0 ? (
-                    <Badge variant="attention">{course.awaiting_grading_count} pending</Badge>
+                  {(course.submissions_awaiting_grading ?? course.awaiting_grading_count ?? 0) >
+                  0 ? (
+                    <Badge variant="attention">
+                      {course.submissions_awaiting_grading ?? course.awaiting_grading_count} pending
+                    </Badge>
                   ) : (
                     <span className="text-xs text-pencil">None</span>
                   )}
@@ -123,7 +129,7 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({ data }
                     >
                       {item.student_name}
                     </Link>
-                    {item.is_late && <Badge variant="error">Late</Badge>}
+                    {(item.late ?? item.is_late) && <Badge variant="error">Late</Badge>}
                   </div>
                   <p className="text-xs text-pencil">
                     {item.assignment_title} &bull; {item.course_title}

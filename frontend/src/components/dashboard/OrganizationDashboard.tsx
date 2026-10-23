@@ -12,16 +12,18 @@ export interface OrganizationDashboardProps {
 }
 
 export const OrganizationDashboard: React.FC<OrganizationDashboardProps> = ({ data }) => {
-  const totalPostings = Object.values(data.posting_counts).reduce((sum, count) => sum + count, 0);
+  const postingCounts = data.postings?.counts_by_status ?? data.posting_counts ?? {};
+  const totalPostings =
+    data.postings?.total ?? Object.values(postingCounts).reduce((sum, count) => sum + count, 0);
 
   const stats = [
-    { label: 'Open postings', value: data.posting_counts['open'] || 0, to: '/my-internships' },
+    { label: 'Open postings', value: postingCounts['open'] || 0, to: '/my-internships' },
     { label: 'Total postings', value: totalPostings, to: '/my-internships' },
     {
       label: 'Postings in review',
-      value: data.posting_counts['pending_review'] || 0,
+      value: postingCounts['pending_review'] || 0,
       badge:
-        (data.posting_counts['pending_review'] || 0) > 0 ? (
+        (postingCounts['pending_review'] || 0) > 0 ? (
           <Badge variant="attention">Pending</Badge>
         ) : undefined,
     },
@@ -70,7 +72,7 @@ export const OrganizationDashboard: React.FC<OrganizationDashboardProps> = ({ da
             >
               <span className="text-xs text-pencil capitalize">{status.replace('_', ' ')}</span>
               <span className="text-xl font-semibold text-ink tabular-nums mt-1">
-                {data.posting_counts[status] || 0}
+                {postingCounts[status] || 0}
               </span>
             </div>
           ))}

@@ -106,8 +106,9 @@ def get_student_dashboard(db: Session, student_id: int) -> StudentDashboardRespo
 
     # 3. courses: enrolled published courses progress & grade average
     enrolled_courses = db.execute(
-        select(Course.id, Course.title)
+        select(Course.id, Course.title, User.full_name.label("instructor_name"))
         .join(Enrollment, Enrollment.course_id == Course.id)
+        .outerjoin(User, Course.instructor_id == User.id)
         .where(
             Enrollment.student_id == student_id,
             Course.status == CourseStatus.PUBLISHED,
@@ -158,6 +159,7 @@ def get_student_dashboard(db: Session, student_id: int) -> StudentDashboardRespo
                 StudentCourseProgressItem(
                     course_id=c.id,
                     title=c.title,
+                    instructor_name=c.instructor_name,
                     assignments_total=tot,
                     assignments_submitted=submitted_count,
                     progress_percent=prog,

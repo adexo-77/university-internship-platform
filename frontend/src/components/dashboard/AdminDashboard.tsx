@@ -16,12 +16,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ data }) => {
     0
   );
 
+  const activeCount = data.users_active_count ?? data.active_users_count ?? 0;
+  const pendingReviews = data.postings_pending_review ?? data.internships_pending_review ?? 0;
+
   const stats = [
     {
       label: 'Users',
       value: totalUsers,
       to: '/admin/users',
-      helperText: `${data.active_users_count} active`,
+      helperText: `${activeCount} active`,
     },
     {
       label: 'Organizations',
@@ -34,11 +37,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ data }) => {
     },
     {
       label: 'Internship reviews',
-      value: data.internships_pending_review,
+      value: pendingReviews,
       to: '/admin/internship-reviews',
       badge:
-        data.internships_pending_review > 0 ? (
-          <Badge variant="attention">{data.internships_pending_review} pending</Badge>
+        pendingReviews > 0 ? (
+          <Badge variant="attention">{pendingReviews} pending</Badge>
         ) : undefined,
     },
     {

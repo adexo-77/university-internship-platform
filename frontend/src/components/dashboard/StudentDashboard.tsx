@@ -14,10 +14,8 @@ export interface StudentDashboardProps {
 }
 
 export const StudentDashboard: React.FC<StudentDashboardProps> = ({ data }) => {
-  const totalApplications = Object.values(data.applications.counts).reduce(
-    (sum, count) => sum + count,
-    0
-  );
+  const appCounts = data.applications.counts_by_status ?? data.applications.counts ?? {};
+  const totalApplications = Object.values(appCounts).reduce((sum, count) => sum + count, 0);
 
   const stats = [
     { label: 'Enrolled courses', value: data.courses.length, to: '/my-courses' },
@@ -207,27 +205,30 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ data }) => {
           />
         ) : (
           <div className="bg-surface border border-line rounded-control divide-y divide-line overflow-hidden">
-            {data.applications.recent.map((app) => (
-              <div
-                key={app.application_id}
-                className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-chalk transition-colors"
-              >
-                <div className="space-y-0.5">
-                  <Link
-                    to={`/applications/${app.application_id}`}
-                    className="font-medium text-ink hover:text-petrol transition-colors"
-                  >
-                    {app.posting_title}
-                  </Link>
-                  <p className="text-xs text-pencil">
-                    {app.organization_name} &bull; Applied {formatDate(app.applied_at)}
-                  </p>
+            {data.applications.recent.map((app) => {
+              const appId = app.application_id ?? app.id;
+              return (
+                <div
+                  key={appId}
+                  className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-chalk transition-colors"
+                >
+                  <div className="space-y-0.5">
+                    <Link
+                      to={`/applications/${appId}`}
+                      className="font-medium text-ink hover:text-petrol transition-colors"
+                    >
+                      {app.posting_title}
+                    </Link>
+                    <p className="text-xs text-pencil">
+                      {app.organization_name} &bull; Applied {formatDate(app.applied_at)}
+                    </p>
+                  </div>
+                  <div>
+                    <ApplicationStatusBadge status={app.status as ApplicationStatus} />
+                  </div>
                 </div>
-                <div>
-                  <ApplicationStatusBadge status={app.status as ApplicationStatus} />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
