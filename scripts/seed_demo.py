@@ -23,7 +23,7 @@ from seed_demo_academics import seed_academics
 from seed_demo_internships import seed_internships_and_apps
 from seed_demo_users import seed_demo_users_and_profiles
 
-DEMO_PASSWORD = "DemoPassword123!"
+DEMO_PASSWORD = "12345678"
 
 
 def seed_demo(db: Session, force: bool = False) -> None:
