@@ -9,5 +9,3 @@ export interface HealthResponse {
 export interface DatabaseHealthResponse {
   database: string;
 }
-
-export type HealthStatusState = 'idle' | 'loading' | 'success' | 'error';

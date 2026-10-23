@@ -49,14 +49,6 @@ export interface ChangePasswordPayload {
 }
 
 /**
- * Standard API error format returned by backend.
- */
-export interface ApiErrorResponse {
-  detail: string;
-  code?: string;
-}
-
-/**
  * Context state for authentication.
  */
 export interface AuthState {

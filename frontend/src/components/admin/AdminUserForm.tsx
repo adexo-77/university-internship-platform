@@ -100,8 +100,12 @@ export const AdminUserForm: React.FC<AdminUserFormProps> = ({ onSuccess }) => {
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium text-ink">Account role</legend>
         <div className="flex items-center gap-6 pt-1">
-          <label className="flex items-center gap-2 cursor-pointer text-sm text-ink">
+          <label
+            htmlFor="admin-role-instructor"
+            className="flex items-center gap-2 cursor-pointer text-sm text-ink"
+          >
             <input
+              id="admin-role-instructor"
               type="radio"
               name="role"
               value="instructor"
@@ -112,8 +116,12 @@ export const AdminUserForm: React.FC<AdminUserFormProps> = ({ onSuccess }) => {
             />
             Instructor
           </label>
-          <label className="flex items-center gap-2 cursor-pointer text-sm text-ink">
+          <label
+            htmlFor="admin-role-admin"
+            className="flex items-center gap-2 cursor-pointer text-sm text-ink"
+          >
             <input
+              id="admin-role-admin"
               type="radio"
               name="role"
               value="admin"
