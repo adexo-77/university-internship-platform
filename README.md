@@ -42,7 +42,9 @@ university-internship-platform/
 │   ├── database.md            # Mermaid ER diagram, status lifecycle diagram, and schema specifications
 │   └── design.md              # Design tokens, components, and layout guidelines
 ├── scripts/
-│   └── create_user.py         # CLI administrative user provisioning tool
+│   ├── create_user.py         # CLI administrative user provisioning tool
+│   ├── seed_demo.py           # Idempotent demo dataset seeder
+│   └── setup_dev.py           # Cross-platform developer environment setup
 ├── backend/
 │   ├── alembic/               # Database migration environment
 │   │   ├── versions/          # Migration revision scripts
@@ -145,49 +147,60 @@ Before starting, ensure the following are installed and added to your `PATH`:
 
 ---
 
-## Exact PowerShell Commands
+## Automated Developer Setup (`scripts/setup_dev.py`)
 
-### 1. Environment Configuration
-
-From the repository root:
+Run the cross-platform setup script from the repository root:
 
 ```powershell
-# Copy environment template to .env
-Copy-Item .env.example .env
+# Standard setup: venv, dependencies, .env, databases, and migrations
+python scripts/setup_dev.py
+
+# Or setup and populate full demo dataset:
+python scripts/setup_dev.py --seed
 ```
 
-> **Important**: `DATABASE_URL` and `TEST_DATABASE_URL` are strictly required settings with **no hard-coded defaults**. Review `.env` to verify your PostgreSQL credentials before starting servers or running tests.
+This automated script:
+1. Validates Python (`>= 3.12`) and Node (`>= 18`) versions.
+2. Creates `backend/.venv` and installs all production and development dependencies.
+3. Installs frontend dependencies via `npm install`.
+4. Creates `.env` from `.env.example` if missing, prompting for the PostgreSQL password with hidden input and URL-encoding it.
+5. Idempotently creates the development (`university_platform`) and test (`university_platform_test`) databases.
+6. Runs database migrations (`alembic upgrade head`).
+7. Optionally seeds demo data with `--seed`.
+
+### Manual Setup Fallback
+
+If you prefer to configure manually:
+
+1. **Environment Configuration**:
+   ```powershell
+   Copy-Item .env.example .env
+   # Edit .env with your PostgreSQL credentials
+   ```
+
+2. **Database Provisioning**:
+   ```powershell
+   psql -U postgres -c "CREATE DATABASE university_platform;"
+   psql -U postgres -c "CREATE DATABASE university_platform_test;"
+   ```
+
+3. **Virtualenv & Dependencies**:
+   ```powershell
+   python -m venv backend/.venv
+   .\backend\.venv\Scripts\Activate.ps1
+   pip install -r backend/requirements.txt -r backend/requirements-dev.txt
+   Set-Location frontend; npm install; Set-Location ..
+   ```
+
+4. **Migrations & Seed**:
+   ```powershell
+   Set-Location backend; .\.venv\Scripts\alembic.exe upgrade head; Set-Location ..
+   python scripts/seed_demo.py
+   ```
 
 ---
 
-### 2. PostgreSQL Database Setup
-
-Create the development and test databases using `psql`:
-
-```powershell
-# Create development database
-psql -U postgres -c "CREATE DATABASE university_platform;"
-
-# Create test database
-psql -U postgres -c "CREATE DATABASE university_platform_test;"
-```
-
----
-
-### 3. Database Migrations (Alembic)
-
-Run database migrations to initialize or update the schema:
-
-```powershell
-Set-Location backend
-
-# Run migrations to the latest revision
-.\.venv\Scripts\alembic.exe upgrade head
-```
-
----
-
-### 4. Administrative User Provisioning (`scripts/create_user.py`)
+## Administrative User Provisioning (`scripts/create_user.py`)
 
 Create instructor or admin accounts directly from the command line:
 

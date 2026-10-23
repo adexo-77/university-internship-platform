@@ -32,7 +32,9 @@ university-internship-platform/
 │   ├── database.md            # Mermaid ER diagram and schema specifications
 │   └── design.md              # Design system tokens, components, and UX rules
 ├── scripts/                   # CLI administrative and automation tools
-│   └── create_user.py         # Administrative user provisioning script
+│   ├── create_user.py         # Administrative user provisioning script
+│   ├── seed_demo.py           # Idempotent demo dataset seeder
+│   └── setup_dev.py           # Cross-platform developer environment setup
 ├── backend/
 │   ├── alembic/               # Database migration environment
 │   │   ├── versions/          # Alembic revision migration files
