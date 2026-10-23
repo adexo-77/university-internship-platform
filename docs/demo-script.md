@@ -27,7 +27,7 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 ---
 
 #### [0:45 - 3:00] Part 1: Student Persona
-> **Action**: Log in as `demo.student@example.com` (password from `.env`).
+> **Action**: Log in as `abel.tesfaye@example.com` (password `12345678`).
 
 > **What to Say**:
 > *"Let's begin from the student perspective. Upon logging in, the student lands on their personalized dashboard. Notice the top stat strip showing enrolled courses, active assignments, and application counts.*
@@ -36,12 +36,12 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 >
 > *Next, let's look at coursework. Under the 'Courses' catalog, students can search courses by code or title and enroll with a single click. When submitting assignments, our backend compares the server timestamp against the due date: if submitted after the deadline, it's accepted but automatically flagged as `is_late=true`.*
 >
-> *Now, let's observe our prerequisite guard. If we switch to our second student account, `demo.student2@example.com`, who has an incomplete profile, a prominent warning banner appears on their dashboard. If they attempt to apply for an internship, the application button is disabled until their bio and skill tags are filled out. This ensures employers only receive complete applications."*
+> *Now, let's observe our prerequisite guard. If we switch to our third student account, `dawit.lemma@example.com`, who has an incomplete profile, a prominent warning banner appears on their dashboard. If they attempt to apply for an internship, the application button is disabled until their bio and skill tags are filled out. This ensures employers only receive complete applications."*
 
 ---
 
 #### [3:00 - 5:15] Part 2: Instructor Persona
-> **Action**: Log out and log in as `demo.instructor@example.com`.
+> **Action**: Log out and log in as `tadesse.bekele@example.com` (password `12345678`).
 
 > **What to Say**:
 > *"Next, let's explore the faculty experience. Instructors have a dedicated dashboard showing active courses, student enrollment totals, and a 'Needs Grading' queue.*
@@ -55,28 +55,28 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 ---
 
 #### [5:15 - 7:00] Part 3: Organization Persona
-> **Action**: Log out and log in as `demo.org@example.com`.
+> **Action**: Log out and log in as `yohannes.haile@example.com` (Kaffa Digital Solutions, password `12345678`).
 
 > **What to Say**:
 > *"Now let's look at corporate recruiting partners. An approved organization manages their corporate profile, including industry category, company size, and verified website.*
 >
 > *Organizations can create internship postings specifying role responsibilities, required skills, work mode—remote, hybrid, or on-site—stipend details, and application deadlines. When created, postings enter a `pending_review` state because universities cannot allow unvetted job listings to reach students.*
 >
-> *Notice our onboarding guard: if we log in as an unverified company, `demo.neworg@example.com`, posting creation is blocked until a university administrator approves their registration.*
+> *Notice our onboarding guard: if we log in as an unverified company, `eyob.kassa@example.com` (Abay Data Labs), posting creation is blocked until a university administrator approves their registration.*
 >
 > *For approved organizations with active listings, the hiring manager reviews incoming candidate applications, inspects cover letters and student skill tags, and transitions candidates through the pipeline: `shortlisted`, `accepted`, or `rejected`. Once an acceptance or rejection is finalized, the record is locked to maintain hiring integrity."*
 
 ---
 
 #### [7:00 - 8:45] Part 4: Administrator Persona
-> **Action**: Log out and log in as `demo.admin@example.com`.
+> **Action**: Log out and log in as `mulugeta.assefa@example.com` (Dr. Mulugeta Assefa, password `12345678`).
 
 > **What to Say**:
 > *"Finally, let's look at institutional governance. University administrators have full visibility over platform operations.*
 >
 > *First, User Management: admins can search and filter accounts across all four roles. Admins can deactivate abusive accounts, with a built-in safety guard preventing administrators from accidentally deactivating themselves. Admins can also issue secure password resets that generate temporary credentials and immediately revoke all active sessions for that account.*
 >
-> *Second, Organization Vetting: in the organization queue, admins review new company registrations like `demo.neworg@example.com`, inspect their website, and approve or reject their access.*
+> *Second, Organization Vetting: in the organization queue, admins review new company registrations like Abay Data Labs (`eyob.kassa@example.com`), inspect their website, and approve or reject their access.*
 >
 > *Third, Internship Content Moderation: in the internship queue, admins review submitted postings. If a posting meets university standards, the admin approves it, publishing it immediately to the student catalog. If a posting violates guidelines or lacks details, the admin can reject it with an explanatory feedback note, or issue an emergency takedown on an existing posting."*
 

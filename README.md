@@ -141,18 +141,21 @@ Visit [http://localhost:5173](http://localhost:5173) to explore the platform.
 
 ## 7. Demo Accounts &amp; Capabilities
 
-All demo accounts are provisioned via `scripts/seed_demo.py` with standard development credentials configured in `.env` (`DEMO_USER_PASSWORD`):
+All demo accounts are provisioned via `scripts/seed_demo.py`. For local evaluation, all roster accounts share `DEMO_PASSWORD = "12345678"` (demo-only).
 
-| Role | Email | Profile State | What This Account Demonstrates |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `demo.admin@example.com` | Complete | Administrative dashboard, user provisioning &amp; password resets, organization registration approvals, internship moderation review queue, and listing takedowns. |
-| **Instructor** | `demo.instructor@example.com` | Complete | Instructor dashboard, course authoring &amp; publishing, assignment creation with deadlines, and student submission grading queue. |
-| **Student (Ready)** | `demo.student@example.com` | Complete | Student dashboard, enrolled course tracking, assignments due soon (urgent, upcoming, past due), recent grade cards, internship catalog search, and submitted applications. |
-| **Student (New)** | `demo.student2@example.com` | Incomplete | Incomplete profile demonstration showing the profile completion banner and prerequisite guard blocking internship applications until bio &amp; skills are saved. |
-| **Organization (Approved)** | `demo.org@example.com` | Approved | Organization dashboard, internship postings across all lifecycles (`open`, `pending_review`, `draft`, `rejected`, `closed`), and applicant decision workflows (shortlist, accept, reject). |
-| **Organization (Pending)** | `demo.neworg@example.com` | Pending Review | Pending approval banner demonstration, with internship creation disabled until platform administrator reviews and approves the company profile. |
+| Name | Role | Email | Profile State | What This Account Demonstrates |
+| :--- | :--- | :--- | :--- | :--- |
+| **Dr. Mulugeta Assefa** | Admin | `mulugeta.assefa@example.com` | Complete | Administrative dashboard, user provisioning &amp; password resets, organization registration approvals, internship moderation review queue, and listing takedowns. |
+| **Dr. Tadesse Bekele** | Instructor | `tadesse.bekele@example.com` | Complete | Instructor dashboard, courses "Database Systems" (published) and "Introduction to Programming" (published), assignment authoring, and student submission grading. |
+| **Ms. Hana Worku** | Instructor | `hana.worku@example.com` | Complete | Course authoring in draft state ("Software Engineering"), curriculum planning, and department course rosters. |
+| **Abel Tesfaye** | Student | `abel.tesfaye@example.com` | Complete | Student dashboard, course progress, submitted ER Diagramming assignment (graded 94/100 with instructor feedback), accepted internship offer from Kaffa Digital Solutions, rejected application, and withdrawn application. |
+| **Meron Girma** | Student | `meron.girma@example.com` | Complete | Student dashboard, course progress, late assignment submission awaiting instructor grading, shortlisted internship candidate at Kaffa Digital Solutions. |
+| **Dawit Lemma** | Student | `dawit.lemma@example.com` | Incomplete | Incomplete profile demonstration showing the profile completion banner and prerequisite guard blocking internship applications until bio &amp; skills are saved; submitted application to Network Support Intern. |
+| **Kaffa Digital Solutions** (Yohannes Haile) | Organization | `yohannes.haile@example.com` | Approved | Organization dashboard, postings across lifecycles (`open`, `pending_review`, `draft`, `rejected`), applicant hiring pipeline (accepted Abel Tesfaye, shortlisted Meron Girma). |
+| **Gibe Valley Telecom Services** (Rahel Desta) | Organization | `rahel.desta@example.com` | Approved | Organization dashboard, network support &amp; systems administration postings, candidate rejection decision, and closed listing. |
+| **Abay Data Labs** (Eyob Kassa) | Organization | `eyob.kassa@example.com` | Pending Approval | Pending approval banner demonstration, with internship creation disabled until platform administrator reviews and approves the company profile. |
 
-> **Security Note**: Never commit plaintext passwords to version control. Passwords and secrets are read directly from `.env` and masked in documentation and test logs.
+> **Note**: All people and organizations in this demo dataset are fictional. The password `12345678` is strictly for local demonstration and evaluation.
 
 ---
 

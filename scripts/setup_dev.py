@@ -194,12 +194,18 @@ def run_migrations_and_optional_seed(seed: bool) -> None:
         )
 
 
-def print_run_instructions() -> None:
+def print_run_instructions(seeded: bool = False) -> None:
     is_win = sys.platform == "win32"
     act_cmd = r".\.venv\Scripts\Activate.ps1" if is_win else "source .venv/bin/activate"
     print("\n" + "=" * 60)
     print("Developer environment setup successfully completed!")
     print("=" * 60)
+    if seeded:
+        print("\nDemo Accounts Seeded (password: 12345678 - demo only):")
+        print("  Admin:        Dr. Mulugeta Assefa     <mulugeta.assefa@example.com>")
+        print("  Instructor:   Dr. Tadesse Bekele      <tadesse.bekele@example.com>")
+        print("  Student:      Abel Tesfaye            <abel.tesfaye@example.com>")
+        print("  Organization: Kaffa Digital Solutions <yohannes.haile@example.com>")
     print("\nTo run the backend development server:")
     print("  Set-Location backend" if is_win else "  cd backend")
     print(f"  {act_cmd}")
@@ -222,7 +228,7 @@ def main() -> None:
     ensure_env_file()
     ensure_databases()
     run_migrations_and_optional_seed(seed=args.seed)
-    print_run_instructions()
+    print_run_instructions(seeded=args.seed)
 
 
 if __name__ == "__main__":
