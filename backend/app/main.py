@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import DBAPIError, OperationalError
 
 from app.core.config import settings, validate_production_configuration
 from app.core.csrf import CSRFMiddleware
@@ -70,6 +71,29 @@ async def app_exception_handler(_: Request, exc: AppException) -> JSONResponse:
         status_code=exc.status_code,
         content={"detail": exc.message, "code": exc.code or "INTERNAL_ERROR"},
         headers=getattr(exc, "headers", None),
+    )
+
+
+@app.exception_handler(OperationalError)
+@app.exception_handler(DBAPIError)
+async def database_unavailable_handler(request: Request, exc: Exception) -> JSONResponse:
+    """Return 503 with a clear message and request id when database is unavailable."""
+    request_id = getattr(request.state, "request_id", None) or uuid.uuid4().hex
+    logger.error(
+        "request_id=%s method=%s path=%s status=503 database_unavailable error=%s",
+        request_id,
+        request.method,
+        request.url.path,
+        str(exc),
+    )
+    return JSONResponse(
+        status_code=503,
+        content={
+            "detail": "Database service is temporarily unavailable. Please try again later.",
+            "code": "DATABASE_UNAVAILABLE",
+            "request_id": request_id,
+        },
+        headers={"X-Request-ID": request_id},
     )
 
 

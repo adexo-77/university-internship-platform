@@ -32,10 +32,5 @@ class OrganizationDashboardResponse(BaseModel):
     approval_status: str
     approval_note: str | None = None
     postings: OrganizationPostingsSummary
-    posting_counts: dict[str, int] | None = None
     applications_awaiting_decision: int
     recent_applications: list[OrganizationApplicationItem]
-
-    def model_post_init(self, __context: object) -> None:
-        if self.posting_counts is None and self.postings:
-            self.posting_counts = self.postings.counts_by_status

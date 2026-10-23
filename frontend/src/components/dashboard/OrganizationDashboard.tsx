@@ -12,9 +12,8 @@ export interface OrganizationDashboardProps {
 }
 
 export const OrganizationDashboard: React.FC<OrganizationDashboardProps> = ({ data }) => {
-  const postingCounts = data.postings?.counts_by_status ?? data.posting_counts ?? {};
-  const totalPostings =
-    data.postings?.total ?? Object.values(postingCounts).reduce((sum, count) => sum + count, 0);
+  const postingCounts = data.postings.counts_by_status;
+  const totalPostings = data.postings.total;
 
   const stats = [
     { label: 'Open postings', value: postingCounts['open'] || 0, to: '/my-internships' },

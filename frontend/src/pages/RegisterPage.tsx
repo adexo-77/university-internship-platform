@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { AuthApiError } from '../api/auth';
 import { Button, Notice, TextField } from '../components/ui';
-import { RegisterRoleSelector } from '../components/account/RegisterRoleSelector';
+import { RegisterRoleSelector } from '../components/auth/RegisterRoleSelector';
 import { useAuth } from '../hooks/useAuth';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useRateLimitCooldown } from '../hooks/useRateLimitCooldown';

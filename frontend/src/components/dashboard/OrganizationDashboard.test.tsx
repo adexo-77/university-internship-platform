@@ -7,19 +7,23 @@ import { OrganizationDashboard } from './OrganizationDashboard';
 const mockData: OrganizationDashboardResponse = {
   approval_status: 'pending',
   approval_note: null,
-  posting_counts: {
-    draft: 1,
-    pending_review: 2,
-    open: 3,
-    closed: 0,
+  postings: {
+    counts_by_status: {
+      draft: 1,
+      pending_review: 2,
+      open: 3,
+      closed: 0,
+    },
+    total: 6,
   },
   applications_awaiting_decision: 4,
   recent_applications: [
     {
-      application_id: '701',
-      posting_id: '801',
+      application_id: 701,
+      posting_id: 801,
       posting_title: 'Software Engineer Intern',
       applicant_name: 'Bob Candidate',
+      applicant_email: 'bob@example.com',
       status: 'submitted',
       applied_at: '2026-10-20T16:00:00Z',
     },

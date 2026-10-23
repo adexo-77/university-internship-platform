@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Badge } from '../ui';
 import { AdminDashboardResponse } from '../../types/dashboard';
 import { StatStrip } from './StatStrip';
@@ -16,15 +15,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ data }) => {
     0
   );
 
-  const activeCount = data.users_active_count ?? data.active_users_count ?? 0;
-  const pendingReviews = data.postings_pending_review ?? data.internships_pending_review ?? 0;
-
   const stats = [
     {
       label: 'Users',
       value: totalUsers,
       to: '/admin/users',
-      helperText: `${activeCount} active`,
+      helperText: `${data.users_active_count} active`,
     },
     {
       label: 'Organizations',
@@ -37,11 +33,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ data }) => {
     },
     {
       label: 'Internship reviews',
-      value: pendingReviews,
+      value: data.postings_pending_review,
       to: '/admin/internship-reviews',
       badge:
-        pendingReviews > 0 ? (
-          <Badge variant="attention">{pendingReviews} pending</Badge>
+        data.postings_pending_review > 0 ? (
+          <Badge variant="attention">{data.postings_pending_review} pending</Badge>
         ) : undefined,
     },
     {
@@ -60,9 +56,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ data }) => {
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold text-ink">Users by role</h2>
-            <Link to="/admin/users" className="text-xs font-medium text-petrol hover:underline">
+            <a href="/admin/users" className="text-xs font-medium text-petrol hover:underline">
               Manage users
-            </Link>
+            </a>
           </div>
           <div className="bg-surface border border-line rounded-control divide-y divide-line overflow-hidden">
             {Object.entries(data.users_by_role).map(([role, count]) => (
@@ -81,9 +77,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ data }) => {
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold text-ink">Courses overview</h2>
-            <Link to="/courses" className="text-xs font-medium text-petrol hover:underline">
+            <a href="/courses" className="text-xs font-medium text-petrol hover:underline">
               Browse catalog ({totalCourses})
-            </Link>
+            </a>
           </div>
           <div className="bg-surface border border-line rounded-control divide-y divide-line overflow-hidden">
             {Object.entries(data.courses_by_status).map(([status, count]) => (
@@ -104,15 +100,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ data }) => {
             Platform applications overview ({totalApplications} total)
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            {Object.entries(data.applications_by_status).map(([status, count]) => (
-              <div
-                key={status}
-                className="p-3 bg-surface border border-line rounded-control flex flex-col justify-between"
-              >
-                <span className="text-xs text-pencil capitalize">{status}</span>
-                <span className="text-xl font-semibold text-ink tabular-nums mt-1">{count}</span>
-              </div>
-            ))}
+            {(['submitted', 'shortlisted', 'accepted', 'rejected', 'withdrawn'] as const).map(
+              (status) => (
+                <div
+                  key={status}
+                  className="p-3 bg-surface border border-line rounded-control flex flex-col justify-between"
+                >
+                  <span className="text-xs text-pencil capitalize">{status}</span>
+                  <span className="text-xl font-semibold text-ink tabular-nums mt-1">
+                    {data.applications_by_status[status] || 0}
+                  </span>
+                </div>
+              )
+            )}
           </div>
         </section>
       </div>

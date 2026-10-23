@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { ErrorBoundary } from './components/layout/ErrorBoundary';
 import { ProtectedRoute } from './components/routes/ProtectedRoute';
 import { RoleRoute } from './components/routes/RoleRoute';
 import { getHomePath } from './config/navigation';
@@ -132,7 +133,9 @@ export const App: React.FC = () => {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <ErrorBoundary>
+          <AppRoutes />
+        </ErrorBoundary>
       </AuthProvider>
     </BrowserRouter>
   );

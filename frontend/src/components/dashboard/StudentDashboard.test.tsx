@@ -7,18 +7,17 @@ import { StudentDashboard } from './StudentDashboard';
 const mockData: StudentDashboardResponse = {
   due_next: [
     {
-      assignment_id: '101',
-      course_id: '1',
+      assignment_id: 101,
+      course_id: 1,
       course_title: 'Algorithms',
       title: 'Problem Set 1',
       due_at: '2026-11-01T12:00:00Z',
-      max_points: 100,
     },
   ],
   recent_grades: [
     {
-      submission_id: '201',
-      assignment_id: '100',
+      submission_id: 201,
+      assignment_id: 100,
       assignment_title: 'Quiz 1',
       course_title: 'Algorithms',
       grade: 95,
@@ -28,7 +27,7 @@ const mockData: StudentDashboardResponse = {
   ],
   courses: [
     {
-      course_id: '1',
+      course_id: 1,
       title: 'Algorithms',
       instructor_name: 'Dr. Turing',
       assignments_total: 4,
@@ -38,11 +37,11 @@ const mockData: StudentDashboardResponse = {
     },
   ],
   applications: {
-    counts: { submitted: 1 },
+    counts_by_status: { submitted: 1 },
     recent: [
       {
-        application_id: '301',
-        posting_id: '401',
+        id: 301,
+        posting_id: 401,
         posting_title: 'Backend Intern',
         organization_name: 'Acme Corp',
         status: 'submitted',
@@ -84,7 +83,7 @@ describe('StudentDashboard', () => {
       due_next: [],
       recent_grades: [],
       courses: [],
-      applications: { counts: {}, recent: [] },
+      applications: { counts_by_status: {}, recent: [] },
       profile_complete: true,
     };
 

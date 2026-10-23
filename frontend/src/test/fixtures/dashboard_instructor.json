@@ -1,0 +1,25 @@
+{
+  "courses": [
+    {
+      "course_id": 1,
+      "title": "Distributed Systems",
+      "status": "published",
+      "enrolled_count": 1,
+      "assignments_count": 2,
+      "submissions_awaiting_grading": 1,
+      "average_grade_percent": 95.0
+    }
+  ],
+  "needs_grading": [
+    {
+      "submission_id": 2,
+      "student_name": "Jane Student",
+      "assignment_id": 2,
+      "assignment_title": "Vector Clocks",
+      "course_id": 1,
+      "course_title": "Distributed Systems",
+      "submitted_at": "2026-10-23T05:30:00Z",
+      "late": true
+    }
+  ]
+}

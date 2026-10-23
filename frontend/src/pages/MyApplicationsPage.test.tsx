@@ -28,13 +28,12 @@ const mockApp: Application = {
   posting_title: 'Frontend Intern',
   organization_name: 'Acme Corp',
   student_id: 20,
-  student_name: 'Student Candidate',
-  student_email: 'student@test.com',
   cover_letter: 'Passionate about React.',
   status: 'submitted',
   decision_message: null,
-  applied_at: '2026-10-20T12:00:00Z',
-  reviewed_at: null,
+  decided_at: null,
+  created_at: '2026-10-20T12:00:00Z',
+  updated_at: '2026-10-20T12:00:00Z',
 };
 
 describe('MyApplicationsPage Component', () => {

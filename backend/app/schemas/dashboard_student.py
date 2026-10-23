@@ -51,28 +51,18 @@ class StudentApplicationRecentItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    application_id: int | None = None
     posting_id: int
     posting_title: str
     organization_name: str
     status: str
     applied_at: datetime
 
-    def model_post_init(self, __context: object) -> None:
-        if self.application_id is None:
-            self.application_id = self.id
-
 
 class StudentApplicationsSummary(BaseModel):
     """Aggregated status counts and latest applications."""
 
     counts_by_status: dict[str, int]
-    counts: dict[str, int] | None = None
     recent: list[StudentApplicationRecentItem]
-
-    def model_post_init(self, __context: object) -> None:
-        if self.counts is None:
-            self.counts = self.counts_by_status
 
 
 class StudentDashboardResponse(BaseModel):

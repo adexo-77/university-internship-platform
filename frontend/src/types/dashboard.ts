@@ -1,15 +1,14 @@
 export interface DueNextAssignment {
-  assignment_id: number | string;
-  course_id: number | string;
-  course_title: string;
+  assignment_id: number;
   title: string;
+  course_id: number;
+  course_title: string;
   due_at: string;
-  max_points?: number;
 }
 
 export interface RecentGrade {
-  submission_id: number | string;
-  assignment_id: number | string;
+  submission_id: number;
+  assignment_id: number;
   assignment_title: string;
   course_title: string;
   grade: number;
@@ -18,9 +17,9 @@ export interface RecentGrade {
 }
 
 export interface StudentCourseProgress {
-  course_id: number | string;
+  course_id: number;
   title: string;
-  instructor_name?: string | null;
+  instructor_name: string | null;
   assignments_total: number;
   assignments_submitted: number;
   progress_percent: number;
@@ -28,9 +27,8 @@ export interface StudentCourseProgress {
 }
 
 export interface LatestApplication {
-  id?: number | string;
-  application_id?: number | string;
-  posting_id: number | string;
+  id: number;
+  posting_id: number;
   posting_title: string;
   organization_name: string;
   status: string;
@@ -38,8 +36,7 @@ export interface LatestApplication {
 }
 
 export interface StudentApplicationsSummary {
-  counts_by_status?: Record<string, number>;
-  counts?: Record<string, number>;
+  counts_by_status: Record<string, number>;
   recent: LatestApplication[];
 }
 
@@ -52,26 +49,24 @@ export interface StudentDashboardResponse {
 }
 
 export interface InstructorCourseSummary {
-  course_id: number | string;
+  course_id: number;
   title: string;
   status: string;
   enrolled_count: number;
   assignments_count: number;
-  submissions_awaiting_grading?: number;
-  awaiting_grading_count?: number;
+  submissions_awaiting_grading: number;
   average_grade_percent: number | null;
 }
 
 export interface NeedsGradingItem {
-  submission_id: number | string;
-  assignment_id: number | string;
-  assignment_title: string;
-  course_id: number | string;
-  course_title: string;
+  submission_id: number;
   student_name: string;
+  assignment_id: number;
+  assignment_title: string;
+  course_id: number;
+  course_title: string;
   submitted_at: string;
-  late?: boolean;
-  is_late?: boolean;
+  late: boolean;
 }
 
 export interface InstructorDashboardResponse {
@@ -80,11 +75,11 @@ export interface InstructorDashboardResponse {
 }
 
 export interface OrgApplicationItem {
-  application_id: number | string;
-  posting_id: number | string;
-  posting_title: string;
+  application_id: number;
   applicant_name: string;
-  applicant_email?: string;
+  applicant_email: string;
+  posting_id: number;
+  posting_title: string;
   status: string;
   applied_at: string;
 }
@@ -97,20 +92,17 @@ export interface OrganizationPostingsSummary {
 export interface OrganizationDashboardResponse {
   approval_status: string;
   approval_note: string | null;
-  postings?: OrganizationPostingsSummary;
-  posting_counts?: Record<string, number>;
+  postings: OrganizationPostingsSummary;
   applications_awaiting_decision: number;
   recent_applications: OrgApplicationItem[];
 }
 
 export interface AdminDashboardResponse {
   users_by_role: Record<string, number>;
-  users_active_count?: number;
-  active_users_count?: number;
+  users_active_count: number;
   users_total_count: number;
   organizations_pending_approval: number;
-  postings_pending_review?: number;
-  internships_pending_review?: number;
+  postings_pending_review: number;
   open_internships: number;
   courses_by_status: Record<string, number>;
   applications_by_status: Record<string, number>;

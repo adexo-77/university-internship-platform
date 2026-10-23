@@ -106,3 +106,26 @@ def test_logs_contain_safe_metadata_and_no_secrets(client: TestClient) -> None:
             assert "password" not in msg.lower() or "password_hash" in msg.lower()
     finally:
         logger.removeHandler(handler)
+
+
+def test_database_connection_error_returns_503_with_request_id() -> None:
+    """Database connection errors return a 503 JSON payload with request_id."""
+    from sqlalchemy.exc import OperationalError
+
+    err = OperationalError("could not connect to server: Connection refused", None, None)
+    with (
+        TestClient(app, raise_server_exceptions=False) as client,
+        patch.object(AuthService, "authenticate", side_effect=err),
+    ):
+        resp = client.post(
+            "/api/auth/login",
+            json={"email": "dbfail@example.com", "password": "Password123!"},
+        )
+
+    assert resp.status_code == 503
+    data = resp.json()
+    assert data["code"] == "DATABASE_UNAVAILABLE"
+    assert data["detail"] == "Database service is temporarily unavailable. Please try again later."
+    assert "request_id" in data
+    assert len(data["request_id"]) > 0
+    assert resp.headers.get("X-Request-ID") == data["request_id"]

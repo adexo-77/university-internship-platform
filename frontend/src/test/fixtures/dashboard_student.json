@@ -1,0 +1,53 @@
+{
+  "due_next": [
+    {
+      "assignment_id": 2,
+      "title": "Vector Clocks",
+      "course_id": 1,
+      "course_title": "Distributed Systems",
+      "due_at": "2026-10-27T05:30:00Z"
+    }
+  ],
+  "recent_grades": [
+    {
+      "submission_id": 1,
+      "assignment_id": 1,
+      "assignment_title": "Raft Consensus",
+      "course_title": "Distributed Systems",
+      "grade": 95,
+      "max_points": 100,
+      "graded_at": "2026-10-22T05:30:00Z"
+    }
+  ],
+  "courses": [
+    {
+      "course_id": 1,
+      "title": "Distributed Systems",
+      "instructor_name": "Dr. Turing",
+      "assignments_total": 2,
+      "assignments_submitted": 1,
+      "progress_percent": 50.0,
+      "average_grade_percent": 95.0
+    }
+  ],
+  "applications": {
+    "counts_by_status": {
+      "submitted": 0,
+      "shortlisted": 1,
+      "accepted": 0,
+      "rejected": 0,
+      "withdrawn": 0
+    },
+    "recent": [
+      {
+        "id": 1,
+        "posting_id": 1,
+        "posting_title": "Cloud Infrastructure Intern",
+        "organization_name": "Nexus Labs",
+        "status": "shortlisted",
+        "applied_at": "2026-10-23T05:30:00Z"
+      }
+    ]
+  },
+  "profile_complete": true
+}

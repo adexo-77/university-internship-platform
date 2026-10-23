@@ -41,7 +41,7 @@ university-internship-platform/
 │   │   │   ├── f0197aea93a8_create_courses_and_enrollments_tables.py
 │   │   │   ├── 340caf61d32f_create_assignments_and_submissions_.py
 │   │   │   ├── e17d6f716230_create_internship_postings_and_.py
-│   │   │   ├── 7a040b1cdfb8_add_approval_fields_to_organization_.py
+│   │   │   ├── 49360543f550_add_approval_fields_to_organization_.py
 │   │   │   └── c4d9a28e57f1_add_review_fields_and_statuses_to_.py
 │   │   ├── env.py             # Migration harness wired to Base metadata
 │   │   └── script.py.mako     # Migration template
@@ -203,6 +203,9 @@ university-internship-platform/
         │   │   ├── SubmissionStatusPanel.test.tsx
         │   │   ├── SubmissionsTable.tsx
         │   │   └── SubmissionsTable.test.tsx
+        │   ├── auth/          # Authentication components
+        │   │   ├── RegisterRoleSelector.tsx
+        │   │   └── RegisterRoleSelector.test.tsx
         │   ├── courses/       # Course domain components
         │   │   ├── CourseForm.tsx
         │   │   ├── CourseForm.test.tsx

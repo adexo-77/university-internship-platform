@@ -1,0 +1,24 @@
+{
+  "users_by_role": {
+    "student": 10,
+    "instructor": 4,
+    "organization": 3,
+    "admin": 2
+  },
+  "users_active_count": 19,
+  "users_total_count": 19,
+  "organizations_pending_approval": 1,
+  "postings_pending_review": 2,
+  "open_internships": 5,
+  "courses_by_status": {
+    "draft": 1,
+    "published": 8
+  },
+  "applications_by_status": {
+    "submitted": 6,
+    "shortlisted": 3,
+    "accepted": 2,
+    "rejected": 1,
+    "withdrawn": 0
+  }
+}

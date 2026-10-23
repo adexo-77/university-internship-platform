@@ -37,7 +37,7 @@ describe('DashboardPage', () => {
           due_next: [],
           recent_grades: [],
           courses: [],
-          applications: { counts: {}, recent: [] },
+          applications: { counts_by_status: {}, recent: [] },
           profile_complete: true,
         }),
         { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -95,7 +95,7 @@ describe('DashboardPage', () => {
             due_next: [],
             recent_grades: [],
             courses: [],
-            applications: { counts: {}, recent: [] },
+            applications: { counts_by_status: {}, recent: [] },
             profile_complete: true,
           }),
           { status: 200, headers: { 'Content-Type': 'application/json' } }

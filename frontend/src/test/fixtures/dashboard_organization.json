@@ -1,0 +1,26 @@
+{
+  "approval_status": "approved",
+  "approval_note": null,
+  "postings": {
+    "counts_by_status": {
+      "draft": 1,
+      "pending_review": 1,
+      "open": 1,
+      "rejected": 0,
+      "closed": 0
+    },
+    "total": 3
+  },
+  "applications_awaiting_decision": 1,
+  "recent_applications": [
+    {
+      "application_id": 1,
+      "applicant_name": "Jane Student",
+      "applicant_email": "jane@test.edu",
+      "posting_id": 1,
+      "posting_title": "Cloud Infrastructure Intern",
+      "status": "submitted",
+      "applied_at": "2026-10-23T05:30:00Z"
+    }
+  ]
+}

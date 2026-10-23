@@ -86,9 +86,8 @@ def test_student_dashboard_realistic_statuses(
     assert data["recent_grades"][0]["grade"] == 92
     assert data["courses"][0]["instructor_name"] == inst.full_name
     assert data["applications"]["counts_by_status"]["submitted"] == 1
-    assert data["applications"]["counts"]["submitted"] == 1
     assert len(data["applications"]["recent"]) >= 1
-    assert data["applications"]["recent"][0]["application_id"] is not None
+    assert data["applications"]["recent"][0]["id"] is not None
     assert data["profile_complete"] is True
 
 
@@ -139,12 +138,9 @@ def test_instructor_dashboard_realistic_statuses(
     data = res.json()
 
     assert data["courses"][0]["submissions_awaiting_grading"] == 2
-    assert data["courses"][0]["awaiting_grading_count"] == 2
     assert len(data["needs_grading"]) == 2
     assert data["needs_grading"][0]["late"] is False
-    assert data["needs_grading"][0]["is_late"] is False
     assert data["needs_grading"][1]["late"] is True
-    assert data["needs_grading"][1]["is_late"] is True
 
 
 def test_organization_and_admin_dashboards_realistic_statuses(
@@ -182,7 +178,7 @@ def test_organization_and_admin_dashboards_realistic_statuses(
     assert org_data["postings"]["counts_by_status"]["open"] >= 1
     assert org_data["postings"]["counts_by_status"]["rejected"] >= 1
     assert org_data["postings"]["counts_by_status"]["closed"] >= 1
-    assert org_data["posting_counts"]["open"] >= 1
+    assert org_data["postings"]["total"] >= 5
     assert org_data["applications_awaiting_decision"] >= 1
     assert len(org_data["recent_applications"]) >= 1
 
@@ -191,8 +187,6 @@ def test_organization_and_admin_dashboards_realistic_statuses(
     assert res_admin.status_code == 200
     admin_data = res_admin.json()
     assert admin_data["users_active_count"] >= 3
-    assert admin_data["active_users_count"] >= 3
     assert admin_data["postings_pending_review"] >= 1
-    assert admin_data["internships_pending_review"] >= 1
     assert admin_data["open_internships"] >= 1
     assert admin_data["applications_by_status"]["submitted"] >= 1

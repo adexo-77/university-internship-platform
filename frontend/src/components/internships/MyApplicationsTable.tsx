@@ -8,7 +8,7 @@ import { ApplicationStatusBadge } from './ApplicationStatusBadge';
 
 export interface MyApplicationsTableProps {
   applications: Application[];
-  onWithdraw?: (id: number) => Promise<void>;
+  onWithdraw?: (id: number) => void | Promise<void>;
   isWithdrawing?: number | null;
   emptyMessage?: string;
 }

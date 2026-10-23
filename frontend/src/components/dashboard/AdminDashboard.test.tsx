@@ -11,9 +11,10 @@ const mockData: AdminDashboardResponse = {
     organization: 5,
     admin: 2,
   },
-  active_users_count: 65,
+  users_active_count: 65,
+  users_total_count: 67,
   organizations_pending_approval: 3,
-  internships_pending_review: 4,
+  postings_pending_review: 4,
   open_internships: 12,
   courses_by_status: {
     draft: 2,

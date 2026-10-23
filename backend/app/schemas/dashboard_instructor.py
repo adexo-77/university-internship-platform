@@ -16,12 +16,7 @@ class InstructorCourseItem(BaseModel):
     enrolled_count: int
     assignments_count: int
     submissions_awaiting_grading: int
-    awaiting_grading_count: int | None = None
     average_grade_percent: float | None = None
-
-    def model_post_init(self, __context: object) -> None:
-        if self.awaiting_grading_count is None:
-            self.awaiting_grading_count = self.submissions_awaiting_grading
 
 
 class InstructorNeedsGradingItem(BaseModel):
@@ -37,11 +32,6 @@ class InstructorNeedsGradingItem(BaseModel):
     course_title: str
     submitted_at: datetime
     late: bool
-    is_late: bool | None = None
-
-    def model_post_init(self, __context: object) -> None:
-        if self.is_late is None:
-            self.is_late = self.late
 
 
 class InstructorDashboardResponse(BaseModel):

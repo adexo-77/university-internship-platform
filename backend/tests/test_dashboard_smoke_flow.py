@@ -108,9 +108,8 @@ def test_dashboard_full_lifecycle_smoke(
     assert stud_data["recent_grades"][0]["grade"] == 95
     assert stud_data["courses"][0]["instructor_name"] == instructor.full_name
     assert stud_data["applications"]["counts_by_status"]["shortlisted"] == 1
-    assert stud_data["applications"]["counts"]["shortlisted"] == 1
     assert len(stud_data["applications"]["recent"]) == 1
-    assert stud_data["applications"]["recent"][0]["application_id"] is not None
+    assert stud_data["applications"]["recent"][0]["id"] is not None
 
     # 6. Verify Instructor Dashboard
     login_test_user(real_db_client, instructor.email)
@@ -120,7 +119,6 @@ def test_dashboard_full_lifecycle_smoke(
     assert len(inst_data["courses"]) == 1
     assert inst_data["courses"][0]["enrolled_count"] == 1
     assert inst_data["courses"][0]["submissions_awaiting_grading"] == 0
-    assert inst_data["courses"][0]["awaiting_grading_count"] == 0
 
     # 7. Verify Organization Dashboard
     login_test_user(real_db_client, org_user.email)
@@ -129,7 +127,7 @@ def test_dashboard_full_lifecycle_smoke(
     org_data = res_org.json()
     assert org_data["approval_status"] == "approved"
     assert org_data["postings"]["counts_by_status"]["open"] >= 1
-    assert org_data["posting_counts"]["open"] >= 1
+    assert org_data["postings"]["total"] >= 1
     assert len(org_data["recent_applications"]) == 1
     assert org_data["recent_applications"][0]["posting_title"] == "Cloud Infrastructure Intern"
 
@@ -140,6 +138,5 @@ def test_dashboard_full_lifecycle_smoke(
     admin_data = res_admin.json()
     assert admin_data["users_total_count"] >= 4
     assert admin_data["users_active_count"] >= 4
-    assert admin_data["active_users_count"] >= 4
     assert admin_data["open_internships"] >= 1
     assert admin_data["applications_by_status"]["shortlisted"] >= 1
