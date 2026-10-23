@@ -21,6 +21,7 @@ from app.core.database import SessionLocal
 from app.core.security import hash_password
 from seed_demo_academics import seed_academics
 from seed_demo_internships import seed_internships_and_apps
+from seed_demo_reset import reset_demo
 from seed_demo_users import seed_demo_users_and_profiles
 
 DEMO_PASSWORD = "12345678"
@@ -47,11 +48,25 @@ def seed_demo(db: Session, force: bool = False) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Seed demo dataset into the database.")
     parser.add_argument("--force", action="store_true", help="Force run in production.")
+    parser.add_argument(
+        "--reset-demo",
+        action="store_true",
+        help="Remove all demo accounts in foreign-key dependency order.",
+    )
+    parser.add_argument(
+        "-y",
+        "--yes",
+        action="store_true",
+        help="Skip confirmation prompt for demo reset.",
+    )
     args = parser.parse_args()
 
     db = SessionLocal()
     try:
-        seed_demo(db, force=args.force)
+        if args.reset_demo:
+            reset_demo(db, skip_confirm=args.yes)
+        else:
+            seed_demo(db, force=args.force)
     finally:
         db.close()
 

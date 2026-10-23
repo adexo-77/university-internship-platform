@@ -15,7 +15,9 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from seed_demo import DEMO_PASSWORD, seed_demo
+from seed_demo_reset import ALL_DEMO_EMAILS, reset_demo
 
+from app.core.security import hash_password
 from app.models.application import Application
 from app.models.assignment import Assignment
 from app.models.course import Course
@@ -23,7 +25,7 @@ from app.models.internship import Internship
 from app.models.organization_profile import OrganizationProfile
 from app.models.student_profile import StudentProfile
 from app.models.submission import Submission
-from app.models.user import User
+from app.models.user import User, UserRole
 
 DEMO_ACCOUNTS = [
     ("demo.admin@example.com", "admin", "/api/dashboard/admin"),
@@ -160,3 +162,32 @@ def test_demo_profile_completeness_and_approval_states(
         select(OrganizationProfile).where(OrganizationProfile.user_id == neworg.id)
     )
     assert nop is not None and nop.approval_status.value == "pending"
+
+
+def test_reset_demo_preserves_non_demo_accounts(real_db_session: Session) -> None:
+    """--reset-demo removes all demo accounts but preserves non-demo accounts."""
+    seed_demo(real_db_session, force=True)
+
+    non_demo = User(
+        email="persistent.faculty@university.edu",
+        full_name="Prof. Persistent",
+        role=UserRole.INSTRUCTOR,
+        password_hash=hash_password("NonDemoPass123!"),
+        is_active=True,
+    )
+    real_db_session.add(non_demo)
+    real_db_session.commit()
+
+    deleted_count = reset_demo(real_db_session, skip_confirm=True)
+    assert deleted_count > 0
+
+    remaining_demo = real_db_session.scalars(
+        select(User).where(User.email.in_(ALL_DEMO_EMAILS))
+    ).all()
+    assert len(list(remaining_demo)) == 0
+
+    survivor = real_db_session.scalar(
+        select(User).where(User.email == "persistent.faculty@university.edu")
+    )
+    assert survivor is not None
+    assert survivor.full_name == "Prof. Persistent"

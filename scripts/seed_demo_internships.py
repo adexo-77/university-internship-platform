@@ -12,12 +12,11 @@ POSTINGS_DATA = [
     (
         "org1",
         "Junior Web Developer Intern",
-        "Develop backend REST APIs with Python/FastAPI and build reactive web applications using React and TypeScript for enterprise clients.",
+        "Develop backend REST APIs with Python/FastAPI and build reactive web applications using React and TypeScript for enterprise clients. Monthly stipend: 4,500 ETB.",
         "Proficiency in Python and JavaScript/TypeScript; understanding of RESTful APIs and relational databases; familiarity with Git.",
         "Addis Ababa",
         InternshipWorkMode.HYBRID,
         12,
-        4500,
         timedelta(days=28),
         InternshipStatus.OPEN,
         None,
@@ -25,12 +24,11 @@ POSTINGS_DATA = [
     (
         "org1",
         "Data Analysis Intern",
-        "Clean, analyze, and visualize client business metrics. Build automated data extraction pipelines and interactive dashboards.",
+        "Clean, analyze, and visualize client business metrics. Build automated data extraction pipelines and interactive dashboards. Monthly stipend: 4,000 ETB.",
         "Strong SQL skills; experience with Python data libraries (pandas, matplotlib); knowledge of basic statistical methods.",
         "Addis Ababa",
         InternshipWorkMode.REMOTE,
         10,
-        4000,
         timedelta(days=21),
         InternshipStatus.OPEN,
         None,
@@ -38,12 +36,11 @@ POSTINGS_DATA = [
     (
         "org1",
         "Mobile Application Intern",
-        "Assist in developing cross-platform mobile apps for financial services. Implement responsive screens and integrate secure endpoints.",
+        "Assist in developing cross-platform mobile apps for financial services. Implement responsive screens and integrate secure endpoints. Monthly stipend: 4,200 ETB.",
         "Experience with React Native or Flutter; understanding of mobile UI/UX design patterns.",
         "Addis Ababa",
         InternshipWorkMode.ONSITE,
         12,
-        4200,
         timedelta(days=40),
         InternshipStatus.PENDING_REVIEW,
         None,
@@ -51,12 +48,11 @@ POSTINGS_DATA = [
     (
         "org1",
         "Cloud Infrastructure Intern",
-        "Draft posting for internal cloud engineering internship focusing on containerization, CI/CD pipelines, and cloud monitoring.",
+        "Draft posting for internal cloud engineering internship focusing on containerization, CI/CD pipelines, and cloud monitoring. Monthly stipend: 5,000 ETB.",
         "Basic Linux administration; experience with Docker and GitHub Actions.",
         "Addis Ababa",
         InternshipWorkMode.REMOTE,
         12,
-        5000,
         timedelta(days=60),
         InternshipStatus.DRAFT,
         None,
@@ -69,7 +65,6 @@ POSTINGS_DATA = [
         "Addis Ababa",
         InternshipWorkMode.REMOTE,
         8,
-        2000,
         timedelta(days=14),
         InternshipStatus.REJECTED,
         "The listing involves speculative financial trading without direct educational supervision or academic mentorship. Please revise the internship scope to focus on software development or financial data engineering.",
@@ -77,12 +72,11 @@ POSTINGS_DATA = [
     (
         "org2",
         "Network Support Intern",
-        "Support our regional network operations center in Jimma. Participate in router configuration, fiber network monitoring, and diagnostic troubleshooting.",
+        "Support our regional network operations center in Jimma. Participate in router configuration, fiber network monitoring, and diagnostic troubleshooting. Monthly stipend: 3,800 ETB.",
         "Knowledge of TCP/IP networking, subnets, routing protocols, and hardware troubleshooting; eager to learn.",
         "Jimma",
         InternshipWorkMode.ONSITE,
         12,
-        3800,
         timedelta(days=35),
         InternshipStatus.OPEN,
         None,
@@ -90,12 +84,11 @@ POSTINGS_DATA = [
     (
         "org2",
         "Systems Administration Intern 2025",
-        "Hands-on Linux server administration, backup automation, and internal systems maintenance for telecom operations.",
+        "Hands-on Linux server administration, backup automation, and internal systems maintenance for telecom operations. Monthly stipend: 3,500 ETB.",
         "Familiarity with Ubuntu/Debian server environments and Bash scripting.",
         "Jimma",
         InternshipWorkMode.ONSITE,
         10,
-        3500,
         -timedelta(days=15),
         InternshipStatus.CLOSED,
         None,
@@ -108,7 +101,7 @@ def _seed_postings(
 ) -> dict[str, Internship]:
     admin = users["admin"]
     postings: dict[str, Internship] = {}
-    for org_k, title, desc, req, loc, mode, wks, stp, delta, st, note in POSTINGS_DATA:
+    for org_k, title, desc, req, loc, mode, wks, delta, st, note in POSTINGS_DATA:
         org = users[org_k]
         p = db.scalar(
             select(Internship).where(
@@ -124,7 +117,6 @@ def _seed_postings(
                 location=loc,
                 work_mode=mode,
                 duration_weeks=wks,
-                stipend=stp,
                 application_deadline=now + delta,
                 status=st,
                 review_note=note,
