@@ -8,46 +8,108 @@ from app.models.user import User
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+POSTINGS_DATA = [
+    (
+        "org1",
+        "Junior Web Developer Intern",
+        "Develop backend REST APIs with Python/FastAPI and build reactive web applications using React and TypeScript for enterprise clients.",
+        "Proficiency in Python and JavaScript/TypeScript; understanding of RESTful APIs and relational databases; familiarity with Git.",
+        "Addis Ababa",
+        InternshipWorkMode.HYBRID,
+        12,
+        4500,
+        timedelta(days=28),
+        InternshipStatus.OPEN,
+        None,
+    ),
+    (
+        "org1",
+        "Data Analysis Intern",
+        "Clean, analyze, and visualize client business metrics. Build automated data extraction pipelines and interactive dashboards.",
+        "Strong SQL skills; experience with Python data libraries (pandas, matplotlib); knowledge of basic statistical methods.",
+        "Addis Ababa",
+        InternshipWorkMode.REMOTE,
+        10,
+        4000,
+        timedelta(days=21),
+        InternshipStatus.OPEN,
+        None,
+    ),
+    (
+        "org1",
+        "Mobile Application Intern",
+        "Assist in developing cross-platform mobile apps for financial services. Implement responsive screens and integrate secure endpoints.",
+        "Experience with React Native or Flutter; understanding of mobile UI/UX design patterns.",
+        "Addis Ababa",
+        InternshipWorkMode.ONSITE,
+        12,
+        4200,
+        timedelta(days=40),
+        InternshipStatus.PENDING_REVIEW,
+        None,
+    ),
+    (
+        "org1",
+        "Cloud Infrastructure Intern",
+        "Draft posting for internal cloud engineering internship focusing on containerization, CI/CD pipelines, and cloud monitoring.",
+        "Basic Linux administration; experience with Docker and GitHub Actions.",
+        "Addis Ababa",
+        InternshipWorkMode.REMOTE,
+        12,
+        5000,
+        timedelta(days=60),
+        InternshipStatus.DRAFT,
+        None,
+    ),
+    (
+        "org1",
+        "Unsupervised Crypto Trading Bot Intern",
+        "Develop automated algorithmic trading scripts for decentralized cryptocurrency exchanges.",
+        "Python algorithmic trading knowledge.",
+        "Addis Ababa",
+        InternshipWorkMode.REMOTE,
+        8,
+        2000,
+        timedelta(days=14),
+        InternshipStatus.REJECTED,
+        "The listing involves speculative financial trading without direct educational supervision or academic mentorship. Please revise the internship scope to focus on software development or financial data engineering.",
+    ),
+    (
+        "org2",
+        "Network Support Intern",
+        "Support our regional network operations center in Jimma. Participate in router configuration, fiber network monitoring, and diagnostic troubleshooting.",
+        "Knowledge of TCP/IP networking, subnets, routing protocols, and hardware troubleshooting; eager to learn.",
+        "Jimma",
+        InternshipWorkMode.ONSITE,
+        12,
+        3800,
+        timedelta(days=35),
+        InternshipStatus.OPEN,
+        None,
+    ),
+    (
+        "org2",
+        "Systems Administration Intern 2025",
+        "Hands-on Linux server administration, backup automation, and internal systems maintenance for telecom operations.",
+        "Familiarity with Ubuntu/Debian server environments and Bash scripting.",
+        "Jimma",
+        InternshipWorkMode.ONSITE,
+        10,
+        3500,
+        -timedelta(days=15),
+        InternshipStatus.CLOSED,
+        None,
+    ),
+]
 
-def seed_internships_and_apps(
+
+def _seed_postings(
     db: Session, users: dict[str, User], now: datetime
-) -> None:
-    org, admin, s1, s2 = users["org"], users["admin"], users["s1"], users["s2"]
-    p_specs = [
-        (
-            "Software Engineering Intern",
-            InternshipStatus.OPEN,
-            now + timedelta(days=30),
-            None,
-        ),
-        ("UI/UX Design Intern", InternshipStatus.OPEN, now + timedelta(days=25), None),
-        (
-            "AI Research Intern",
-            InternshipStatus.PENDING_REVIEW,
-            now + timedelta(days=45),
-            None,
-        ),
-        (
-            "Cloud Systems Intern",
-            InternshipStatus.DRAFT,
-            now + timedelta(days=60),
-            None,
-        ),
-        (
-            "Crypto Trading Intern",
-            InternshipStatus.REJECTED,
-            now + timedelta(days=15),
-            "Scope does not meet educational guidelines.",
-        ),
-        (
-            "Systems Intern 2025",
-            InternshipStatus.CLOSED,
-            now - timedelta(days=10),
-            None,
-        ),
-    ]
+) -> dict[str, Internship]:
+    admin = users["admin"]
     postings: dict[str, Internship] = {}
-    for title, st, dl, note in p_specs:
+    for org_k, title, desc, req, loc, mode, wks, stp, delta, st, note in POSTINGS_DATA:
+        org = users[org_k]
         p = db.scalar(
             select(Internship).where(
                 Internship.organization_id == org.id, Internship.title == title
@@ -57,12 +119,13 @@ def seed_internships_and_apps(
             p = Internship(
                 organization_id=org.id,
                 title=title,
-                description=f"Role: {title}",
-                requirements="Strong analytical and problem-solving skills.",
-                location="San Francisco, CA",
-                work_mode=InternshipWorkMode.REMOTE,
-                duration_weeks=12,
-                application_deadline=dl,
+                description=desc,
+                requirements=req,
+                location=loc,
+                work_mode=mode,
+                duration_weeks=wks,
+                stipend=stp,
+                application_deadline=now + delta,
                 status=st,
                 review_note=note,
                 reviewed_by=admin.id if note else None,
@@ -71,44 +134,60 @@ def seed_internships_and_apps(
             db.add(p)
             db.flush()
         postings[title] = p
+    return postings
 
-    p_swe, p_ui, p_closed = (
-        postings["Software Engineering Intern"],
-        postings["UI/UX Design Intern"],
-        postings["Systems Intern 2025"],
-    )
+
+def _seed_applications(
+    db: Session, postings: dict[str, Internship], users: dict[str, User], now: datetime
+) -> None:
+    p_web = postings["Junior Web Developer Intern"]
+    p_net = postings["Network Support Intern"]
+    p_sys = postings["Systems Administration Intern 2025"]
+    s1, s2, s3 = users["s1"], users["s2"], users["s3"]
+
     app_specs = [
         (
-            p_swe.id,
+            p_web.id,
             s1.id,
             ApplicationStatus.ACCEPTED,
-            "Excited to join!",
-            "Welcome to our team!",
-        ),
-        (p_swe.id, s2.id, ApplicationStatus.SUBMITTED, "Applying for SWE role.", None),
-        (
-            p_ui.id,
-            s1.id,
-            ApplicationStatus.SHORTLISTED,
-            "Portfolio attached.",
-            "Shortlisted.",
+            "Dear Hiring Team at Kaffa Digital Solutions, as a fourth-year IT student at Jimma University experienced in Python, FastAPI, and React, I would love to contribute to your enterprise web platforms. My capstone project involved building distributed RESTful services with strict test automation.",
+            "We were very impressed by your coursework and project repository. We are excited to offer you the Junior Web Developer internship position!",
+            now - timedelta(days=1),
         ),
         (
-            p_ui.id,
+            p_web.id,
             s2.id,
-            ApplicationStatus.REJECTED,
-            "Applying for UI role.",
-            "Role filled.",
+            ApplicationStatus.SHORTLISTED,
+            "Dear Kaffa Digital team, I am writing to express my strong interest in the Junior Web Developer Intern role. Having built multiple frontend projects using React, TypeScript, and Tailwind CSS, I am excited about the prospect of learning from your engineering team in Addis Ababa.",
+            "Your frontend portfolio is strong. We have shortlisted your application for a technical interview next week.",
+            now - timedelta(days=1),
         ),
         (
-            p_closed.id,
+            p_net.id,
+            s1.id,
+            ApplicationStatus.REJECTED,
+            "I am interested in broadening my hands-on telecommunications and network configuration experience with Gibe Valley Telecom in Jimma.",
+            "Thank you for applying. We have decided to advance candidates with specialized optical networking coursework for this cohort.",
+            now - timedelta(days=2),
+        ),
+        (
+            p_net.id,
+            s3.id,
+            ApplicationStatus.SUBMITTED,
+            "Applying for the Network Support Intern position to gain practical networking and router configuration experience in Jimma.",
+            None,
+            None,
+        ),
+        (
+            p_sys.id,
             s1.id,
             ApplicationStatus.WITHDRAWN,
-            "Withdrawing application.",
+            "I am submitting my application for the Systems Administration internship to apply my Linux server administration skills.",
+            None,
             None,
         ),
     ]
-    for pid, sid, st, cl, msg in app_specs:
+    for pid, sid, st, cl, msg, dec_at in app_specs:
         if not db.scalar(
             select(Application).where(
                 Application.posting_id == pid, Application.student_id == sid
@@ -121,7 +200,14 @@ def seed_internships_and_apps(
                     cover_letter=cl,
                     status=st,
                     decision_message=msg,
-                    decided_at=now - timedelta(days=1) if msg else None,
+                    decided_at=dec_at,
                 )
             )
     db.flush()
+
+
+def seed_internships_and_apps(
+    db: Session, users: dict[str, User], now: datetime
+) -> None:
+    postings = _seed_postings(db, users, now)
+    _seed_applications(db, postings, users, now)
