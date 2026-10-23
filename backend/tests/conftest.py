@@ -35,7 +35,7 @@ TestingSessionLocal = sessionmaker(
 )
 
 # Test-only route to verify role enforcement dependencies
-role_test_router = APIRouter(prefix="/api/test-roles", tags=["test"])
+role_test_router = APIRouter(prefix="/api/test-roles", tags=["test"], include_in_schema=False)
 require_admin_role = require_roles(UserRole.ADMIN)
 
 
@@ -46,7 +46,7 @@ def admin_only_endpoint(
     return {"message": f"Welcome admin {current_user.full_name}"}
 
 
-app.include_router(role_test_router)
+app.include_router(role_test_router, include_in_schema=False)
 
 
 @pytest.fixture(scope="session", autouse=True)

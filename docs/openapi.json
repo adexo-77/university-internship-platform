@@ -1,0 +1,5225 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "University Learning & Internship Platform API",
+    "description": "Backend API for Brolf Tech University Learning & Internship Platform",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "System Health Check",
+        "description": "Returns the operational status of the API server.",
+        "operationId": "get_health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health/db": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Database Health Check",
+        "description": "Executes a test query to verify PostgreSQL database connectivity.",
+        "operationId": "get_database_health_api_health_db_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseHealthResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database connection or query failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Register new user account",
+        "description": "Register student or organization account and establish an authenticated session.",
+        "operationId": "register_api_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Authenticate user credentials",
+        "description": "Verify user credentials and establish an authenticated session.",
+        "operationId": "login_api_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Terminate session",
+        "description": "Invalidate session in database and clear session cookie.",
+        "operationId": "logout_api_auth_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Logout Api Auth Logout Post"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Get current user identity",
+        "description": "Return identity and profile of currently authenticated user.",
+        "operationId": "get_me_api_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/change-password": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Change user password",
+        "description": "Change authenticated user password and invalidate all other sessions.",
+        "operationId": "change_password_api_auth_change_password_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Change Password Api Auth Change Password Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/students/me": {
+      "get": {
+        "tags": [
+          "students"
+        ],
+        "summary": "Get current student profile",
+        "description": "Retrieve profile details for the authenticated student.",
+        "operationId": "get_my_student_profile_api_students_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "students"
+        ],
+        "summary": "Update current student profile",
+        "description": "Update profile details for the authenticated student.",
+        "operationId": "update_my_student_profile_api_students_me_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudentProfileUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentProfileResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/organizations/me": {
+      "get": {
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Get current organization profile",
+        "description": "Retrieve profile details for the authenticated organization.",
+        "operationId": "get_my_organization_profile_api_organizations_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Update current organization profile",
+        "description": "Update profile details for the authenticated organization.",
+        "operationId": "update_my_organization_profile_api_organizations_me_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrganizationProfileUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationProfileResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/courses": {
+      "post": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Create a new course",
+        "description": "Create a course owned by the authenticated instructor.",
+        "operationId": "create_course_api_courses_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "List courses with search and pagination",
+        "description": "List published courses (or all statuses for admin) with title search.",
+        "operationId": "list_courses_api_courses_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Title search substring",
+              "title": "Q"
+            },
+            "description": "Title search substring"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Items limit",
+              "default": 20,
+              "title": "Limit"
+            },
+            "description": "Items limit"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Items offset",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Items offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/instructors/me/courses": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Get instructor's own courses",
+        "description": "Retrieve all courses owned by the authenticated instructor with student counts.",
+        "operationId": "get_my_instructor_courses_api_instructors_me_courses_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CourseResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get My Instructor Courses Api Instructors Me Courses Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/students/me/courses": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Get student's enrolled courses",
+        "description": "Retrieve all courses currently enrolled by the authenticated student.",
+        "operationId": "get_my_student_courses_api_students_me_courses_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CourseResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get My Student Courses Api Students Me Courses Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/courses/{id}": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Get course by ID",
+        "description": "Retrieve course details if published, owned by user, or requested by admin.",
+        "operationId": "get_course_by_id_api_courses__id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Update course",
+        "description": "Update title, description, or transition status from draft to published.",
+        "operationId": "update_course_api_courses__id__patch",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/courses/{id}/students": {
+      "get": {
+        "tags": [
+          "enrollments"
+        ],
+        "summary": "Get enrolled student roster",
+        "description": "Retrieve enrolled student roster for the course owner or admin.",
+        "operationId": "get_course_students_api_courses__id__students_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnrolledStudentResponse"
+                  },
+                  "title": "Response Get Course Students Api Courses  Id  Students Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/courses/{id}/enrollment": {
+      "post": {
+        "tags": [
+          "enrollments"
+        ],
+        "summary": "Enroll in course",
+        "description": "Enroll the authenticated student in a published course.",
+        "operationId": "enroll_course_api_courses__id__enrollment_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "enrollments"
+        ],
+        "summary": "Leave course",
+        "description": "Unenroll the authenticated student from a course.",
+        "operationId": "leave_course_api_courses__id__enrollment_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollmentActionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/courses/{id}/assignments": {
+      "post": {
+        "tags": [
+          "assignments"
+        ],
+        "summary": "Create a new course assignment",
+        "description": "Create a new course assignment for the owner instructor.",
+        "operationId": "create_course_assignment_api_courses__id__assignments_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "Course ID",
+              "title": "Id"
+            },
+            "description": "Course ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "assignments"
+        ],
+        "summary": "List assignments for a course",
+        "description": "Retrieve all assignments for an authorized user (owner, admin, or enrolled student).",
+        "operationId": "list_course_assignments_api_courses__id__assignments_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "Course ID",
+              "title": "Id"
+            },
+            "description": "Course ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssignmentResponse"
+                  },
+                  "title": "Response List Course Assignments Api Courses  Id  Assignments Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/assignments/{id}": {
+      "get": {
+        "tags": [
+          "assignments"
+        ],
+        "summary": "Get assignment details",
+        "description": "Get single assignment details with student submission state if student.",
+        "operationId": "get_assignment_api_assignments__id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "Assignment ID",
+              "title": "Id"
+            },
+            "description": "Assignment ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "assignments"
+        ],
+        "summary": "Update assignment details",
+        "description": "Update assignment fields and enforce max_points grade constraints.",
+        "operationId": "update_assignment_api_assignments__id__patch",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "Assignment ID",
+              "title": "Id"
+            },
+            "description": "Assignment ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "assignments"
+        ],
+        "summary": "Delete an assignment",
+        "description": "Delete an assignment if no submissions have been made.",
+        "operationId": "delete_assignment_api_assignments__id__delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "Assignment ID",
+              "title": "Id"
+            },
+            "description": "Assignment ID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/assignments/{id}/submission": {
+      "put": {
+        "tags": [
+          "submissions"
+        ],
+        "summary": "Submit or resubmit assignment work",
+        "description": "Submit work for an assignment (only enrolled students, 409 if graded).",
+        "operationId": "submit_assignment_api_assignments__id__submission_put",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "Assignment ID",
+              "title": "Id"
+            },
+            "description": "Assignment ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmissionSubmit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "submissions"
+        ],
+        "summary": "Get student's own submission",
+        "description": "Retrieve the authenticated student's own submission.",
+        "operationId": "get_own_submission_api_assignments__id__submission_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "Assignment ID",
+              "title": "Id"
+            },
+            "description": "Assignment ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/assignments/{id}/submissions": {
+      "get": {
+        "tags": [
+          "submissions"
+        ],
+        "summary": "List all enrolled students and submissions",
+        "description": "Retrieve every enrolled student and their submission (owner instructor or admin).",
+        "operationId": "list_assignment_submissions_api_assignments__id__submissions_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "Assignment ID",
+              "title": "Id"
+            },
+            "description": "Assignment ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StudentSubmissionRosterItem"
+                  },
+                  "title": "Response List Assignment Submissions Api Assignments  Id  Submissions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/submissions/{id}/grade": {
+      "put": {
+        "tags": [
+          "submissions"
+        ],
+        "summary": "Grade a submission",
+        "description": "Grade an assignment submission (owner instructor only, admin read-only).",
+        "operationId": "grade_submission_api_submissions__id__grade_put",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "Submission ID",
+              "title": "Id"
+            },
+            "description": "Submission ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmissionGrade"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internships": {
+      "post": {
+        "tags": [
+          "internships"
+        ],
+        "summary": "Create a new internship posting",
+        "description": "Create a new internship posting in draft status owned by the authenticated organization.",
+        "operationId": "create_internship_api_internships_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InternshipCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternshipResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "internships"
+        ],
+        "summary": "Browse internship catalog",
+        "description": "List open internship postings for students or all postings for administrators.",
+        "operationId": "list_internships_api_internships_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search keyword for title or organization",
+              "title": "Q"
+            },
+            "description": "Search keyword for title or organization"
+          },
+          {
+            "name": "work_mode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/InternshipWorkMode"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by work mode",
+              "title": "Work Mode"
+            },
+            "description": "Filter by work mode"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Page limit",
+              "default": 20,
+              "title": "Limit"
+            },
+            "description": "Page limit"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Page offset",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Page offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternshipListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/organizations/me/internships": {
+      "get": {
+        "tags": [
+          "internships"
+        ],
+        "summary": "Get organization's own internship postings",
+        "description": "Retrieve all internship postings owned by authenticated organization.",
+        "operationId": "get_my_internships_api_organizations_me_internships_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/InternshipResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get My Internships Api Organizations Me Internships Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internships/{id}": {
+      "patch": {
+        "tags": [
+          "internships"
+        ],
+        "summary": "Update an internship posting",
+        "description": "Update internship details or lifecycle status.",
+        "operationId": "update_internship_api_internships__id__patch",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InternshipUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternshipResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "internships"
+        ],
+        "summary": "Get internship posting by ID",
+        "description": "Retrieve detailed information for an internship posting.",
+        "operationId": "get_internship_by_id_api_internships__id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternshipResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internships/{id}/submit": {
+      "post": {
+        "tags": [
+          "internships"
+        ],
+        "summary": "Submit an internship posting for admin review",
+        "description": "Submit a draft or rejected internship posting for administrative review.",
+        "operationId": "submit_internship_api_internships__id__submit_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternshipResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internships/{id}/withdraw": {
+      "post": {
+        "tags": [
+          "internships"
+        ],
+        "summary": "Withdraw an internship posting to draft",
+        "description": "Withdraw a pending_review internship posting back to draft status.",
+        "operationId": "withdraw_internship_api_internships__id__withdraw_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternshipResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internships/{id}/close": {
+      "post": {
+        "tags": [
+          "internships"
+        ],
+        "summary": "Close an open internship posting",
+        "description": "Close an active open internship posting.",
+        "operationId": "close_internship_api_internships__id__close_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternshipResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internships/{id}/applications": {
+      "post": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Submit an application to an internship posting",
+        "description": "Submit an application as the authenticated student to an open internship posting.",
+        "operationId": "apply_to_internship_api_internships__id__applications_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Get applicant roster for an internship posting",
+        "description": "Retrieve applicant roster with profile details for owner or admin.",
+        "operationId": "get_internship_applications_api_internships__id__applications_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ApplicationStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter applicants by status",
+              "title": "Status"
+            },
+            "description": "Filter applicants by status"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationResponse"
+                  },
+                  "title": "Response Get Internship Applications Api Internships  Id  Applications Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/students/me/applications": {
+      "get": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Get student's own applications",
+        "description": "Retrieve all applications submitted by the authenticated student.",
+        "operationId": "get_my_applications_api_students_me_applications_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get My Applications Api Students Me Applications Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/applications/{id}/withdraw": {
+      "post": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Withdraw a submitted or shortlisted application",
+        "description": "Withdraw an application submitted by the student while pending decision.",
+        "operationId": "withdraw_application_api_applications__id__withdraw_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/applications/{id}": {
+      "get": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Get application detail by ID",
+        "description": "Retrieve application detail for the student owner, posting organization, or admin.",
+        "operationId": "get_application_by_id_api_applications__id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/applications/{id}/decision": {
+      "put": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Record decision on an application",
+        "description": "Record an organization decision (shortlisted, accepted, or rejected).",
+        "operationId": "decide_application_api_applications__id__decision_put",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users": {
+      "get": {
+        "tags": [
+          "admin-users"
+        ],
+        "summary": "List and search users",
+        "description": "Retrieve paginated user directory with search and filtering.",
+        "operationId": "list_users_api_admin_users_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search by name or email",
+              "title": "Q"
+            },
+            "description": "Search by name or email"
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/UserRole"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by account role",
+              "title": "Role"
+            },
+            "description": "Filter by account role"
+          },
+          {
+            "name": "is_active",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by active status",
+              "title": "Is Active"
+            },
+            "description": "Filter by active status"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Items per page",
+              "default": 20,
+              "title": "Limit"
+            },
+            "description": "Items per page"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Pagination offset",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Pagination offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "admin-users"
+        ],
+        "summary": "Provision instructor or admin user",
+        "description": "Create a new instructor or administrative user account.",
+        "operationId": "create_user_api_admin_users_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users/{user_id}": {
+      "patch": {
+        "tags": [
+          "admin-users"
+        ],
+        "summary": "Update user active status",
+        "description": "Activate or deactivate a user account with administrative protections.",
+        "operationId": "update_user_status_api_admin_users__user_id__patch",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users/{user_id}/password": {
+      "put": {
+        "tags": [
+          "admin-users"
+        ],
+        "summary": "Reset user password",
+        "description": "Reset user password and invalidate all of the user's active sessions.",
+        "operationId": "reset_user_password_api_admin_users__user_id__password_put",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserPasswordResetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Reset User Password Api Admin Users  User Id  Password Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/organizations": {
+      "get": {
+        "tags": [
+          "admin-organizations"
+        ],
+        "summary": "List organizations for review",
+        "description": "Retrieve paginated organization directory with approval status filter.",
+        "operationId": "list_organizations_api_admin_organizations_get",
+        "parameters": [
+          {
+            "name": "approval_status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ApprovalStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by approval status",
+              "title": "Approval Status"
+            },
+            "description": "Filter by approval status"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Items per page",
+              "default": 20,
+              "title": "Limit"
+            },
+            "description": "Items per page"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Pagination offset",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Pagination offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOrganizationListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/organizations/{user_id}/approval": {
+      "put": {
+        "tags": [
+          "admin-organizations"
+        ],
+        "summary": "Update organization approval status",
+        "description": "Approve, reject, or mark pending an organization with an optional review note.",
+        "operationId": "update_organization_approval_api_admin_organizations__user_id__approval_put",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminOrganizationApprovalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOrganizationItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/internships": {
+      "get": {
+        "tags": [
+          "admin-internships"
+        ],
+        "summary": "List internship postings for admin review",
+        "description": "Retrieve internship postings in review queue, ordered oldest first.",
+        "operationId": "list_admin_internships_api_admin_internships_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "all",
+                    "pending_review",
+                    "open",
+                    "rejected",
+                    "closed",
+                    "draft"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by posting status (defaults to pending_review, or 'all')",
+              "title": "Status"
+            },
+            "description": "Filter by posting status (defaults to pending_review, or 'all')"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Page limit",
+              "default": 20,
+              "title": "Limit"
+            },
+            "description": "Page limit"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Page offset",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Page offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternshipListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/internships/{id}/review": {
+      "put": {
+        "tags": [
+          "admin-internships"
+        ],
+        "summary": "Approve, reject, or take down an internship posting",
+        "description": "Review an internship posting by approving or rejecting, or taking down an open posting.",
+        "operationId": "review_internship_api_admin_internships__id__review_put",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InternshipReviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternshipResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/student": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "Student Dashboard",
+        "description": "Retrieve aggregated dashboard metrics for the authenticated student.",
+        "operationId": "student_dashboard_api_dashboard_student_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentDashboardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/instructor": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "Instructor Dashboard",
+        "description": "Retrieve aggregated dashboard metrics for the authenticated instructor.",
+        "operationId": "instructor_dashboard_api_dashboard_instructor_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstructorDashboardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/organization": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "Organization Dashboard",
+        "description": "Retrieve aggregated dashboard metrics for the authenticated organization.",
+        "operationId": "organization_dashboard_api_dashboard_organization_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationDashboardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/admin": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "Admin Dashboard",
+        "description": "Retrieve high-level platform activity metrics for administrators.",
+        "operationId": "admin_dashboard_api_dashboard_admin_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDashboardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AdminCreatableRole": {
+        "type": "string",
+        "enum": [
+          "instructor",
+          "admin"
+        ],
+        "title": "AdminCreatableRole",
+        "description": "Roles permitted to be provisioned via admin user creation."
+      },
+      "AdminDashboardResponse": {
+        "properties": {
+          "users_by_role": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Users By Role"
+          },
+          "users_active_count": {
+            "type": "integer",
+            "title": "Users Active Count"
+          },
+          "users_total_count": {
+            "type": "integer",
+            "title": "Users Total Count"
+          },
+          "organizations_pending_approval": {
+            "type": "integer",
+            "title": "Organizations Pending Approval"
+          },
+          "postings_pending_review": {
+            "type": "integer",
+            "title": "Postings Pending Review"
+          },
+          "open_internships": {
+            "type": "integer",
+            "title": "Open Internships"
+          },
+          "courses_by_status": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Courses By Status"
+          },
+          "applications_by_status": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Applications By Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "users_by_role",
+          "users_active_count",
+          "users_total_count",
+          "organizations_pending_approval",
+          "postings_pending_review",
+          "open_internships",
+          "courses_by_status",
+          "applications_by_status"
+        ],
+        "title": "AdminDashboardResponse",
+        "description": "Aggregated platform health and activity metrics for administrators."
+      },
+      "AdminOrganizationApprovalRequest": {
+        "properties": {
+          "approval_status": {
+            "$ref": "#/components/schemas/ApprovalStatus",
+            "description": "New approval status"
+          },
+          "approval_note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Note",
+            "description": "Optional administrator review note"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "approval_status"
+        ],
+        "title": "AdminOrganizationApprovalRequest",
+        "description": "Schema for updating organization approval status and note."
+      },
+      "AdminOrganizationItem": {
+        "properties": {
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "organization_name": {
+            "type": "string",
+            "title": "Organization Name"
+          },
+          "contact_name": {
+            "type": "string",
+            "title": "Contact Name"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "industry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Industry"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "approval_status": {
+            "$ref": "#/components/schemas/ApprovalStatus"
+          },
+          "approval_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Note"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "reviewed_by": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed By"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "organization_name",
+          "contact_name",
+          "email",
+          "approval_status"
+        ],
+        "title": "AdminOrganizationItem",
+        "description": "Item representation of an organization in admin directory."
+      },
+      "AdminOrganizationListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminOrganizationItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "AdminOrganizationListResponse",
+        "description": "Paginated list of organizations for admin review."
+      },
+      "AdminUserCreateRequest": {
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Full Name",
+            "description": "Full name of user"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "description": "User email address"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password",
+            "description": "Password between 8 and 128 characters"
+          },
+          "role": {
+            "$ref": "#/components/schemas/AdminCreatableRole",
+            "description": "Account role: must be 'instructor' or 'admin'"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "full_name",
+          "email",
+          "password",
+          "role"
+        ],
+        "title": "AdminUserCreateRequest",
+        "description": "Schema for admin provisioning of instructor or admin accounts."
+      },
+      "AdminUserListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminUserResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "AdminUserListResponse",
+        "description": "Paginated list of users for admin directory."
+      },
+      "AdminUserPasswordResetRequest": {
+        "properties": {
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password",
+            "description": "New password between 8 and 128 characters"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "password"
+        ],
+        "title": "AdminUserPasswordResetRequest",
+        "description": "Schema for admin resetting a user password."
+      },
+      "AdminUserResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "full_name",
+          "role",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "AdminUserResponse",
+        "description": "User account response safe representation (excludes password hash)."
+      },
+      "AdminUserUpdateRequest": {
+        "properties": {
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "description": "Target active state for user account"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "is_active"
+        ],
+        "title": "AdminUserUpdateRequest",
+        "description": "Schema for updating user active status."
+      },
+      "ApplicantProfile": {
+        "properties": {
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "university": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "University"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
+          },
+          "year_of_study": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year Of Study"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Skills",
+            "default": []
+          },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "full_name",
+          "email"
+        ],
+        "title": "ApplicantProfile",
+        "description": "Snapshot of applicant student profile for organization/admin review."
+      },
+      "ApplicationCreate": {
+        "properties": {
+          "cover_letter": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Cover Letter"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cover_letter"
+        ],
+        "title": "ApplicationCreate",
+        "description": "Schema for submitting an application to an internship posting."
+      },
+      "ApplicationDecision": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/ApplicationStatus",
+            "description": "Allowed decision statuses: shortlisted, accepted, rejected"
+          },
+          "decision_message": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "ApplicationDecision",
+        "description": "Schema for recording an organization's decision on an application."
+      },
+      "ApplicationResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "posting_id": {
+            "type": "integer",
+            "title": "Posting Id"
+          },
+          "posting_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Posting Title"
+          },
+          "organization_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organization Name"
+          },
+          "student_id": {
+            "type": "integer",
+            "title": "Student Id"
+          },
+          "cover_letter": {
+            "type": "string",
+            "title": "Cover Letter"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          },
+          "decision_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Message"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "applicant": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ApplicantProfile"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "posting_id",
+          "student_id",
+          "cover_letter",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ApplicationResponse",
+        "description": "Schema for returning application data."
+      },
+      "ApplicationStatus": {
+        "type": "string",
+        "enum": [
+          "submitted",
+          "shortlisted",
+          "accepted",
+          "rejected",
+          "withdrawn"
+        ],
+        "title": "ApplicationStatus",
+        "description": "Allowed status states for an internship application."
+      },
+      "ApprovalStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "approved",
+          "rejected"
+        ],
+        "title": "ApprovalStatus",
+        "description": "Approval status for organization profiles."
+      },
+      "AssignmentCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 3,
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "due_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Due At"
+          },
+          "max_points": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Max Points",
+            "default": 100
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "due_at"
+        ],
+        "title": "AssignmentCreate",
+        "description": "Payload to create a new assignment."
+      },
+      "AssignmentResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "course_id": {
+            "type": "integer",
+            "title": "Course Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "due_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Due At"
+          },
+          "max_points": {
+            "type": "integer",
+            "title": "Max Points"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "submission_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submission Status"
+          },
+          "is_late": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Late"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grade"
+          },
+          "course_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "course_id",
+          "title",
+          "due_at",
+          "max_points",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "AssignmentResponse",
+        "description": "Serialized assignment representation."
+      },
+      "AssignmentUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120,
+                "minLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
+          "max_points": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1000.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Points"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "AssignmentUpdate",
+        "description": "Payload to update an existing assignment."
+      },
+      "ChangePasswordRequest": {
+        "properties": {
+          "current_password": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Current Password",
+            "description": "Current account password"
+          },
+          "new_password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "New Password",
+            "description": "New account password between 8 and 128 characters"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "current_password",
+          "new_password"
+        ],
+        "title": "ChangePasswordRequest",
+        "description": "Schema for authenticated password change."
+      },
+      "CourseCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 3,
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CourseStatus",
+            "default": "draft"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "CourseCreate",
+        "description": "Payload to create a new course."
+      },
+      "CourseListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CourseResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "CourseListResponse",
+        "description": "Paginated list of courses with total count."
+      },
+      "CourseResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "instructor_id": {
+            "type": "integer",
+            "title": "Instructor Id"
+          },
+          "instructor_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instructor Name"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CourseStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "enrolled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enrolled"
+          },
+          "enrolled_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enrolled Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "instructor_id",
+          "title",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "CourseResponse",
+        "description": "Course item representation returned by endpoints."
+      },
+      "CourseStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "published"
+        ],
+        "title": "CourseStatus",
+        "description": "Allowed statuses for a course."
+      },
+      "CourseUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120,
+                "minLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CourseUpdate",
+        "description": "Payload to update an existing course."
+      },
+      "DatabaseHealthResponse": {
+        "properties": {
+          "database": {
+            "type": "string",
+            "title": "Database"
+          }
+        },
+        "type": "object",
+        "required": [
+          "database"
+        ],
+        "title": "DatabaseHealthResponse",
+        "description": "Schema for database health status."
+      },
+      "EnrolledStudentResponse": {
+        "properties": {
+          "student_id": {
+            "type": "integer",
+            "title": "Student Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "enrolled_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Enrolled At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "student_id",
+          "name",
+          "email",
+          "enrolled_at"
+        ],
+        "title": "EnrolledStudentResponse",
+        "description": "Roster item representing an enrolled student."
+      },
+      "EnrollmentActionResponse": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "EnrollmentActionResponse",
+        "description": "Standard message response for enrollment actions such as leaving a course."
+      },
+      "EnrollmentResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "course_id": {
+            "type": "integer",
+            "title": "Course Id"
+          },
+          "student_id": {
+            "type": "integer",
+            "title": "Student Id"
+          },
+          "enrolled_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Enrolled At"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Enrolled successfully"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "course_id",
+          "student_id",
+          "enrolled_at"
+        ],
+        "title": "EnrollmentResponse",
+        "description": "Response returned upon successful course enrollment."
+      },
+      "ErrorDetailResponse": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "ErrorDetailResponse",
+        "description": "Consistent API error format."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "HealthResponse",
+        "description": "Schema for root health status."
+      },
+      "InstructorCourseItem": {
+        "properties": {
+          "course_id": {
+            "type": "integer",
+            "title": "Course Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "enrolled_count": {
+            "type": "integer",
+            "title": "Enrolled Count"
+          },
+          "assignments_count": {
+            "type": "integer",
+            "title": "Assignments Count"
+          },
+          "submissions_awaiting_grading": {
+            "type": "integer",
+            "title": "Submissions Awaiting Grading"
+          },
+          "average_grade_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Grade Percent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "course_id",
+          "title",
+          "status",
+          "enrolled_count",
+          "assignments_count",
+          "submissions_awaiting_grading"
+        ],
+        "title": "InstructorCourseItem",
+        "description": "Summary of an instructor-owned course with engagement metrics."
+      },
+      "InstructorDashboardResponse": {
+        "properties": {
+          "courses": {
+            "items": {
+              "$ref": "#/components/schemas/InstructorCourseItem"
+            },
+            "type": "array",
+            "title": "Courses"
+          },
+          "needs_grading": {
+            "items": {
+              "$ref": "#/components/schemas/InstructorNeedsGradingItem"
+            },
+            "type": "array",
+            "title": "Needs Grading"
+          }
+        },
+        "type": "object",
+        "required": [
+          "courses",
+          "needs_grading"
+        ],
+        "title": "InstructorDashboardResponse",
+        "description": "Aggregated dashboard payload for instructors."
+      },
+      "InstructorNeedsGradingItem": {
+        "properties": {
+          "submission_id": {
+            "type": "integer",
+            "title": "Submission Id"
+          },
+          "student_name": {
+            "type": "string",
+            "title": "Student Name"
+          },
+          "assignment_id": {
+            "type": "integer",
+            "title": "Assignment Id"
+          },
+          "assignment_title": {
+            "type": "string",
+            "title": "Assignment Title"
+          },
+          "course_id": {
+            "type": "integer",
+            "title": "Course Id"
+          },
+          "course_title": {
+            "type": "string",
+            "title": "Course Title"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Submitted At"
+          },
+          "late": {
+            "type": "boolean",
+            "title": "Late"
+          }
+        },
+        "type": "object",
+        "required": [
+          "submission_id",
+          "student_name",
+          "assignment_id",
+          "assignment_title",
+          "course_id",
+          "course_title",
+          "submitted_at",
+          "late"
+        ],
+        "title": "InstructorNeedsGradingItem",
+        "description": "Pending ungraded student submission awaiting review."
+      },
+      "InternshipCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Description"
+          },
+          "requirements": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Requirements"
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Location"
+          },
+          "work_mode": {
+            "$ref": "#/components/schemas/InternshipWorkMode"
+          },
+          "duration_weeks": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 104.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Weeks"
+          },
+          "application_deadline": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Application Deadline"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "description",
+          "requirements",
+          "location",
+          "work_mode",
+          "application_deadline"
+        ],
+        "title": "InternshipCreate",
+        "description": "Schema for creating a new internship posting."
+      },
+      "InternshipListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/InternshipResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "InternshipListResponse",
+        "description": "Schema for paginated internship postings response."
+      },
+      "InternshipResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "integer",
+            "title": "Organization Id"
+          },
+          "organization_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organization Name"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "requirements": {
+            "type": "string",
+            "title": "Requirements"
+          },
+          "location": {
+            "type": "string",
+            "title": "Location"
+          },
+          "work_mode": {
+            "$ref": "#/components/schemas/InternshipWorkMode"
+          },
+          "duration_weeks": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Weeks"
+          },
+          "application_deadline": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Application Deadline"
+          },
+          "status": {
+            "$ref": "#/components/schemas/InternshipStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "applicant_count": {
+            "type": "integer",
+            "title": "Applicant Count",
+            "default": 0
+          },
+          "applications_accepted": {
+            "type": "boolean",
+            "title": "Applications Accepted",
+            "default": true
+          },
+          "applied": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applied"
+          },
+          "application_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Application Status"
+          },
+          "review_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Note"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "reviewed_by": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed By"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "organization_id",
+          "title",
+          "description",
+          "requirements",
+          "location",
+          "work_mode",
+          "application_deadline",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "InternshipResponse",
+        "description": "Schema for returning internship posting details."
+      },
+      "InternshipReviewRequest": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected"
+            ],
+            "title": "Decision"
+          },
+          "review_note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Note"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "decision"
+        ],
+        "title": "InternshipReviewRequest",
+        "description": "Schema for approving, rejecting, or taking down an internship posting."
+      },
+      "InternshipStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "pending_review",
+          "open",
+          "rejected",
+          "closed"
+        ],
+        "title": "InternshipStatus",
+        "description": "Lifecycle status for an internship posting."
+      },
+      "InternshipUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "requirements": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requirements"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "work_mode": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InternshipWorkMode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duration_weeks": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 104.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Weeks"
+          },
+          "application_deadline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Application Deadline"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InternshipStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "InternshipUpdate",
+        "description": "Schema for updating an existing internship posting."
+      },
+      "InternshipWorkMode": {
+        "type": "string",
+        "enum": [
+          "onsite",
+          "remote",
+          "hybrid"
+        ],
+        "title": "InternshipWorkMode",
+        "description": "Allowed work modes for an internship posting."
+      },
+      "LoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "description": "User email address"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Password",
+            "description": "Account password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginRequest",
+        "description": "Schema for user credentials login."
+      },
+      "OrganizationApplicationItem": {
+        "properties": {
+          "application_id": {
+            "type": "integer",
+            "title": "Application Id"
+          },
+          "applicant_name": {
+            "type": "string",
+            "title": "Applicant Name"
+          },
+          "applicant_email": {
+            "type": "string",
+            "title": "Applicant Email"
+          },
+          "posting_id": {
+            "type": "integer",
+            "title": "Posting Id"
+          },
+          "posting_title": {
+            "type": "string",
+            "title": "Posting Title"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "applied_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Applied At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "application_id",
+          "applicant_name",
+          "applicant_email",
+          "posting_id",
+          "posting_title",
+          "status",
+          "applied_at"
+        ],
+        "title": "OrganizationApplicationItem",
+        "description": "Recent applicant item for an organization's postings."
+      },
+      "OrganizationDashboardResponse": {
+        "properties": {
+          "approval_status": {
+            "type": "string",
+            "title": "Approval Status"
+          },
+          "approval_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Note"
+          },
+          "postings": {
+            "$ref": "#/components/schemas/OrganizationPostingsSummary"
+          },
+          "applications_awaiting_decision": {
+            "type": "integer",
+            "title": "Applications Awaiting Decision"
+          },
+          "recent_applications": {
+            "items": {
+              "$ref": "#/components/schemas/OrganizationApplicationItem"
+            },
+            "type": "array",
+            "title": "Recent Applications"
+          }
+        },
+        "type": "object",
+        "required": [
+          "approval_status",
+          "postings",
+          "applications_awaiting_decision",
+          "recent_applications"
+        ],
+        "title": "OrganizationDashboardResponse",
+        "description": "Aggregated dashboard payload for organizations."
+      },
+      "OrganizationPostingsSummary": {
+        "properties": {
+          "counts_by_status": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Counts By Status"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "counts_by_status",
+          "total"
+        ],
+        "title": "OrganizationPostingsSummary",
+        "description": "Posting counts grouped by lifecycle status."
+      },
+      "OrganizationProfileResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "organization_name": {
+            "type": "string",
+            "title": "Organization Name"
+          },
+          "industry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Industry"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "approval_status": {
+            "$ref": "#/components/schemas/ApprovalStatus",
+            "default": "pending"
+          },
+          "approval_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Note"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "organization_name",
+          "updated_at"
+        ],
+        "title": "OrganizationProfileResponse",
+        "description": "Safe organization profile response representation."
+      },
+      "OrganizationProfileUpdateRequest": {
+        "properties": {
+          "organization_name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Organization Name",
+            "description": "Name of the organization"
+          },
+          "industry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Industry",
+            "description": "Industry sector or domain"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location",
+            "description": "Physical headquarters or office location"
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website",
+            "description": "Valid HTTP or HTTPS website URL"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Organization overview and mission (max 1000 characters)"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "organization_name"
+        ],
+        "title": "OrganizationProfileUpdateRequest",
+        "description": "Schema for updating organization profile details."
+      },
+      "PublicRegisterRole": {
+        "type": "string",
+        "enum": [
+          "student",
+          "organization"
+        ],
+        "title": "PublicRegisterRole",
+        "description": "Permitted roles for public registration."
+      },
+      "RegisterRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "description": "User email address"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password",
+            "description": "User password between 8 and 128 characters"
+          },
+          "full_name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Full Name",
+            "description": "Full name of the user or organization representative"
+          },
+          "role": {
+            "$ref": "#/components/schemas/PublicRegisterRole",
+            "description": "Account role: must be 'student' or 'organization'"
+          },
+          "organization_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organization Name",
+            "description": "Required when registering as an organization"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "full_name",
+          "role"
+        ],
+        "title": "RegisterRequest",
+        "description": "Schema for public user registration."
+      },
+      "StudentApplicationRecentItem": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "posting_id": {
+            "type": "integer",
+            "title": "Posting Id"
+          },
+          "posting_title": {
+            "type": "string",
+            "title": "Posting Title"
+          },
+          "organization_name": {
+            "type": "string",
+            "title": "Organization Name"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "applied_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Applied At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "posting_id",
+          "posting_title",
+          "organization_name",
+          "status",
+          "applied_at"
+        ],
+        "title": "StudentApplicationRecentItem",
+        "description": "Recent internship application item."
+      },
+      "StudentApplicationsSummary": {
+        "properties": {
+          "counts_by_status": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Counts By Status"
+          },
+          "recent": {
+            "items": {
+              "$ref": "#/components/schemas/StudentApplicationRecentItem"
+            },
+            "type": "array",
+            "title": "Recent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "counts_by_status",
+          "recent"
+        ],
+        "title": "StudentApplicationsSummary",
+        "description": "Aggregated status counts and latest applications."
+      },
+      "StudentCourseProgressItem": {
+        "properties": {
+          "course_id": {
+            "type": "integer",
+            "title": "Course Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "instructor_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instructor Name"
+          },
+          "assignments_total": {
+            "type": "integer",
+            "title": "Assignments Total"
+          },
+          "assignments_submitted": {
+            "type": "integer",
+            "title": "Assignments Submitted"
+          },
+          "progress_percent": {
+            "type": "number",
+            "title": "Progress Percent"
+          },
+          "average_grade_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Grade Percent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "course_id",
+          "title",
+          "assignments_total",
+          "assignments_submitted",
+          "progress_percent"
+        ],
+        "title": "StudentCourseProgressItem",
+        "description": "Course completion and academic grade performance progress."
+      },
+      "StudentDashboardResponse": {
+        "properties": {
+          "due_next": {
+            "items": {
+              "$ref": "#/components/schemas/StudentDueNextItem"
+            },
+            "type": "array",
+            "title": "Due Next"
+          },
+          "recent_grades": {
+            "items": {
+              "$ref": "#/components/schemas/StudentRecentGradeItem"
+            },
+            "type": "array",
+            "title": "Recent Grades"
+          },
+          "courses": {
+            "items": {
+              "$ref": "#/components/schemas/StudentCourseProgressItem"
+            },
+            "type": "array",
+            "title": "Courses"
+          },
+          "applications": {
+            "$ref": "#/components/schemas/StudentApplicationsSummary"
+          },
+          "profile_complete": {
+            "type": "boolean",
+            "title": "Profile Complete"
+          }
+        },
+        "type": "object",
+        "required": [
+          "due_next",
+          "recent_grades",
+          "courses",
+          "applications",
+          "profile_complete"
+        ],
+        "title": "StudentDashboardResponse",
+        "description": "Aggregated dashboard payload for students."
+      },
+      "StudentDueNextItem": {
+        "properties": {
+          "assignment_id": {
+            "type": "integer",
+            "title": "Assignment Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "course_id": {
+            "type": "integer",
+            "title": "Course Id"
+          },
+          "course_title": {
+            "type": "string",
+            "title": "Course Title"
+          },
+          "due_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Due At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "assignment_id",
+          "title",
+          "course_id",
+          "course_title",
+          "due_at"
+        ],
+        "title": "StudentDueNextItem",
+        "description": "Upcoming unsubmitted assignment in an enrolled published course."
+      },
+      "StudentProfileResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "university": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "University"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
+          },
+          "year_of_study": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year Of Study"
+          },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Skills"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "updated_at"
+        ],
+        "title": "StudentProfileResponse",
+        "description": "Safe student profile response representation."
+      },
+      "StudentProfileUpdateRequest": {
+        "properties": {
+          "university": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "University",
+            "description": "University or educational institution name"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department",
+            "description": "Academic department or field of study"
+          },
+          "year_of_study": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year Of Study",
+            "description": "Current academic year between 1 and 6"
+          },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio",
+            "description": "Personal biography and academic interests (max 1000 characters)"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Skills",
+            "description": "List of skills (at most 20 skills, up to 40 characters each)"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "StudentProfileUpdateRequest",
+        "description": "Schema for updating student profile details."
+      },
+      "StudentRecentGradeItem": {
+        "properties": {
+          "submission_id": {
+            "type": "integer",
+            "title": "Submission Id"
+          },
+          "assignment_id": {
+            "type": "integer",
+            "title": "Assignment Id"
+          },
+          "assignment_title": {
+            "type": "string",
+            "title": "Assignment Title"
+          },
+          "course_title": {
+            "type": "string",
+            "title": "Course Title"
+          },
+          "grade": {
+            "type": "integer",
+            "title": "Grade"
+          },
+          "max_points": {
+            "type": "integer",
+            "title": "Max Points"
+          },
+          "graded_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Graded At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "submission_id",
+          "assignment_id",
+          "assignment_title",
+          "course_title",
+          "grade",
+          "max_points"
+        ],
+        "title": "StudentRecentGradeItem",
+        "description": "Recently graded assignment submission for the student."
+      },
+      "StudentSubmissionRosterItem": {
+        "properties": {
+          "student_id": {
+            "type": "integer",
+            "title": "Student Id"
+          },
+          "student_name": {
+            "type": "string",
+            "title": "Student Name"
+          },
+          "student_email": {
+            "type": "string",
+            "title": "Student Email"
+          },
+          "submission": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SubmissionResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "student_id",
+          "student_name",
+          "student_email"
+        ],
+        "title": "StudentSubmissionRosterItem",
+        "description": "Enrolled student with their submission record if present."
+      },
+      "SubmissionGrade": {
+        "properties": {
+          "grade": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Grade"
+          },
+          "feedback": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "grade"
+        ],
+        "title": "SubmissionGrade",
+        "description": "Payload for grading an assignment submission."
+      },
+      "SubmissionResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "assignment_id": {
+            "type": "integer",
+            "title": "Assignment Id"
+          },
+          "student_id": {
+            "type": "integer",
+            "title": "Student Id"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "link_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Link Url"
+          },
+          "is_late": {
+            "type": "boolean",
+            "title": "Is Late"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Submitted At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grade"
+          },
+          "feedback": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback"
+          },
+          "graded_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Graded At"
+          },
+          "graded_by": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Graded By"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "assignment_id",
+          "student_id",
+          "content",
+          "is_late",
+          "submitted_at",
+          "updated_at"
+        ],
+        "title": "SubmissionResponse",
+        "description": "Serialized submission model."
+      },
+      "SubmissionSubmit": {
+        "properties": {
+          "content": {
+            "type": "string",
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Content"
+          },
+          "link_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2048
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Link Url"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "title": "SubmissionSubmit",
+        "description": "Payload for submitting or resubmitting assignment work."
+      },
+      "UserResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "full_name",
+          "role",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "UserResponse",
+        "description": "Safe user profile response schema (excludes password_hash and tokens)."
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "student",
+          "instructor",
+          "organization",
+          "admin"
+        ],
+        "title": "UserRole",
+        "description": "User account roles."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
