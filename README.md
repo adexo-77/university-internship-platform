@@ -1,12 +1,111 @@
-# University Learning &amp; Internship Platform &bull; Phase 7b Developer Setup, Demo Data &amp; CI
+# University Learning &amp; Internship Platform
 
 [![CI](https://github.com/adexo-77/university-internship-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/adexo-77/university-internship-platform/actions/workflows/ci.yml)
 
-A production-grade, modular web platform designed for university student learning tracking, skill assessment, and internship placement matching. Built for the Brolf Tech internship technical challenge with a strict **MVP first, one phase at a time** methodology.
+A production-grade, modular web platform designed for university student learning tracking, assignment evaluation, and internship placement matching. Built for the Brolf Tech internship technical challenge with a strict **MVP first, one phase at a time** methodology and comprehensive test coverage.
 
 ---
 
-## Quick Start
+## 1. What the Platform Is &amp; Why It Was Built
+
+Universities often face a disconnected ecosystem: academic coursework lives in a Learning Management System (LMS), while internship hunting occurs across external job boards and untracked emails. This leads to fragmented student records, lack of visibility for faculty mentors, and high friction for partner companies recruiting student talent.
+
+The **University Learning &amp; Internship Platform** unifies these two critical workflows into a single system:
+- **Academic Progress**: Instructors publish courses, issue structured assignments with deadlines, collect student submissions, and record grades with feedback comments.
+- **Career Pathways**: Partner organizations register verified profiles, publish vetted internship opportunities, and manage candidate pipelines.
+- **Institutional Governance**: University administrators oversee user accounts, approve corporate partners, and review internship postings before listings go live to protect students from unverified employers.
+
+---
+
+## 2. Features by Role
+
+The platform provides tailored workspaces and dashboards for four primary user roles:
+
+### 🎓 Student
+- **Interactive Student Dashboard**: View enrolled courses, assignments due soon (flagged as urgent, upcoming, or past due), recent grade cards, and application pipeline metrics.
+- **Course Enrollment**: Search the course catalog, enroll with duplicate guards, access assignment rosters, and monitor progress.
+- **Assignment Submissions**: Submit text-based assignments before deadlines; late submissions are automatically flagged with timestamp metadata; submissions are locked against edits once graded.
+- **Profile Management**: Maintain bio and technical skills tags; incomplete profiles trigger clear visual banners.
+- **Internship Discovery &amp; Applications**: Search published internships with work mode filters (remote, hybrid, onsite) and keyword searches; apply with personalized cover letters; withdraw pending applications with automatic confirmation guards.
+
+### 👨‍🏫 Instructor
+- **Instructor Dashboard**: Monitor active and draft courses, student enrollment totals, and a dedicated "Needs Grading" queue highlighting pending assignments.
+- **Course Lifecycle**: Author courses with titles, descriptions, and syllabus outlines; manage status transitions (`draft`, `published`, `archived`).
+- **Assignment Authoring**: Define assignments with due dates and maximum scores; edit or delete assignments with cascade protection.
+- **Grading &amp; Feedback**: Review student submissions in an organized roster, assign numeric scores (strictly bounded between 0 and max points), and provide actionable instructor feedback comments.
+
+### 🏢 Organization (Employer)
+- **Organization Dashboard**: Track live postings, pending administrator reviews, and applicant pipeline counts.
+- **Corporate Profile**: Maintain company details, industry category, company size, and official website URL.
+- **Internship Posting Lifecycle**: Create postings with roles, requirements, locations, stipends, and deadlines; manage states (`draft` &rarr; `pending_review` &rarr; `open` &rarr; `closed`).
+- **Applicant Pipeline Management**: Review student applications, inspect applicant profiles and cover letters, and execute hiring decisions (`shortlisted`, `accepted`, `rejected`) with state locking.
+
+### 🛡️ Administrator
+- **Administrator Dashboard**: High-level platform health metrics, user account distributions, and pending review counts.
+- **User Provisioning &amp; Management**: Search, filter, inspect, activate, or deactivate user accounts across all roles; trigger administrative password resets.
+- **Organization Vetting**: Review incoming employer registrations; approve or reject organizations before they are permitted to post listings.
+- **Internship Moderation**: Review submitted postings; approve for public discovery or reject with explanatory review notes; take down compromised listings.
+
+---
+
+## 3. Screenshots
+
+> *Note: The `docs/screenshots/` directory is currently empty; screenshot embeds have been skipped.*
+
+---
+
+## 4. Technology Stack
+
+| Layer | Technologies | Rationale |
+| :--- | :--- | :--- |
+| **Backend** | Python 3.12+ / 3.14+, FastAPI, Pydantic v2, `pydantic-settings` | High performance asynchronous REST API with automatic OpenAPI validation schemas and dependency injection. |
+| **Database &amp; ORM** | PostgreSQL 16+, SQLAlchemy 2 (ORM &amp; 2.0 Core style), `psycopg` 3 (`psycopg[binary]`), Alembic | ACID-compliant relational persistence, declarative typing, and version-controlled database schema migrations. |
+| **Frontend** | React 18, TypeScript (strict, zero `any`), Vite, React Router, Tailwind CSS, Lucide React | Modern SPA with type safety, clean component-driven architecture, and responsive styling. |
+| **Testing** | Pytest, FastAPI `TestClient`, Vitest, React Testing Library | Full test pyramid: unit, service, integration, and UI component tests across both stacks. |
+| **Code Quality** | Ruff (backend lint &amp; format), ESLint 9 (flat config) + Prettier (frontend) | Enforced zero-warning policy, automated formatting, and strict code hygiene. |
+| **CI / CD** | GitHub Actions (`.github/workflows/ci.yml`) | Automated pull request and push validation matrix covering backend tests, frontend tests, and migration checks. |
+
+---
+
+## 5. System Architecture
+
+```mermaid
+flowchart TD
+    subgraph Client["Client Tier (Port 5173)"]
+        SPA["React 18 SPA (TypeScript)"]
+        Router["React Router 6/7"]
+        AuthContext["Auth Context &amp; Route Guards"]
+        SPA --> Router --> AuthContext
+    end
+
+    subgraph API_Gateway["API Gateway &amp; Reverse Proxy"]
+        ViteProxy["Vite Dev Server Proxy (/api)"]
+    end
+
+    subgraph Backend["Backend Application Tier (Port 8001)"]
+        FastAPI["FastAPI REST Application"]
+        Middleware["Session Auth &amp; Rate Limit Middleware"]
+        Routers["Domain Routers (/api/*)"]
+        Services["Domain Services (Business Logic)"]
+        Models["SQLAlchemy Declarative Models"]
+
+        FastAPI --> Middleware --> Routers --> Services --> Models
+    end
+
+    subgraph Database["Data Tier (Port 5432)"]
+        PG[("PostgreSQL Database")]
+        Alembic["Alembic Migrations"]
+        Models --> PG
+        Alembic -.-> PG
+    end
+
+    SPA -->|HTTP / JSON with Session Cookie| ViteProxy
+    ViteProxy -->|Proxy Pass| FastAPI
+```
+
+---
+
+## 6. Quick Start
 
 Get up and running locally in four commands:
 
@@ -40,263 +139,125 @@ Visit [http://localhost:5173](http://localhost:5173) to explore the platform.
 
 ---
 
-## Demo Accounts &amp; Capabilities
+## 7. Demo Accounts &amp; Capabilities
 
-All demo accounts share a single constant password for easy local evaluation:
-> **DEMO PASSWORD (DEMO ONLY)**: `DemoPassword123!`
+All demo accounts are provisioned via `scripts/seed_demo.py` with standard development credentials configured in `.env` (`DEMO_USER_PASSWORD`):
 
 | Role | Email | Profile State | What This Account Demonstrates |
 | :--- | :--- | :--- | :--- |
-| **Admin** | `demo.admin@example.com` | Complete | Platform administration dashboard, user provisioning &amp; password resets, organization registration approvals, internship moderation review queue, and administrative listing takedowns. |
-| **Instructor** | `demo.instructor@example.com` | Complete | Instructor dashboard, course authoring &amp; publishing (active and draft courses), assignment creation with deadlines, and student submission grading queue. |
-| **Student (Ready)** | `demo.student@example.com` | Complete | Student dashboard, enrolled course tracking, assignments due soon (due in 2 days, 3 weeks, past due), recent grade cards, internship catalog search, and submitted applications. |
+| **Admin** | `demo.admin@example.com` | Complete | Administrative dashboard, user provisioning &amp; password resets, organization registration approvals, internship moderation review queue, and listing takedowns. |
+| **Instructor** | `demo.instructor@example.com` | Complete | Instructor dashboard, course authoring &amp; publishing, assignment creation with deadlines, and student submission grading queue. |
+| **Student (Ready)** | `demo.student@example.com` | Complete | Student dashboard, enrolled course tracking, assignments due soon (urgent, upcoming, past due), recent grade cards, internship catalog search, and submitted applications. |
 | **Student (New)** | `demo.student2@example.com` | Incomplete | Incomplete profile demonstration showing the profile completion banner and prerequisite guard blocking internship applications until bio &amp; skills are saved. |
 | **Organization (Approved)** | `demo.org@example.com` | Approved | Organization dashboard, internship postings across all lifecycles (`open`, `pending_review`, `draft`, `rejected`, `closed`), and applicant decision workflows (shortlist, accept, reject). |
 | **Organization (Pending)** | `demo.neworg@example.com` | Pending Review | Pending approval banner demonstration, with internship creation disabled until platform administrator reviews and approves the company profile. |
 
----
-
-## Network Ports &amp; Services
-
-| Port | Service | Description | URL |
-| :--- | :--- | :--- | :--- |
-| **5173** | **Frontend Client** | Vite React Single-Page Application | [http://localhost:5173](http://localhost:5173) |
-| **8001** | **Backend API** | FastAPI REST Application | [http://localhost:8001/api](http://localhost:8001/api) |
-| **8001** | **API Documentation** | Interactive Swagger OpenAPI Docs | [http://localhost:8001/docs](http://localhost:8001/docs) |
-| **8001** | **Health DB Check** | Database connectivity probe | [http://localhost:8001/api/health/db](http://localhost:8001/api/health/db) |
-| **5432** | **PostgreSQL** | Primary Relational Database Engine | `localhost:5432` |
+> **Security Note**: Never commit plaintext passwords to version control. Passwords and secrets are read directly from `.env` and masked in documentation and test logs.
 
 ---
 
-## Troubleshooting
-
-### PostgreSQL Connection &amp; Authentication Errors
-- **Issue**: `setup_dev.py` fails with `password authentication failed for user "postgres"`.
-- **Fix**: Verify your PostgreSQL server service is running (`Get-Service postgresql*`). When prompted by `setup_dev.py`, enter your actual local PostgreSQL `postgres` user password. Special characters (such as `@`, `!`, `#`) are automatically URL-encoded for the SQLAlchemy connection URI.
-- **Manual Check**: Test connectivity directly with `psql -U postgres -h localhost`.
-
-### Port Conflicts (:8001 or :5173 Already in Use)
-- **Issue**: `Address already in use` error when starting FastAPI or Vite.
-- **Fix**: Check running processes on those ports:
-  ```powershell
-  Get-NetTCPConnection -LocalPort 8001,5173 -ErrorAction SilentlyContinue | Select-Object LocalPort, OwningProcess
-  ```
-  Terminate lingering processes using `Stop-Process -Id <OwningProcess> -Force`.
-
-### Node.js or Python Version Warnings
-- **Prerequisites**: Python 3.12+ (or 3.14+) and Node.js 20+ (or 24+ LTS) are required.
-- Run `python --version` and `node --version` to ensure modern runtime versions are active on your `PATH`.
-
-### Resetting Dev Database &amp; Re-seeding
-- To start from a completely clean slate at any time:
-  ```powershell
-  psql -U postgres -c "DROP DATABASE IF EXISTS university_platform WITH (FORCE);"
-  psql -U postgres -c "DROP DATABASE IF EXISTS university_platform_test WITH (FORCE);"
-  python scripts/setup_dev.py --seed
-  ```
-
----
-
-## Docker Status Note
-
-During environment evaluation:
-- Docker CLI was detected on host (`docker --version` output: `Docker version 29.8.2, build 7fc2dff`).
-- However, Docker Desktop daemon is not running and WSL 2 has no installed Linux engine on this Windows environment (`open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified`).
-- In strict adherence to Phase 7b item 4 instructions (*"Docker, ONLY if `docker --version` works on this machine so you can test it; if Docker is not installed, skip this item, say so plainly, and do not write untested Docker files"*), container runtime configuration was cleanly skipped to prevent introducing untested Docker artifacts.
-- The platform is fully runnable, testable, and verified via native Python/Node tooling through `scripts/setup_dev.py`.
-
----
-
-## Tech Stack
-
-| Layer | Technologies |
-| :--- | :--- |
-| **Backend** | Python 3.12+ / 3.14+, FastAPI, SQLAlchemy 2, PostgreSQL (via `psycopg` 3), Alembic, Pydantic v2 |
-| **Frontend** | React 18, React Router 6/7, Vite (proxy to backend :8001), TypeScript (strict, no `any`), Tailwind CSS, Lucide React |
-| **Testing** | Pytest + FastAPI `TestClient` (backend: 190 tests), Vitest + React Testing Library (frontend: 207 tests across 60 files) |
-| **Tooling &amp; Quality** | Ruff (backend lint &amp; format), ESLint 9 + Prettier (frontend lint &amp; format), `pip-audit`, `npm audit` |
-| **CI / CD** | GitHub Actions (`.github/workflows/ci.yml`): backend matrix, frontend matrix, and fresh migration check |
-| **Environment** | Windows PowerShell compatible, Unix LF line endings, no hardcoded Windows paths |
-
----
-
-## Directory Structure
-
-```text
-university-internship-platform/
-├── .editorconfig              # Editor consistency rules (LF, UTF-8, indentation)
-├── .env.example               # Template environment configuration
-├── .gitattributes             # Enforce LF line endings (* text=auto eol=lf)
-├── .gitignore                 # Excludes .env, .venv, node_modules, dist, __pycache__, etc.
-├── .github/
-│   └── workflows/
-│       └── ci.yml             # GitHub Actions CI matrix (backend, frontend, migrations)
-├── AGENTS.md                  # Project constitution & strict architectural guidelines
-├── README.md                  # Setup instructions and PowerShell commands
-├── docs/
-│   ├── architecture.md        # Architecture, topology, and endpoint contracts
-│   ├── database.md            # Mermaid ER diagram, status lifecycle diagram, and schema specifications
-│   ├── design.md              # Design tokens, components, and layout guidelines
-│   └── security.md            # Threat model, controls matrix, and security guidelines
-├── scripts/
-│   ├── create_user.py         # CLI administrative user provisioning tool
-│   ├── seed_demo.py           # Idempotent demo dataset seeder
-│   ├── seed_demo_academics.py # Courses, assignments, submissions seed logic
-│   ├── seed_demo_internships.py # Internships, applications seed logic
-│   ├── seed_demo_users.py     # Demo users and profile seeding logic
-│   ├── setup_dev.py           # Cross-platform developer environment setup
-│   └── setup_dev_db.py        # Database creation and URL helpers for setup
-├── backend/
-│   ├── alembic/               # Database migration environment
-│   │   ├── versions/          # Migration revision scripts
-│   │   └── env.py             # Migration harness wired to Base metadata
-│   ├── alembic.ini            # Alembic configuration
-│   ├── pyproject.toml         # Ruff and Pytest settings
-│   ├── requirements.txt       # Production dependencies
-│   ├── requirements-dev.txt   # Development and testing dependencies (pytest, ruff, httpx)
-│   ├── app/
-│   │   ├── core/              # Settings, database engine, security helpers, deps
-│   │   ├── models/            # SQLAlchemy declarative models
-│   │   ├── schemas/           # Pydantic validation schemas
-│   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only)
-│   │   ├── services/          # Pure business logic and domain rules
-│   │   └── main.py            # FastAPI entry point & middleware
-│   └── tests/                 # Comprehensive Pytest test suite (190 tests)
-└── frontend/
-    ├── eslint.config.js       # ESLint 9 flat configuration
-    ├── index.html             # HTML entry with typography and SEO metadata
-    ├── package.json           # Frontend dependencies and npm scripts
-    ├── postcss.config.js      # PostCSS config
-    ├── tailwind.config.js     # Tailwind CSS theme setup
-    ├── tsconfig.json          # Strict TypeScript configuration
-    ├── tsconfig.node.json     # Vite config TypeScript options
-    ├── vite.config.ts         # Vite proxy configuration (/api -> :8001) and Vitest
-    └── src/                   # React TypeScript application (207 tests across 60 test suites)
-```
-
----
-
-## Automated Developer Setup (`scripts/setup_dev.py`)
-
-Run the cross-platform setup script from the repository root:
-
-```powershell
-# Standard setup: venv, dependencies, .env, databases, and migrations
-python scripts/setup_dev.py
-
-# Or setup and populate full demo dataset:
-python scripts/setup_dev.py --seed
-```
-
-### Manual Setup Fallback
-
-If you prefer to configure manually:
-
-1. **Environment Configuration**:
-   ```powershell
-   Copy-Item .env.example .env
-   # Edit .env with your PostgreSQL credentials
-   ```
-
-2. **Database Provisioning**:
-   ```powershell
-   psql -U postgres -c "CREATE DATABASE university_platform;"
-   psql -U postgres -c "CREATE DATABASE university_platform_test;"
-   ```
-
-3. **Virtualenv &amp; Dependencies**:
-   ```powershell
-   python -m venv backend/.venv
-   .\backend\.venv\Scripts\Activate.ps1
-   pip install -r backend/requirements.txt -r backend/requirements-dev.txt
-   Set-Location frontend; npm install; Set-Location ..
-   ```
-
-4. **Migrations &amp; Seed**:
-   ```powershell
-   Set-Location backend; .\.venv\Scripts\alembic.exe upgrade head; Set-Location ..
-   python scripts/seed_demo.py
-   ```
-
----
-
-## Administrative User Provisioning (`scripts/create_user.py`)
-
-Create instructor or admin accounts directly from the command line:
-
-```powershell
-# From project root
-python scripts/create_user.py --email admin@example.com --password "SecureAdminPassword123!" --full-name "System Administrator" --role admin
-
-python scripts/create_user.py --email instructor@example.com --password "InstructorPassword123!" --full-name "Prof. Turing" --role instructor
-```
-
----
-
-## Linting &amp; Formatting Commands
-
-### Backend (Ruff)
-
-```powershell
-Set-Location backend
-
-# Run Ruff lint check
-.\.venv\Scripts\ruff.exe check .
-
-# Run Ruff formatting check
-.\.venv\Scripts\ruff.exe format --check .
-```
-
-### Frontend (ESLint + Prettier)
-
-```powershell
-Set-Location frontend
-
-# Run ESLint (zero warnings allowed)
-npm run lint
-
-# Check Prettier formatting
-npm run format:check
-
-# Auto-format files
-npm run format
-```
-
----
-
-## Automated Testing Commands
+## 8. How to Run the Tests
 
 ### Backend Tests (Pytest)
-
 ```powershell
 Set-Location backend
+.\.venv\Scripts\Activate.ps1
 
-# Run Pytest suite
-.\.venv\Scripts\pytest.exe -v
+# Run complete backend test suite (190+ tests)
+python -m pytest -v
+
+# Or run quiet summary
+python -m pytest -q
 ```
 
 ### Frontend Tests (Vitest)
-
 ```powershell
 Set-Location frontend
 
-# Run Vitest suite
-npm run test
+# Run complete frontend test suite (207+ tests across 60 test suites)
+npm test
+
+# Run Vitest in watch mode
+npm run test:watch
+```
+
+### Linting &amp; Formatting Checks
+```powershell
+# Backend (Ruff)
+Set-Location backend
+.\.venv\Scripts\ruff.exe check .
+.\.venv\Scripts\ruff.exe format --check .
+
+# Frontend (ESLint 9 & Prettier)
+Set-Location frontend
+npm run lint
+npm run format:check
 ```
 
 ---
 
-## Phase 7b Definition of Done Verification
+## 9. Project Structure
 
-| Criteria | Status | Details |
-| :--- | :---: | :--- |
-| **1. Lint &amp; format pass with 0 warnings** | PASS | Ruff check &amp; format pass with 0 errors; ESLint &amp; Prettier pass with 0 warnings |
-| **2. All tests pass** | PASS | Pytest (190/190 passed against real PostgreSQL); Vitest (207/207 passed across 60 test files) |
-| **3. Clean Clone Proof** | PASS | Cloned into isolated directory, executed `setup_dev.py --seed`, verified all 6 demo accounts &amp; dashboards return 200 |
-| **4. Idempotent Demo Seeder** | PASS | `scripts/seed_demo.py` safely runs repeatedly without duplicating records; refuses in production |
-| **5. Cross-Platform Setup Script** | PASS | `scripts/setup_dev.py` checks versions, provisions venv/node_modules, handles hidden password input, runs migrations |
-| **6. Continuous Integration** | PASS | `.github/workflows/ci.yml` runs backend matrix, frontend matrix, and migration schema drift check |
-| **7. No unused files, imports, or dependencies** | PASS | All modules, imports, and packages verified clean against project guide |
-| **8. Documentation is complete** | PASS | Updated `README.md` with Quick start, Demo accounts table, ports, troubleshooting, and Docker note |
-| **9. Working tree is clean and committed** | PASS | Small, focused conventional commits across every step |
-| **10. File size limits** | PASS | All source and test files strictly under 250 physical lines |
+```text
+university-internship-platform/
+├── .github/workflows/ci.yml   # Automated CI test and migration matrix
+├── docs/                      # Architectural designs, schemas, and specifications
+│   ├── api.md                 # REST API reference and schema guide
+│   ├── architecture.md        # Architecture topology and endpoint matrix
+│   ├── database.md            # Mermaid ER diagram and schema specifications
+│   ├── demo-script.md         # Evaluator walkthrough script & Q&A preparation
+│   ├── design.md              # Design system tokens and UX rules
+│   ├── openapi.json           # Exported OpenAPI 3.1 specification
+│   ├── requirements.md        # Functional and non-functional requirements traceability
+│   ├── security.md            # Threat model, controls matrix, and security policies
+│   └── user-guide.md          # Step-by-step role-based user manual
+├── scripts/                   # Administrative automation CLI tools
+│   ├── create_user.py         # CLI administrative user provisioning tool
+│   ├── export_openapi.py      # OpenAPI JSON schema exporter
+│   ├── seed_demo.py           # Idempotent demo dataset seeder
+│   └── setup_dev.py           # Cross-platform developer environment setup
+├── backend/
+│   ├── alembic/               # Database migration environment
+│   ├── app/
+│   │   ├── core/              # Config, database engine, security helpers, deps
+│   │   ├── models/            # SQLAlchemy declarative models (one file per model)
+│   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only)
+│   │   ├── schemas/           # Pydantic validation schemas
+│   │   └── services/          # Pure business logic and domain rules
+│   └── tests/                 # Pytest test suite mirroring app/ domain modules
+└── frontend/
+    ├── src/
+    │   ├── api/               # Typed API client wrappers
+    │   ├── components/        # Modular, accessible UI components
+    │   ├── context/           # React context providers (AuthContext)
+    │   ├── hooks/             # Custom React hooks
+    │   ├── pages/             # Page-level route views
+    │   └── types/             # Shared TypeScript type definitions
+    └── package.json           # Dependencies and test scripts
+```
+
+---
+
+## 10. Security Summary
+
+Security is integrated into every layer of the platform architecture:
+- **Server-Side Session Authentication**: Session IDs are generated with cryptographically secure random bytes (`secrets.token_urlsafe(32)`), stored hashed in PostgreSQL, and transmitted exclusively via `HttpOnly`, `SameSite=Lax` cookies. Identity is **never** accepted from client headers or request bodies.
+- **Argon2id Password Hashing**: User credentials are protected using `pwdlib`'s Argon2id algorithm with per-user salt and high memory/time hardness factors.
+- **Role-Based Access Control (RBAC)**: Enforced strictly at the service and route dependency layer (`get_current_user`, `require_role`). Frontend route guards and UI button states are purely ergonomic conveniences.
+- **Ownership Verification &amp; Cascading Guards**: Instructors can only modify their own courses; organizations can only edit their own postings; students can only submit work for courses in which they are actively enrolled.
+- **Rate Limiting &amp; Defense-in-Depth**: In-memory token-bucket rate limiting guards sensitive endpoints against brute force attacks; client handles `429 Too Many Requests` with automatic cooldown banners.
+
+For in-depth threat modeling, STRIDE analysis, and vulnerability mitigation matrices, refer to [docs/security.md](docs/security.md).
+
+---
+
+## 11. Known Limitations &amp; Future Work
+
+The platform was built under a strict MVP-first specification. The following features were deliberately left out of scope and represent clear opportunities for future phases:
+
+1. **In-App Notification Center &amp; Webhooks**: Asynchronous events (such as submission grading or application status changes) are reflected immediately upon dashboard queries, but persistent notification inbox tables, email push alerts, and webhooks are not implemented.
+2. **Badges, Gamification &amp; Rankings**: Course achievement badges, student leaderboards, and gamified ranking points are not implemented.
+3. **Learning Resources &amp; Rich File Attachments**: Courses support descriptions, syllabi, assignments, and text submissions; binary file attachments (PDF lecture notes, slide decks, ZIP archives) and multimedia streaming are not implemented.
+4. **AI-Driven Recommendation Features**: Automated resume parsing, candidate scoring, and machine-learning-based internship recommendations are not implemented; matching is executed via explicit database filtering (work mode, required skills, keywords).
+5. **Email Verification &amp; Self-Service Emailed Password Resets**: External SMTP/SES email delivery is not configured; user activation is immediate upon registration and password resets are managed administratively or via CLI tools.
+6. **Docker Engine Deployment**: Local containerization was deferred because the host development environment lacked an active Docker daemon. Native Python and Node runtimes are fully automated via `scripts/setup_dev.py`.

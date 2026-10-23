@@ -426,6 +426,8 @@ npm run test
     Commit messages must use standard conventional commit prefixes (`feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`) and be small, focused, and verified before committing.
 11. **Strict Phase Discipline**:
     Never touch or implement code outside the active phase. Build Phase 0 foundation first, then progress phase by phase without premature feature bloat.
+12. **Credential and Secret Hygiene**:
+    NEVER put credentials (passwords, connection strings, API tokens, secret keys) inline in any command, commit message, or report; read them from `.env` or system environment variables and mask them in any output.
 
 ---
 
