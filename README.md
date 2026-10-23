@@ -1,4 +1,6 @@
-# University Learning &amp; Internship Platform &bull; Phase 7a Security Hardening
+# University Learning &amp; Internship Platform &bull; Phase 7b Developer Setup, Demo Data &amp; CI
+
+[![CI](https://github.com/adexo-77/university-internship-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/adexo-77/university-internship-platform/actions/workflows/ci.yml)
 
 A production-grade, modular web platform designed for university student learning tracking, skill assessment, and internship placement matching. Built for the Brolf Tech internship technical challenge with a strict **MVP first, one phase at a time** methodology.
 

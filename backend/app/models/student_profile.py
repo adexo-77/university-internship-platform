@@ -3,7 +3,17 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ARRAY, CheckConstraint, DateTime, ForeignKey, Integer, String, func
+from sqlalchemy import (
+    ARRAY,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -21,14 +31,14 @@ class StudentProfile(Base):
             "year_of_study IS NULL OR (year_of_study >= 1 AND year_of_study <= 6)",
             name="check_student_year_of_study",
         ),
+        UniqueConstraint("user_id", name="uq_student_profiles_user_id"),
+        Index("ix_student_profiles_user_id", "user_id", unique=True),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey("users.id", ondelete="CASCADE"),
-        unique=True,
-        index=True,
         nullable=False,
     )
     university: Mapped[str | None] = mapped_column(String(255), nullable=True)

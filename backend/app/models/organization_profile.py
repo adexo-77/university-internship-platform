@@ -2,7 +2,7 @@ import enum
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, func
+from sqlalchemy import DateTime, Enum, ForeignKey, Index, Integer, String, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -23,13 +23,15 @@ class OrganizationProfile(Base):
     """Organization profile information."""
 
     __tablename__ = "organization_profiles"
+    __table_args__ = (
+        UniqueConstraint("user_id", name="uq_organization_profiles_user_id"),
+        Index("ix_organization_profiles_user_id", "user_id", unique=True),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey("users.id", ondelete="CASCADE"),
-        unique=True,
-        index=True,
         nullable=False,
     )
     organization_name: Mapped[str] = mapped_column(String(255), nullable=False)
