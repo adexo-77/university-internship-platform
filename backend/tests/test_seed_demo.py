@@ -9,7 +9,6 @@ from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-# Add scripts directory to path to import seed functions
 SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
@@ -28,12 +27,15 @@ from app.models.submission import Submission
 from app.models.user import User, UserRole
 
 DEMO_ACCOUNTS = [
-    ("demo.admin@example.com", "admin", "/api/dashboard/admin"),
-    ("demo.instructor@example.com", "instructor", "/api/dashboard/instructor"),
-    ("demo.student@example.com", "student", "/api/dashboard/student"),
-    ("demo.student2@example.com", "student", "/api/dashboard/student"),
-    ("demo.org@example.com", "organization", "/api/dashboard/organization"),
-    ("demo.neworg@example.com", "organization", "/api/dashboard/organization"),
+    ("mulugeta.assefa@example.com", "admin", "/api/dashboard/admin"),
+    ("tadesse.bekele@example.com", "instructor", "/api/dashboard/instructor"),
+    ("hana.worku@example.com", "instructor", "/api/dashboard/instructor"),
+    ("abel.tesfaye@example.com", "student", "/api/dashboard/student"),
+    ("meron.girma@example.com", "student", "/api/dashboard/student"),
+    ("dawit.lemma@example.com", "student", "/api/dashboard/student"),
+    ("yohannes.haile@example.com", "organization", "/api/dashboard/organization"),
+    ("rahel.desta@example.com", "organization", "/api/dashboard/organization"),
+    ("eyob.kassa@example.com", "organization", "/api/dashboard/organization"),
 ]
 
 
@@ -46,7 +48,6 @@ def test_seed_demo_refuses_in_production(real_db_session: Session) -> None:
             seed_demo(real_db_session, force=False)
         assert exc.value.code == 1
 
-        # With force=True, it succeeds even in production
         seed_demo(real_db_session, force=True)
     finally:
         if orig_env is not None:
@@ -60,23 +61,27 @@ def test_seed_demo_idempotency(real_db_session: Session) -> None:
     seed_demo(real_db_session, force=True)
 
     def get_counts() -> dict[str, int]:
+        c_titles = [
+            "Introduction to Programming",
+            "Database Systems",
+            "Software Engineering",
+        ]
+        a_titles = [
+            "Relational Schema Design & Normalization",
+            "Advanced SQL Queries & Index Optimization",
+            "ER Diagramming & Conceptual Modeling",
+        ]
         return {
             "users": real_db_session.scalar(
-                select(func.count(User.id)).where(User.email.like("demo.%"))
+                select(func.count(User.id)).where(User.email.in_(ALL_DEMO_EMAILS))
             )
             or 0,
             "courses": real_db_session.scalar(
-                select(func.count(Course.id)).where(
-                    Course.title.in_(["Web Architecture", "Cloud DevOps"])
-                )
+                select(func.count(Course.id)).where(Course.title.in_(c_titles))
             )
             or 0,
             "assignments": real_db_session.scalar(
-                select(func.count(Assignment.id)).where(
-                    Assignment.title.in_(
-                        ["Microservices Design", "Capstone Project", "Security & Auth"]
-                    )
-                )
+                select(func.count(Assignment.id)).where(Assignment.title.in_(a_titles))
             )
             or 0,
             "postings": real_db_session.scalar(
@@ -86,26 +91,25 @@ def test_seed_demo_idempotency(real_db_session: Session) -> None:
             "submissions": real_db_session.scalar(
                 select(func.count(Submission.id))
                 .join(User, Submission.student_id == User.id)
-                .where(User.email.like("demo.student%"))
+                .where(User.email.in_(ALL_DEMO_EMAILS))
             )
             or 0,
             "apps": real_db_session.scalar(
                 select(func.count(Application.id))
                 .join(User, Application.student_id == User.id)
-                .where(User.email.like("demo.student%"))
+                .where(User.email.in_(ALL_DEMO_EMAILS))
             )
             or 0,
         }
 
     counts_first = get_counts()
-    assert counts_first["users"] == 6
-    assert counts_first["courses"] == 2
+    assert counts_first["users"] == 9
+    assert counts_first["courses"] == 3
     assert counts_first["assignments"] == 3
-    assert counts_first["postings"] == 6
-    assert counts_first["submissions"] == 2
+    assert counts_first["postings"] == 7
+    assert counts_first["submissions"] == 3
     assert counts_first["apps"] == 5
 
-    # Run a second time
     seed_demo(real_db_session, force=True)
     counts_second = get_counts()
     assert counts_first == counts_second
@@ -129,39 +133,50 @@ def test_demo_accounts_login_and_dashboards(
         data = dash_resp.json()
         assert isinstance(data, dict)
 
-        # Logout before testing the next account
         real_db_client.post("/api/auth/logout")
 
 
 def test_demo_profile_completeness_and_approval_states(
     real_db_session: Session,
 ) -> None:
-    """Verify demo.student is complete, demo.student2 incomplete, and org approvals."""
+    """Verify Abel/Meron complete, Dawit incomplete, and organization approval states."""
     seed_demo(real_db_session, force=True)
 
-    s1 = real_db_session.scalar(select(User).where(User.email == "demo.student@example.com"))
+    s1 = real_db_session.scalar(select(User).where(User.email == "abel.tesfaye@example.com"))
     assert s1 is not None
     sp1 = real_db_session.scalar(select(StudentProfile).where(StudentProfile.user_id == s1.id))
-    assert sp1 is not None and sp1.university and sp1.department and len(sp1.skills) > 0
+    assert sp1 is not None and sp1.university == "Jimma University" and len(sp1.skills) > 0
 
-    s2 = real_db_session.scalar(select(User).where(User.email == "demo.student2@example.com"))
+    s2 = real_db_session.scalar(select(User).where(User.email == "meron.girma@example.com"))
     assert s2 is not None
     sp2 = real_db_session.scalar(select(StudentProfile).where(StudentProfile.user_id == s2.id))
-    assert sp2 is not None and not sp2.university and not sp2.department and len(sp2.skills) == 0
+    assert sp2 is not None and sp2.university == "Jimma University" and len(sp2.skills) > 0
 
-    org = real_db_session.scalar(select(User).where(User.email == "demo.org@example.com"))
-    assert org is not None
-    op = real_db_session.scalar(
-        select(OrganizationProfile).where(OrganizationProfile.user_id == org.id)
-    )
-    assert op is not None and op.approval_status.value == "approved"
+    s3 = real_db_session.scalar(select(User).where(User.email == "dawit.lemma@example.com"))
+    assert s3 is not None
+    sp3 = real_db_session.scalar(select(StudentProfile).where(StudentProfile.user_id == s3.id))
+    assert sp3 is not None and len(sp3.skills) == 0
 
-    neworg = real_db_session.scalar(select(User).where(User.email == "demo.neworg@example.com"))
-    assert neworg is not None
-    nop = real_db_session.scalar(
-        select(OrganizationProfile).where(OrganizationProfile.user_id == neworg.id)
+    org1 = real_db_session.scalar(select(User).where(User.email == "yohannes.haile@example.com"))
+    assert org1 is not None
+    op1 = real_db_session.scalar(
+        select(OrganizationProfile).where(OrganizationProfile.user_id == org1.id)
     )
-    assert nop is not None and nop.approval_status.value == "pending"
+    assert op1 is not None and op1.approval_status.value == "approved"
+
+    org2 = real_db_session.scalar(select(User).where(User.email == "rahel.desta@example.com"))
+    assert org2 is not None
+    op2 = real_db_session.scalar(
+        select(OrganizationProfile).where(OrganizationProfile.user_id == org2.id)
+    )
+    assert op2 is not None and op2.approval_status.value == "approved"
+
+    org3 = real_db_session.scalar(select(User).where(User.email == "eyob.kassa@example.com"))
+    assert org3 is not None
+    op3 = real_db_session.scalar(
+        select(OrganizationProfile).where(OrganizationProfile.user_id == org3.id)
+    )
+    assert op3 is not None and op3.approval_status.value == "pending"
 
 
 def test_reset_demo_preserves_non_demo_accounts(real_db_session: Session) -> None:
