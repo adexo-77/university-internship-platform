@@ -22,6 +22,7 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.params.Depends", "fastapi.
 [tool.ruff.lint.per-file-ignores]
 "alembic/env.py" = ["E402"]
 "backend/alembic/env.py" = ["E402"]
+"tests/test_seed_demo.py" = ["E402"]
 
 [tool.ruff.format]
 quote-style = "double"
