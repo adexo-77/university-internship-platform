@@ -24,7 +24,7 @@ Ensure both backend and frontend development servers are running:
 ### Demo Accounts
 - **Ready Student**: Abel Tesfaye (`abel.tesfaye@example.com`, complete profile, enrolled courses, existing submissions)
 - **Ready Student**: Meron Girma (`meron.girma@example.com`, complete profile, enrolled courses, late submission)
-- **Incomplete Profile Student**: Dawit Lemma (`dawit.lemma@example.com`, incomplete profile demonstrating prerequisite guards)
+- **Incomplete Profile Student**: Dawit Lemma (`dawit.lemma@example.com`, incomplete profile demonstrating the profile-complete rule before applying)
 
 ### Step 1: Explore the Student Dashboard (`/`)
 1. Log in as `abel.tesfaye@example.com`.
@@ -52,10 +52,10 @@ Ensure both backend and frontend development servers are running:
 4. Log in as `meron.girma@example.com` to observe a late submission tagged with a red **Late** badge.
 5. Once the instructor grades your submission, notice that your score and comments appear, and further edits are strictly locked.
 
-### Step 4: Manage Profile &amp; Test Prerequisite Guard (`/profile`)
+### Step 4: Manage Profile &amp; Test Profile-Complete Rule Before Applying (`/profile`)
 1. Log in as `abel.tesfaye@example.com`. Click your name in the top navigation and select **Profile**.
 2. Notice your profile attributes: Jimma University, Information Technology, Year 4, and technical skills tags (`Python`, `FastAPI`, `React`, `PostgreSQL`, `Docker`, `Git`).
-3. **Guard Test**: Log in as `dawit.lemma@example.com`. Notice the warning banner stating your profile is incomplete. Navigate to `/internships`, select an internship, and observe that the **Apply** button warns you to complete your profile before applying.
+3. **Profile-Complete Rule Test**: Log in as `dawit.lemma@example.com`. Notice the warning banner stating your profile is incomplete (missing university and department). Navigate to `/internships`, select an internship, and observe that submitting an application is blocked until your university and department profile fields are completed.
 
 ### Step 5: Search &amp; Apply for Internships (`/internships`)
 1. Log in as `abel.tesfaye@example.com`.

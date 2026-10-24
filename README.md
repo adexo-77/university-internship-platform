@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/adexo-77/university-internship-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/adexo-77/university-internship-platform/actions/workflows/ci.yml)
 
-A production-grade, modular web platform designed for university student learning tracking, assignment evaluation, and internship placement matching. Built for the Brolf Tech internship technical challenge with a strict **MVP first, one phase at a time** methodology and comprehensive test coverage.
+A production-grade, modular web platform designed for university student learning tracking, assignment evaluation, and internship discovery and application tracking. Built for the Brolf Tech internship technical challenge with a strict **MVP first, one phase at a time** methodology and comprehensive test coverage.
 
 ---
 
@@ -152,7 +152,7 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local evaluati
 | **Ms. Hana Worku** | Instructor | `hana.worku@example.com` | `12345678` | Complete | Course authoring in draft state ("Software Engineering"), curriculum planning, and department course rosters. |
 | **Abel Tesfaye** | Student | `abel.tesfaye@example.com` | `12345678` | Complete | Student dashboard, course progress, submitted ER Diagramming assignment (graded 94/100 with instructor feedback), accepted internship offer from Kaffa Digital Solutions, rejected application, and withdrawn application. |
 | **Meron Girma** | Student | `meron.girma@example.com` | `12345678` | Complete | Student dashboard, course progress, late assignment submission awaiting instructor grading, shortlisted internship candidate at Kaffa Digital Solutions. |
-| **Dawit Lemma** | Student | `dawit.lemma@example.com` | `12345678` | Incomplete | Incomplete profile demonstration showing the profile completion banner and prerequisite guard blocking internship applications until bio &amp; skills are saved; submitted application to Network Support Intern. |
+| **Dawit Lemma** | Student | `dawit.lemma@example.com` | `12345678` | Incomplete | Incomplete profile demonstration showing the profile completion banner and the profile-complete rule before applying (blocking internship applications until university, department, bio, and skills are saved); submitted application to Network Support Intern. |
 | **Kaffa Digital Solutions** (Yohannes Haile) | Organization | `yohannes.haile@example.com` | `12345678` | Approved | Organization dashboard, postings across lifecycles (`open`, `pending_review`, `draft`, `rejected`), applicant hiring pipeline (accepted Abel Tesfaye, shortlisted Meron Girma). |
 | **Gibe Valley Telecom Services** (Rahel Desta) | Organization | `rahel.desta@example.com` | `12345678` | Approved | Organization dashboard, network support &amp; systems administration postings, candidate rejection decision, and closed listing. |
 | **Abay Data Labs** (Eyob Kassa) | Organization | `eyob.kassa@example.com` | `12345678` | Pending Approval | Pending approval banner demonstration, with internship creation disabled until platform administrator reviews and approves the company profile. |
@@ -168,7 +168,7 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local evaluati
 Set-Location backend
 .\.venv\Scripts\Activate.ps1
 
-# Run complete backend test suite (190+ tests)
+# Run complete backend test suite (192 tests across 28 test suites)
 python -m pytest -v
 
 # Or run quiet summary
@@ -179,7 +179,7 @@ python -m pytest -q
 ```powershell
 Set-Location frontend
 
-# Run complete frontend test suite (207+ tests across 60 test suites)
+# Run complete frontend test suite (207 tests across 60 test suites)
 npm test
 
 # Run Vitest in watch mode
@@ -271,5 +271,5 @@ The platform was built under a strict MVP-first specification. The following fea
 1. **In-App Notification Center &amp; Webhooks**: Asynchronous events (such as submission grading or application status changes) are reflected immediately upon dashboard queries, but persistent notification inbox tables, email push alerts, and webhooks are not implemented.
 2. **Badges, Gamification &amp; Rankings**: Course achievement badges, student leaderboards, and gamified ranking points are not implemented.
 3. **Learning Resources &amp; Rich File Attachments**: Courses support descriptions, syllabi, assignments, and text submissions; binary file attachments (PDF lecture notes, slide decks, ZIP archives) and multimedia streaming are not implemented.
-4. **AI-Driven Recommendation Features**: Automated resume parsing, candidate scoring, and machine-learning-based internship recommendations are not implemented; matching is executed via explicit database filtering (work mode, required skills, keywords).
+4. **AI-Driven Recommendation Features**: Automated resume parsing, candidate scoring, and machine-learning-based internship recommendations are not implemented; only keyword search and a work-mode filter exist.
 5. **Email Verification &amp; Self-Service Emailed Password Resets**: External SMTP/SES email delivery is not configured; user activation is immediate upon registration and password resets are managed administratively or via CLI tools.

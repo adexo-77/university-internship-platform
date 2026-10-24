@@ -36,7 +36,7 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 >
 > *Next, let's look at coursework. Under the 'Courses' catalog, students can search courses by code or title and enroll with a single click. When submitting assignments, our backend compares the server timestamp against the due date: if submitted after the deadline, it's accepted but automatically flagged as `is_late=true`.*
 >
-> *Now, let's observe our prerequisite guard. If we switch to our third student account, `dawit.lemma@example.com`, who has an incomplete profile, a prominent warning banner appears on their dashboard. If they attempt to apply for an internship, the application button is disabled until their bio and skill tags are filled out. This ensures employers only receive complete applications."*
+> *Now, let's observe our profile-complete rule before applying. If we switch to our third student account, `dawit.lemma@example.com`, who has an incomplete profile (missing university and department), a prominent warning banner appears on their dashboard. If they attempt to apply for an internship, the application is blocked until their university and department profile fields are completed. This ensures partner organizations only receive complete applications."*
 
 ---
 
@@ -89,7 +89,7 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 > 2. Passwords use Argon2id hashing.
 > 3. File sizes are strictly capped under 250 physical lines across all Python, TypeScript, and test files.
 > 4. We maintain zero linter warnings on Ruff and ESLint.
-> 5. Our test suite includes 190 Pytest integration tests against a real PostgreSQL database and 207 Vitest unit and component tests.
+> 5. Our test suite includes 192 Pytest integration tests against a real PostgreSQL database and 207 Vitest unit and component tests across 60 suites (399 automated tests total).
 >
 > Thank you, and I am ready for any questions!"*
 
@@ -125,7 +125,7 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 
 ### Q9: What is your automated testing strategy across the stack?
 **Answer**: We employ a comprehensive test pyramid:
-- **Backend (190 Pytest tests)**: Integration and domain tests executed against a real PostgreSQL test database (`university_platform_test`). Tests cover registration, role sweeps, session expiry, deadline enforcement, bounded grading, and concurrent enrollment.
+- **Backend (192 Pytest tests across 28 suites)**: Integration and domain tests executed against a real PostgreSQL test database (`university_platform_test`). Tests cover registration, role sweeps, session expiry, deadline enforcement, bounded grading, and concurrent enrollment.
 - **Frontend (207 Vitest tests across 60 suites)**: Unit and integration tests using React Testing Library and Vitest, testing component rendering, form validations, route guards, error boundaries, and WCAG color token compliance.
 
 ### Q10: How does the application protect against common web vulnerabilities (OWASP Top 10)?
@@ -153,4 +153,4 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 1. **Asynchronous Notification Center**: Persistent in-app notifications and email alerts (via AWS SES/SendGrid) for grade releases and interview invitations.
 2. **Binary Learning Resources**: S3/MinIO presigned URL integration for PDF slides, assignment attachments, and resume uploads.
 3. **Badges &amp; Gamification**: Achievement badges for course completion and skill milestones.
-4. **AI-Assisted Candidate Matching**: Vector embeddings to suggest top-fitting internships based on student skills and course grades.
+4. **AI-Assisted Candidate Matching**: Currently only title/description search and a work-mode filter exist; future phases could add vector embeddings or resume matching.

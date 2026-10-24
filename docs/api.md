@@ -54,10 +54,10 @@ Authentication uses stateful, server-managed sessions with cryptographically ran
 ### User Profile Endpoints
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/students/profile` | Student | Retrieve student bio, skills list, and profile completion status. |
-| `PUT` | `/api/students/profile` | Student | Update student bio and technical skills tags. |
-| `GET` | `/api/organizations/profile` | Organization | Retrieve corporate profile, industry, size, and website. |
-| `PUT` | `/api/organizations/profile` | Organization | Update organization profile attributes. |
+| `GET` | `/api/students/me` | Student | Retrieve student bio, university, department, year, skills, and profile completion status. |
+| `PUT` | `/api/students/me` | Student | Update student profile attributes (university, department, year, bio, skills). |
+| `GET` | `/api/organizations/me` | Organization | Retrieve corporate profile, industry, size, website, and approval status. |
+| `PUT` | `/api/organizations/me` | Organization | Update organization profile attributes. |
 
 ### Course Management Endpoints
 | Method | Endpoint | Access | Description |
@@ -65,61 +65,63 @@ Authentication uses stateful, server-managed sessions with cryptographically ran
 | `GET` | `/api/courses` | Authenticated | Browse published courses or filter by instructor ownership. |
 | `POST` | `/api/courses` | Instructor | Author a new course (`draft` or `published`). |
 | `GET` | `/api/courses/{id}` | Authenticated | Retrieve detailed course view, syllabus outline, and instructor info. |
-| `PATCH` | `/api/courses/{id}` | Course Instructor | Update course details, syllabus, or lifecycle state (`draft`, `published`, `archived`). |
-| `GET` | `/api/courses/{id}/roster` | Course Instructor | Inspect enrolled student roster with enrollment timestamps. |
+| `PATCH` | `/api/courses/{id}` | Course Instructor, Admin | Update course details, syllabus, or lifecycle state (`draft`, `published`, `archived`). |
+| `GET` | `/api/courses/{id}/students` | Course Instructor, Admin | Inspect enrolled student roster with enrollment timestamps. |
 
 ### Course Enrollment Endpoints
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/courses/{id}/enroll` | Student | Enroll in an active, published course (duplicate guarded). |
-| `DELETE` | `/api/courses/{id}/leave` | Student | Unenroll from a course. |
+| `POST` | `/api/courses/{id}/enrollment` | Student | Enroll in an active, published course (duplicate guarded). |
+| `DELETE` | `/api/courses/{id}/enrollment` | Student | Unenroll from a course. |
 
 ### Assignment &amp; Submission Endpoints
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/courses/{id}/assignments` | Authenticated | List all assignments defined for a specific course. |
+| `GET` | `/api/courses/{id}/assignments` | Authenticated | List all assignments defined for a specific course (with submission state). |
 | `POST` | `/api/courses/{id}/assignments` | Course Instructor | Create an assignment with due date and maximum points. |
 | `GET` | `/api/assignments/{id}` | Authenticated | Retrieve assignment prompt, deadline, and scoring details. |
-| `PATCH` | `/api/assignments/{id}` | Course Instructor | Update assignment parameters. |
+| `PATCH` | `/api/assignments/{id}` | Course Instructor | Update assignment parameters (max_points floor checked). |
 | `DELETE` | `/api/assignments/{id}` | Course Instructor | Delete assignment (protected against active submissions). |
-| `GET` | `/api/assignments/{id}/submissions` | Course Instructor | View submission roster for an assignment. |
-| `POST` | `/api/assignments/{id}/submissions` | Enrolled Student | Submit text work; automatically tags `is_late=true` if past due. |
-| `GET` | `/api/submissions/{id}` | Student / Instructor | Retrieve submission details and grading status. |
-| `POST` | `/api/submissions/{id}/grade` | Course Instructor | Assign numeric score (0 to max) and qualitative instructor feedback. |
+| `GET` | `/api/assignments/{id}/submissions` | Course Instructor, Admin | View submission roster for an assignment. |
+| `PUT` | `/api/assignments/{id}/submission` | Enrolled Student | Submit or update coursework; automatically tags `is_late=true` if past due. |
+| `GET` | `/api/assignments/{id}/submission` | Enrolled Student | Retrieve student's own submission and grading status. |
+| `PUT` | `/api/submissions/{id}/grade` | Course Instructor | Assign numeric score (0 to max) and qualitative instructor feedback. |
 
 ### Internship Postings &amp; Application Endpoints
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/internships` | Authenticated | Search published listings with work mode and keyword filters. |
+| `GET` | `/api/internships` | Student, Admin | Search published listings with work mode and keyword filters. |
 | `POST` | `/api/internships` | Approved Org | Create a new internship posting (`draft` or `pending_review`). |
 | `GET` | `/api/internships/{id}` | Authenticated | View internship posting details and application status. |
-| `PATCH` | `/api/internships/{id}` | Posting Org | Update posting details or transition state. |
-| `GET` | `/api/internships/{id}/applications` | Posting Org | Review student applications and cover letters for a posting. |
-| `POST` | `/api/internships/{id}/apply` | Student | Apply with personalized cover letter (requires completed profile). |
-| `GET` | `/api/applications/my` | Student | List all applications submitted by the current student. |
+| `PATCH` | `/api/internships/{id}` | Posting Org | Update posting details or extend deadline up to 90 days. |
+| `POST` | `/api/internships/{id}/submit` | Posting Org | Submit draft posting for admin review (requires approved org). |
+| `POST` | `/api/internships/{id}/withdraw` | Posting Org | Withdraw pending_review posting back to draft. |
+| `POST` | `/api/internships/{id}/close` | Posting Org | Close open internship posting. |
+| `GET` | `/api/internships/{id}/applications` | Posting Org, Admin | Review student applications and cover letters for a posting. |
+| `POST` | `/api/internships/{id}/applications` | Student | Apply with personalized cover letter (requires profile with university &amp; department). |
+| `GET` | `/api/students/me/applications` | Student | List all applications submitted by the current student. |
 | `POST` | `/api/applications/{id}/withdraw` | Student | Withdraw a pending application before final hiring decision. |
-| `POST` | `/api/applications/{id}/decision` | Posting Org | Advance candidate status (`shortlisted`, `accepted`, `rejected`). |
+| `PUT` | `/api/applications/{id}/decision` | Posting Org | Advance candidate status (`shortlisted`, `accepted`, `rejected`). |
 
 ### Administration Endpoints
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/admin/users` | Admin | Search and filter platform user accounts by role and status. |
-| `POST` | `/api/admin/users/{id}/status` | Admin | Activate or deactivate account (self-deactivation guarded). |
-| `POST` | `/api/admin/users/{id}/reset-password` | Admin | Generate temporary password and invalidate active sessions. |
+| `POST` | `/api/admin/users` | Admin | Provision instructor or administrator account. |
+| `PATCH` | `/api/admin/users/{id}` | Admin | Activate or deactivate account (self-deactivation guarded). |
+| `PUT` | `/api/admin/users/{id}/password` | Admin | Administratively reset user password and invalidate active sessions. |
 | `GET` | `/api/admin/organizations` | Admin | Review pending organization registrations. |
-| `POST` | `/api/admin/organizations/{id}/status` | Admin | Approve or reject company registration status. |
+| `PUT` | `/api/admin/organizations/{user_id}/approval` | Admin | Approve, reject, or reset company registration status with note. |
 | `GET` | `/api/admin/internships` | Admin | Moderation queue for submitted internship postings. |
-| `POST` | `/api/admin/internships/{id}/review` | Admin | Approve or reject listing with mandatory feedback notes. |
-| `POST` | `/api/admin/internships/{id}/takedown` | Admin | Administratively close a published listing for policy violations. |
+| `PUT` | `/api/admin/internships/{id}/review` | Admin | Approve, reject, or take down listing with review note. |
 
 ### Role Dashboard Endpoints
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/dashboard/stats` | Authenticated | Universal summary metrics based on user role. |
-| `GET` | `/api/dashboard/student` | Student | Enrolled courses, assignments due soon, and recent grades. |
+| `GET` | `/api/dashboard/student` | Student | Enrolled courses, assignments due soon, recent grades, and application metrics. |
 | `GET` | `/api/dashboard/instructor` | Instructor | Active courses, student count, and "Needs Grading" queue. |
-| `GET` | `/api/dashboard/organization` | Organization | Active postings, pending reviews, and candidate totals. |
-| `GET` | `/api/dashboard/admin` | Admin | Platform-wide user metrics and pending review counts. |
+| `GET` | `/api/dashboard/organization` | Organization | Active postings, pending reviews, and candidate pipeline totals. |
+| `GET` | `/api/dashboard/admin` | Admin | Platform-wide user metrics, pending reviews, and status breakdowns. |
 
 ---
 
