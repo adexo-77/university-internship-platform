@@ -173,11 +173,8 @@ jobs:
       - name: Create docker environment file from template
         run: cp .env.docker.example .env.docker
 
-      - name: Build Docker images
-        run: docker compose build
-
       - name: Start Docker Compose stack with health wait
-        run: docker compose up --wait
+        run: docker compose up --build -d --wait
 
       - name: Smoke test API health endpoint through Nginx proxy
         run: |

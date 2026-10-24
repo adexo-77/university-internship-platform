@@ -113,9 +113,11 @@ Get up and running locally in three commands:
 
 ```powershell
 Copy-Item .env.docker.example .env.docker
-docker compose up --build -d
+docker compose up --build -d --wait
 docker compose run --rm backend python scripts/seed_demo.py
 ```
+
+> **Troubleshooting 502 Bad Gateway**: If you encounter a `502 Bad Gateway` error in the first few seconds of startup, the backend container is still executing initial database migrations (`alembic upgrade head`). Using `docker compose up --build -d --wait` ensures the command returns only after all services pass their healthchecks. If the backend is restarting, Nginx automatically retries and resolves the upstream container dynamically.
 
 Open [http://localhost:8080](http://localhost:8080) to access the application.
 
