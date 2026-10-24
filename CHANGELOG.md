@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Instructor grading interface with numeric score bounding (0 to max points), qualitative feedback comments, and submission locking once graded.
 - **Phase 4: Internship Opportunities &amp; Application Pipeline**:
   - Organization internship posting creation with work modes (`remote`, `hybrid`, `onsite`), stipends, and deadlines.
-  - Student profile prerequisite guard: students with incomplete profiles are blocked from applying to internships until bio and skills are saved.
+  - Student profile prerequisite guard: students with incomplete profiles are blocked from applying to internships until university and department are saved.
   - Student application pipeline with personalized cover letters, application tracking (`/my-applications`), and safe application withdrawal with confirmation dialogs.
   - Employer decision workflows (`shortlisted`, `accepted`, `rejected`) with terminal candidate locking.
 - **Phase 5: Institutional Administration &amp; Governance**:
