@@ -1,0 +1,11 @@
+.git
+.venv
+.ruff_cache
+.pytest_cache
+backend/.venv
+backend/__pycache__
+frontend/node_modules
+frontend/dist
+.env
+.env.*
+!.env.docker.example
