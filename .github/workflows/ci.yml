@@ -161,3 +161,33 @@ jobs:
         working-directory: backend
         env:
           DATABASE_URL: postgresql+psycopg://postgres:postgrespassword@localhost:5432/university_platform_fresh
+
+  docker-smoke:
+    name: Docker Build & Compose Smoke Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create docker environment file from template
+        run: cp .env.docker.example .env.docker
+
+      - name: Build Docker images
+        run: docker compose build
+
+      - name: Start Docker Compose stack with health wait
+        run: docker compose up --wait
+
+      - name: Smoke test API health endpoint through Nginx proxy
+        run: |
+          curl --fail --retry 5 --retry-delay 2 --retry-connrefused http://localhost:8080/api/health
+          curl --fail --retry 5 --retry-delay 2 --retry-connrefused http://localhost:8080/api/health/db
+
+      - name: Seed demo dataset in container
+        run: docker compose run --rm backend python scripts/seed_demo.py
+
+      - name: Tear down Docker Compose stack
+        if: always()
+        run: docker compose down -v
+
