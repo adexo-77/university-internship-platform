@@ -59,6 +59,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - One-command demo database seeding via `docker compose run --rm backend python scripts/seed_demo.py`.
   - CI automation job `docker-smoke` in GitHub Actions validating container builds, Compose startup with `--wait`, health endpoints, and clean teardown.
   - Comprehensive documentation accuracy review: added Docker Quick Start, public demo account password matrix, container architecture topology, and corrected test counts.
+- **Docker Startup Ordering, Dynamic Upstream & Security Header Deduplication**:
+  - Enforced strict startup ordering in `docker-compose.yml` with backend `service_healthy` condition on the frontend and 20s migration `start_period`.
+  - Configured Nginx dynamic upstream resolution via Docker embedded DNS (`127.0.0.11`) and retry directives (`proxy_next_upstream`) to gracefully handle backend restarts.
+  - Eliminated duplicate HTTP defensive headers on `/api` routes by letting backend headers pass through single-sourced, scoping Nginx headers exclusively to static assets, and removing deprecated `X-XSS-Protection`.
+  - Explicitly negated `.env.example` and `.env.docker.example` in ignore files to guarantee template tracking.
 
 ### Changed
 - Standardized FastAPI and frontend package versions to `1.0.0`.
