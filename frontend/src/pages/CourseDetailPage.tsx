@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getCourseById, getCourseRoster, updateCourse } from '../api/course';
 import { CourseAssignmentsSection } from '../components/assignments/CourseAssignmentsSection';
+import { CourseResourcesSection } from '../components/courses/CourseResourcesSection';
 import { EnrollButton } from '../components/courses/EnrollButton';
 import { StudentRosterTable } from '../components/courses/StudentRosterTable';
 import { AppShell } from '../components/layout/AppShell';
@@ -154,12 +155,15 @@ export const CourseDetailPage: React.FC = () => {
             </section>
 
             {(isOwner || isAdmin || (user?.role === 'student' && course.enrolled)) && (
-              <CourseAssignmentsSection
-                courseId={course.id}
-                isOwner={isOwner}
-                isAdmin={isAdmin}
-                isStudent={user?.role === 'student'}
-              />
+              <>
+                <CourseResourcesSection courseId={course.id} isOwner={isOwner} />
+                <CourseAssignmentsSection
+                  courseId={course.id}
+                  isOwner={isOwner}
+                  isAdmin={isAdmin}
+                  isStudent={user?.role === 'student'}
+                />
+              </>
             )}
 
             {(isOwner || isAdmin) && (

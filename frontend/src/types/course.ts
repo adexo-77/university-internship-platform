@@ -50,3 +50,25 @@ export interface EnrollmentResponse {
   enrolled_at: string;
   message: string;
 }
+
+export interface CourseResource {
+  id: number;
+  course_id: number;
+  title: string;
+  url: string;
+  description?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CourseResourceCreateRequest {
+  title: string;
+  url: string;
+  description?: string | null;
+}
+
+export interface CourseResourceUpdateRequest {
+  title?: string | null;
+  url?: string | null;
+  description?: string | null;
+}
