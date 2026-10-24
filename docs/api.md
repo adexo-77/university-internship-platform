@@ -74,6 +74,14 @@ Authentication uses stateful, server-managed sessions with cryptographically ran
 | `POST` | `/api/courses/{id}/enrollment` | Student | Enroll in an active, published course (duplicate guarded). |
 | `DELETE` | `/api/courses/{id}/enrollment` | Student | Unenroll from a course. |
 
+### Course Learning Resource Endpoints
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/courses/{id}/resources` | Instructor (Owner), Admin, Enrolled Student | List curated external learning resources for course (enrolled only if published). |
+| `POST` | `/api/courses/{id}/resources` | Course Instructor (Owner) | Add learning resource link (up to 50 per course, http/https). |
+| `PATCH` | `/api/resources/{id}` | Course Instructor (Owner) | Update learning resource title, URL, or description. |
+| `DELETE` | `/api/resources/{id}` | Course Instructor (Owner) | Delete course learning resource. |
+
 ### Assignment &amp; Submission Endpoints
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |

@@ -50,7 +50,8 @@ university-internship-platform/
 │   │   │   ├── 340caf61d32f_create_assignments_and_submissions_.py
 │   │   │   ├── e17d6f716230_create_internship_postings_and_.py
 │   │   │   ├── 49360543f550_add_approval_fields_to_organization_.py
-│   │   │   └── c4d9a28e57f1_add_review_fields_and_statuses_to_.py
+│   │   │   ├── c4d9a28e57f1_add_review_fields_and_statuses_to_.py
+│   │   │   └── cbd29ec4559d_create_course_resources_table.py
 │   │   ├── env.py             # Migration harness wired to Base metadata
 │   │   └── script.py.mako     # Migration template
 │   ├── alembic.ini            # Alembic configuration
@@ -69,6 +70,7 @@ university-internship-platform/
 │   │   │   ├── assignment.py
 │   │   │   ├── base.py
 │   │   │   ├── course.py
+│   │   │   ├── course_resource.py
 │   │   │   ├── enrollment.py
 │   │   │   ├── internship.py
 │   │   │   ├── organization_profile.py
@@ -84,6 +86,7 @@ university-internship-platform/
 │   │   │   ├── assignment.py
 │   │   │   ├── auth.py
 │   │   │   ├── course.py
+│   │   │   ├── course_resource.py
 │   │   │   ├── enrollment.py
 │   │   │   ├── health.py
 │   │   │   ├── internship.py
@@ -98,6 +101,7 @@ university-internship-platform/
 │   │   │   ├── assignment.py
 │   │   │   ├── auth.py
 │   │   │   ├── course.py
+│   │   │   ├── course_resource.py
 │   │   │   ├── enrollment.py
 │   │   │   ├── health.py
 │   │   │   ├── internship.py
@@ -113,6 +117,7 @@ university-internship-platform/
 │   │   │   ├── auth.py
 │   │   │   ├── course.py
 │   │   │   ├── course_catalog.py
+│   │   │   ├── course_resource.py
 │   │   │   ├── enrollment.py
 │   │   │   ├── health.py
 │   │   │   ├── internship.py
@@ -137,6 +142,8 @@ university-internship-platform/
 │       ├── test_auth_register.py        # Registration & atomic profile provisioning tests
 │       ├── test_auth_session.py         # Session lifecycle, logout, expiry & role guard tests
 │       ├── test_course_create.py        # Course creation permissions and field validation tests
+│       ├── test_course_resource_access.py # Course resource visibility and enrollment guards
+│       ├── test_course_resource_rules.py  # Course resource CRUD and URL validation tests
 │       ├── test_course_update.py        # Course update and status transition tests
 │       ├── test_course_visibility.py    # Course visibility, catalog search, and pagination tests
 │       ├── test_enrollment.py           # Enrollment, double-enroll, leave, and roster tests
@@ -175,6 +182,7 @@ university-internship-platform/
         │   ├── assignment.ts
         │   ├── auth.ts
         │   ├── course.ts
+        │   ├── course_resource.ts
         │   ├── health.ts
         │   ├── internship.ts
         │   └── profile.ts
@@ -220,6 +228,9 @@ university-internship-platform/
         │   ├── courses/       # Course domain components
         │   │   ├── CourseForm.tsx
         │   │   ├── CourseForm.test.tsx
+        │   │   ├── CourseResourceFormModal.tsx
+        │   │   ├── CourseResourcesSection.tsx
+        │   │   ├── CourseResourcesSection.test.tsx
         │   │   ├── CourseTable.tsx
         │   │   ├── EnrollButton.tsx
         │   │   ├── EnrollButton.test.tsx

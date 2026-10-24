@@ -24,6 +24,7 @@ The platform provides tailored workspaces and dashboards for four primary user r
 ### 🎓 Student
 - **Interactive Student Dashboard**: View enrolled courses, assignments due soon (flagged as urgent, upcoming, or past due), recent grade cards, and application pipeline metrics.
 - **Course Enrollment**: Search the course catalog, enroll with duplicate guards, access assignment rosters, and monitor progress.
+- **Course Learning Resources**: Access curated external documentation and study links associated with published courses in which the student is enrolled.
 - **Assignment Submissions**: Submit text-based assignments before deadlines; late submissions are automatically flagged with timestamp metadata; submissions are locked against edits once graded.
 - **Profile Management**: Maintain bio and technical skills tags; incomplete profiles trigger clear visual banners.
 - **Internship Discovery &amp; Applications**: Search published internships with work mode filters (remote, hybrid, onsite) and keyword searches; apply with personalized cover letters; withdraw pending applications with automatic confirmation guards.
@@ -31,6 +32,7 @@ The platform provides tailored workspaces and dashboards for four primary user r
 ### 👨‍🏫 Instructor
 - **Instructor Dashboard**: Monitor active and draft courses, student enrollment totals, and a dedicated "Needs Grading" queue highlighting pending assignments.
 - **Course Lifecycle**: Author courses with titles, descriptions, and syllabus outlines; manage status transitions (`draft`, `published`, `archived`).
+- **Course Learning Resources**: Author and curate external learning resources and documentation links (up to 50 per course) with validated HTTP/HTTPS URLs and full CRUD controls.
 - **Assignment Authoring**: Define assignments with due dates and maximum scores; edit or delete assignments with cascade protection.
 - **Grading &amp; Feedback**: Review student submissions in an organized roster, assign numeric scores (strictly bounded between 0 and max points), and provide actionable instructor feedback comments.
 
@@ -170,7 +172,7 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local evaluati
 Set-Location backend
 .\.venv\Scripts\Activate.ps1
 
-# Run complete backend test suite (192 tests across 28 test suites)
+# Run complete backend test suite (219 tests across 46 test suites)
 python -m pytest -v
 
 # Or run quiet summary
@@ -181,7 +183,7 @@ python -m pytest -q
 ```powershell
 Set-Location frontend
 
-# Run complete frontend test suite (207 tests across 60 test suites)
+# Run complete frontend test suite (213 tests across 61 test suites)
 npm test
 
 # Run Vitest in watch mode
@@ -272,6 +274,6 @@ The platform was built under a strict MVP-first specification. The following fea
 
 1. **In-App Notification Center &amp; Webhooks**: Asynchronous events (such as submission grading or application status changes) are reflected immediately upon dashboard queries, but persistent notification inbox tables, email push alerts, and webhooks are not implemented.
 2. **Badges, Gamification &amp; Rankings**: Course achievement badges, student leaderboards, and gamified ranking points are not implemented.
-3. **Learning Resources &amp; Rich File Attachments**: Courses support descriptions, syllabi, assignments, and text submissions; binary file attachments (PDF lecture notes, slide decks, ZIP archives) and multimedia streaming are not implemented.
+3. **Binary File Uploads &amp; Media Streaming**: Direct binary file uploads (PDF slides, lecture videos, downloadable archives) and multimedia streaming are not implemented; curated external learning resources and documentation links are supported.
 4. **AI-Driven Recommendation Features**: Automated resume parsing, candidate scoring, and machine-learning-based internship recommendations are not implemented; only keyword search and a work-mode filter exist.
 5. **Email Verification &amp; Self-Service Emailed Password Resets**: External SMTP/SES email delivery is not configured; user activation is immediate upon registration and password resets are managed administratively or via CLI tools.

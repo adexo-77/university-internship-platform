@@ -10,6 +10,7 @@ The **University Learning & Internship Platform** is engineered with a modular, 
 - **Phase 5b-c**: Admin user management, organization approval, password changes, moderation review queue, and 90-day deadline extension caps.
 - **Phase 6**: Role dashboards with aggregated metrics, progress percentages, and average grades.
 - **Phase 7a**: Security hardening: sliding-window rate limiting, CSRF defense, security headers (`X-Frame-Options: DENY`, `no-store` cache), production cookie guards, 256 KB request limits, string/null-byte sanitization, structured logging, and generic 500 handlers.
+- **Phase 8a**: Course learning resources: curated external documentation links (up to 50 per course) with owner management and enrolled student visibility.
 
 ```mermaid
 flowchart TD
@@ -86,6 +87,7 @@ flowchart TD
   - `course.py`: `Course` model with `CourseStatus` enum (`draft`, `published`), instructor FK, title, description, timestamps.
   - `enrollment.py`: `Enrollment` model linking course and student with unique constraint.
   - `assignment.py`: `Assignment` model with course FK, title, description, timezone-aware `due_at`, `max_points`, timestamps.
+  - `course_resource.py`: `CourseResource` model with course FK, title, url, description, timestamps.
   - `submission.py`: `Submission` model linking assignment and student with unique constraint, content, link_url, is_late, grade, feedback, graded_at, graded_by.
   - `internship.py`: `InternshipPosting` model with organization FK, title, description, requirements, location, work mode, duration_weeks, application_deadline, status (`draft`, `open`, `closed`).
   - `application.py`: `Application` model linking posting and student with unique constraint, cover_letter, status (`submitted`, `shortlisted`, `accepted`, `rejected`, `withdrawn`), decision_message, decided_at.
@@ -95,6 +97,7 @@ flowchart TD
   - `student_profile.py`: `StudentProfileUpdateRequest`, `StudentProfileResponse`.
   - `organization_profile.py`: `OrganizationProfileUpdateRequest`, `OrganizationProfileResponse`.
   - `course.py`: `CourseCreate` (extra="forbid"), `CourseUpdate` (extra="forbid"), `CourseResponse`, `CourseListResponse`.
+  - `course_resource.py`: `CourseResourceCreate` (extra="forbid", valid http/https), `CourseResourceUpdate` (extra="forbid"), `CourseResourceResponse`.
   - `enrollment.py`: `EnrolledStudentResponse`, `EnrollmentResponse`, `EnrollmentActionResponse`.
   - `assignment.py`: `AssignmentCreate` (extra="forbid", future due date), `AssignmentUpdate` (extra="forbid"), `AssignmentResponse`.
   - `submission.py`: `SubmissionSubmit` (extra="forbid", http/https validation), `SubmissionGrade` (extra="forbid"), `SubmissionResponse`, `StudentSubmissionRosterItem`.
@@ -107,6 +110,7 @@ flowchart TD
   - `student_profile.py`: `/students/me`.
   - `organization_profile.py`: `/organizations/me`.
   - `course.py`: `/courses`, `/courses/{id}`, `/instructors/me/courses`, `/students/me/courses`.
+  - `course_resource.py`: `/courses/{id}/resources`, `/resources/{id}`.
   - `enrollment.py`: `/courses/{id}/enrollment`, `/courses/{id}/students`.
   - `assignment.py`: `/courses/{id}/assignments`, `/assignments/{id}`.
   - `submission.py`: `/assignments/{id}/submission`, `/assignments/{id}/submissions`, `/submissions/{id}/grade`.
@@ -118,6 +122,7 @@ flowchart TD
   - `OrganizationProfileService`: Organization profile retrieval and updates.
   - `course.py`: Course creation, detail lookup with draft visibility guard, update with draft-reversion lock.
   - `course_catalog.py`: Course search and pagination.
+  - `course_resource.py`: Course learning resources listing with published/enrolled access check, creation (max 50 limit, URL scheme validation), updating, and cascade deletion.
   - `enrollment.py`: Course enrollment with duplicate prevention, unenrollment, and roster retrieval.
   - `assignment.py`: Assignment creation, course assignment listing with student submission status mapping, assignment detail lookup, update with max_points grade floor check, and deletion protected against existing submissions.
   - `submission.py`: Student assignment submission with server-clock late flag calculation and locked-after-graded protection, student submission lookup, instructor/admin submissions roster, and instructor grading with max_points bounds.
@@ -136,7 +141,7 @@ flowchart TD
   - `skills.ts`: Comma-separated skill string parsing.
   - `dates.ts`: Unambiguous date formatting (`formatDate`, `formatDateTime`), due-soon (3 days), and past-due logic.
 - **Components (`components/`)**:
-  - `components/courses/`: `CourseForm`, `CourseTable`, `EnrollButton`, `StudentRosterTable`.
+  - `components/courses/`: `CourseForm`, `CourseTable`, `EnrollButton`, `StudentRosterTable`, `CourseResourcesSection`, `CourseResourceFormModal`.
   - `components/assignments/`: `AssignmentForm`, `AssignmentTable`, `CourseAssignmentsSection`, `DueBadge`, `GradeForm`, `SubmissionForm`, `SubmissionStatusBadge`, `SubmissionsTable`.
   - `components/internships/`: `InternshipForm`, `InternshipTable`, `InternshipStatusBadge`, `ApplyForm`, `ApplicationStatusBadge`, `ApplicantsTable`, `DecisionForm`, `MyApplicationsTable`, `StudentApplicationPanel`, `InternshipApplicantsSection`.
   - `components/ui/`: `Button`, `TextField`, `Textarea`, `Select`, `Badge`, `DataTable`, `EmptyState`, `ErrorMessage`, `Notice`, `PageHeader`.
@@ -184,6 +189,10 @@ flowchart TD
 | `/api/instructors/me/courses` | `GET` | `instructor` | Get instructor's own courses with enrolled count | `200 OK` |
 | `/api/students/me/courses` | `GET` | `student` | Get student's enrolled courses | `200 OK` |
 | `/api/courses/{id}/students` | `GET` | `instructor` (owner), `admin` | Get enrolled student roster with names and emails | `200 OK` |
+| `/api/courses/{id}/resources` | `GET` | `instructor` (owner), `admin`, `student` (enrolled) | List learning resources for course (enrolled only if published) | `200 OK` |
+| `/api/courses/{id}/resources` | `POST` | `instructor` (owner) | Add learning resource link (up to 50 per course, http/https) | `201 Created` |
+| `/api/resources/{id}` | `PATCH` | `instructor` (owner) | Update learning resource title, URL, or description | `200 OK` |
+| `/api/resources/{id}` | `DELETE` | `instructor` (owner) | Delete course learning resource | `204 No Content` |
 | `/api/courses/{id}/enrollment` | `POST` | `student` | Enroll student in published course | `201 Created` |
 | `/api/courses/{id}/enrollment` | `DELETE` | `student` | Unenroll student from course | `200 OK` |
 | `/api/courses/{id}/assignments` | `POST` | `instructor` (owner) | Create assignment with future due date | `201 Created` |

@@ -16,6 +16,7 @@ erDiagram
     users ||--o{ submissions : "submits coursework (student)"
     courses ||--o{ enrollments : "has enrollments"
     courses ||--o{ assignments : "has assignments"
+    courses ||--o{ course_resources : "has resources"
     assignments ||--o{ submissions : "has submissions"
     users ||--o{ internship_postings : "posts (organization)"
     users ||--o{ applications : "submits (student)"
@@ -90,6 +91,16 @@ erDiagram
         string description "nullable, max 2000"
         timestamp due_at "with time zone, required"
         int max_points "default 100, 1-1000"
+        timestamp created_at "with time zone, server default now()"
+        timestamp updated_at "with time zone, server default now(), on update"
+    }
+
+    course_resources {
+        int id PK "autoincrement"
+        int course_id FK "courses.id, ON DELETE CASCADE, indexed"
+        string title "max 120"
+        string url "max 500, valid http/https"
+        string description "nullable, max 500"
         timestamp created_at "with time zone, server default now()"
         timestamp updated_at "with time zone, server default now(), on update"
     }
@@ -246,6 +257,20 @@ Represents coursework, problem sets, and practical assignments created by instru
 | `created_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Creation timestamp in UTC |
 | `updated_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Last update timestamp in UTC |
 
+### `course_resources`
+
+Represents instructor-curated external learning resources and documentation links associated with a course (up to 50 resources per course).
+
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | `PRIMARY KEY`, `AUTOINCREMENT` | Unique course resource identifier |
+| `course_id` | `INTEGER` | `NOT NULL`, `FK courses(id) ON DELETE CASCADE`, `INDEX` | Owning course reference |
+| `title` | `VARCHAR(120)` | `NOT NULL` | Resource title (1 to 120 characters) |
+| `url` | `VARCHAR(500)` | `NOT NULL` | Valid external HTTP or HTTPS URL (max 500 chars) |
+| `description` | `VARCHAR(500)` | `NULLABLE` | Optional summary or guidance notes |
+| `created_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Creation timestamp in UTC |
+| `updated_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Last update timestamp in UTC |
+
 ### `submissions`
 
 Represents student work submitted for an assignment, along with grades and instructor feedback.
@@ -349,4 +374,5 @@ stateDiagram-v2
 21. **Application Lifecycle Transitions**: Applications can transition from `submitted` to `shortlisted`, `accepted`, or `rejected`; and from `shortlisted` to `accepted` or `rejected`. `accepted` and `rejected` statuses are terminal (409 Conflict). Withdrawn applications cannot be decided.
 22. **Withdrawal Window**: Students can withdraw their own application only while in `submitted` or `shortlisted` status (409 Conflict).
 23. **Applicant Data Isolation**: Detailed applicant profile data and cover letters are strictly confined to the posting's owner organization and platform administrators. Other organizations receive 404 Not Found.
+24. **Course Resource Constraints & Access**: Course resources are bounded to a maximum of 50 links per course. Resource URLs must strictly use `http` or `https` schemes and cannot contain null bytes, control characters, or Javascript URIs. Access to resources is restricted to the owning instructor, platform admin, or students enrolled in the published course (returning 404 Not Found for non-enrolled students or draft courses). Only the owning instructor may add, edit, or delete resources.
 

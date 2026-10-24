@@ -5,6 +5,21 @@ All notable changes to the **University Learning &amp; Internship Platform** wil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - Unreleased
+
+### Added
+- **Phase 8a: Course Learning Resources**:
+  - `course_resources` database model and Alembic migration with cascade foreign key and index on `course_id`.
+  - Backend endpoints under `/api`: `GET /api/courses/{id}/resources`, `POST /api/courses/{id}/resources`, `PATCH /api/resources/{id}`, and `DELETE /api/resources/{id}` with thin routers and domain logic in `services/course_resource.py`.
+  - Access controls: resources are visible to owner instructor, platform admin, or enrolled students on published courses (draft courses or non-enrolled students return 404). Only owner instructors can add, edit, or delete resources.
+  - Strict input validation rejecting `javascript:`, `data:`, non-http(s) schemes, null bytes, and control characters, with extra fields forbidden and a 50-resource limit per course.
+  - Frontend `CourseResourcesSection` component with list, modal forms, `ConfirmModal` deletion dialogues, and clear empty states for owners vs enrolled students.
+  - Realistic demo course resources seeded into demo dataset with idempotency guards and extended seed tests.
+  - OpenAPI documentation synchronized in `docs/openapi.json`.
+
+### Fixed
+- Corrected internship application profile prerequisite claims in documentation from bio and skills to university and department only.
+
 ---
 
 ## [1.0.0] - 2026-10-23
