@@ -11,6 +11,7 @@ from app.models.base import Base
 
 if TYPE_CHECKING:
     from app.models.assignment import Assignment
+    from app.models.course_resource import CourseResource
     from app.models.enrollment import Enrollment
     from app.models.user import User
 
@@ -65,6 +66,12 @@ class Course(Base):
     )
     assignments: Mapped[list["Assignment"]] = relationship(
         "Assignment",
+        back_populates="course",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    resources: Mapped[list["CourseResource"]] = relationship(
+        "CourseResource",
         back_populates="course",
         cascade="all, delete-orphan",
         passive_deletes=True,

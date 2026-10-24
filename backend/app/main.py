@@ -21,6 +21,7 @@ from app.routers.application import router as application_router
 from app.routers.assignment import router as assignment_router
 from app.routers.auth import router as auth_router
 from app.routers.course import router as course_router
+from app.routers.course_resource import router as course_resource_router
 from app.routers.dashboard import router as dashboard_router
 from app.routers.enrollment import router as enrollment_router
 from app.routers.health import router as health_router
@@ -124,6 +125,7 @@ app.include_router(auth_router, prefix="/api")
 app.include_router(student_profile_router, prefix="/api")
 app.include_router(organization_profile_router, prefix="/api")
 app.include_router(course_router, prefix="/api")
+app.include_router(course_resource_router, prefix="/api")
 app.include_router(enrollment_router, prefix="/api")
 app.include_router(assignment_router, prefix="/api")
 app.include_router(submission_router, prefix="/api")

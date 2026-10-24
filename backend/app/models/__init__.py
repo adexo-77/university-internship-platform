@@ -4,6 +4,7 @@ from app.models.application import Application, ApplicationStatus
 from app.models.assignment import Assignment
 from app.models.base import Base
 from app.models.course import Course, CourseStatus
+from app.models.course_resource import CourseResource
 from app.models.enrollment import Enrollment
 from app.models.internship import Internship, InternshipStatus, InternshipWorkMode
 from app.models.organization_profile import ApprovalStatus, OrganizationProfile
@@ -19,6 +20,7 @@ __all__ = [
     "Assignment",
     "Base",
     "Course",
+    "CourseResource",
     "CourseStatus",
     "Enrollment",
     "Internship",

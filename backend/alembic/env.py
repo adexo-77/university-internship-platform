@@ -17,6 +17,7 @@ from app.models import (  # noqa: F401
     Assignment,
     Base,
     Course,
+    CourseResource,
     Enrollment,
     Internship,
     OrganizationProfile,
