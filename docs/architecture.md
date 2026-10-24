@@ -225,3 +225,49 @@ flowchart TD
 | `/api/health` | `GET` | Public | Basic platform status probe | `200 OK` |
 | `/api/health/db` | `GET` | Public | Database query connectivity probe | `200 OK` |
 
+---
+
+## 4. Deployment Architecture (Docker Compose Topology)
+
+The platform is containerized for reproducible local and staging deployments via Docker Compose:
+
+```mermaid
+flowchart TD
+    subgraph Host ["Host Machine / Client"]
+        Client["Web Browser"]
+        Port8080["localhost:8080"]
+    end
+
+    subgraph ComposeNetwork ["Docker Compose Bridge Network"]
+        subgraph FrontendContainer ["frontend container (nginx:1.27.2-alpine)"]
+            Nginx["Nginx Reverse Proxy & Static Server"]
+            Static["SPA Dist Assets (/usr/share/nginx/html)"]
+        end
+
+        subgraph BackendContainer ["backend container (python:3.12.7-slim)"]
+            FastAPI["FastAPI REST Application (:8000)"]
+            Alembic["Alembic Migration Runner"]
+        end
+
+        subgraph DBContainer ["db container (postgres:16.4-alpine)"]
+            PostgreSQL["PostgreSQL Engine (:5432)"]
+            Volume[("Named Volume: pgdata")]
+        end
+    end
+
+    Client -->|HTTP Request| Port8080
+    Port8080 --> Nginx
+    Nginx -->|SPA Routes / Static Files| Static
+    Nginx -->|Proxy Pass /api/*| FastAPI
+    FastAPI -->|psycopg Connection Pool| PostgreSQL
+    Alembic -.->|Startup Migration| PostgreSQL
+    PostgreSQL --- Volume
+```
+
+### Production Hardening & Reverse-Proxy Requirements
+In production environments:
+1. An edge reverse-proxy (e.g., Cloudflare, AWS ALB, Traefik, or an edge Nginx instance) terminates TLS/HTTPS.
+2. The edge proxy forwards standard proxy headers (`X-Forwarded-Proto: https`, `X-Forwarded-For`).
+3. Set `ENVIRONMENT=production` in the backend environment, which enforces secure cookie transmission (`secure=True`), strict origins in `CORS_ORIGINS`, and cryptographically strong secret keys.
+
+

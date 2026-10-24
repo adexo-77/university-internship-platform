@@ -107,30 +107,32 @@ flowchart TD
 
 ## 6. Quick Start
 
-Get up and running locally in four commands:
+### Option A: Docker Compose (Fastest & Containerized)
 
-### 1. Clone the Repository
+Get up and running locally in three commands:
+
 ```powershell
-git clone https://github.com/adexo-77/university-internship-platform.git
-Set-Location university-internship-platform
+Copy-Item .env.docker.example .env.docker
+docker compose up --build -d
+docker compose run --rm backend python scripts/seed_demo.py
 ```
 
-### 2. Run Automated Setup &amp; Seed
+Open [http://localhost:8080](http://localhost:8080) to access the application.
+
+---
+
+### Option B: Native Host Environment (PowerShell)
+
 ```powershell
+# 1. Run Automated Setup & Seed
 python scripts/setup_dev.py --seed
-```
-*Creates the virtualenv, installs Python &amp; Node dependencies, provisions development &amp; test databases, applies Alembic migrations, and populates the rich demo dataset.*
 
-### 3. Start Backend Server (:8001)
-```powershell
+# 2. Start Backend Server (:8001)
 Set-Location backend
 .\.venv\Scripts\Activate.ps1
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8001 --reload
-```
 
-### 4. Start Frontend Client (:5173)
-```powershell
-# In a separate PowerShell window
+# 3. Start Frontend Client (:5173) in a separate terminal
 Set-Location frontend
 npm run dev
 ```
@@ -141,21 +143,21 @@ Visit [http://localhost:5173](http://localhost:5173) to explore the platform.
 
 ## 7. Demo Accounts &amp; Capabilities
 
-All demo accounts are provisioned via `scripts/seed_demo.py`. For local evaluation, all roster accounts share `DEMO_PASSWORD = "12345678"` (demo-only).
+All demo accounts are provisioned via `scripts/seed_demo.py`. For local evaluation, all demo roster accounts share the password `12345678`, marked demo-only and intentionally public.
 
-| Name | Role | Email | Profile State | What This Account Demonstrates |
-| :--- | :--- | :--- | :--- | :--- |
-| **Dr. Mulugeta Assefa** | Admin | `mulugeta.assefa@example.com` | Complete | Administrative dashboard, user provisioning &amp; password resets, organization registration approvals, internship moderation review queue, and listing takedowns. |
-| **Dr. Tadesse Bekele** | Instructor | `tadesse.bekele@example.com` | Complete | Instructor dashboard, courses "Database Systems" (published) and "Introduction to Programming" (published), assignment authoring, and student submission grading. |
-| **Ms. Hana Worku** | Instructor | `hana.worku@example.com` | Complete | Course authoring in draft state ("Software Engineering"), curriculum planning, and department course rosters. |
-| **Abel Tesfaye** | Student | `abel.tesfaye@example.com` | Complete | Student dashboard, course progress, submitted ER Diagramming assignment (graded 94/100 with instructor feedback), accepted internship offer from Kaffa Digital Solutions, rejected application, and withdrawn application. |
-| **Meron Girma** | Student | `meron.girma@example.com` | Complete | Student dashboard, course progress, late assignment submission awaiting instructor grading, shortlisted internship candidate at Kaffa Digital Solutions. |
-| **Dawit Lemma** | Student | `dawit.lemma@example.com` | Incomplete | Incomplete profile demonstration showing the profile completion banner and prerequisite guard blocking internship applications until bio &amp; skills are saved; submitted application to Network Support Intern. |
-| **Kaffa Digital Solutions** (Yohannes Haile) | Organization | `yohannes.haile@example.com` | Approved | Organization dashboard, postings across lifecycles (`open`, `pending_review`, `draft`, `rejected`), applicant hiring pipeline (accepted Abel Tesfaye, shortlisted Meron Girma). |
-| **Gibe Valley Telecom Services** (Rahel Desta) | Organization | `rahel.desta@example.com` | Approved | Organization dashboard, network support &amp; systems administration postings, candidate rejection decision, and closed listing. |
-| **Abay Data Labs** (Eyob Kassa) | Organization | `eyob.kassa@example.com` | Pending Approval | Pending approval banner demonstration, with internship creation disabled until platform administrator reviews and approves the company profile. |
+| Name | Role | Email | Password (Demo-Only) | Profile State | What This Account Demonstrates |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Dr. Mulugeta Assefa** | Admin | `mulugeta.assefa@example.com` | `12345678` | Complete | Administrative dashboard, user provisioning &amp; password resets, organization registration approvals, internship moderation review queue, and listing takedowns. |
+| **Dr. Tadesse Bekele** | Instructor | `tadesse.bekele@example.com` | `12345678` | Complete | Instructor dashboard, courses "Database Systems" (published) and "Introduction to Programming" (published), assignment authoring, and student submission grading. |
+| **Ms. Hana Worku** | Instructor | `hana.worku@example.com` | `12345678` | Complete | Course authoring in draft state ("Software Engineering"), curriculum planning, and department course rosters. |
+| **Abel Tesfaye** | Student | `abel.tesfaye@example.com` | `12345678` | Complete | Student dashboard, course progress, submitted ER Diagramming assignment (graded 94/100 with instructor feedback), accepted internship offer from Kaffa Digital Solutions, rejected application, and withdrawn application. |
+| **Meron Girma** | Student | `meron.girma@example.com` | `12345678` | Complete | Student dashboard, course progress, late assignment submission awaiting instructor grading, shortlisted internship candidate at Kaffa Digital Solutions. |
+| **Dawit Lemma** | Student | `dawit.lemma@example.com` | `12345678` | Incomplete | Incomplete profile demonstration showing the profile completion banner and prerequisite guard blocking internship applications until bio &amp; skills are saved; submitted application to Network Support Intern. |
+| **Kaffa Digital Solutions** (Yohannes Haile) | Organization | `yohannes.haile@example.com` | `12345678` | Approved | Organization dashboard, postings across lifecycles (`open`, `pending_review`, `draft`, `rejected`), applicant hiring pipeline (accepted Abel Tesfaye, shortlisted Meron Girma). |
+| **Gibe Valley Telecom Services** (Rahel Desta) | Organization | `rahel.desta@example.com` | `12345678` | Approved | Organization dashboard, network support &amp; systems administration postings, candidate rejection decision, and closed listing. |
+| **Abay Data Labs** (Eyob Kassa) | Organization | `eyob.kassa@example.com` | `12345678` | Pending Approval | Pending approval banner demonstration, with internship creation disabled until platform administrator reviews and approves the company profile. |
 
-> **Note**: All people and organizations in this demo dataset are fictional. The password `12345678` is strictly for local demonstration and evaluation.
+> **Note**: All people and organizations in this demo dataset are fictional. The password `12345678` is marked demo-only and intentionally public for local demonstration and evaluation.
 
 ---
 
@@ -203,7 +205,10 @@ npm run format:check
 
 ```text
 university-internship-platform/
-├── .github/workflows/ci.yml   # Automated CI test and migration matrix
+├── .dockerignore              # Root Docker build context exclusion rules
+├── .env.docker.example        # Template environment configuration for Docker Compose
+├── .github/workflows/ci.yml   # Automated CI test, migration & docker smoke matrix
+├── docker-compose.yml         # Container orchestration (db, backend, frontend)
 ├── docs/                      # Architectural designs, schemas, and specifications
 │   ├── api.md                 # REST API reference and schema guide
 │   ├── architecture.md        # Architecture topology and endpoint matrix
@@ -220,6 +225,8 @@ university-internship-platform/
 │   ├── seed_demo.py           # Idempotent demo dataset seeder
 │   └── setup_dev.py           # Cross-platform developer environment setup
 ├── backend/
+│   ├── .dockerignore          # Backend Docker build exclusion rules
+│   ├── Dockerfile             # Multi-stage backend container definition
 │   ├── alembic/               # Database migration environment
 │   ├── app/
 │   │   ├── core/              # Config, database engine, security helpers, deps
@@ -229,6 +236,9 @@ university-internship-platform/
 │   │   └── services/          # Pure business logic and domain rules
 │   └── tests/                 # Pytest test suite mirroring app/ domain modules
 └── frontend/
+    ├── .dockerignore          # Frontend Docker build exclusion rules
+    ├── Dockerfile             # Multi-stage frontend container (build + Nginx)
+    ├── nginx.conf             # Nginx reverse proxy, SPA fallback, gzip & security headers
     ├── src/
     │   ├── api/               # Typed API client wrappers
     │   ├── components/        # Modular, accessible UI components
@@ -263,4 +273,3 @@ The platform was built under a strict MVP-first specification. The following fea
 3. **Learning Resources &amp; Rich File Attachments**: Courses support descriptions, syllabi, assignments, and text submissions; binary file attachments (PDF lecture notes, slide decks, ZIP archives) and multimedia streaming are not implemented.
 4. **AI-Driven Recommendation Features**: Automated resume parsing, candidate scoring, and machine-learning-based internship recommendations are not implemented; matching is executed via explicit database filtering (work mode, required skills, keywords).
 5. **Email Verification &amp; Self-Service Emailed Password Resets**: External SMTP/SES email delivery is not configured; user activation is immediate upon registration and password resets are managed administratively or via CLI tools.
-6. **Docker Engine Deployment**: Local containerization was deferred because the host development environment lacked an active Docker daemon. Native Python and Node runtimes are fully automated via `scripts/setup_dev.py`.

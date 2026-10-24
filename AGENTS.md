@@ -21,11 +21,15 @@ The official **PROJECT STRUCTURE GUIDE** outlines the file tree and structural c
 
 ```text
 university-internship-platform/
+├── .dockerignore              # Root Docker build exclusion rules
 ├── .editorconfig              # Editor consistency rules (LF, UTF-8, indentation)
+├── .env.docker.example        # Template environment configuration for Docker Compose
 ├── .env.example               # Template environment configuration
 ├── .gitattributes             # Enforce LF line endings (* text=auto eol=lf)
 ├── .gitignore                 # Ignore .env, .venv, node_modules, dist, __pycache__, etc.
 ├── AGENTS.md                  # Project constitution and multi-phase agent guidelines
+├── CHANGELOG.md               # Versioned changelog across phases
+├── docker-compose.yml         # Container orchestration (db, backend, frontend)
 ├── README.md                  # Setup instructions, exact PowerShell commands
 ├── docs/                      # Architectural designs, schemas, and specifications
 │   ├── architecture.md        # Architecture topology and endpoint matrix
@@ -36,6 +40,8 @@ university-internship-platform/
 │   ├── seed_demo.py           # Idempotent demo dataset seeder
 │   └── setup_dev.py           # Cross-platform developer environment setup
 ├── backend/
+│   ├── .dockerignore          # Docker build exclusion rules for backend
+│   ├── Dockerfile             # Multi-stage production container definition
 │   ├── alembic/               # Database migration environment
 │   │   ├── versions/          # Alembic revision migration files
 │   │   │   ├── 6d7757d439a5_create_users_and_sessions_tables.py
@@ -147,9 +153,12 @@ university-internship-platform/
 │       ├── test_submission_grading.py   # Roster visibility and grading bounds tests
 │       └── test_submission_lifecycle.py # Submission lifecycle, late flag, and locking tests
 └── frontend/
+    ├── .dockerignore          # Docker build exclusion rules for frontend
     ├── .prettierrc            # Prettier code formatting config
+    ├── Dockerfile             # Multi-stage build + Nginx runtime container definition
     ├── eslint.config.js       # ESLint 9 flat configuration
     ├── index.html             # Single-page HTML entry with typography and SEO metadata
+    ├── nginx.conf             # Nginx reverse proxy, SPA fallback, gzip & security headers
     ├── package.json           # Frontend dependencies and npm scripts
     ├── package-lock.json      # Locked npm dependency tree
     ├── postcss.config.js      # PostCSS configuration
@@ -427,7 +436,7 @@ npm run test
 11. **Strict Phase Discipline**:
     Never touch or implement code outside the active phase. Build Phase 0 foundation first, then progress phase by phase without premature feature bloat.
 12. **Credential and Secret Hygiene**:
-    NEVER put credentials (passwords, connection strings, API tokens, secret keys) inline in any command, commit message, or report; read them from `.env` or system environment variables and mask them in any output.
+    NEVER put credentials (passwords, connection strings, API tokens, secret keys) inline in any command, commit message, or report; read them from `.env` or system environment variables and mask them in any output. *Exception*: documented demo-only passwords (such as `12345678` for seeded demo roster accounts) are allowed in public documentation for evaluators; real secrets, private keys, connection strings, and production credentials never are.
 
 ---
 
