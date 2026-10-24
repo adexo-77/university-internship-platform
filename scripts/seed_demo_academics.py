@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
+from app.models.course_resource import CourseResource
 from app.models.enrollment import Enrollment
 from app.models.submission import Submission
 from app.models.user import User
@@ -164,7 +165,67 @@ def _seed_assignments_and_submissions(
     db.flush()
 
 
+RESOURCE_SPECS = [
+    (
+        "Introduction to Programming",
+        "Official Python Tutorial",
+        "https://docs.python.org/3/tutorial/",
+        "The official Python tutorial covering core syntax, data structures, and standard library fundamentals.",
+    ),
+    (
+        "Introduction to Programming",
+        "Think Python 2e",
+        "https://greenteapress.com/wp/think-python-2e/",
+        "Free introductory programming textbook focusing on algorithmic thinking and Python foundations.",
+    ),
+    (
+        "Database Systems",
+        "PostgreSQL Official Documentation",
+        "https://www.postgresql.org/docs/current/",
+        "Complete manual for PostgreSQL database server architecture, SQL syntax, and administration.",
+    ),
+    (
+        "Database Systems",
+        "Use The Index, Luke!",
+        "https://use-the-index-luke.com/",
+        "Guide to database indexing and SQL performance optimization for developers.",
+    ),
+    (
+        "Software Engineering",
+        "Refactoring Guru: Design Patterns",
+        "https://refactoring.guru/design-patterns",
+        "Visual guide to architectural and behavioral design patterns in modern software development.",
+    ),
+    (
+        "Software Engineering",
+        "Git Book Documentation",
+        "https://git-scm.com/book/en/v2",
+        "Pro Git official guide covering distributed version control workflows, branching, and collaboration.",
+    ),
+]
+
+
+def _seed_course_resources(db: Session, courses: dict[str, Course]) -> None:
+    for course_title, title, url, desc in RESOURCE_SPECS:
+        course = courses.get(course_title)
+        if not course:
+            continue
+        exists = db.scalar(
+            select(CourseResource.id).where(
+                CourseResource.course_id == course.id, CourseResource.title == title
+            )
+        )
+        if not exists:
+            db.add(
+                CourseResource(
+                    course_id=course.id, title=title, url=url, description=desc
+                )
+            )
+    db.flush()
+
+
 def seed_academics(db: Session, users: dict[str, User], now: datetime) -> None:
     courses = _seed_courses(db, users)
     _seed_enrollments(db, courses, users)
+    _seed_course_resources(db, courses)
     _seed_assignments_and_submissions(db, courses["Database Systems"], users, now)

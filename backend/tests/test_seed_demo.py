@@ -20,6 +20,7 @@ from app.core.security import hash_password
 from app.models.application import Application
 from app.models.assignment import Assignment
 from app.models.course import Course
+from app.models.course_resource import CourseResource
 from app.models.internship import Internship
 from app.models.organization_profile import OrganizationProfile
 from app.models.student_profile import StudentProfile
@@ -84,6 +85,12 @@ def test_seed_demo_idempotency(real_db_session: Session) -> None:
                 select(func.count(Assignment.id)).where(Assignment.title.in_(a_titles))
             )
             or 0,
+            "resources": real_db_session.scalar(
+                select(func.count(CourseResource.id))
+                .join(Course, CourseResource.course_id == Course.id)
+                .where(Course.title.in_(c_titles))
+            )
+            or 0,
             "postings": real_db_session.scalar(
                 select(func.count(Internship.id)).where(Internship.title.like("%Intern%"))
             )
@@ -106,6 +113,7 @@ def test_seed_demo_idempotency(real_db_session: Session) -> None:
     assert counts_first["users"] == 9
     assert counts_first["courses"] == 3
     assert counts_first["assignments"] == 3
+    assert counts_first["resources"] == 6
     assert counts_first["postings"] == 7
     assert counts_first["submissions"] == 3
     assert counts_first["apps"] == 5

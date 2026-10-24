@@ -5,6 +5,7 @@ from collections.abc import Iterable
 from app.models.application import Application
 from app.models.assignment import Assignment
 from app.models.course import Course
+from app.models.course_resource import CourseResource
 from app.models.enrollment import Enrollment
 from app.models.internship import Internship
 from app.models.organization_profile import OrganizationProfile
@@ -75,8 +76,9 @@ def _delete_in_dependency_order(
             Application.student_id.in_(user_ids) | Application.posting_id.in_(p_list)
         )
     )
-    # 3. Assignments under demo courses
+    # 3. Assignments and resources under demo courses
     db.execute(delete(Assignment).where(Assignment.course_id.in_(c_list)))
+    db.execute(delete(CourseResource).where(CourseResource.course_id.in_(c_list)))
     # 4. Enrollments of demo students or in demo courses
     db.execute(
         delete(Enrollment).where(
