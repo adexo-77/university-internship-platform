@@ -6,6 +6,10 @@ import { AuthProvider } from '../../context/AuthContext';
 import { User } from '../../types/auth';
 import { AppShell } from './AppShell';
 
+vi.mock('../../api/notification', () => ({
+  fetchUnreadCount: vi.fn().mockResolvedValue({ unread_count: 0 }),
+}));
+
 const mockAdminUser: User = {
   id: 1,
   email: 'admin@example.com',

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatDateTime, isDueSoon, isPastDue } from './dates';
+import { formatDate, formatDateTime, formatRelativeTime, isDueSoon, isPastDue } from './dates';
 
 describe('dates utilities', () => {
   it('formats unambiguous date without time or timezone name', () => {
@@ -60,6 +60,37 @@ describe('dates utilities', () => {
 
     it('returns false for future date', () => {
       expect(isPastDue('2026-10-21T12:00:00Z', now)).toBe(false);
+    });
+  });
+
+  describe('formatRelativeTime logic', () => {
+    const now = new Date('2026-10-20T12:00:00Z');
+
+    it('handles null, undefined, or invalid input', () => {
+      expect(formatRelativeTime(null)).toBe('—');
+      expect(formatRelativeTime(undefined)).toBe('—');
+      expect(formatRelativeTime('invalid-date')).toBe('Invalid date');
+    });
+
+    it('returns "just now" for dates within 60 seconds', () => {
+      expect(formatRelativeTime('2026-10-20T11:59:30Z', now)).toBe('just now');
+      expect(formatRelativeTime('2026-10-20T12:00:10Z', now)).toBe('just now');
+    });
+
+    it('returns minutes ago for dates within the hour', () => {
+      expect(formatRelativeTime('2026-10-20T11:45:00Z', now)).toBe('15m ago');
+    });
+
+    it('returns hours ago for dates within 24 hours', () => {
+      expect(formatRelativeTime('2026-10-20T08:00:00Z', now)).toBe('4h ago');
+    });
+
+    it('returns days ago for dates within 7 days', () => {
+      expect(formatRelativeTime('2026-10-18T12:00:00Z', now)).toBe('2d ago');
+    });
+
+    it('formats date string for dates older than 7 days', () => {
+      expect(formatRelativeTime('2026-10-10T12:00:00Z', now)).toBe('10 Oct 2026');
     });
   });
 });

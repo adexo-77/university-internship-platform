@@ -25,24 +25,37 @@ const mockInstructor: User = {
   updated_at: '2026-10-18T00:00:00Z',
 };
 
+const mockDashboardFetch = (dashboardData: unknown, failFirst = false) => {
+  let failed = false;
+  return vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
+    const url = String(input);
+    if (url.includes('/api/notifications/unread-count')) {
+      return new Response(JSON.stringify({ unread_count: 0 }), { status: 200 });
+    }
+    if (failFirst && !failed) {
+      failed = true;
+      throw new Error('Network disconnected');
+    }
+    return new Response(JSON.stringify(dashboardData), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  });
+};
+
 describe('DashboardPage', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
   it('renders student dashboard on success', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          due_next: [],
-          recent_grades: [],
-          courses: [],
-          applications: { counts_by_status: {}, recent: [] },
-          profile_complete: true,
-        }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
-      )
-    );
+    mockDashboardFetch({
+      due_next: [],
+      recent_grades: [],
+      courses: [],
+      applications: { counts_by_status: {}, recent: [] },
+      profile_complete: true,
+    });
 
     render(
       <MemoryRouter>
@@ -61,15 +74,10 @@ describe('DashboardPage', () => {
   });
 
   it('renders instructor dashboard on success', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          courses: [],
-          needs_grading: [],
-        }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
-      )
-    );
+    mockDashboardFetch({
+      courses: [],
+      needs_grading: [],
+    });
 
     render(
       <MemoryRouter>
@@ -86,21 +94,16 @@ describe('DashboardPage', () => {
   });
 
   it('renders error state and retries on button click', async () => {
-    const fetchMock = vi
-      .spyOn(globalThis, 'fetch')
-      .mockRejectedValueOnce(new Error('Network disconnected'))
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({
-            due_next: [],
-            recent_grades: [],
-            courses: [],
-            applications: { counts_by_status: {}, recent: [] },
-            profile_complete: true,
-          }),
-          { status: 200, headers: { 'Content-Type': 'application/json' } }
-        )
-      );
+    const fetchMock = mockDashboardFetch(
+      {
+        due_next: [],
+        recent_grades: [],
+        courses: [],
+        applications: { counts_by_status: {}, recent: [] },
+        profile_complete: true,
+      },
+      true
+    );
 
     render(
       <MemoryRouter>
@@ -121,6 +124,6 @@ describe('DashboardPage', () => {
       expect(screen.getByText('No upcoming assignments')).toBeInTheDocument();
     });
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalled();
   });
 });

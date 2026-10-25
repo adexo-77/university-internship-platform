@@ -25,33 +25,37 @@ const mockInstructor: User = {
   updated_at: '2026-10-18T00:00:00Z',
 };
 
+const mockFetch = (coursesData: unknown) =>
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
+    const url = String(input);
+    if (url.includes('/api/notifications/unread-count')) {
+      return new Response(JSON.stringify({ unread_count: 0 }), { status: 200 });
+    }
+    return new Response(JSON.stringify(coursesData), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  });
+
 describe('MyCoursesPage Component', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
   it('renders student enrolled courses when logged in as student', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(
-        JSON.stringify([
-          {
-            id: 10,
-            instructor_id: 2,
-            instructor_name: 'Prof. Gauss',
-            title: 'Linear Algebra',
-            description: 'Matrices and vectors.',
-            status: 'published',
-            created_at: '2026-10-18T00:00:00Z',
-            updated_at: '2026-10-18T00:00:00Z',
-            enrolled: true,
-          },
-        ]),
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      )
-    );
+    mockFetch([
+      {
+        id: 10,
+        instructor_id: 2,
+        instructor_name: 'Prof. Gauss',
+        title: 'Linear Algebra',
+        description: 'Matrices and vectors.',
+        status: 'published',
+        created_at: '2026-10-18T00:00:00Z',
+        updated_at: '2026-10-18T00:00:00Z',
+        enrolled: true,
+      },
+    ]);
 
     await act(async () => {
       render(
@@ -69,12 +73,7 @@ describe('MyCoursesPage Component', () => {
   });
 
   it('renders empty state for student when no courses are enrolled', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify([]), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      })
-    );
+    mockFetch([]);
 
     await act(async () => {
       render(
@@ -91,26 +90,18 @@ describe('MyCoursesPage Component', () => {
   });
 
   it('renders instructor own courses with New Course action and enrolled count', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(
-        JSON.stringify([
-          {
-            id: 20,
-            instructor_id: 2,
-            instructor_name: 'Instructor User',
-            title: 'Operating Systems Design',
-            status: 'published',
-            enrolled_count: 15,
-            created_at: '2026-10-18T00:00:00Z',
-            updated_at: '2026-10-18T00:00:00Z',
-          },
-        ]),
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      )
-    );
+    mockFetch([
+      {
+        id: 20,
+        instructor_id: 2,
+        instructor_name: 'Instructor User',
+        title: 'Operating Systems Design',
+        status: 'published',
+        enrolled_count: 15,
+        created_at: '2026-10-18T00:00:00Z',
+        updated_at: '2026-10-18T00:00:00Z',
+      },
+    ]);
 
     await act(async () => {
       render(

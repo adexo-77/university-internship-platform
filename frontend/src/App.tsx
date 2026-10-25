@@ -29,6 +29,7 @@ import { MyApplicationsPage } from './pages/MyApplicationsPage';
 import { MyCoursesPage } from './pages/MyCoursesPage';
 import { MyInternshipsPage } from './pages/MyInternshipsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { NotificationsPage } from './pages/NotificationsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { RegisterPage } from './pages/RegisterPage';
 import { SubmissionGradePage } from './pages/SubmissionGradePage';
@@ -61,6 +62,7 @@ export const AppRoutes: React.FC = () => {
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/account" element={<AccountPage />} />
 
         {/* Profile: student and organization roles only */}

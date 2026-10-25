@@ -90,3 +90,43 @@ export function isPastDue(
 
   return dueDate.getTime() < referenceDate.getTime();
 }
+
+/**
+ * Format an ISO date string as a concise relative time string.
+ * Examples: "just now", "5m ago", "2h ago", "3d ago", or "18 Oct 2026".
+ */
+export function formatRelativeTime(
+  isoString: string | null | undefined,
+  referenceDate: Date = new Date()
+): string {
+  if (!isoString) {
+    return '—';
+  }
+
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) {
+    return 'Invalid date';
+  }
+
+  const diffMs = referenceDate.getTime() - date.getTime();
+  if (diffMs < 60_000) {
+    return 'just now';
+  }
+
+  const minutes = Math.floor(diffMs / 60_000);
+  if (minutes < 60) {
+    return `${minutes}m ago`;
+  }
+
+  const hours = Math.floor(diffMs / 3_600_000);
+  if (hours < 24) {
+    return `${hours}h ago`;
+  }
+
+  const days = Math.floor(diffMs / 86_400_000);
+  if (days < 7) {
+    return `${days}d ago`;
+  }
+
+  return formatDate(isoString);
+}

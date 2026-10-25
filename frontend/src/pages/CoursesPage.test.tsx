@@ -25,38 +25,42 @@ const mockStudentUser: User = {
   updated_at: '2026-10-18T00:00:00Z',
 };
 
+const mockFetch = (coursesData: unknown) =>
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
+    const url = String(input);
+    if (url.includes('/api/notifications/unread-count')) {
+      return new Response(JSON.stringify({ unread_count: 0 }), { status: 200 });
+    }
+    return new Response(JSON.stringify(coursesData), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  });
+
 describe('CoursesPage Component', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
   it('renders courses list and search form', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          items: [
-            {
-              id: 1,
-              instructor_id: 10,
-              instructor_name: 'Dr. Turing',
-              title: 'Theory of Computation',
-              description: 'Automata and computability.',
-              status: 'published',
-              created_at: '2026-10-18T00:00:00Z',
-              updated_at: '2026-10-18T00:00:00Z',
-              enrolled: false,
-            },
-          ],
-          total: 1,
-          limit: 10,
-          offset: 0,
-        }),
+    mockFetch({
+      items: [
         {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      )
-    );
+          id: 1,
+          instructor_id: 10,
+          instructor_name: 'Dr. Turing',
+          title: 'Theory of Computation',
+          description: 'Automata and computability.',
+          status: 'published',
+          created_at: '2026-10-18T00:00:00Z',
+          updated_at: '2026-10-18T00:00:00Z',
+          enrolled: false,
+        },
+      ],
+      total: 1,
+      limit: 10,
+      offset: 0,
+    });
 
     await act(async () => {
       render(
@@ -74,20 +78,12 @@ describe('CoursesPage Component', () => {
   });
 
   it('submits search query and requests filtered courses', async () => {
-    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          items: [],
-          total: 0,
-          limit: 10,
-          offset: 0,
-        }),
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      )
-    );
+    const fetchSpy = mockFetch({
+      items: [],
+      total: 0,
+      limit: 10,
+      offset: 0,
+    });
 
     await act(async () => {
       render(
@@ -111,30 +107,22 @@ describe('CoursesPage Component', () => {
   });
 
   it('shows status badge for admin users', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          items: [
-            {
-              id: 2,
-              instructor_id: 10,
-              instructor_name: 'Dr. Turing',
-              title: 'Draft Course 101',
-              status: 'draft',
-              created_at: '2026-10-18T00:00:00Z',
-              updated_at: '2026-10-18T00:00:00Z',
-            },
-          ],
-          total: 1,
-          limit: 10,
-          offset: 0,
-        }),
+    mockFetch({
+      items: [
         {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      )
-    );
+          id: 2,
+          instructor_id: 10,
+          instructor_name: 'Dr. Turing',
+          title: 'Draft Course 101',
+          status: 'draft',
+          created_at: '2026-10-18T00:00:00Z',
+          updated_at: '2026-10-18T00:00:00Z',
+        },
+      ],
+      total: 1,
+      limit: 10,
+      offset: 0,
+    });
 
     await act(async () => {
       render(

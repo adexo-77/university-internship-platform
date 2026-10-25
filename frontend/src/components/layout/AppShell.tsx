@@ -3,8 +3,10 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { navigationItems, NavItem } from '../../config/navigation';
 import { useAuth } from '../../hooks/useAuth';
+import { useUnreadCount } from '../../hooks/useUnreadCount';
 import { cn } from '../../lib/cn';
 import { Badge, Button } from '../ui';
+import { NotificationBell } from '../notifications/NotificationBell';
 
 export interface AppShellProps {
   children: React.ReactNode;
@@ -20,6 +22,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { unreadCount } = useUnreadCount({ enabled: Boolean(user) });
 
   const activePath = currentPath ?? location.pathname;
 
@@ -38,15 +41,18 @@ export const AppShell: React.FC<AppShellProps> = ({
       {/* Mobile Top Navigation */}
       <div className="flex md:hidden items-center justify-between border-b border-line bg-surface px-4 py-3">
         <span className="font-semibold text-ink text-base">University Platform</span>
-        <button
-          type="button"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
-          aria-expanded={isMobileMenuOpen}
-          className="rounded-control border border-line p-1.5 text-pencil hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-petrol"
-        >
-          {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-2">
+          {user && <NotificationBell count={unreadCount} />}
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isMobileMenuOpen}
+            className="rounded-control border border-line p-1.5 text-pencil hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-petrol"
+          >
+            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Sidebar Overlay on Mobile */}
@@ -128,6 +134,7 @@ export const AppShell: React.FC<AppShellProps> = ({
 
           {user && (
             <div className="flex items-center gap-3">
+              <NotificationBell count={unreadCount} />
               <span className="text-base text-ink font-medium">{user.full_name}</span>
               <Badge variant="neutral">{user.role}</Badge>
               <Button
