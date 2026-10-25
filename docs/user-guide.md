@@ -194,3 +194,24 @@ Any authenticated user can update their password:
 1. Click **Sign out** in the navigation bar.
 2. The server invalidates the session record in PostgreSQL and clears the `HttpOnly` cookie.
 3. The browser is redirected to `/login`, and protected route access is immediately blocked.
+
+---
+
+## 7. In-App Notifications &amp; Activity Tracking
+
+The platform includes an automated in-app notifications center that keeps all personas informed of critical lifecycle events across courses, assignments, applications, and account security.
+
+### Notification Bell &amp; Unread Counter
+- A notification bell icon is situated in the top navigation header across all authenticated views.
+- If there are unread notifications, a bold petrol badge displays the exact unread count (e.g., `3`).
+- **Visibility-Aware Polling**: The unread counter polls the server every 60 seconds when the browser tab is active and visible. Refetches trigger instantly when the browser window regains focus.
+
+### Notifications Page (`/notifications`)
+1. Click the notification bell icon (or navigate to `/notifications`) to open your notifications feed.
+2. **Visual Indicators**: Unread notifications are distinguished with a petrol tint background, bold title, and an unread dot indicator.
+3. **Deep Linking**: Click any notification to navigate directly to its related entity (e.g., assignment details, course syllabus, application decision, or internship posting).
+4. **Mark as Read**:
+   - Clicking a notification automatically marks it as read on the server.
+   - Click the checkmark icon on an individual item to mark it as read without navigating away.
+   - Click **Mark all as read** at the top right to clear all unread badges simultaneously.
+5. **Retention**: The platform automatically caps history at the 200 most recent notifications per user via an automated database pruning trigger.

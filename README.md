@@ -48,6 +48,13 @@ The platform provides tailored workspaces and dashboards for four primary user r
 - **Organization Vetting**: Review incoming employer registrations; approve or reject organizations before they are permitted to post listings.
 - **Internship Moderation**: Review submitted postings; approve for public discovery or reject with explanatory review notes; take down compromised listings.
 
+### 🔔 In-App Notifications (All Roles)
+- **Top Navigation Indicator**: Real-time bell icon with petrol badge displaying unread notification count.
+- **Visibility-Aware Polling**: Background check every 60 seconds while active, with immediate refetch on window focus.
+- **Comprehensive Notification Center (`/notifications`)**: Dedicated feed with unread highlights, filter, individual mark-as-read, bulk read-all, and direct deep-linking to relevant resources.
+- **Domain Event Triggers**: 10 lifecycle events across grading, submissions, reviews, applications, and security.
+- **Automated Capacity Pruning**: PostgreSQL database trigger automatically caps history at 200 items per user.
+
 ---
 
 ## 3. Screenshots

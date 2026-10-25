@@ -16,6 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Frontend `CourseResourcesSection` component with list, modal forms, `ConfirmModal` deletion dialogues, and clear empty states for owners vs enrolled students.
   - Realistic demo course resources seeded into demo dataset with idempotency guards and extended seed tests.
   - OpenAPI documentation synchronized in `docs/openapi.json`.
+- **Phase 8b: In-App Notifications**:
+  - `notifications` database model with `notification_kind` enum, foreign key with cascade to `users.id`, relative `link_path` validation, and indexed `is_read` and `created_at`.
+  - Alembic migration `f5b72183c0aa` creating `notifications` table and PostgreSQL database trigger `trg_prune_notifications` calling `prune_user_notifications()` automatically enforcing a 200-item ceiling per recipient user.
+  - Domain event triggers across service layer for 10 distinct events: submission graded, application decision, assignment created, first submission on assignment, application received, internship review status, organization review status, new organization registration, internship submitted for review, and administrative password reset.
+  - Actor exclusion logic preventing self-notifications on user-initiated actions.
+  - Thin router endpoints under `/api`: `GET /api/notifications`, `GET /api/notifications/unread-count`, `PATCH /api/notifications/{id}/read`, and `POST /api/notifications/read-all`.
+  - Frontend `NotificationBell` with unread badge counter, `useUnreadCount` hook with 60-second document visibility polling and focus refetch, `NotificationsPage` with unread highlights, filter, individual mark-as-read, and bulk read-all actions.
+  - Realistic notification seeding across demo personas with idempotency guards and extended seed tests.
+  - OpenAPI schema synchronization and documentation updates across `database.md`, `architecture.md`, `api.md`, `requirements.md`, `user-guide.md`, and `README.md`.
 
 ### Fixed
 - Corrected internship application profile prerequisite claims in documentation from bio and skills to university and department only.

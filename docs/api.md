@@ -123,6 +123,14 @@ Authentication uses stateful, server-managed sessions with cryptographically ran
 | `GET` | `/api/admin/internships` | Admin | Moderation queue for submitted internship postings. |
 | `PUT` | `/api/admin/internships/{id}/review` | Admin | Approve, reject, or take down listing with review note. |
 
+### Notification Endpoints
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/notifications` | Authenticated | Retrieve paginated notifications list for current user (?limit=, ?offset=). |
+| `GET` | `/api/notifications/unread-count` | Authenticated | Retrieve unread notifications count for navigation badge. |
+| `PATCH` | `/api/notifications/{id}/read` | Authenticated | Mark single notification owned by current user as read. |
+| `POST` | `/api/notifications/read-all` | Authenticated | Mark all notifications owned by current user as read. |
+
 ### Role Dashboard Endpoints
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |

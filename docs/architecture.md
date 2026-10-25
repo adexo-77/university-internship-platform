@@ -11,6 +11,7 @@ The **University Learning & Internship Platform** is engineered with a modular, 
 - **Phase 6**: Role dashboards with aggregated metrics, progress percentages, and average grades.
 - **Phase 7a**: Security hardening: sliding-window rate limiting, CSRF defense, security headers (`X-Frame-Options: DENY`, `no-store` cache), production cookie guards, 256 KB request limits, string/null-byte sanitization, structured logging, and generic 500 handlers.
 - **Phase 8a**: Course learning resources: curated external documentation links (up to 50 per course) with owner management and enrolled student visibility.
+- **Phase 8b**: In-app notifications: 10 domain lifecycle events, recipient isolation, no self-notifications, 200-notification capacity pruning trigger, bell icon with unread count indicator, 60s visibility-aware polling with focus refetch, mark as read, read-all, and full notifications page.
 
 ```mermaid
 flowchart TD
@@ -91,6 +92,7 @@ flowchart TD
   - `submission.py`: `Submission` model linking assignment and student with unique constraint, content, link_url, is_late, grade, feedback, graded_at, graded_by.
   - `internship.py`: `InternshipPosting` model with organization FK, title, description, requirements, location, work mode, duration_weeks, application_deadline, status (`draft`, `open`, `closed`).
   - `application.py`: `Application` model linking posting and student with unique constraint, cover_letter, status (`submitted`, `shortlisted`, `accepted`, `rejected`, `withdrawn`), decision_message, decided_at.
+  - `notification.py`: `Notification` model with user FK (cascade), `notification_kind` enum, title, message, validated relative `link_path`, `is_read`, and timestamps.
   - `base.py`: Central `DeclarativeBase` metadata class.
 - **Schemas (`schemas/`)**:
   - `auth.py`: `RegisterRequest`, `LoginRequest`, `UserResponse`.
@@ -103,6 +105,7 @@ flowchart TD
   - `submission.py`: `SubmissionSubmit` (extra="forbid", http/https validation), `SubmissionGrade` (extra="forbid"), `SubmissionResponse`, `StudentSubmissionRosterItem`.
   - `internship.py`: `InternshipCreate`, `InternshipUpdate`, `InternshipResponse`, `InternshipCatalogueItem`, `InternshipListResponse`, `MyInternshipItem`.
   - `application.py`: `ApplicationCreate`, `ApplicationDecision`, `ApplicationResponse`, `MyApplicationItem`, `ApplicantRosterItem`.
+  - `notification.py`: `NotificationResponse`, `NotificationListResponse`, `UnreadCountResponse`.
   - `health.py`: Health verification schemas.
 - **Routers (`routers/`)**:
   - Thin FastAPI HTTP endpoints under `/api`.
@@ -116,6 +119,7 @@ flowchart TD
   - `submission.py`: `/assignments/{id}/submission`, `/assignments/{id}/submissions`, `/submissions/{id}/grade`.
   - `internship.py`: `/internships`, `/organizations/me/internships`, `/internships/{id}`.
   - `application.py`: `/internships/{id}/applications`, `/students/me/applications`, `/applications/{id}/withdraw`, `/applications/{id}`, `/applications/{id}/decision`.
+  - `notification.py`: `/notifications`, `/notifications/unread-count`, `/notifications/{id}/read`, `/notifications/read-all`.
 - **Services (`services/`)**:
   - `AuthService`: Registration (atomic user + profile), authentication, session lifecycle.
   - `StudentProfileService`: Student profile retrieval and updates.
@@ -129,21 +133,24 @@ flowchart TD
   - `internship.py`: Internship posting creation, detail lookup, update with status transitions (`draft`->`open`, `open`->`closed`), organization own postings list with applicant counts.
   - `internship_catalog.py`: Catalogue search and pagination for students and admin with applied status mapping.
   - `application.py`: Student application submission with profile completeness and open deadline guards, duplicate prevention, student application listing, withdrawal window, applicant roster retrieval, and organization decision transitions.
-
-### 2. Frontend Layer (`frontend/src/`)
+  - `notification.py`: Notification creation on 10 domain events, user notifications listing with pagination, unread counter, read status updates, link path validation, and 200-item capacity pruning.
+- **Frontend Layer (`frontend/src/`)**:
 - **API (`api/`)**:
-  - `auth.ts`, `profile.ts`, `course.ts`, `assignment.ts`, `internship.ts`, `application.ts`, `health.ts`.
+  - `auth.ts`, `profile.ts`, `course.ts`, `assignment.ts`, `internship.ts`, `application.ts`, `notification.ts`, `health.ts`.
 - **Context &amp; Navigation (`context/`, `config/`)**:
   - `AuthContext`: Session lifecycle and user identity.
   - `navigation.ts`: Navigation items filtered per role, role-based `getHomePath` (organization routes to `/my-internships`).
+- **Hooks (`hooks/`)**:
+  - `useAuth.ts`, `useHealth.ts`, `useInternshipActions.ts`, `usePageTitle.ts`, `useUnreadCount.ts` (60s document visibility polling + window focus refetch).
 - **Libraries (`lib/`)**:
   - `cn.ts`: Tailwind class utility.
   - `skills.ts`: Comma-separated skill string parsing.
-  - `dates.ts`: Unambiguous date formatting (`formatDate`, `formatDateTime`), due-soon (3 days), and past-due logic.
+  - `dates.ts`: Unambiguous date formatting (`formatDate`, `formatDateTime`, `formatRelativeTime`), due-soon (3 days), and past-due logic.
 - **Components (`components/`)**:
   - `components/courses/`: `CourseForm`, `CourseTable`, `EnrollButton`, `StudentRosterTable`, `CourseResourcesSection`, `CourseResourceFormModal`.
   - `components/assignments/`: `AssignmentForm`, `AssignmentTable`, `CourseAssignmentsSection`, `DueBadge`, `GradeForm`, `SubmissionForm`, `SubmissionStatusBadge`, `SubmissionsTable`.
   - `components/internships/`: `InternshipForm`, `InternshipTable`, `InternshipStatusBadge`, `ApplyForm`, `ApplicationStatusBadge`, `ApplicantsTable`, `DecisionForm`, `MyApplicationsTable`, `StudentApplicationPanel`, `InternshipApplicantsSection`.
+  - `components/notifications/`: `NotificationBell`, `NotificationItem`, `NotificationList`.
   - `components/ui/`: `Button`, `TextField`, `Textarea`, `Select`, `Badge`, `DataTable`, `EmptyState`, `ErrorMessage`, `Notice`, `PageHeader`.
   - `components/layout/`: `AppShell`.
   - `components/routes/`: `ProtectedRoute`, `RoleRoute`.
@@ -164,6 +171,7 @@ flowchart TD
   - `/internships/:id/edit`: Organization internship editing form.
   - `/my-applications`: Student applications table with status badges and withdraw action.
   - `/applications/:id`: Applicant review page with background profile, cover letter, and decision form.
+  - `/notifications`: In-app notifications feed with unread highlights, filter, mark as read, and read-all actions.
   - `/profile`: Role-specific student and organization profile views.
   - `/account`: Account details and credentials overview.
   - `/status`: Admin system status view.
@@ -231,6 +239,10 @@ flowchart TD
 | `/api/dashboard/instructor` | `GET` | `instructor` | Instructor courses overview, awaiting grading counts, and needs_grading queue | `200 OK` |
 | `/api/dashboard/organization` | `GET` | `organization` | Organization approval status, posting status counts, and latest applications | `200 OK` |
 | `/api/dashboard/admin` | `GET` | `admin` | Admin platform metrics, pending approvals and reviews, and status breakdowns | `200 OK` |
+| `/api/notifications` | `GET` | Authenticated | Retrieve paginated notifications list for current user (?limit=, ?offset=) | `200 OK` |
+| `/api/notifications/unread-count` | `GET` | Authenticated | Get total count of unread notifications for badge counter | `200 OK` |
+| `/api/notifications/{id}/read` | `PATCH` | Authenticated | Mark a single notification owned by current user as read | `200 OK` |
+| `/api/notifications/read-all` | `POST` | Authenticated | Mark all notifications owned by current user as read | `200 OK` |
 | `/api/health` | `GET` | Public | Basic platform status probe | `200 OK` |
 | `/api/health/db` | `GET` | Public | Database query connectivity probe | `200 OK` |
 
