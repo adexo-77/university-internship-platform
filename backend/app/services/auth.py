@@ -1,9 +1,7 @@
 """Domain service implementing authentication, session management, and credential verification."""
 
-from datetime import UTC, datetime, timedelta
-
 from sqlalchemy import delete, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from app.core.exceptions import (
     AppException,
@@ -12,8 +10,6 @@ from app.core.exceptions import (
 )
 from app.core.rate_limit import rate_limiter
 from app.core.security import (
-    SESSION_LIFETIME_SECONDS,
-    generate_session_token,
     hash_password,
     hash_session_token,
     verify_dummy_password,
@@ -26,10 +22,16 @@ from app.models.student_profile import StudentProfile
 from app.models.user import User, UserRole
 from app.schemas.auth import ChangePasswordRequest, LoginRequest, RegisterRequest
 from app.services.notification import create_notification
+from app.services.session import SessionService
 
 
 class AuthService:
     """Authentication and session management business logic."""
+
+    purge_expired_sessions = staticmethod(SessionService.purge_expired_sessions)
+    create_session = staticmethod(SessionService.create_session)
+    delete_session = staticmethod(SessionService.delete_session)
+    resolve_current_user = staticmethod(SessionService.resolve_current_user)
 
     @staticmethod
     def register(
@@ -79,15 +81,18 @@ class AuthService:
                     approval_status=ApprovalStatus.PENDING,
                 )
                 db.add(org_profile)
-                admin_ids = list(
+                recipient_ids = list(
                     db.scalars(
-                        select(User.id).where(User.role == UserRole.ADMIN, User.is_active.is_(True))
+                        select(User.id).where(
+                            User.role.in_([UserRole.ADMIN, UserRole.COORDINATOR]),
+                            User.is_active.is_(True),
+                        )
                     )
                 )
-                for admin_id in admin_ids:
+                for recipient_id in recipient_ids:
                     create_notification(
                         db,
-                        user_id=admin_id,
+                        user_id=recipient_id,
                         actor_id=user.id,
                         kind=NotificationKind.ORGANIZATION_REGISTERED,
                         title=f"New Organization: {org_name}",
@@ -133,74 +138,6 @@ class AuthService:
         AuthService.purge_expired_sessions(db)
         _, raw_token = AuthService.create_session(db=db, user_id=user.id)
         return user, raw_token
-
-    @staticmethod
-    def purge_expired_sessions(db: Session) -> int:
-        """Purge expired sessions across all users."""
-        now = datetime.now(UTC)
-        result = db.execute(delete(SessionModel).where(SessionModel.expires_at <= now))
-        db.commit()
-        return int(result.rowcount)
-
-    @staticmethod
-    def create_session(db: Session, user_id: int) -> tuple[SessionModel, str]:
-        """Create a new session record storing only the SHA-256 hash of the token."""
-        raw_token = generate_session_token()
-        token_hash = hash_session_token(raw_token)
-        expires_at = datetime.now(UTC) + timedelta(seconds=SESSION_LIFETIME_SECONDS)
-
-        session_record = SessionModel(
-            user_id=user_id,
-            token_hash=token_hash,
-            expires_at=expires_at,
-        )
-        db.add(session_record)
-        db.commit()
-        db.refresh(session_record)
-
-        return session_record, raw_token
-
-    @staticmethod
-    def delete_session(db: Session, raw_token: str | None) -> None:
-        """Invalidate and delete the session matching the given raw token.
-
-        Safe to call when signed out or when raw_token is missing or empty.
-        """
-        if not raw_token:
-            return
-
-        token_hash = hash_session_token(raw_token)
-        db.execute(delete(SessionModel).where(SessionModel.token_hash == token_hash))
-        db.commit()
-
-    @staticmethod
-    def resolve_current_user(db: Session, raw_token: str | None) -> User | None:
-        """Resolve current active user from session token cookie, expiring stale sessions."""
-        if not raw_token:
-            return None
-
-        token_hash = hash_session_token(raw_token)
-        stmt = (
-            select(SessionModel)
-            .options(joinedload(SessionModel.user))
-            .where(SessionModel.token_hash == token_hash)
-        )
-        session_record = db.scalar(stmt)
-        if session_record is None:
-            return None
-
-        # Check session expiry
-        now = datetime.now(UTC)
-        if session_record.expires_at <= now:
-            db.delete(session_record)
-            db.commit()
-            return None
-
-        # Verify associated user is active
-        if not session_record.user or not session_record.user.is_active:
-            return None
-
-        return session_record.user
 
     @staticmethod
     def change_password(

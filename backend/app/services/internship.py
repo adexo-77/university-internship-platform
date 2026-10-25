@@ -115,13 +115,18 @@ def submit_internship(db: Session, internship_id: int, current_user: User) -> In
             code="ORGANIZATION_NOT_APPROVED",
         )
     p.status = InternshipStatus.PENDING_REVIEW
-    admin_ids = list(
-        db.scalars(select(User.id).where(User.role == UserRole.ADMIN, User.is_active.is_(True)))
+    recipient_ids = list(
+        db.scalars(
+            select(User.id).where(
+                User.role.in_([UserRole.ADMIN, UserRole.COORDINATOR]),
+                User.is_active.is_(True),
+            )
+        )
     )
-    for admin_id in admin_ids:
+    for recipient_id in recipient_ids:
         create_notification(
             db,
-            user_id=admin_id,
+            user_id=recipient_id,
             actor_id=current_user.id,
             kind=NotificationKind.INTERNSHIP_SUBMITTED,
             title=f"Internship Review: {p.title}",
