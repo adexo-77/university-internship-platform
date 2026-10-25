@@ -17,6 +17,7 @@ describe('AdminUserForm Component', () => {
 
     expect(screen.getByLabelText(/instructor/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/administrator/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/coordinator/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/initial password/i)).toBeInTheDocument();
@@ -92,5 +93,43 @@ describe('AdminUserForm Component', () => {
         /Account for Dr. John Watson \(john.watson@brolf.edu\) created successfully\./i
       )
     ).toBeInTheDocument();
+  });
+
+  it('allows selecting coordinator role and submits successfully', async () => {
+    vi.mocked(adminUserApi.createAdminUser).mockResolvedValueOnce({
+      id: 6,
+      email: 'selamawit.tadesse@example.com',
+      full_name: 'Ms. Selamawit Tadesse',
+      role: 'coordinator',
+      is_active: true,
+      created_at: '2026-10-25T12:00:00Z',
+      updated_at: '2026-10-25T12:00:00Z',
+    });
+
+    render(<AdminUserForm />);
+
+    fireEvent.click(screen.getByLabelText(/coordinator/i));
+    fireEvent.change(screen.getByLabelText(/full name/i), {
+      target: { value: 'Ms. Selamawit Tadesse' },
+    });
+    fireEvent.change(screen.getByLabelText(/email address/i), {
+      target: { value: 'selamawit.tadesse@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/initial password/i), {
+      target: { value: '12345678' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /create user/i }));
+
+    await waitFor(() => {
+      expect(adminUserApi.createAdminUser).toHaveBeenCalledWith({
+        role: 'coordinator',
+        full_name: 'Ms. Selamawit Tadesse',
+        email: 'selamawit.tadesse@example.com',
+        password: '12345678',
+      });
+    });
+
+    expect(await screen.findByText(/user created/i)).toBeInTheDocument();
   });
 });

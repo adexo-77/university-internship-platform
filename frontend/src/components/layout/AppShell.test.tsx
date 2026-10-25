@@ -21,13 +21,18 @@ const mockAdminUser: User = {
 };
 
 const mockStudentUser: User = {
+  ...mockAdminUser,
   id: 2,
   email: 'student@example.com',
   full_name: 'Jane Student',
   role: 'student',
-  is_active: true,
-  created_at: '2026-10-18T00:00:00Z',
-  updated_at: '2026-10-18T00:00:00Z',
+};
+
+const mockCoordinatorUser: User = {
+  ...mockAdminUser,
+  id: 3,
+  full_name: 'Selamawit Tadesse',
+  role: 'coordinator',
 };
 
 describe('AppShell Component', () => {
@@ -71,6 +76,25 @@ describe('AppShell Component', () => {
     expect(screen.getByRole('link', { name: 'Account' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'System status' })).not.toBeInTheDocument();
     expect(screen.getAllByText('Jane Student').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('renders coordinator navigation and role badge correctly', () => {
+    render(
+      <MemoryRouter initialEntries={['/dashboard']}>
+        <AuthProvider initialUser={mockCoordinatorUser}>
+          <AppShell currentPath="/dashboard">
+            <div>Coordinator content</div>
+          </AppShell>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole('link', { name: 'Organizations' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Internship reviews' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Internships' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Users' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Courses' })).not.toBeInTheDocument();
+    expect(screen.getByText('coordinator')).toBeInTheDocument();
   });
 
   it('renders custom navigation items passed via navItems prop', () => {

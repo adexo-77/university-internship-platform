@@ -7,13 +7,14 @@ describe('Navigation Configuration', () => {
     expect(getHomePath('instructor')).toBe('/dashboard');
     expect(getHomePath('organization')).toBe('/dashboard');
     expect(getHomePath('admin')).toBe('/dashboard');
+    expect(getHomePath('coordinator')).toBe('/dashboard');
   });
 
   it('has Dashboard as the first navigation item for all roles', () => {
     expect(navigationItems[0].label).toBe('Dashboard');
     expect(navigationItems[0].path).toBe('/dashboard');
 
-    const roles = ['student', 'instructor', 'organization', 'admin'] as const;
+    const roles = ['student', 'instructor', 'organization', 'admin', 'coordinator'] as const;
     for (const role of roles) {
       const items = navigationItems.filter((item) => !item.roles || item.roles.includes(role));
       expect(items[0].label).toBe('Dashboard');
@@ -84,6 +85,26 @@ describe('Navigation Configuration', () => {
     expect(labels).toContain('Internships');
     expect(labels).toContain('Account');
     expect(labels).toContain('System status');
+    expect(labels).not.toContain('My courses');
+    expect(labels).not.toContain('My applications');
+    expect(labels).not.toContain('My internships');
+    expect(labels).not.toContain('Profile');
+  });
+
+  it('filters navigation items for coordinator role', () => {
+    const coordinatorItems = navigationItems.filter(
+      (item) => !item.roles || item.roles.includes('coordinator')
+    );
+    const labels = coordinatorItems.map((i) => i.label);
+
+    expect(labels).toContain('Dashboard');
+    expect(labels).toContain('Organizations');
+    expect(labels).toContain('Internship reviews');
+    expect(labels).toContain('Internships');
+    expect(labels).toContain('Account');
+    expect(labels).not.toContain('Users');
+    expect(labels).not.toContain('Courses');
+    expect(labels).not.toContain('System status');
     expect(labels).not.toContain('My courses');
     expect(labels).not.toContain('My applications');
     expect(labels).not.toContain('My internships');

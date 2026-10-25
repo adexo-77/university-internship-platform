@@ -25,6 +25,16 @@ const mockInstructor: User = {
   updated_at: '2026-10-18T00:00:00Z',
 };
 
+const mockCoordinator: User = {
+  id: 3,
+  email: 'coord@test.edu',
+  full_name: 'Coordinator User',
+  role: 'coordinator',
+  is_active: true,
+  created_at: '2026-10-18T00:00:00Z',
+  updated_at: '2026-10-18T00:00:00Z',
+};
+
 const mockDashboardFetch = (dashboardData: unknown, failFirst = false) => {
   let failed = false;
   return vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
@@ -90,6 +100,29 @@ describe('DashboardPage', () => {
     await waitFor(() => {
       expect(screen.getByText('No courses found')).toBeInTheDocument();
       expect(screen.getByText('All caught up')).toBeInTheDocument();
+    });
+  });
+
+  it('renders coordinator dashboard on success', async () => {
+    mockDashboardFetch({
+      organizations_pending_approval: 1,
+      internships_pending_review: 2,
+      open_internships: 3,
+      applications_by_status: { submitted: 4, accepted: 1 },
+      reviews_completed: 5,
+    });
+
+    render(
+      <MemoryRouter>
+        <AuthProvider initialUser={mockCoordinator}>
+          <DashboardPage />
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Review work queues')).toBeInTheDocument();
+      expect(screen.getByText('Completed by you')).toBeInTheDocument();
     });
   });
 
