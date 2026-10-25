@@ -2681,6 +2681,28 @@
         }
       }
     },
+    "/api/dashboard/coordinator": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "Coordinator Dashboard",
+        "description": "Retrieve aggregated review queues and applications metrics for coordinators.",
+        "operationId": "coordinator_dashboard_api_dashboard_coordinator_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoordinatorDashboardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/notifications": {
       "get": {
         "tags": [
@@ -2850,7 +2872,8 @@
         "type": "string",
         "enum": [
           "instructor",
-          "admin"
+          "admin",
+          "coordinator"
         ],
         "title": "AdminCreatableRole",
         "description": "Roles permitted to be provisioned via admin user creation."
@@ -3085,7 +3108,7 @@
           },
           "role": {
             "$ref": "#/components/schemas/AdminCreatableRole",
-            "description": "Account role: must be 'instructor' or 'admin'"
+            "description": "Account role: must be 'instructor', 'admin', or 'coordinator'"
           }
         },
         "additionalProperties": false,
@@ -3097,7 +3120,7 @@
           "role"
         ],
         "title": "AdminUserCreateRequest",
-        "description": "Schema for admin provisioning of instructor or admin accounts."
+        "description": "Schema for admin provisioning of instructor, admin, or coordinator accounts."
       },
       "AdminUserListResponse": {
         "properties": {
@@ -3678,6 +3701,43 @@
         ],
         "title": "ChangePasswordRequest",
         "description": "Schema for authenticated password change."
+      },
+      "CoordinatorDashboardResponse": {
+        "properties": {
+          "organizations_pending_approval": {
+            "type": "integer",
+            "title": "Organizations Pending Approval"
+          },
+          "internships_pending_review": {
+            "type": "integer",
+            "title": "Internships Pending Review"
+          },
+          "open_internships": {
+            "type": "integer",
+            "title": "Open Internships"
+          },
+          "applications_by_status": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Applications By Status"
+          },
+          "reviews_completed": {
+            "type": "integer",
+            "title": "Reviews Completed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "organizations_pending_approval",
+          "internships_pending_review",
+          "open_internships",
+          "applications_by_status",
+          "reviews_completed"
+        ],
+        "title": "CoordinatorDashboardResponse",
+        "description": "Aggregated platform workflow metrics for internship coordinators."
       },
       "CourseCreate": {
         "properties": {
@@ -5804,7 +5864,8 @@
           "student",
           "instructor",
           "organization",
-          "admin"
+          "admin",
+          "coordinator"
         ],
         "title": "UserRole",
         "description": "User account roles."

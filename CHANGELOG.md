@@ -25,6 +25,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Frontend `NotificationBell` with unread badge counter, `useUnreadCount` hook with 60-second document visibility polling and focus refetch, `NotificationsPage` with unread highlights, filter, individual mark-as-read, and bulk read-all actions.
   - Realistic notification seeding across demo personas with idempotency guards and extended seed tests.
   - OpenAPI schema synchronization and documentation updates across `database.md`, `architecture.md`, `api.md`, `requirements.md`, `user-guide.md`, and `README.md`.
+- **Phase 8c: Internship Coordinator Role**:
+  - `coordinator` role added to native PostgreSQL `user_role` enum via Alembic migration `4486e293b423` using `autocommit_block()`.
+  - Self-registration restricted to student and organization; coordinators can only be provisioned by administrators via the admin user form or `scripts/create_user.py`.
+  - Server-side role enforcement: coordinators and admins may list and decide on organization approvals (`/api/admin/organizations*`), review, approve, reject with notes, and take down internship postings (`/api/admin/internships*`), list all platform internships across all statuses, and read applicant rosters in read-only mode (`/api/internships/{id}/applications`).
+  - Strict security boundaries: coordinators are forbidden (`403 Forbidden`) from user administration (`/api/admin/users*`), administrative password resets, course administration, or system health status.
+  - Dual notifications: events that notify admins (new organization registered, internship submitted for review) notify both active admins and coordinators.
+  - Dedicated coordinator dashboard (`GET /api/dashboard/coordinator`) returning pending organization approvals, postings pending moderation, live open postings, applicant pipeline distribution, and coordinator completed reviews count.
+  - Frontend coordinator workspace: custom navigation (Dashboard, Organizations, Internship reviews, Internships, Account, notification bell), dedicated `CoordinatorDashboard` component, route guards, admin user form coordinator option, and badge rendering.
+  - Realistic demo coordinator Ms. Selamawit Tadesse seeded into demo dataset, with updated seed tests, user guide, demo script, and documentation.
 
 ### Fixed
 - Corrected internship application profile prerequisite claims in documentation from bio and skills to university and department only.

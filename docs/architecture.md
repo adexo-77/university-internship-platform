@@ -12,6 +12,7 @@ The **University Learning & Internship Platform** is engineered with a modular, 
 - **Phase 7a**: Security hardening: sliding-window rate limiting, CSRF defense, security headers (`X-Frame-Options: DENY`, `no-store` cache), production cookie guards, 256 KB request limits, string/null-byte sanitization, structured logging, and generic 500 handlers.
 - **Phase 8a**: Course learning resources: curated external documentation links (up to 50 per course) with owner management and enrolled student visibility.
 - **Phase 8b**: In-app notifications: 10 domain lifecycle events, recipient isolation, no self-notifications, 200-notification capacity pruning trigger, bell icon with unread count indicator, 60s visibility-aware polling with focus refetch, mark as read, read-all, and full notifications page.
+- **Phase 8c**: Internship coordinator role: dedicated institutional liaison persona for organization approval vetting, internship moderation queue decisions, read-only applicant roster inspection, and dedicated coordinator dashboard.
 
 ```mermaid
 flowchart TD
@@ -81,7 +82,7 @@ flowchart TD
   - `deps.py`: `get_current_user` and `require_roles(*roles)` enforcing role authorization.
   - `exceptions.py`: Application exceptions mapped to standard HTTP status codes.
 - **Models (`models/`)**:
-  - `user.py`: `User` account model with `UserRole` enum (`student`, `instructor`, `organization`, `admin`).
+  - `user.py`: `User` account model with `UserRole` enum (`student`, `instructor`, `organization`, `admin`, `coordinator`).
   - `session.py`: `Session` model with user FK and indexed `token_hash`.
   - `student_profile.py`: `StudentProfile` model with 1-to-1 cascade FK to users.
   - `organization_profile.py`: `OrganizationProfile` model with 1-to-1 cascade FK to users.
@@ -215,29 +216,30 @@ flowchart TD
 | `/api/internships` | `POST` | `organization` | Create internship posting with future deadline | `201 Created` |
 | `/api/organizations/me/internships` | `GET` | `organization` | Get organization's own postings with applicant count | `200 OK` |
 | `/api/internships/{id}` | `PATCH` | `organization` (owner) | Update posting fields in draft/rejected, or extend deadline up to 90 days if open | `200 OK` |
-| `/api/internships/{id}/submit` | `POST` | `organization` (owner) | Submit draft or rejected posting for admin review (requires approved org) | `200 OK` |
+| `/api/internships/{id}/submit` | `POST` | `organization` (owner) | Submit draft or rejected posting for admin/coordinator review (requires approved org) | `200 OK` |
 | `/api/internships/{id}/withdraw` | `POST` | `organization` (owner) | Withdraw pending_review posting back to draft for further editing | `200 OK` |
 | `/api/internships/{id}/close` | `POST` | `organization` (owner) | Close open internship posting | `200 OK` |
-| `/api/internships` | `GET` | `student`, `admin` | Search catalogue (?q=, ?work_mode=, pagination); 403 for others | `200 OK` |
-| `/api/internships/{id}` | `GET` | `student` (if open), owner `organization`, `admin` | Get internship details (404 for others) | `200 OK` |
-| `/api/admin/internships` | `GET` | `admin` | List postings for review queue (?status=, oldest first) | `200 OK` |
-| `/api/admin/internships/{id}/review` | `PUT` | `admin` | Approve, reject, or take down posting (note required for reject/takedown) | `200 OK` |
+| `/api/internships` | `GET` | `student`, `coordinator`, `admin` | Search catalogue (?q=, ?work_mode=, pagination); 403 for others | `200 OK` |
+| `/api/internships/{id}` | `GET` | `student` (if open), owner `organization`, `coordinator`, `admin` | Get internship details (404 for others) | `200 OK` |
+| `/api/admin/internships` | `GET` | `coordinator`, `admin` | List postings for review queue (?status=, oldest first) | `200 OK` |
+| `/api/admin/internships/{id}/review` | `PUT` | `coordinator`, `admin` | Approve, reject, or take down posting (note required for reject/takedown) | `200 OK` |
 | `/api/internships/{id}/applications` | `POST` | `student` | Submit application (guards profile completeness, deadline, duplicates) | `201 Created` |
 | `/api/students/me/applications` | `GET` | `student` | Get authenticated student's applications | `200 OK` |
 | `/api/applications/{id}/withdraw` | `POST` | `student` (owner) | Withdraw application while submitted/shortlisted | `200 OK` |
-| `/api/internships/{id}/applications` | `GET` | `organization` (owner), `admin` | List applicant background profiles, cover letters, and statuses | `200 OK` |
-| `/api/applications/{id}` | `GET` | `student` (owner), `organization` (owner), `admin` | Get application details (404 for others) | `200 OK` |
+| `/api/internships/{id}/applications` | `GET` | `organization` (owner), `coordinator`, `admin` | List applicant background profiles, cover letters, and statuses | `200 OK` |
+| `/api/applications/{id}` | `GET` | `student` (owner), `organization` (owner), `coordinator`, `admin` | Get application details (404 for others) | `200 OK` |
 | `/api/applications/{id}/decision` | `PUT` | `organization` (owner) | Decide application (`shortlisted`, `accepted`, `rejected`) | `200 OK` |
 | `/api/auth/change-password` | `POST` | Authenticated | Change user's own password (invalidates other sessions) | `200 OK` |
 | `/api/admin/users` | `GET` | `admin` | Search & paginate users (?q=, ?role=, ?is_active=) | `200 OK` |
-| `/api/admin/users` | `POST` | `admin` | Provision instructor or admin account (422 for other roles) | `201 Created` |
+| `/api/admin/users` | `POST` | `admin` | Provision instructor, admin, or coordinator account | `201 Created` |
 | `/api/admin/users/{id}` | `PATCH` | `admin` | Toggle user is_active (guards self/last-admin, kills sessions) | `200 OK` |
 | `/api/admin/users/{id}/password` | `PUT` | `admin` | Reset user password (invalidates user sessions) | `200 OK` |
-| `/api/admin/organizations` | `GET` | `admin` | List organizations with ?approval_status= filter & pagination | `200 OK` |
-| `/api/admin/organizations/{user_id}/approval` | `PUT` | `admin` | Approve, reject, or reset organization approval with note | `200 OK` |
+| `/api/admin/organizations` | `GET` | `coordinator`, `admin` | List organizations with ?approval_status= filter & pagination | `200 OK` |
+| `/api/admin/organizations/{user_id}/approval` | `PUT` | `coordinator`, `admin` | Approve, reject, or reset organization approval with note | `200 OK` |
 | `/api/dashboard/student` | `GET` | `student` | Student coursework progress, due_next assignments, recent grades, and applications summary | `200 OK` |
 | `/api/dashboard/instructor` | `GET` | `instructor` | Instructor courses overview, awaiting grading counts, and needs_grading queue | `200 OK` |
 | `/api/dashboard/organization` | `GET` | `organization` | Organization approval status, posting status counts, and latest applications | `200 OK` |
+| `/api/dashboard/coordinator` | `GET` | `coordinator` | Coordinator metrics: pending approvals & reviews, open postings, app statuses, reviews completed | `200 OK` |
 | `/api/dashboard/admin` | `GET` | `admin` | Admin platform metrics, pending approvals and reviews, and status breakdowns | `200 OK` |
 | `/api/notifications` | `GET` | Authenticated | Retrieve paginated notifications list for current user (?limit=, ?offset=) | `200 OK` |
 | `/api/notifications/unread-count` | `GET` | Authenticated | Get total count of unread notifications for badge counter | `200 OK` |
@@ -245,6 +247,37 @@ flowchart TD
 | `/api/notifications/read-all` | `POST` | Authenticated | Mark all notifications owned by current user as read | `200 OK` |
 | `/api/health` | `GET` | Public | Basic platform status probe | `200 OK` |
 | `/api/health/db` | `GET` | Public | Database query connectivity probe | `200 OK` |
+
+---
+
+### Role-Permission Authorization Matrix
+
+The table below outlines role access across platform route domains. Anonymous requests receive `401 Unauthorized`; authenticated requests with unpermitted roles receive `403 Forbidden`.
+
+| Route Domain / Resource | Student | Instructor | Organization | Coordinator | Admin | Notes / Enforcement Guards |
+| :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **Authentication &amp; Self-Service** (`/api/auth/*`) | ✅ | ✅ | ✅ | ✅ | ✅ | Register (student, org only), login, logout, password change |
+| **In-App Notifications** (`/api/notifications/*`) | ✅ | ✅ | ✅ | ✅ | ✅ | Scoped strictly to authenticated user's ID |
+| **Student Profiles** (`/api/students/*`) | ✅ | ❌ | ❌ | ❌ | ✅ | Student self-management; admin inspect |
+| **Organization Profiles** (`/api/organizations/*`) | ❌ | ❌ | ✅ | ❌ | ✅ | Org self-management; admin inspect |
+| **Course Catalog &amp; View** (`/api/courses`, `GET /courses/{id}`) | ✅ | ✅ | ❌ | ❌ | ✅ | Published courses visible; draft visible to owner/admin |
+| **Course Authoring &amp; Resources** (`POST /courses`, `/resources`) | ❌ | ✅ | ❌ | ❌ | ✅ | Instructor owns course/resources; admin read/delete |
+| **Course Enrollment** (`/courses/{id}/enrollment`) | ✅ | ❌ | ❌ | ❌ | ❌ | Students only |
+| **Course Roster** (`/courses/{id}/roster`) | ❌ | ✅ | ❌ | ❌ | ✅ | Course instructor &amp; admin |
+| **Assignment Authoring &amp; Grading** (`/assignments`, `/grade`) | ❌ | ✅ | ❌ | ❌ | ❌ | Instructor owns course; admin read-only submissions |
+| **Assignment Submissions** (`/assignments/{id}/submission`) | ✅ | ❌ | ❌ | ❌ | ❌ | Enrolled students only |
+| **Internship Catalog Search** (`GET /api/internships`) | ✅ | ❌ | ❌ | ✅ | ✅ | Students (open only), Coordinators &amp; Admins (all) |
+| **Internship Posting Detail** (`GET /api/internships/{id}`) | ✅ (open) | ❌ | ✅ (owner) | ✅ | ✅ | Student (open only), Owner org, Coordinator, Admin |
+| **Internship Authoring &amp; Close** (`POST /internships`, `/close`) | ❌ | ❌ | ✅ | ❌ | ❌ | Approved organizations only |
+| **Internship Moderation Queue** (`/api/admin/internships*`) | ❌ | ❌ | ❌ | ✅ | ✅ | Review queue, approve, reject with note, takedown |
+| **Organization Approval Vetting** (`/api/admin/organizations*`) | ❌ | ❌ | ❌ | ✅ | ✅ | Vetting queue, approve, reject with note |
+| **Internship Applicant Roster** (`GET /internships/{id}/applications`)| ❌ | ❌ | ✅ (owner) | ✅ (read-only) | ✅ (read-only) | Owner organization, Coordinator, Admin |
+| **Application Decisions** (`PUT /applications/{id}/decision`) | ❌ | ❌ | ✅ (owner) | ❌ | ❌ | Posting owner organization only |
+| **Student Applications** (`POST /internships/{id}/applications`) | ✅ | ❌ | ❌ | ❌ | ❌ | Profile completeness required |
+| **User Administration** (`/api/admin/users*`) | ❌ | ❌ | ❌ | ❌ | ✅ | Admin only; Coordinator returns 403 |
+| **Administrative Password Reset** (`PUT /admin/users/{id}/password`) | ❌ | ❌ | ❌ | ❌ | ✅ | Admin only; Coordinator returns 403 |
+| **System Status Probe** (`/system-status`) | ❌ | ❌ | ❌ | ❌ | ✅ | Admin only; Coordinator returns 403 |
+| **Role Dashboard** (`/api/dashboard/{role}`) | Student | Instructor | Org | Coordinator | Admin | Scoped strictly to matching role |
 
 ---
 

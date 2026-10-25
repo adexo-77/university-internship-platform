@@ -31,11 +31,32 @@ This document details the security posture, threat model, control mechanisms, kn
 | **Request Size Limits** | `backend/app/core/request_size.py` | Rejects request payloads greater than 256 KB with `HTTP 413`. |
 | **Input Sanitization** | `backend/app/core/sanitization.py` | Strips control characters, rejects `\x00` bytes, and normalizes email addresses via safe NFKC unicode conversion. |
 | **Logging &amp; Error Masking** | `backend/app/core/logging.py` | Request logger masking auth payloads; 500 handler logging stack traces server-side and returning clean `{detail, code, request_id}`. |
-| **Role Authorization** | `backend/app/core/deps.py` | Mandatory server-side session resolution; `/api/admin/*` enforced strictly for admin role with `HTTP 403`. |
+| **Role Authorization** | `backend/app/core/deps.py` | Mandatory server-side session resolution; explicit per-route role sets enforced via `require_roles(*roles)` returning `HTTP 403` for unauthorized personas. |
 
 ---
 
-## 3. Known Limitations &amp; Design Tradeoffs
+## 3. Role-Based Access Control (RBAC) &amp; Personas
+
+The platform defines five distinct personas governed by server-enforced role dependencies:
+
+1. **Student (`student`)**:
+   - **Capabilities**: Browse published courses, enroll, access course learning resources, submit coursework before deadline, withdraw pending applications, apply to open postings with completed profile, manage academic profile.
+   - **Restrictions**: Cannot author courses, grade coursework, moderate postings, approve organizations, or manage users (`403 Forbidden`).
+2. **Instructor (`instructor`)**:
+   - **Capabilities**: Author and publish courses, curate course learning resources, author assignments, inspect submission rosters, award numeric grades with feedback.
+   - **Restrictions**: Cannot apply to postings, moderate postings, approve organizations, manage users, or grade unowned courses (`403 Forbidden`).
+3. **Organization (`organization`)**:
+   - **Capabilities**: Author internship postings (`draft`, `pending_review`, `open`, `closed`), extend deadlines up to 90 days, manage candidate pipeline decisions (`shortlisted`, `accepted`, `rejected`), manage corporate profile.
+   - **Restrictions**: Unapproved organizations cannot submit postings for review; cannot access academic course rosters or administer users (`403 Forbidden`).
+4. **Internship Coordinator (`coordinator`)**:
+   - **Capabilities**: Review and decide organization registrations (`/api/admin/organizations*`), moderate internship postings (`/api/admin/internships*`: approve, reject with notes, takedowns), search and view all platform internships across all statuses, inspect candidate applicant rosters (read-only), dedicated coordinator dashboard.
+   - **Restrictions**: Strictly forbidden from user account administration (`/api/admin/users*`), administrative password resets, course administration, or system health status (`403 Forbidden`).
+5. **Administrator (`admin`)**:
+   - **Capabilities**: Superuser role retaining every coordinator privilege plus complete user administration (`/api/admin/users*`), administrative password resets, account activation/deactivation (with self-protection), course administration, and system health status.
+
+---
+
+## 4. Known Limitations &amp; Design Tradeoffs
 
 1. **In-Memory Rate Limiting**:
    - The sliding-window rate limiter stores attempt timestamps in process memory.
@@ -50,7 +71,7 @@ This document details the security posture, threat model, control mechanisms, kn
 
 ---
 
-## 4. Production Deployment Recommendations
+## 5. Production Deployment Recommendations
 
 1. **TLS / HTTPS Termination**:
    - Deploy backend behind a secure reverse proxy (Nginx, Traefik, Caddy, or Cloud Load Balancer) terminating TLS 1.3.

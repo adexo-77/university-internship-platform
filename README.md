@@ -19,7 +19,7 @@ The **University Learning &amp; Internship Platform** unifies these two critical
 
 ## 2. Features by Role
 
-The platform provides tailored workspaces and dashboards for four primary user roles:
+The platform provides tailored workspaces and dashboards for five primary user roles:
 
 ### 🎓 Student
 - **Interactive Student Dashboard**: View enrolled courses, assignments due soon (flagged as urgent, upcoming, or past due), recent grade cards, and application pipeline metrics.
@@ -41,6 +41,13 @@ The platform provides tailored workspaces and dashboards for four primary user r
 - **Corporate Profile**: Maintain company details, industry category, company size, and official website URL.
 - **Internship Posting Lifecycle**: Create postings with roles, requirements, locations, stipends, and deadlines; manage states (`draft` &rarr; `pending_review` &rarr; `open` &rarr; `closed`).
 - **Applicant Pipeline Management**: Review student applications, inspect applicant profiles and cover letters, and execute hiring decisions (`shortlisted`, `accepted`, `rejected`) with state locking.
+
+### 📋 Internship Coordinator
+- **Coordinator Dashboard**: Dedicated operational dashboard tracking pending employer registrations, internship postings awaiting moderation, live open postings, applicant pipeline distributions, and completed review counts.
+- **Organization Vetting**: Review and decide on corporate partner registrations with full approval and rejection workflows.
+- **Internship Moderation**: Review submitted postings, approve listings for public student discovery, reject with feedback notes, or take down compromised listings.
+- **Listing &amp; Applicant Visibility**: Search and inspect all internship listings across every lifecycle status and inspect applicant rosters in read-only mode to mentor students and monitor placement health.
+- **Institutional Boundaries**: Strictly separated from administrative user provisioning, password resets, course administration, or system health operations.
 
 ### 🛡️ Administrator
 - **Administrator Dashboard**: High-level platform health metrics, user account distributions, and pending review counts.

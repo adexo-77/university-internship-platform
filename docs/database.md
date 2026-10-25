@@ -28,7 +28,7 @@ erDiagram
         string email UK "lowercase, indexed, max 255"
         string password_hash "scrypt hash with salt"
         string full_name "max 255"
-        user_role role "enum: student | instructor | organization | admin"
+        user_role role "enum: student | instructor | organization | admin | coordinator"
         boolean is_active "default true"
         timestamp created_at "with time zone, server default now()"
         timestamp updated_at "with time zone, server default now(), on update"
@@ -177,7 +177,7 @@ Represents all registered accounts across all roles in the platform.
 | `email` | `VARCHAR(255)` | `NOT NULL`, `UNIQUE`, `INDEX` | Normalized lowercase email address |
 | `password_hash` | `VARCHAR(255)` | `NOT NULL` | `hashlib.scrypt` hash with unique random salt |
 | `full_name` | `VARCHAR(255)` | `NOT NULL` | Display and legal name of the user |
-| `role` | `user_role` | `NOT NULL` | PostgreSQL native enum (`student`, `instructor`, `organization`, `admin`) |
+| `role` | `user_role` | `NOT NULL` | PostgreSQL native enum (`student`, `instructor`, `organization`, `admin`, `coordinator`) |
 | `is_active` | `BOOLEAN` | `NOT NULL`, `DEFAULT TRUE` | Account active state for suspension / activation |
 | `created_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Account creation timestamp in UTC |
 | `updated_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Last update timestamp in UTC |
@@ -368,10 +368,10 @@ stateDiagram-v2
     [*] --> draft: Organization creates posting
     draft --> pending_review: Organization submits for review (POST /api/internships/{id}/submit)
     pending_review --> draft: Organization withdraws to draft (POST /api/internships/{id}/withdraw)
-    pending_review --> open: Admin approves (PUT /api/admin/internships/{id}/review)
-    pending_review --> rejected: Admin rejects with note (PUT /api/admin/internships/{id}/review)
+    pending_review --> open: Admin or Coordinator approves (PUT /api/admin/internships/{id}/review)
+    pending_review --> rejected: Admin or Coordinator rejects with note (PUT /api/admin/internships/{id}/review)
     rejected --> pending_review: Organization resubmits after editing (POST /api/internships/{id}/submit)
-    open --> rejected: Admin takes down with note (PUT /api/admin/internships/{id}/review)
+    open --> rejected: Admin or Coordinator takes down with note (PUT /api/admin/internships/{id}/review)
     open --> closed: Organization closes (POST /api/internships/{id}/close)
     closed --> [*]
 ```
@@ -395,14 +395,14 @@ stateDiagram-v2
 13. **Instructor-Only Grading**: Only the course owner instructor can grade or regrade student work; administrators possess read-only access (403 Forbidden).
 14. **Internship Review Lifecycle**: Organizations cannot publish postings directly to `open` (PATCH with status `open` returns 409 "Submit for review instead"). Submission to `pending_review` requires an approved organization account (409 Conflict).
 15. **Content Modification Lock & Deadline Cap**: Posting content is editable only while in `draft` or `rejected` status. An `open` posting accepts only deadline extension (shortening returns 409 Conflict) or close. A posting's application deadline may never exceed `MAX_DEADLINE_DAYS = 90` days after its reference date (the approval date `reviewed_at` for open postings, and today for draft or rejected postings). Violations on creation, editing, or extension return 409 Conflict with the latest allowed date. `pending_review` and `closed` postings are strictly locked.
-16. **Admin Review Privileges & Note Requirement**: Only admins can approve or reject postings. Rejections and takedowns strictly require a non-empty `review_note` (up to 500 characters). Admins never edit posting content.
-17. **Review Metadata Privacy**: `review_note`, `reviewed_at`, and `reviewed_by` are set from the server session and visible only to the posting owner organization and administrators. They are never exposed to students or other organizations.
+16. **Moderation Review Privileges & Note Requirement**: Only admins and coordinators can approve or reject postings. Rejections and takedowns strictly require a non-empty `review_note` (up to 500 characters). Admins and coordinators never edit posting content.
+17. **Review Metadata Privacy**: `review_note`, `reviewed_at`, and `reviewed_by` are set from the server session and visible only to the posting owner organization, administrators, and coordinators. They are never exposed to students or other organizations.
 18. **Takedown & Rejection Visibility Isolation**: A taken-down or rejected posting disappears from student catalogue search and detail views (404 Not Found) and blocks new student applications (409 Conflict), but preserves existing applications for both student and organization review.
 19. **Profile Completeness Prerequisite**: Students must have both `university` and `department` populated in their student profile before submitting an application (409 Conflict: "Complete your profile before applying").
 20. **Unique Application Per Posting**: Unique constraint on `(posting_id, student_id)` prevents duplicate applications by a student for the same posting (409 Conflict).
 21. **Application Lifecycle Transitions**: Applications can transition from `submitted` to `shortlisted`, `accepted`, or `rejected`; and from `shortlisted` to `accepted` or `rejected`. `accepted` and `rejected` statuses are terminal (409 Conflict). Withdrawn applications cannot be decided.
 22. **Withdrawal Window**: Students can withdraw their own application only while in `submitted` or `shortlisted` status (409 Conflict).
-23. **Applicant Data Isolation**: Detailed applicant profile data and cover letters are strictly confined to the posting's owner organization and platform administrators. Other organizations receive 404 Not Found.
+23. **Applicant Data Isolation**: Detailed applicant profile data and cover letters are strictly confined to the posting's owner organization, platform administrators, and internship coordinators. Other organizations receive 404 Not Found.
 24. **Course Resource Constraints & Access**: Course resources are bounded to a maximum of 50 links per course. Resource URLs must strictly use `http` or `https` schemes and cannot contain null bytes, control characters, or Javascript URIs. Access to resources is restricted to the owning instructor, platform admin, or students enrolled in the published course (returning 404 Not Found for non-enrolled students or draft courses). Only the owning instructor may add, edit, or delete resources.
 25. **Notification Isolation, Link Validation & Capacity Pruning**: In-app notifications are strictly bound to their recipient `user_id`; cross-user access returns 404 Not Found. Actions performed by an actor never generate self-notifications for that actor. Target `link_path` strings are validated to start with `/` and contain no external schemes, control characters, or invalid URIs. Capacity is strictly constrained to 200 notifications per user, enforced by an atomic PostgreSQL database trigger (`trg_prune_notifications`) and service-layer fallback pruning.
 
