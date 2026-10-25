@@ -26,6 +26,7 @@ from app.routers.dashboard import router as dashboard_router
 from app.routers.enrollment import router as enrollment_router
 from app.routers.health import router as health_router
 from app.routers.internship import router as internship_router
+from app.routers.notification import router as notification_router
 from app.routers.organization_profile import router as organization_profile_router
 from app.routers.student_profile import router as student_profile_router
 from app.routers.submission import router as submission_router
@@ -135,3 +136,4 @@ app.include_router(admin_user_router, prefix="/api")
 app.include_router(admin_organization_router, prefix="/api")
 app.include_router(admin_internship_router, prefix="/api")
 app.include_router(dashboard_router, prefix="/api")
+app.include_router(notification_router, prefix="/api")
