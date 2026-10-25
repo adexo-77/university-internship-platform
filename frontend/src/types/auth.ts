@@ -1,7 +1,7 @@
 /**
  * User roles in the platform.
  */
-export type UserRole = 'student' | 'instructor' | 'organization' | 'admin';
+export type UserRole = 'student' | 'instructor' | 'organization' | 'admin' | 'coordinator';
 
 /**
  * Roles allowed for self-service public registration.

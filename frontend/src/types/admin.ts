@@ -1,7 +1,7 @@
 import { UserRole } from './auth';
 import { ApprovalStatus } from './profile';
 
-export type AdminCreatableRole = 'instructor' | 'admin';
+export type AdminCreatableRole = 'instructor' | 'admin' | 'coordinator';
 
 export interface AdminUser {
   id: number;

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CLI administrative tool to create instructor and admin accounts."""
+"""CLI administrative tool to create instructor, admin, and coordinator accounts."""
 
 import argparse
 import getpass
@@ -20,13 +20,17 @@ from app.core.security import hash_password
 from app.models.user import User, UserRole
 from sqlalchemy import select
 
-ALLOWED_ROLES = (UserRole.INSTRUCTOR.value, UserRole.ADMIN.value)
+ALLOWED_ROLES = (
+    UserRole.INSTRUCTOR.value,
+    UserRole.ADMIN.value,
+    UserRole.COORDINATOR.value,
+)
 
 
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Create an instructor or admin account directly in the database."
+        description="Create an instructor, admin, or coordinator account directly in the database."
     )
     parser.add_argument(
         "--email",
@@ -42,7 +46,7 @@ def parse_args() -> argparse.Namespace:
         "--role",
         required=True,
         choices=ALLOWED_ROLES,
-        help="Account role (must be 'instructor' or 'admin')",
+        help="Account role (must be 'instructor', 'admin', or 'coordinator')",
     )
     return parser.parse_args()
 

@@ -20,8 +20,8 @@ export const AdminUserForm: React.FC<AdminUserFormProps> = ({ onSuccess }) => {
   const validate = (): boolean => {
     const errors: Record<string, string> = {};
 
-    if (!role || (role !== 'instructor' && role !== 'admin')) {
-      errors.role = 'Role must be either instructor or admin.';
+    if (!role || (role !== 'instructor' && role !== 'admin' && role !== 'coordinator')) {
+      errors.role = 'Role must be either instructor, admin, or coordinator.';
     }
 
     if (!fullName.trim()) {
@@ -131,6 +131,22 @@ export const AdminUserForm: React.FC<AdminUserFormProps> = ({ onSuccess }) => {
               className="text-petrol focus:ring-petrol"
             />
             Administrator
+          </label>
+          <label
+            htmlFor="admin-role-coordinator"
+            className="flex items-center gap-2 cursor-pointer text-sm text-ink"
+          >
+            <input
+              id="admin-role-coordinator"
+              type="radio"
+              name="role"
+              value="coordinator"
+              checked={role === 'coordinator'}
+              onChange={() => setRole('coordinator')}
+              disabled={isSubmitting}
+              className="text-petrol focus:ring-petrol"
+            />
+            Coordinator
           </label>
         </div>
         {fieldErrors.role && <p className="text-xs text-brick mt-1">{fieldErrors.role}</p>}

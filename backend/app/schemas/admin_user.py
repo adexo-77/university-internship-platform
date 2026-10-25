@@ -13,10 +13,11 @@ class AdminCreatableRole(enum.StrEnum):
 
     INSTRUCTOR = "instructor"
     ADMIN = "admin"
+    COORDINATOR = "coordinator"
 
 
 class AdminUserCreateRequest(BaseModel):
-    """Schema for admin provisioning of instructor or admin accounts."""
+    """Schema for admin provisioning of instructor, admin, or coordinator accounts."""
 
     full_name: str = Field(..., min_length=1, max_length=255, description="Full name of user")
     email: str = Field(..., description="User email address")
@@ -27,7 +28,7 @@ class AdminUserCreateRequest(BaseModel):
         description="Password between 8 and 128 characters",
     )
     role: AdminCreatableRole = Field(
-        ..., description="Account role: must be 'instructor' or 'admin'"
+        ..., description="Account role: must be 'instructor', 'admin', or 'coordinator'"
     )
 
     model_config = ConfigDict(extra="forbid")

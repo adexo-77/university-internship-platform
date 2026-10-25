@@ -13,7 +13,6 @@ from app.models.notification import NotificationKind
 from app.models.session import Session as SessionModel
 from app.models.user import User, UserRole
 from app.schemas.admin_user import (
-    AdminCreatableRole,
     AdminUserCreateRequest,
     AdminUserListResponse,
     AdminUserResponse,
@@ -77,9 +76,7 @@ class AdminUserService:
         if existing_user is not None:
             raise EmailAlreadyExistsException()
 
-        target_role = (
-            UserRole.INSTRUCTOR if payload.role == AdminCreatableRole.INSTRUCTOR else UserRole.ADMIN
-        )
+        target_role = UserRole(payload.role.value)
 
         user = User(
             email=payload.email,

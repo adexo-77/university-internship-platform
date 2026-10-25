@@ -28,6 +28,7 @@ class UserRole(enum.StrEnum):
     INSTRUCTOR = "instructor"
     ORGANIZATION = "organization"
     ADMIN = "admin"
+    COORDINATOR = "coordinator"
 
 
 class User(Base):
