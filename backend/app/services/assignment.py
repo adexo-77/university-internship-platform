@@ -9,9 +9,11 @@ from app.core.exceptions import ConflictException, ForbiddenException, NotFoundE
 from app.models.assignment import Assignment
 from app.models.course import Course
 from app.models.enrollment import Enrollment
+from app.models.notification import NotificationKind
 from app.models.submission import Submission
 from app.models.user import User, UserRole
 from app.schemas.assignment import AssignmentCreate, AssignmentResponse, AssignmentUpdate
+from app.services.notification import create_notification
 
 
 def check_course_access(db: Session, course: Course, user: User) -> bool:
@@ -27,6 +29,17 @@ def check_course_access(db: Session, course: Course, user: User) -> bool:
         )
         return enrolled is not None
     return False
+
+
+def _attach_submission(resp: AssignmentResponse, sub: Submission | None) -> None:
+    if sub:
+        resp.submission_status = "graded" if sub.grade is not None else "submitted"
+        resp.is_late = sub.is_late
+        resp.grade = sub.grade
+    else:
+        resp.submission_status = "not_submitted"
+        resp.is_late = None
+        resp.grade = None
 
 
 def create_assignment(
@@ -61,6 +74,22 @@ def create_assignment(
         max_points=payload.max_points,
     )
     db.add(assignment)
+    db.flush()
+
+    enrolled_ids = list(
+        db.scalars(select(Enrollment.student_id).where(Enrollment.course_id == course_id))
+    )
+    for student_id in enrolled_ids:
+        create_notification(
+            db,
+            user_id=student_id,
+            actor_id=current_user.id,
+            kind=NotificationKind.ASSIGNMENT_CREATED,
+            title=f"New Assignment: {assignment.title}",
+            message=f"A new assignment '{assignment.title}' was posted in '{course.title}'.",
+            link_path=f"/assignments/{assignment.id}",
+        )
+
     db.commit()
     db.refresh(assignment)
     resp = AssignmentResponse.model_validate(assignment)
@@ -106,15 +135,7 @@ def get_course_assignments(
         resp = AssignmentResponse.model_validate(item)
         resp.course_title = course.title
         if current_user.role == UserRole.STUDENT:
-            sub = submissions_map.get(item.id)
-            if sub:
-                resp.submission_status = "graded" if sub.grade is not None else "submitted"
-                resp.is_late = sub.is_late
-                resp.grade = sub.grade
-            else:
-                resp.submission_status = "not_submitted"
-                resp.is_late = None
-                resp.grade = None
+            _attach_submission(resp, submissions_map.get(item.id))
         responses.append(resp)
 
     return responses
@@ -143,14 +164,7 @@ def get_assignment_by_id(
                 Submission.student_id == current_user.id,
             )
         )
-        if sub:
-            resp.submission_status = "graded" if sub.grade is not None else "submitted"
-            resp.is_late = sub.is_late
-            resp.grade = sub.grade
-        else:
-            resp.submission_status = "not_submitted"
-            resp.is_late = None
-            resp.grade = None
+        _attach_submission(resp, sub)
 
     return resp
 
@@ -188,12 +202,10 @@ def update_assignment(
             )
         assignment.max_points = payload.max_points
 
-    if payload.title is not None:
-        assignment.title = payload.title
-    if payload.description is not None:
-        assignment.description = payload.description
-    if payload.due_at is not None:
-        assignment.due_at = payload.due_at
+    for field in ("title", "description", "due_at"):
+        val = getattr(payload, field)
+        if val is not None:
+            setattr(assignment, field, val)
 
     db.commit()
     db.refresh(assignment)

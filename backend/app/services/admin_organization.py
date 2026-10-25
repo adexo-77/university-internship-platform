@@ -6,6 +6,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import NotFoundException
+from app.models.notification import NotificationKind
 from app.models.organization_profile import ApprovalStatus, OrganizationProfile
 from app.models.user import User, UserRole
 from app.schemas.admin_organization import (
@@ -13,6 +14,7 @@ from app.schemas.admin_organization import (
     AdminOrganizationItem,
     AdminOrganizationListResponse,
 )
+from app.services.notification import create_notification
 
 
 class AdminOrganizationService:
@@ -99,6 +101,21 @@ class AdminOrganizationService:
         org.approval_note = payload.approval_note
         org.reviewed_at = datetime.now(UTC)
         org.reviewed_by = current_admin.id
+        db.flush()
+
+        note_text = f" Note: {payload.approval_note}" if payload.approval_note else ""
+        create_notification(
+            db,
+            user_id=org.user_id,
+            actor_id=current_admin.id,
+            kind=NotificationKind.ORGANIZATION_STATUS,
+            title=f"Organization Status: {payload.approval_status.value.capitalize()}",
+            message=(
+                f"Your organization account approval status was changed to "
+                f"{payload.approval_status.value}.{note_text}"
+            ),
+            link_path="/profile",
+        )
 
         db.commit()
         db.refresh(org)

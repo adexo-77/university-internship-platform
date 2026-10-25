@@ -19,11 +19,13 @@ from app.core.security import (
     verify_dummy_password,
     verify_password,
 )
+from app.models.notification import NotificationKind
 from app.models.organization_profile import ApprovalStatus, OrganizationProfile
 from app.models.session import Session as SessionModel
 from app.models.student_profile import StudentProfile
 from app.models.user import User, UserRole
 from app.schemas.auth import ChangePasswordRequest, LoginRequest, RegisterRequest
+from app.services.notification import create_notification
 
 
 class AuthService:
@@ -77,6 +79,21 @@ class AuthService:
                     approval_status=ApprovalStatus.PENDING,
                 )
                 db.add(org_profile)
+                admin_ids = list(
+                    db.scalars(
+                        select(User.id).where(User.role == UserRole.ADMIN, User.is_active.is_(True))
+                    )
+                )
+                for admin_id in admin_ids:
+                    create_notification(
+                        db,
+                        user_id=admin_id,
+                        actor_id=user.id,
+                        kind=NotificationKind.ORGANIZATION_REGISTERED,
+                        title=f"New Organization: {org_name}",
+                        message=f"Organization '{org_name}' registered and is pending approval.",
+                        link_path="/admin/organizations",
+                    )
 
             db.commit()
             db.refresh(user)

@@ -9,6 +9,7 @@ from app.core.exceptions import ConflictException, ForbiddenException, NotFoundE
 from app.models.assignment import Assignment
 from app.models.course import Course
 from app.models.enrollment import Enrollment
+from app.models.notification import NotificationKind
 from app.models.submission import Submission
 from app.models.user import User, UserRole
 from app.schemas.submission import (
@@ -17,6 +18,7 @@ from app.schemas.submission import (
     SubmissionResponse,
     SubmissionSubmit,
 )
+from app.services.notification import create_notification
 
 
 def _ensure_enrolled_student(db: Session, course_id: int, user: User) -> None:
@@ -85,6 +87,17 @@ def submit_assignment(
             updated_at=now,
         )
         db.add(submission)
+        course = db.scalar(select(Course).where(Course.id == assignment.course_id))
+        if course:
+            create_notification(
+                db,
+                user_id=course.instructor_id,
+                actor_id=current_user.id,
+                kind=NotificationKind.FIRST_SUBMISSION,
+                title=f"Submission: {assignment.title}",
+                message=f"{current_user.full_name} submitted to '{assignment.title}'.",
+                link_path=f"/assignments/{assignment.id}",
+            )
 
     db.commit()
     db.refresh(submission)
@@ -203,6 +216,19 @@ def grade_submission(
     submission.feedback = payload.feedback
     submission.graded_at = now
     submission.graded_by = current_user.id
+
+    create_notification(
+        db,
+        user_id=submission.student_id,
+        actor_id=current_user.id,
+        kind=NotificationKind.SUBMISSION_GRADED,
+        title=f"Submission Graded: {assignment.title}",
+        message=(
+            f"Your submission for '{assignment.title}' was graded: "
+            f"{payload.grade}/{assignment.max_points}."
+        ),
+        link_path=f"/assignments/{assignment.id}",
+    )
 
     db.commit()
     db.refresh(submission)

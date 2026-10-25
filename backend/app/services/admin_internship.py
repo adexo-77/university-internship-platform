@@ -8,10 +8,12 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import ConflictException, NotFoundException
 from app.models.application import Application
 from app.models.internship import Internship, InternshipStatus
+from app.models.notification import NotificationKind
 from app.models.organization_profile import OrganizationProfile
 from app.models.user import User
 from app.schemas.admin_internship import InternshipReviewRequest
 from app.schemas.internship import InternshipListResponse, InternshipResponse
+from app.services.notification import create_notification
 
 
 def _get_org_name(db: Session, org_id: int) -> str | None:
@@ -106,11 +108,14 @@ def review_internship(
     if p.status == InternshipStatus.PENDING_REVIEW:
         if payload.decision == "approved":
             p.status = InternshipStatus.OPEN
+            action = "approved"
         else:
             p.status = InternshipStatus.REJECTED
+            action = "rejected"
     elif p.status == InternshipStatus.OPEN:
         if payload.decision == "rejected":
             p.status = InternshipStatus.REJECTED
+            action = "taken down"
         else:
             raise ConflictException(message="Posting is already open", code="ALREADY_OPEN")
     else:
@@ -122,6 +127,18 @@ def review_internship(
     p.reviewed_by = reviewer_id
     p.reviewed_at = datetime.now(UTC)
     p.review_note = payload.review_note
+    db.flush()
+
+    note_text = f" Note: {payload.review_note}" if payload.review_note else ""
+    create_notification(
+        db,
+        user_id=p.organization_id,
+        actor_id=reviewer_id,
+        kind=NotificationKind.INTERNSHIP_STATUS,
+        title=f"Posting {action.capitalize()}: {p.title}",
+        message=f"Your posting '{p.title}' was {action}.{note_text}",
+        link_path=f"/internships/{p.id}",
+    )
 
     db.commit()
     db.refresh(p)

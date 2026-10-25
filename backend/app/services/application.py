@@ -8,50 +8,17 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import ConflictException, ForbiddenException, NotFoundException
 from app.models.application import Application, ApplicationStatus
 from app.models.internship import Internship, InternshipStatus
+from app.models.notification import NotificationKind
 from app.models.organization_profile import OrganizationProfile
 from app.models.student_profile import StudentProfile
 from app.models.user import User, UserRole
 from app.schemas.application import (
-    ApplicantProfile,
     ApplicationCreate,
     ApplicationDecision,
     ApplicationResponse,
 )
-
-
-def _get_org_name(db: Session, org_id: int) -> str | None:
-    return db.scalar(
-        select(func.coalesce(OrganizationProfile.organization_name, User.full_name))
-        .select_from(User)
-        .outerjoin(OrganizationProfile, User.id == OrganizationProfile.user_id)
-        .where(User.id == org_id)
-    )
-
-
-def _to_applicant(u: User, p: StudentProfile | None) -> ApplicantProfile:
-    return ApplicantProfile(
-        user_id=u.id,
-        full_name=u.full_name,
-        email=u.email,
-        university=p.university if p else None,
-        department=p.department if p else None,
-        year_of_study=p.year_of_study if p else None,
-        skills=p.skills if p else [],
-        bio=p.bio if p else None,
-    )
-
-
-def _to_response(
-    a: Application,
-    posting_title: str | None = None,
-    org_name: str | None = None,
-    applicant: ApplicantProfile | None = None,
-) -> ApplicationResponse:
-    res = ApplicationResponse.model_validate(a)
-    res.posting_title = posting_title
-    res.organization_name = org_name
-    res.applicant = applicant
-    return res
+from app.services.application_helpers import get_org_name, to_applicant, to_response
+from app.services.notification import create_notification
 
 
 def apply_to_internship(
@@ -96,9 +63,19 @@ def apply_to_internship(
         status=ApplicationStatus.SUBMITTED,
     )
     db.add(app)
+    db.flush()
+    create_notification(
+        db,
+        user_id=p.organization_id,
+        actor_id=student_id,
+        kind=NotificationKind.APPLICATION_RECEIVED,
+        title=f"New Application: {p.title}",
+        message=f"A new application was received for '{p.title}'.",
+        link_path=f"/internships/{p.id}",
+    )
     db.commit()
     db.refresh(app)
-    return _to_response(app, p.title, _get_org_name(db, p.organization_id))
+    return to_response(app, p.title, get_org_name(db, p.organization_id))
 
 
 def get_student_applications(db: Session, student_id: int) -> list[ApplicationResponse]:
@@ -112,7 +89,7 @@ def get_student_applications(db: Session, student_id: int) -> list[ApplicationRe
         .where(Application.student_id == student_id)
         .order_by(Application.created_at.desc())
     )
-    return [_to_response(a, title, org) for a, title, org in db.execute(stmt).all()]
+    return [to_response(a, title, org) for a, title, org in db.execute(stmt).all()]
 
 
 def withdraw_application(db: Session, application_id: int, student_id: int) -> ApplicationResponse:
@@ -131,8 +108,8 @@ def withdraw_application(db: Session, application_id: int, student_id: int) -> A
     db.commit()
     db.refresh(app)
     p = db.scalar(select(Internship).where(Internship.id == app.posting_id))
-    org_name = _get_org_name(db, p.organization_id) if p else None
-    return _to_response(app, p.title if p else None, org_name)
+    org_name = get_org_name(db, p.organization_id) if p else None
+    return to_response(app, p.title if p else None, org_name)
 
 
 def get_internship_applications(
@@ -156,9 +133,9 @@ def get_internship_applications(
     if status is not None:
         stmt = stmt.where(Application.status == status)
 
-    org_name = _get_org_name(db, p.organization_id)
+    org_name = get_org_name(db, p.organization_id)
     return [
-        _to_response(a, p.title, org_name, _to_applicant(u, prof))
+        to_response(a, p.title, org_name, to_applicant(u, prof))
         for a, u, prof in db.execute(stmt.order_by(Application.created_at.desc())).all()
     ]
 
@@ -184,8 +161,8 @@ def get_application_by_id(
         raise NotFoundException(message="Application not found", code="NOT_FOUND")
 
     show_applicant = p.organization_id == current_user.id or current_user.role == UserRole.ADMIN
-    applicant = _to_applicant(user, prof) if show_applicant else None
-    return _to_response(app, p.title, _get_org_name(db, p.organization_id), applicant)
+    applicant = to_applicant(user, prof) if show_applicant else None
+    return to_response(app, p.title, get_org_name(db, p.organization_id), applicant)
 
 
 def decide_application(
@@ -232,6 +209,19 @@ def decide_application(
     app.status = payload.status
     app.decision_message = payload.decision_message
     app.decided_at = datetime.now(UTC)
+    db.flush()
+    msg_suffix = f": {payload.decision_message}" if payload.decision_message else "."
+    create_notification(
+        db,
+        user_id=app.student_id,
+        actor_id=current_user.id,
+        kind=NotificationKind.APPLICATION_DECISION,
+        title=f"Application {payload.status.value.capitalize()}: {p.title}",
+        message=(
+            f"Your application for '{p.title}' was marked as {payload.status.value}{msg_suffix}"
+        ),
+        link_path=f"/applications/{app.id}",
+    )
     db.commit()
     db.refresh(app)
-    return _to_response(app, p.title, _get_org_name(db, p.organization_id))
+    return to_response(app, p.title, get_org_name(db, p.organization_id))

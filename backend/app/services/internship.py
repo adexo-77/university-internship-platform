@@ -8,8 +8,9 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import ConflictException, NotFoundException
 from app.models.application import Application
 from app.models.internship import Internship, InternshipStatus
+from app.models.notification import NotificationKind
 from app.models.organization_profile import ApprovalStatus, OrganizationProfile
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.internship import (
     InternshipCreate,
     InternshipResponse,
@@ -20,6 +21,7 @@ from app.services.internship_deadline import (
     to_internship_response,
     update_posting_deadline,
 )
+from app.services.notification import create_notification
 
 CONTENT_FIELDS = (
     "title",
@@ -112,7 +114,21 @@ def submit_internship(db: Session, internship_id: int, current_user: User) -> In
             message="Your organization must be approved before you can submit internships",
             code="ORGANIZATION_NOT_APPROVED",
         )
-    return _transition_posting(db, p, InternshipStatus.PENDING_REVIEW)
+    p.status = InternshipStatus.PENDING_REVIEW
+    admin_ids = list(
+        db.scalars(select(User.id).where(User.role == UserRole.ADMIN, User.is_active.is_(True)))
+    )
+    for admin_id in admin_ids:
+        create_notification(
+            db,
+            user_id=admin_id,
+            actor_id=current_user.id,
+            kind=NotificationKind.INTERNSHIP_SUBMITTED,
+            title=f"Internship Review: {p.title}",
+            message=f"Internship '{p.title}' was submitted for review.",
+            link_path="/admin/internship-reviews",
+        )
+    return _save_and_response(db, p)
 
 
 def withdraw_internship(db: Session, internship_id: int, current_user: User) -> InternshipResponse:

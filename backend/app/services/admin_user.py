@@ -9,6 +9,7 @@ from app.core.exceptions import (
     NotFoundException,
 )
 from app.core.security import hash_password
+from app.models.notification import NotificationKind
 from app.models.session import Session as SessionModel
 from app.models.user import User, UserRole
 from app.schemas.admin_user import (
@@ -17,6 +18,7 @@ from app.schemas.admin_user import (
     AdminUserListResponse,
     AdminUserResponse,
 )
+from app.services.notification import create_notification
 
 
 class AdminUserService:
@@ -138,7 +140,12 @@ class AdminUserService:
         return target_user
 
     @staticmethod
-    def reset_user_password(db: Session, user_id: int, new_password: str) -> None:
+    def reset_user_password(
+        db: Session,
+        user_id: int,
+        new_password: str,
+        admin_id: int | None = None,
+    ) -> None:
         """Reset user password and invalidate all of the user's active sessions."""
         target_user = db.scalar(select(User).where(User.id == user_id))
         if target_user is None:
@@ -146,4 +153,13 @@ class AdminUserService:
 
         target_user.password_hash = hash_password(new_password)
         db.execute(delete(SessionModel).where(SessionModel.user_id == target_user.id))
+        create_notification(
+            db,
+            user_id=target_user.id,
+            actor_id=admin_id,
+            kind=NotificationKind.PASSWORD_RESET,
+            title="Password Reset",
+            message="Your password was reset by an administrator.",
+            link_path="/account",
+        )
         db.commit()

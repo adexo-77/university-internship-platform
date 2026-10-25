@@ -89,7 +89,7 @@ def update_user_status(
 def reset_user_password(
     user_id: int,
     payload: AdminUserPasswordResetRequest,
-    _: User = Depends(require_admin),
+    current_admin: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ) -> dict[str, str]:
     """Reset user password and invalidate all of the user's active sessions."""
@@ -97,5 +97,6 @@ def reset_user_password(
         db=db,
         user_id=user_id,
         new_password=payload.password,
+        admin_id=current_admin.id,
     )
     return {"message": "Password reset successfully"}
