@@ -7,6 +7,7 @@ from app.models.course import Course, CourseStatus
 from app.models.course_resource import CourseResource
 from app.models.enrollment import Enrollment
 from app.models.internship import Internship, InternshipStatus, InternshipWorkMode
+from app.models.notification import Notification, NotificationKind
 from app.models.organization_profile import ApprovalStatus, OrganizationProfile
 from app.models.session import Session
 from app.models.student_profile import StudentProfile
@@ -26,6 +27,8 @@ __all__ = [
     "Internship",
     "InternshipStatus",
     "InternshipWorkMode",
+    "Notification",
+    "NotificationKind",
     "OrganizationProfile",
     "Session",
     "StudentProfile",

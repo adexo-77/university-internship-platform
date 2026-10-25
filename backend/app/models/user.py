@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from app.models.course import Course
     from app.models.enrollment import Enrollment
     from app.models.internship import Internship
+    from app.models.notification import Notification
     from app.models.organization_profile import OrganizationProfile
     from app.models.session import Session
     from app.models.student_profile import StudentProfile
@@ -113,6 +114,12 @@ class User(Base):
     applications: Mapped[list["Application"]] = relationship(
         "Application",
         back_populates="student",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    notifications: Mapped[list["Notification"]] = relationship(
+        "Notification",
+        back_populates="user",
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
