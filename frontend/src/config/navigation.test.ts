@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getHomePath, navigationItems } from './navigation';
+import { getHomePath, navigationItems, resolveSectionTitle } from './navigation';
 
 describe('Navigation Configuration', () => {
   it('returns /dashboard home path for every role', () => {
@@ -88,5 +88,41 @@ describe('Navigation Configuration', () => {
     expect(labels).not.toContain('My applications');
     expect(labels).not.toContain('My internships');
     expect(labels).not.toContain('Profile');
+  });
+
+  describe('resolveSectionTitle', () => {
+    it('resolves dashboard for root and dashboard routes', () => {
+      expect(resolveSectionTitle('/')).toBe('Dashboard');
+      expect(resolveSectionTitle('/dashboard')).toBe('Dashboard');
+    });
+
+    it('resolves section titles for detail and nested routes instead of Dashboard', () => {
+      expect(resolveSectionTitle('/courses/42')).toBe('Courses');
+      expect(resolveSectionTitle('/courses/new')).toBe('Courses');
+      expect(resolveSectionTitle('/courses/42/edit')).toBe('Courses');
+      expect(resolveSectionTitle('/assignments/101')).toBe('Assignments');
+      expect(resolveSectionTitle('/assignments/101/edit')).toBe('Assignments');
+      expect(resolveSectionTitle('/internships/55')).toBe('Internships');
+      expect(resolveSectionTitle('/internships/55/edit')).toBe('Internships');
+      expect(resolveSectionTitle('/applications/88')).toBe('Applications');
+      expect(resolveSectionTitle('/admin/users/new')).toBe('Users');
+    });
+
+    it('resolves independent sections matching prefixes correctly', () => {
+      expect(resolveSectionTitle('/my-courses')).toBe('My courses');
+      expect(resolveSectionTitle('/my-applications')).toBe('My applications');
+      expect(resolveSectionTitle('/my-internships')).toBe('My internships');
+      expect(resolveSectionTitle('/notifications')).toBe('Notifications');
+      expect(resolveSectionTitle('/account')).toBe('Account');
+      expect(resolveSectionTitle('/profile')).toBe('Profile');
+      expect(resolveSectionTitle('/status')).toBe('System status');
+      expect(resolveSectionTitle('/admin/organizations')).toBe('Organizations');
+      expect(resolveSectionTitle('/admin/internship-reviews')).toBe('Internship reviews');
+    });
+
+    it('uses provided fallback when route is unknown', () => {
+      expect(resolveSectionTitle('/unknown/subpage', 'Custom Fallback')).toBe('Custom Fallback');
+      expect(resolveSectionTitle('/unknown/subpage')).toBe('Dashboard');
+    });
   });
 });

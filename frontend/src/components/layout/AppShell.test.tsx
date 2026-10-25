@@ -150,4 +150,56 @@ describe('AppShell Component', () => {
       expect.objectContaining({ method: 'POST' })
     );
   });
+
+  it('displays section title in top bar on detail routes instead of falling back to Dashboard', async () => {
+    let unmountFn: () => void = () => {};
+    await act(async () => {
+      const res = render(
+        <MemoryRouter initialEntries={['/courses/42']}>
+          <AuthProvider initialUser={mockStudentUser}>
+            <AppShell currentPath="/courses/42">
+              <div>Course detail content</div>
+            </AppShell>
+          </AuthProvider>
+        </MemoryRouter>
+      );
+      unmountFn = res.unmount;
+    });
+
+    const headers = screen.getAllByText('Courses');
+    expect(headers.length).toBeGreaterThanOrEqual(1);
+    const coursesLink = screen.getByRole('link', { name: 'Courses' });
+    expect(coursesLink).toHaveAttribute('aria-current', 'page');
+    unmountFn();
+
+    await act(async () => {
+      render(
+        <MemoryRouter initialEntries={['/assignments/99']}>
+          <AuthProvider initialUser={mockStudentUser}>
+            <AppShell currentPath="/assignments/99">
+              <div>Assignment detail content</div>
+            </AppShell>
+          </AuthProvider>
+        </MemoryRouter>
+      );
+    });
+
+    expect(screen.getByText('Assignments')).toBeInTheDocument();
+  });
+
+  it('renders explicit title in top bar when provided via title prop', async () => {
+    await act(async () => {
+      render(
+        <MemoryRouter initialEntries={['/courses/42/assignments/new']}>
+          <AuthProvider initialUser={mockStudentUser}>
+            <AppShell currentPath="/courses/42/assignments/new" title="New Assignment">
+              <div>Form content</div>
+            </AppShell>
+          </AuthProvider>
+        </MemoryRouter>
+      );
+    });
+
+    expect(screen.getByText('New Assignment')).toBeInTheDocument();
+  });
 });

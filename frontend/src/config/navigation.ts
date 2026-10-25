@@ -99,6 +99,43 @@ export const navigationItems: NavItem[] = [
   },
 ];
 
+export const SECTION_ROUTES: Array<{ prefix: string; title: string }> = [
+  { prefix: '/dashboard', title: 'Dashboard' },
+  { prefix: '/notifications', title: 'Notifications' },
+  { prefix: '/account', title: 'Account' },
+  { prefix: '/profile', title: 'Profile' },
+  { prefix: '/status', title: 'System status' },
+  { prefix: '/admin/users', title: 'Users' },
+  { prefix: '/admin/organizations', title: 'Organizations' },
+  { prefix: '/admin/internship-reviews', title: 'Internship reviews' },
+  { prefix: '/my-courses', title: 'My courses' },
+  { prefix: '/my-applications', title: 'My applications' },
+  { prefix: '/my-internships', title: 'My internships' },
+  { prefix: '/courses', title: 'Courses' },
+  { prefix: '/assignments', title: 'Assignments' },
+  { prefix: '/internships', title: 'Internships' },
+  { prefix: '/applications', title: 'Applications' },
+];
+
+/**
+ * Resolves the top bar section/page title from a URL path.
+ * Avoids falling back to "Dashboard" on detail and nested routes.
+ */
+export function resolveSectionTitle(path: string, fallback?: string): string {
+  if (path === '/' || path === '') {
+    return 'Dashboard';
+  }
+
+  const match = SECTION_ROUTES.find(
+    (route) => path === route.prefix || path.startsWith(`${route.prefix}/`)
+  );
+  if (match) {
+    return match.title;
+  }
+
+  return fallback ?? 'Dashboard';
+}
+
 /**
  * Returns the default home path for a given user role.
  */

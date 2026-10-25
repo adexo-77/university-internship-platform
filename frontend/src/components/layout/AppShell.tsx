@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import { navigationItems, NavItem } from '../../config/navigation';
+import { navigationItems, NavItem, resolveSectionTitle } from '../../config/navigation';
 import { useAuth } from '../../hooks/useAuth';
 import { useUnreadCount } from '../../hooks/useUnreadCount';
 import { cn } from '../../lib/cn';
@@ -12,12 +12,14 @@ export interface AppShellProps {
   children: React.ReactNode;
   navItems?: NavItem[];
   currentPath?: string;
+  title?: string;
 }
 
 export const AppShell: React.FC<AppShellProps> = ({
   children,
   navItems = navigationItems,
   currentPath,
+  title,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
@@ -34,7 +36,7 @@ export const AppShell: React.FC<AppShellProps> = ({
     return user ? item.roles.includes(user.role) : false;
   });
 
-  const activeItem = visibleNavItems.find((item) => item.path === activePath) ?? visibleNavItems[0];
+  const topBarTitle = title ?? resolveSectionTitle(activePath, visibleNavItems[0]?.label);
 
   return (
     <div className="min-h-screen bg-chalk text-ink flex flex-col md:flex-row">
@@ -82,7 +84,12 @@ export const AppShell: React.FC<AppShellProps> = ({
         <nav aria-label="Main navigation" className="flex-1 p-3 space-y-1">
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
-            const isActive = item.path === activePath;
+            const isExact = item.path === activePath;
+            const isPrefix =
+              item.path !== '/dashboard' &&
+              item.path !== '/' &&
+              activePath.startsWith(`${item.path}/`);
+            const isActive = isExact || isPrefix;
 
             return (
               <Link
@@ -130,7 +137,7 @@ export const AppShell: React.FC<AppShellProps> = ({
       <div className="flex-1 flex flex-col min-w-0">
         {/* Desktop Top Bar */}
         <header className="hidden md:flex h-14 items-center justify-between border-b border-line bg-surface px-8">
-          <span className="text-base font-medium text-ink">{activeItem?.label}</span>
+          <span className="text-base font-medium text-ink">{topBarTitle}</span>
 
           {user && (
             <div className="flex items-center gap-3">
