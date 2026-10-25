@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   getAdminDashboard,
+  getCoordinatorDashboard,
   getInstructorDashboard,
   getOrganizationDashboard,
   getStudentDashboard,
 } from '../api/dashboard';
 import { AdminDashboard } from '../components/dashboard/AdminDashboard';
+import { CoordinatorDashboard } from '../components/dashboard/CoordinatorDashboard';
 import { InstructorDashboard } from '../components/dashboard/InstructorDashboard';
 import { OrganizationDashboard } from '../components/dashboard/OrganizationDashboard';
 import { StudentDashboard } from '../components/dashboard/StudentDashboard';
@@ -15,6 +17,7 @@ import { useAuth } from '../hooks/useAuth';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   AdminDashboardResponse,
+  CoordinatorDashboardResponse,
   InstructorDashboardResponse,
   OrganizationDashboardResponse,
   StudentDashboardResponse,
@@ -24,7 +27,8 @@ type DashboardData =
   | { role: 'student'; data: StudentDashboardResponse }
   | { role: 'instructor'; data: InstructorDashboardResponse }
   | { role: 'organization'; data: OrganizationDashboardResponse }
-  | { role: 'admin'; data: AdminDashboardResponse };
+  | { role: 'admin'; data: AdminDashboardResponse }
+  | { role: 'coordinator'; data: CoordinatorDashboardResponse };
 
 export const DashboardPage: React.FC = () => {
   usePageTitle('Dashboard');
@@ -51,6 +55,9 @@ export const DashboardPage: React.FC = () => {
       } else if (user.role === 'admin') {
         const res = await getAdminDashboard();
         setData({ role: 'admin', data: res });
+      } else if (user.role === 'coordinator') {
+        const res = await getCoordinatorDashboard();
+        setData({ role: 'coordinator', data: res });
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -97,6 +104,7 @@ export const DashboardPage: React.FC = () => {
             {data.role === 'instructor' && <InstructorDashboard data={data.data} />}
             {data.role === 'organization' && <OrganizationDashboard data={data.data} />}
             {data.role === 'admin' && <AdminDashboard data={data.data} />}
+            {data.role === 'coordinator' && <CoordinatorDashboard data={data.data} />}
           </>
         )}
       </div>

@@ -7,10 +7,12 @@ from app.core.database import get_db
 from app.core.deps import require_roles
 from app.models.user import User, UserRole
 from app.schemas.dashboard_admin import AdminDashboardResponse
+from app.schemas.dashboard_coordinator import CoordinatorDashboardResponse
 from app.schemas.dashboard_instructor import InstructorDashboardResponse
 from app.schemas.dashboard_organization import OrganizationDashboardResponse
 from app.schemas.dashboard_student import StudentDashboardResponse
 from app.services.dashboard_admin import get_admin_dashboard
+from app.services.dashboard_coordinator import get_coordinator_dashboard
 from app.services.dashboard_instructor import get_instructor_dashboard
 from app.services.dashboard_organization import get_organization_dashboard
 from app.services.dashboard_student import get_student_dashboard
@@ -22,6 +24,7 @@ require_student = require_roles(UserRole.STUDENT)
 require_instructor = require_roles(UserRole.INSTRUCTOR)
 require_organization = require_roles(UserRole.ORGANIZATION)
 require_admin = require_roles(UserRole.ADMIN)
+require_coordinator = require_roles(UserRole.COORDINATOR)
 
 
 @router.get("/student", response_model=StudentDashboardResponse)
@@ -58,3 +61,12 @@ def admin_dashboard(
 ) -> AdminDashboardResponse:
     """Retrieve high-level platform activity metrics for administrators."""
     return get_admin_dashboard(db)
+
+
+@router.get("/coordinator", response_model=CoordinatorDashboardResponse)
+def coordinator_dashboard(
+    current_user: User = Depends(require_coordinator),
+    db: Session = Depends(get_db),
+) -> CoordinatorDashboardResponse:
+    """Retrieve aggregated review queues and applications metrics for coordinators."""
+    return get_coordinator_dashboard(db, current_user.id)

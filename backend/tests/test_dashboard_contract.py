@@ -159,6 +159,29 @@ def test_organization_and_admin_match_frontend_contract(
     assert extract_key_structure(res_admin.json()) == extract_key_structure(admin_fixture)
 
 
+def test_coordinator_dashboard_matches_frontend_contract(
+    real_db_client: TestClient, real_db_session: Session
+) -> None:
+    coord = create_test_user(real_db_session, "contract_coord@test.com", UserRole.COORDINATOR)
+    org, _ = create_test_organization(
+        real_db_session, "contract_org3@test.com", approval_status=ApprovalStatus.APPROVED
+    )
+    student, _ = create_test_student(real_db_session, "contract_stud4@test.com")
+
+    p = create_test_internship(
+        real_db_session, org, title="Backend Intern", status=InternshipStatus.OPEN
+    )
+    create_test_application(real_db_session, p, student, status=ApplicationStatus.SUBMITTED)
+    real_db_session.commit()
+
+    login_test_user(real_db_client, coord.email)
+    res_coord = real_db_client.get("/api/dashboard/coordinator")
+    assert res_coord.status_code == 200
+
+    coord_fixture = load_fixture("dashboard_coordinator.json")
+    assert extract_key_structure(res_coord.json()) == extract_key_structure(coord_fixture)
+
+
 def test_contract_drift_detection_fails_on_renamed_or_missing_keys() -> None:
     """Drift check raises AssertionError when keys are renamed or missing."""
     base = {"courses": [{"id": 1, "title": "Math"}], "total": 1}

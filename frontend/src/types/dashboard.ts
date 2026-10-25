@@ -107,3 +107,11 @@ export interface AdminDashboardResponse {
   courses_by_status: Record<string, number>;
   applications_by_status: Record<string, number>;
 }
+
+export interface CoordinatorDashboardResponse {
+  organizations_pending_approval: number;
+  internships_pending_review: number;
+  open_internships: number;
+  applications_by_status: Record<string, number>;
+  reviews_completed: number;
+}

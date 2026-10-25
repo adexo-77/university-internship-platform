@@ -92,3 +92,17 @@ export async function getAdminDashboard(): Promise<AdminDashboardResponse> {
 
   return (await response.json()) as AdminDashboardResponse;
 }
+
+export async function getCoordinatorDashboard(): Promise<CoordinatorDashboardResponse> {
+  const response = await fetch('/api/dashboard/coordinator', {
+    method: 'GET',
+    credentials: 'include',
+    headers: { Accept: 'application/json' },
+  });
+
+  if (!response.ok) {
+    await handleResponseError(response);
+  }
+
+  return (await response.json()) as CoordinatorDashboardResponse;
+}

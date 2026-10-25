@@ -1,0 +1,13 @@
+{
+  "organizations_pending_approval": 1,
+  "internships_pending_review": 2,
+  "open_internships": 5,
+  "applications_by_status": {
+    "submitted": 6,
+    "shortlisted": 3,
+    "accepted": 2,
+    "rejected": 1,
+    "withdrawn": 0
+  },
+  "reviews_completed": 4
+}
