@@ -69,7 +69,7 @@ def list_internships(
     offset: int = 0,
 ) -> InternshipListResponse:
     """Browse catalog of internship postings with filters and pagination."""
-    if current_user.role not in (UserRole.STUDENT, UserRole.ADMIN):
+    if current_user.role not in (UserRole.STUDENT, UserRole.ADMIN, UserRole.COORDINATOR):
         raise ForbiddenException(
             message="Organizations and instructors cannot browse the internship catalogue",
             code="FORBIDDEN",
@@ -150,7 +150,7 @@ def get_internship_by_id(db: Session, internship_id: int, current_user: User) ->
         raise NotFoundException(message="Internship posting not found", code="NOT_FOUND")
 
     is_owner = p.organization_id == current_user.id
-    is_admin = current_user.role == UserRole.ADMIN
+    is_privileged = current_user.role in (UserRole.ADMIN, UserRole.COORDINATOR)
     if current_user.role == UserRole.STUDENT:
         org_user = db.scalar(select(User).where(User.id == p.organization_id))
         org_prof = db.scalar(
@@ -168,7 +168,7 @@ def get_internship_by_id(db: Session, internship_id: int, current_user: User) ->
     elif current_user.role == UserRole.ORGANIZATION:
         if not is_owner:
             raise NotFoundException(message="Internship posting not found", code="NOT_FOUND")
-    elif not is_admin:
+    elif not is_privileged:
         raise NotFoundException(message="Internship posting not found", code="NOT_FOUND")
 
     applied, app_status = None, None
@@ -182,7 +182,7 @@ def get_internship_by_id(db: Session, internship_id: int, current_user: User) ->
         app_status = app.status.value if app else None
 
     count = 0
-    if is_owner or is_admin:
+    if is_owner or is_privileged:
         count = (
             db.scalar(select(func.count(Application.id)).where(Application.posting_id == p.id)) or 0
         )
@@ -193,5 +193,5 @@ def get_internship_by_id(db: Session, internship_id: int, current_user: User) ->
         applicant_count=count,
         applied=applied,
         app_status=app_status,
-        include_review=(is_owner or is_admin),
+        include_review=(is_owner or is_privileged),
     )

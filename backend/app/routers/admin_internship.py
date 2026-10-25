@@ -13,7 +13,7 @@ from app.services import admin_internship as admin_internship_service
 
 router = APIRouter(prefix="/admin/internships", tags=["admin-internships"])
 
-require_admin = require_roles(UserRole.ADMIN)
+require_admin_or_coordinator = require_roles(UserRole.ADMIN, UserRole.COORDINATOR)
 
 ReviewStatusParam = Literal[
     "all",
@@ -39,7 +39,7 @@ def list_admin_internships(
     ),
     limit: int = Query(default=20, ge=1, le=100, description="Page limit"),
     offset: int = Query(default=0, ge=0, description="Page offset"),
-    _current_user: User = Depends(require_admin),
+    _current_user: User = Depends(require_admin_or_coordinator),
     db: Session = Depends(get_db),
 ) -> InternshipListResponse:
     """Retrieve internship postings in review queue, ordered oldest first."""
@@ -60,7 +60,7 @@ def list_admin_internships(
 def review_internship(
     id: int,
     payload: InternshipReviewRequest,
-    current_user: User = Depends(require_admin),
+    current_user: User = Depends(require_admin_or_coordinator),
     db: Session = Depends(get_db),
 ) -> InternshipResponse:
     """Review an internship posting by approving or rejecting, or taking down an open posting."""

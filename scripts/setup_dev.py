@@ -19,6 +19,7 @@ FRONTEND_DIR = REPO_ROOT / "frontend"
 
 def get_venv_paths() -> tuple[Path, Path]:
     venv_dir = BACKEND_DIR / ".venv"
+   
     if sys.platform == "win32":
         return venv_dir / "Scripts" / "python.exe", venv_dir / "Scripts" / "alembic.exe"
     return venv_dir / "bin" / "python", venv_dir / "bin" / "alembic"

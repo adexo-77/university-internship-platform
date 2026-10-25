@@ -15,7 +15,7 @@ from app.schemas.admin_organization import (
 from app.services.admin_organization import AdminOrganizationService
 
 router = APIRouter(prefix="/admin/organizations", tags=["admin-organizations"])
-require_admin = require_roles(UserRole.ADMIN)
+require_admin_or_coordinator = require_roles(UserRole.ADMIN, UserRole.COORDINATOR)
 
 
 @router.get(
@@ -30,7 +30,7 @@ def list_organizations(
     ),
     limit: int = Query(default=20, ge=1, le=100, description="Items per page"),
     offset: int = Query(default=0, ge=0, description="Pagination offset"),
-    _: User = Depends(require_admin),
+    _: User = Depends(require_admin_or_coordinator),
     db: Session = Depends(get_db),
 ) -> AdminOrganizationListResponse:
     """Retrieve paginated organization directory with approval status filter."""
@@ -51,7 +51,7 @@ def list_organizations(
 def update_organization_approval(
     user_id: int,
     payload: AdminOrganizationApprovalRequest,
-    current_admin: User = Depends(require_admin),
+    current_admin: User = Depends(require_admin_or_coordinator),
     db: Session = Depends(get_db),
 ) -> AdminOrganizationItem:
     """Approve, reject, or mark pending an organization with an optional review note."""

@@ -120,8 +120,8 @@ def get_internship_applications(
     if not p:
         raise NotFoundException(message="Internship posting not found", code="NOT_FOUND")
 
-    is_admin = current_user.role == UserRole.ADMIN
-    if not (p.organization_id == current_user.id or is_admin):
+    is_privileged = current_user.role in (UserRole.ADMIN, UserRole.COORDINATOR)
+    if not (p.organization_id == current_user.id or is_privileged):
         raise NotFoundException(message="Internship posting not found", code="NOT_FOUND")
 
     stmt = (
@@ -157,10 +157,11 @@ def get_application_by_id(
 
     app, p, user, prof = row
     is_owner = app.student_id == current_user.id or p.organization_id == current_user.id
-    if not (is_owner or current_user.role == UserRole.ADMIN):
+    is_privileged = current_user.role in (UserRole.ADMIN, UserRole.COORDINATOR)
+    if not (is_owner or is_privileged):
         raise NotFoundException(message="Application not found", code="NOT_FOUND")
 
-    show_applicant = p.organization_id == current_user.id or current_user.role == UserRole.ADMIN
+    show_applicant = p.organization_id == current_user.id or is_privileged
     applicant = to_applicant(user, prof) if show_applicant else None
     return to_response(app, p.title, get_org_name(db, p.organization_id), applicant)
 

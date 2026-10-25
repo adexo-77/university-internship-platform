@@ -18,7 +18,9 @@ router = APIRouter(tags=["applications"])
 
 require_student = require_roles(UserRole.STUDENT)
 require_organization = require_roles(UserRole.ORGANIZATION)
-require_org_or_admin = require_roles(UserRole.ORGANIZATION, UserRole.ADMIN)
+require_org_admin_or_coordinator = require_roles(
+    UserRole.ORGANIZATION, UserRole.ADMIN, UserRole.COORDINATOR
+)
 
 
 @router.post(
@@ -53,7 +55,7 @@ def get_internship_applications(
     status_filter: ApplicationStatus | None = Query(
         default=None, alias="status", description="Filter applicants by status"
     ),
-    current_user: User = Depends(require_org_or_admin),
+    current_user: User = Depends(require_org_admin_or_coordinator),
     db: Session = Depends(get_db),
 ) -> list[ApplicationResponse]:
     """Retrieve applicant roster with profile details for owner or admin."""
