@@ -182,7 +182,41 @@ Ensure both backend and frontend development servers are running:
 
 ---
 
-## 6. Account Self-Service &amp; Session Management
+## 6. Internship Coordinator Role Guide
+
+### Demo Account
+- **Internship Coordinator**: Ms. Selamawit Tadesse (`selamawit.tadesse@example.com`)
+
+### Step 1: Access the Coordinator Dashboard (`/dashboard`)
+1. Log in as `selamawit.tadesse@example.com`.
+2. Review key operational moderation metrics:
+   - Organizations pending review.
+   - Internship postings pending moderation review.
+   - Currently active open internships.
+   - Applications breakdown by status across the institution.
+   - Total moderation reviews completed by this coordinator.
+
+### Step 2: Organization Approval Queue (`/admin/organizations`)
+1. Click **Organizations** in the coordinator navigation bar.
+2. Review unverified employer registrations (e.g. Abay Data Labs).
+3. Inspect company profile credentials, industry, and website.
+4. Click **Approve Organization** or **Reject** with review rationale.
+
+### Step 3: Internship Posting Moderation (`/admin/internships`)
+1. Click **Internship reviews** in the navigation bar.
+2. Moderate submitted postings with status `pending_review` (e.g. Mobile Application Intern).
+3. Inspect role details, requirements, stipend, and deadlines.
+4. Click **Approve** to publish to students, or **Reject** with feedback for the employer.
+5. Take down listings when necessary to safeguard student placements.
+
+### Step 4: Internship Listings and Read-Only Applicant Inspection (`/internships`)
+1. Click **Internships** to browse all platform listings across all statuses (`draft`, `pending_review`, `open`, `closed`, `rejected`).
+2. Open any internship details page to inspect listing details and view incoming candidate applications and statuses in read-only mode.
+3. Note security bounds: Coordinators cannot manage system users, reset other users' passwords, administer courses, or access system status.
+
+---
+
+## 7. Account Self-Service &amp; Session Management
 
 ### Changing Passwords (`/account`)
 Any authenticated user can update their password:
@@ -197,7 +231,7 @@ Any authenticated user can update their password:
 
 ---
 
-## 7. In-App Notifications &amp; Activity Tracking
+## 8. In-App Notifications &amp; Activity Tracking
 
 The platform includes an automated in-app notifications center that keeps all personas informed of critical lifecycle events across courses, assignments, applications, and account security.
 

@@ -68,21 +68,31 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 
 ---
 
-#### [7:00 - 8:45] Part 4: Administrator Persona
+#### [7:00 - 8:15] Part 4: Administrator Persona
 > **Action**: Log out and log in as `mulugeta.assefa@example.com` (Dr. Mulugeta Assefa, password `12345678`).
 
 > **What to Say**:
-> *"Finally, let's look at institutional governance. University administrators have full visibility over platform operations.*
+> *"Next, let's look at institutional governance. University administrators have full visibility over platform operations.*
 >
-> *First, User Management: admins can search and filter accounts across all four roles. Admins can deactivate abusive accounts, with a built-in safety guard preventing administrators from accidentally deactivating themselves. Admins can also issue secure password resets that generate temporary credentials and immediately revoke all active sessions for that account.*
+> *First, User Management: admins can search and filter accounts across all roles. Admins can provision new users including internship coordinators, deactivate abusive accounts with self-protection guards, and issue secure password resets that revoke active sessions.*
 >
-> *Second, Organization Vetting: in the organization queue, admins review new company registrations like Abay Data Labs (`eyob.kassa@example.com`), inspect their website, and approve or reject their access.*
->
-> *Third, Internship Content Moderation: in the internship queue, admins review submitted postings. If a posting meets university standards, the admin approves it, publishing it immediately to the student catalog. If a posting violates guidelines or lacks details, the admin can reject it with an explanatory feedback note, or issue an emergency takedown on an existing posting."*
+> *Second, Organization Vetting &amp; Moderation: admins review pending company registrations and submitted internship postings before they reach students."*
 
 ---
 
-#### [8:45 - 10:00] Part 5: Quality Engineering &amp; Wrap-up
+#### [8:15 - 9:00] Part 5: Internship Coordinator Persona
+> **Action**: Log out and log in as `selamawit.tadesse@example.com` (Ms. Selamawit Tadesse, password `12345678`).
+
+> **What to Say**:
+> *"Now let's examine the Internship Coordinator role. Coordinators are institutional liaisons focused strictly on employer relationships and internship moderation, without administrative access to user accounts, password resets, courses, or system health.*
+>
+> *On the Coordinator Dashboard, Ms. Selamawit monitors pending employer approvals, postings awaiting review, open internships, application statuses, and her personal completed review count.*
+>
+> *Coordinators review and approve pending organizations like Abay Data Labs, moderate and publish or reject internship postings, browse all platform listings across every lifecycle, and inspect applicant rosters in read-only mode to track placement health."*
+
+---
+
+#### [9:00 - 10:00] Part 6: Quality Engineering &amp; Wrap-up
 > **What to Say**:
 > *"To conclude, I'd like to highlight our engineering standards. We adhered strictly to the AGENTS.md constitution throughout development:
 > 1. Authentication relies on server-side session tokens stored hashed in PostgreSQL with `HttpOnly` and `SameSite=Lax` cookies—never trusting client headers.

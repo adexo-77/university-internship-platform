@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 ROSTER_USERS = [
     ("mulugeta.assefa@example.com", "Dr. Mulugeta Assefa", UserRole.ADMIN),
+    ("selamawit.tadesse@example.com", "Ms. Selamawit Tadesse", UserRole.COORDINATOR),
     ("tadesse.bekele@example.com", "Dr. Tadesse Bekele", UserRole.INSTRUCTOR),
     ("hana.worku@example.com", "Ms. Hana Worku", UserRole.INSTRUCTOR),
     ("abel.tesfaye@example.com", "Abel Tesfaye", UserRole.STUDENT),
@@ -125,6 +126,7 @@ def seed_demo_users_and_profiles(db: Session, pw_hash: str) -> dict[str, User]:
         users[email] = get_or_create_user(db, email, name, role, pw_hash)
 
     admin = users["mulugeta.assefa@example.com"]
+    coord = users["selamawit.tadesse@example.com"]
     inst1 = users["tadesse.bekele@example.com"]
     inst2 = users["hana.worku@example.com"]
     s1 = users["abel.tesfaye@example.com"]
@@ -140,6 +142,8 @@ def seed_demo_users_and_profiles(db: Session, pw_hash: str) -> dict[str, User]:
 
     return {
         "admin": admin,
+        "coord": coord,
+        "coordinator": coord,
         "inst": inst1,
         "inst1": inst1,
         "inst2": inst2,

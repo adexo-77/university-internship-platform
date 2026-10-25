@@ -28,6 +28,7 @@ OLD_DEMO_EMAILS = [
 
 NEW_DEMO_EMAILS = [
     "mulugeta.assefa@example.com",
+    "selamawit.tadesse@example.com",
     "tadesse.bekele@example.com",
     "hana.worku@example.com",
     "abel.tesfaye@example.com",

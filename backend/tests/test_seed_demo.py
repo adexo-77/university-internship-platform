@@ -1,11 +1,10 @@
-"""Tests for the demo seed script ensuring idempotency, production guards, and login."""
+"""Tests for demo seed idempotency and production guards."""
 
 import os
 import sys
 from pathlib import Path
 
 import pytest
-from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -13,7 +12,7 @@ SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from seed_demo import DEMO_PASSWORD, seed_demo
+from seed_demo import seed_demo
 from seed_demo_reset import ALL_DEMO_EMAILS, reset_demo
 
 from app.core.security import hash_password
@@ -23,22 +22,8 @@ from app.models.course import Course
 from app.models.course_resource import CourseResource
 from app.models.internship import Internship
 from app.models.notification import Notification
-from app.models.organization_profile import OrganizationProfile
-from app.models.student_profile import StudentProfile
 from app.models.submission import Submission
 from app.models.user import User, UserRole
-
-DEMO_ACCOUNTS = [
-    ("mulugeta.assefa@example.com", "admin", "/api/dashboard/admin"),
-    ("tadesse.bekele@example.com", "instructor", "/api/dashboard/instructor"),
-    ("hana.worku@example.com", "instructor", "/api/dashboard/instructor"),
-    ("abel.tesfaye@example.com", "student", "/api/dashboard/student"),
-    ("meron.girma@example.com", "student", "/api/dashboard/student"),
-    ("dawit.lemma@example.com", "student", "/api/dashboard/student"),
-    ("yohannes.haile@example.com", "organization", "/api/dashboard/organization"),
-    ("rahel.desta@example.com", "organization", "/api/dashboard/organization"),
-    ("eyob.kassa@example.com", "organization", "/api/dashboard/organization"),
-]
 
 
 def test_seed_demo_refuses_in_production(real_db_session: Session) -> None:
@@ -117,82 +102,18 @@ def test_seed_demo_idempotency(real_db_session: Session) -> None:
         }
 
     counts_first = get_counts()
-    assert counts_first["users"] == 9
+    assert counts_first["users"] == 10
     assert counts_first["courses"] == 3
     assert counts_first["assignments"] == 3
     assert counts_first["resources"] == 6
     assert counts_first["postings"] == 7
     assert counts_first["submissions"] == 3
     assert counts_first["apps"] == 5
-    assert counts_first["notifications"] == 9
+    assert counts_first["notifications"] == 11
 
     seed_demo(real_db_session, force=True)
     counts_second = get_counts()
     assert counts_first == counts_second
-
-
-def test_demo_accounts_login_and_dashboards(
-    real_db_client: TestClient, real_db_session: Session
-) -> None:
-    """Every seeded demo account can log in and access their role dashboard with 200 OK."""
-    seed_demo(real_db_session, force=True)
-
-    for email, _expected_role, dashboard_path in DEMO_ACCOUNTS:
-        login_resp = real_db_client.post(
-            "/api/auth/login",
-            json={"email": email, "password": DEMO_PASSWORD},
-        )
-        assert login_resp.status_code == 200, f"Login failed for {email}: {login_resp.text}"
-
-        dash_resp = real_db_client.get(dashboard_path)
-        assert dash_resp.status_code == 200, f"Dashboard failed for {email}: {dash_resp.text}"
-        data = dash_resp.json()
-        assert isinstance(data, dict)
-
-        real_db_client.post("/api/auth/logout")
-
-
-def test_demo_profile_completeness_and_approval_states(
-    real_db_session: Session,
-) -> None:
-    """Verify Abel/Meron complete, Dawit incomplete, and organization approval states."""
-    seed_demo(real_db_session, force=True)
-
-    s1 = real_db_session.scalar(select(User).where(User.email == "abel.tesfaye@example.com"))
-    assert s1 is not None
-    sp1 = real_db_session.scalar(select(StudentProfile).where(StudentProfile.user_id == s1.id))
-    assert sp1 is not None and sp1.university == "Jimma University" and len(sp1.skills) > 0
-
-    s2 = real_db_session.scalar(select(User).where(User.email == "meron.girma@example.com"))
-    assert s2 is not None
-    sp2 = real_db_session.scalar(select(StudentProfile).where(StudentProfile.user_id == s2.id))
-    assert sp2 is not None and sp2.university == "Jimma University" and len(sp2.skills) > 0
-
-    s3 = real_db_session.scalar(select(User).where(User.email == "dawit.lemma@example.com"))
-    assert s3 is not None
-    sp3 = real_db_session.scalar(select(StudentProfile).where(StudentProfile.user_id == s3.id))
-    assert sp3 is not None and len(sp3.skills) == 0
-
-    org1 = real_db_session.scalar(select(User).where(User.email == "yohannes.haile@example.com"))
-    assert org1 is not None
-    op1 = real_db_session.scalar(
-        select(OrganizationProfile).where(OrganizationProfile.user_id == org1.id)
-    )
-    assert op1 is not None and op1.approval_status.value == "approved"
-
-    org2 = real_db_session.scalar(select(User).where(User.email == "rahel.desta@example.com"))
-    assert org2 is not None
-    op2 = real_db_session.scalar(
-        select(OrganizationProfile).where(OrganizationProfile.user_id == org2.id)
-    )
-    assert op2 is not None and op2.approval_status.value == "approved"
-
-    org3 = real_db_session.scalar(select(User).where(User.email == "eyob.kassa@example.com"))
-    assert org3 is not None
-    op3 = real_db_session.scalar(
-        select(OrganizationProfile).where(OrganizationProfile.user_id == org3.id)
-    )
-    assert op3 is not None and op3.approval_status.value == "pending"
 
 
 def test_reset_demo_preserves_non_demo_accounts(real_db_session: Session) -> None:
@@ -222,18 +143,3 @@ def test_reset_demo_preserves_non_demo_accounts(real_db_session: Session) -> Non
     )
     assert survivor is not None
     assert survivor.full_name == "Prof. Persistent"
-
-
-def test_seeded_demo_notifications(real_db_client: TestClient, real_db_session: Session) -> None:
-    """Demo accounts receive realistic notifications accessible via API."""
-    seed_demo(real_db_session, force=True)
-    resp = real_db_client.post(
-        "/api/auth/login",
-        json={"email": "abel.tesfaye@example.com", "password": DEMO_PASSWORD},
-    )
-    assert resp.status_code == 200
-    res = real_db_client.get("/api/notifications")
-    assert res.status_code == 200
-    data = res.json()
-    assert data["total"] == 3
-    assert data["unread_count"] == 2

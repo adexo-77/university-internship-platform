@@ -91,13 +91,13 @@ def seed_notifications(db: Session, users: dict[str, User], now: datetime) -> in
             ]
         )
 
-    # Admin demo accounts
-    admin = users.get("admin") or users.get("mulugeta.assefa@example.com")
-    if admin:
+    # Admin and coordinator reviewer accounts
+    reviewers = [u for u in (users.get("admin"), users.get("coord")) if u is not None]
+    for reviewer in reviewers:
         demo_specs.extend(
             [
                 (
-                    admin,
+                    reviewer,
                     NotificationKind.ORGANIZATION_REGISTERED,
                     "New Organization Registration Pending",
                     "A new organization has registered and requires approval.",
@@ -105,7 +105,7 @@ def seed_notifications(db: Session, users: dict[str, User], now: datetime) -> in
                     None,
                 ),
                 (
-                    admin,
+                    reviewer,
                     NotificationKind.INTERNSHIP_SUBMITTED,
                     "Internship Review Queue Updated",
                     "An organization submitted an internship posting for admin review.",
