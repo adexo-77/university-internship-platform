@@ -141,6 +141,7 @@ export const AdminUsersPage: React.FC = () => {
                 { value: '', label: 'All roles' },
                 { value: 'instructor', label: 'Instructor' },
                 { value: 'admin', label: 'Admin' },
+                { value: 'coordinator', label: 'Coordinator' },
                 { value: 'student', label: 'Student' },
                 { value: 'organization', label: 'Organization' },
               ]}

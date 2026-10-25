@@ -73,6 +73,10 @@ export const AppRoutes: React.FC = () => {
         {/* Course catalogue: student and admin */}
         <Route element={<RoleRoute allowedRoles={['student', 'admin']} />}>
           <Route path="/courses" element={<CoursesPage />} />
+        </Route>
+
+        {/* Internship catalogue: student, admin, and coordinator */}
+        <Route element={<RoleRoute allowedRoles={['student', 'admin', 'coordinator']} />}>
           <Route path="/internships" element={<InternshipsPage />} />
         </Route>
 
@@ -115,12 +119,16 @@ export const AppRoutes: React.FC = () => {
         <Route path="/internships/:id" element={<InternshipDetailPage />} />
         <Route path="/applications/:id" element={<ApplicationDetailPage />} />
 
+        {/* Review queues: admin and coordinator */}
+        <Route element={<RoleRoute allowedRoles={['admin', 'coordinator']} />}>
+          <Route path="/admin/organizations" element={<AdminOrganizationsPage />} />
+          <Route path="/admin/internship-reviews" element={<AdminInternshipReviewsPage />} />
+        </Route>
+
         {/* Admin management routes: admin role only */}
         <Route element={<RoleRoute allowedRoles={['admin']} />}>
           <Route path="/admin/users" element={<AdminUsersPage />} />
           <Route path="/admin/users/new" element={<AdminUserCreatePage />} />
-          <Route path="/admin/organizations" element={<AdminOrganizationsPage />} />
-          <Route path="/admin/internship-reviews" element={<AdminInternshipReviewsPage />} />
           <Route path="/status" element={<SystemStatusPage />} />
         </Route>
       </Route>

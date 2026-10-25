@@ -42,13 +42,13 @@ export const navigationItems: NavItem[] = [
     path: '/admin/organizations',
     label: 'Organizations',
     icon: Building2,
-    roles: ['admin'],
+    roles: ['admin', 'coordinator'],
   },
   {
     path: '/admin/internship-reviews',
     label: 'Internship reviews',
     icon: ClipboardCheck,
-    roles: ['admin'],
+    roles: ['admin', 'coordinator'],
   },
   {
     path: '/courses',
@@ -66,7 +66,7 @@ export const navigationItems: NavItem[] = [
     path: '/internships',
     label: 'Internships',
     icon: Briefcase,
-    roles: ['student', 'admin'],
+    roles: ['student', 'admin', 'coordinator'],
   },
   {
     path: '/my-applications',

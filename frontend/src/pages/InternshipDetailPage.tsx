@@ -40,7 +40,7 @@ export const InternshipDetailPage: React.FC = () => {
   usePageTitle(internship?.title ?? 'Internship details');
 
   const isOwner = user?.role === 'organization' && user?.id === internship?.organization_id;
-  const isAdmin = user?.role === 'admin';
+  const isPrivileged = user?.role === 'admin' || user?.role === 'coordinator';
   const isStudent = user?.role === 'student';
 
   const loadData = useCallback(async () => {
@@ -57,7 +57,11 @@ export const InternshipDetailPage: React.FC = () => {
         ]);
         setProfile(profData);
         setMyApp(myApps.find((a) => a.posting_id === postingId) ?? null);
-      } else if (user?.role === 'organization' || user?.role === 'admin') {
+      } else if (
+        user?.role === 'organization' ||
+        user?.role === 'admin' ||
+        user?.role === 'coordinator'
+      ) {
         setRoster(await getInternshipApplications(postingId, statusFilter || undefined));
       }
     } catch (err: unknown) {
@@ -130,7 +134,7 @@ export const InternshipDetailPage: React.FC = () => {
           <InternshipActionsBar
             internship={internship}
             isOwner={Boolean(isOwner)}
-            isAdmin={Boolean(isAdmin)}
+            isAdmin={Boolean(isPrivileged)}
             onSubmitForReview={handleSubmitForReview}
             onWithdrawToDraft={handleWithdrawToDraft}
             onClose={() => setIsCloseModalOpen(true)}
@@ -172,7 +176,7 @@ export const InternshipDetailPage: React.FC = () => {
           />
         )}
 
-        {(isOwner || isAdmin) && (
+        {(isOwner || isPrivileged) && (
           <InternshipApplicantsSection
             roster={roster}
             statusFilter={statusFilter}

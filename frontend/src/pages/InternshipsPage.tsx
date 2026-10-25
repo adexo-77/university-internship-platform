@@ -122,7 +122,8 @@ export const InternshipsPage: React.FC = () => {
           <div className="space-y-4">
             <InternshipTable
               internships={internships}
-              showStatus={user?.role === 'admin'}
+              showStatus={user?.role === 'admin' || user?.role === 'coordinator'}
+              showApplicantCount={user?.role === 'admin' || user?.role === 'coordinator'}
               showOrganization={true}
               showApplicationStatus={user?.role === 'student'}
               emptyMessage="No internships match your criteria."
