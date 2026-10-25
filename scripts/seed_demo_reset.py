@@ -8,6 +8,7 @@ from app.models.course import Course
 from app.models.course_resource import CourseResource
 from app.models.enrollment import Enrollment
 from app.models.internship import Internship
+from app.models.notification import Notification
 from app.models.organization_profile import OrganizationProfile
 from app.models.session import Session as UserSession
 from app.models.student_profile import StudentProfile
@@ -94,8 +95,9 @@ def _delete_in_dependency_order(
     db.execute(
         delete(OrganizationProfile).where(OrganizationProfile.user_id.in_(user_ids))
     )
-    # 8. Active sessions for demo users
+    # 8. Active sessions and notifications for demo users
     db.execute(delete(UserSession).where(UserSession.user_id.in_(user_ids)))
+    db.execute(delete(Notification).where(Notification.user_id.in_(user_ids)))
     # 9. Demo users
     db.execute(delete(User).where(User.id.in_(user_ids)))
 

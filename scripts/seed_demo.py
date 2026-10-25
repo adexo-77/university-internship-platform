@@ -21,6 +21,7 @@ from app.core.database import SessionLocal
 from app.core.security import hash_password
 from seed_demo_academics import seed_academics
 from seed_demo_internships import seed_internships_and_apps
+from seed_demo_notifications import seed_notifications
 from seed_demo_reset import reset_demo
 from seed_demo_users import seed_demo_users_and_profiles
 
@@ -41,6 +42,7 @@ def seed_demo(db: Session, force: bool = False) -> None:
     users = seed_demo_users_and_profiles(db, pw_hash)
     seed_academics(db, users, now)
     seed_internships_and_apps(db, users, now)
+    seed_notifications(db, users, now)
     db.commit()
     print("Demo dataset seeded successfully.")
 

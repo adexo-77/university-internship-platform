@@ -22,6 +22,7 @@ from app.models.assignment import Assignment
 from app.models.course import Course
 from app.models.course_resource import CourseResource
 from app.models.internship import Internship
+from app.models.notification import Notification
 from app.models.organization_profile import OrganizationProfile
 from app.models.student_profile import StudentProfile
 from app.models.submission import Submission
@@ -107,6 +108,12 @@ def test_seed_demo_idempotency(real_db_session: Session) -> None:
                 .where(User.email.in_(ALL_DEMO_EMAILS))
             )
             or 0,
+            "notifications": real_db_session.scalar(
+                select(func.count(Notification.id))
+                .join(User, Notification.user_id == User.id)
+                .where(User.email.in_(ALL_DEMO_EMAILS))
+            )
+            or 0,
         }
 
     counts_first = get_counts()
@@ -117,6 +124,7 @@ def test_seed_demo_idempotency(real_db_session: Session) -> None:
     assert counts_first["postings"] == 7
     assert counts_first["submissions"] == 3
     assert counts_first["apps"] == 5
+    assert counts_first["notifications"] == 9
 
     seed_demo(real_db_session, force=True)
     counts_second = get_counts()
@@ -214,3 +222,18 @@ def test_reset_demo_preserves_non_demo_accounts(real_db_session: Session) -> Non
     )
     assert survivor is not None
     assert survivor.full_name == "Prof. Persistent"
+
+
+def test_seeded_demo_notifications(real_db_client: TestClient, real_db_session: Session) -> None:
+    """Demo accounts receive realistic notifications accessible via API."""
+    seed_demo(real_db_session, force=True)
+    resp = real_db_client.post(
+        "/api/auth/login",
+        json={"email": "abel.tesfaye@example.com", "password": DEMO_PASSWORD},
+    )
+    assert resp.status_code == 200
+    res = real_db_client.get("/api/notifications")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total"] == 3
+    assert data["unread_count"] == 2
