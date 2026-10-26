@@ -113,3 +113,52 @@ def test_seeded_demo_notifications(real_db_client: TestClient, real_db_session: 
     data = res.json()
     assert data["total"] == 3
     assert data["unread_count"] == 2
+    real_db_client.post("/api/auth/logout")
+
+
+def test_seeded_student_achievement_badges(
+    real_db_client: TestClient, real_db_session: Session
+) -> None:
+    """Verify Abel earns several achievement badges and Meron earns fewer."""
+    seed_demo(real_db_session, force=True)
+
+    # Abel's badges
+    login_abel = real_db_client.post(
+        "/api/auth/login",
+        json={"email": "abel.tesfaye@example.com", "password": DEMO_PASSWORD},
+    )
+    assert login_abel.status_code == 200
+    abel_badges_resp = real_db_client.get("/api/students/me/badges")
+    assert abel_badges_resp.status_code == 200
+    abel_badges = abel_badges_resp.json()
+
+    abel_earned_ids = {b["id"] for b in abel_badges if b["earned"]}
+    assert "first_submission" in abel_earned_ids
+    assert "high_achiever" in abel_earned_ids
+    assert "perfect_score" in abel_earned_ids
+    assert "profile_complete" in abel_earned_ids
+    assert "first_application" in abel_earned_ids
+    assert "offer_accepted" in abel_earned_ids
+    assert len(abel_earned_ids) == 6
+
+    # Meron's badges
+    real_db_client.post("/api/auth/logout")
+    login_meron = real_db_client.post(
+        "/api/auth/login",
+        json={"email": "meron.girma@example.com", "password": DEMO_PASSWORD},
+    )
+    assert login_meron.status_code == 200
+    meron_badges_resp = real_db_client.get("/api/students/me/badges")
+    assert meron_badges_resp.status_code == 200
+    meron_badges = meron_badges_resp.json()
+
+    meron_earned_ids = {b["id"] for b in meron_badges if b["earned"]}
+    assert "first_submission" in meron_earned_ids
+    assert "profile_complete" in meron_earned_ids
+    assert "first_application" in meron_earned_ids
+    assert "offer_accepted" not in meron_earned_ids
+    assert "perfect_score" not in meron_earned_ids
+    assert len(meron_earned_ids) == 3
+
+    assert len(abel_earned_ids) > len(meron_earned_ids)
+    real_db_client.post("/api/auth/logout")

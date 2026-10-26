@@ -120,7 +120,7 @@ def _seed_assignments_and_submissions(
             "Complete Entity-Relationship diagram for university clinic management, mapped to 3NF tables with foreign keys and unique constraints.",
             "https://github.com/abeltesfaye/clinic-er-model",
             False,
-            94,
+            100,
             "Outstanding structural design and clear cardinalities.",
             now - timedelta(days=3),
         ),
