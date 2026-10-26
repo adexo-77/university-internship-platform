@@ -23,6 +23,7 @@ from app.routers.auth import router as auth_router
 from app.routers.badge import router as badge_router
 from app.routers.course import router as course_router
 from app.routers.course_resource import router as course_resource_router
+from app.routers.csv_export import router as csv_export_router
 from app.routers.dashboard import router as dashboard_router
 from app.routers.enrollment import router as enrollment_router
 from app.routers.health import router as health_router
@@ -139,3 +140,4 @@ app.include_router(admin_organization_router, prefix="/api")
 app.include_router(admin_internship_router, prefix="/api")
 app.include_router(dashboard_router, prefix="/api")
 app.include_router(notification_router, prefix="/api")
+app.include_router(csv_export_router, prefix="/api")
