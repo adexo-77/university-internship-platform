@@ -31,27 +31,27 @@ The platform provides tailored workspaces and dashboards for five primary user r
 
 ### 👨‍🏫 Instructor
 - **Instructor Dashboard**: Monitor active and draft courses, student enrollment totals, and a dedicated "Needs Grading" queue highlighting pending assignments.
-- **Course Lifecycle**: Author courses with titles, descriptions, and syllabus outlines; manage status transitions (`draft`, `published`, `archived`).
+- **Course Lifecycle**: Author courses with titles, descriptions, and syllabus outlines; manage status transitions (`draft`, `published`).
 - **Course Learning Resources**: Author and curate external learning resources and documentation links (up to 50 per course) with validated HTTP/HTTPS URLs and full CRUD controls.
 - **Assignment Authoring**: Define assignments with due dates and maximum scores; edit or delete assignments with cascade protection.
-- **Grading &amp; Feedback**: Review student submissions in an organized roster, assign numeric scores (strictly bounded between 0 and max points), and provide actionable instructor feedback comments.
+- **Grading & Feedback**: Review student submissions in an organized roster, assign numeric scores (strictly bounded between 0 and max points), and provide actionable instructor feedback comments.
 
 ### 🏢 Organization (Employer)
 - **Organization Dashboard**: Track live postings, pending administrator reviews, and applicant pipeline counts.
-- **Corporate Profile**: Maintain company details, industry category, company size, and official website URL.
-- **Internship Posting Lifecycle**: Create postings with roles, requirements, locations, stipends, and deadlines; manage states (`draft` &rarr; `pending_review` &rarr; `open` &rarr; `closed`).
+- **Corporate Profile**: Maintain company details, industry category, and official website URL.
+- **Internship Posting Lifecycle**: Create postings with roles, requirements, locations, and deadlines; manage states (`draft` &rarr; `pending_review` &rarr; `open` &rarr; `closed`).
 - **Applicant Pipeline Management**: Review student applications, inspect applicant profiles and cover letters, and execute hiring decisions (`shortlisted`, `accepted`, `rejected`) with state locking.
 
 ### 📋 Internship Coordinator
 - **Coordinator Dashboard**: Dedicated operational dashboard tracking pending employer registrations, internship postings awaiting moderation, live open postings, applicant pipeline distributions, and completed review counts.
-- **Organization Vetting**: Review and decide on corporate partner registrations with full approval and rejection workflows.
-- **Internship Moderation**: Review submitted postings, approve listings for public student discovery, reject with feedback notes, or take down compromised listings.
-- **Listing &amp; Applicant Visibility**: Search and inspect all internship listings across every lifecycle status and inspect applicant rosters in read-only mode to mentor students and monitor placement health.
-- **Institutional Boundaries**: Strictly separated from administrative user provisioning, password resets, course administration, or system health operations.
+- **Organization Vetting**: Review and decide on corporate partner registrations (`/api/admin/organizations*`) with full approval and rejection workflows.
+- **Internship Moderation**: Review submitted postings (`/api/admin/internships*`), approve listings for public student discovery, reject with feedback notes, or take down compromised listings.
+- **Listing & Applicant Visibility**: Search and inspect all internship listings across every lifecycle status and inspect applicant rosters in read-only mode to mentor students and monitor placement health.
+- **Institutional Boundaries**: Strictly separated from administrative user provisioning (`/api/admin/users*`), password resets, course administration, or system health operations.
 
 ### 🛡️ Administrator
 - **Administrator Dashboard**: High-level platform health metrics, user account distributions, and pending review counts.
-- **User Provisioning &amp; Management**: Search, filter, inspect, activate, or deactivate user accounts across all roles; trigger administrative password resets.
+- **User Provisioning & Management**: Search, filter, inspect, activate, or deactivate user accounts across all roles; trigger administrative password resets.
 - **Organization Vetting**: Review incoming employer registrations; approve or reject organizations before they are permitted to post listings.
 - **Internship Moderation**: Review submitted postings; approve for public discovery or reject with explanatory review notes; take down compromised listings.
 
@@ -66,7 +66,7 @@ The platform provides tailored workspaces and dashboards for five primary user r
 
 ## 3. Screenshots
 
-> *Note: The `docs/screenshots/` directory is currently empty; screenshot embeds have been skipped.*
+Screenshots are located in `docs/screenshots/` when they exist.
 
 ---
 
@@ -74,11 +74,11 @@ The platform provides tailored workspaces and dashboards for five primary user r
 
 | Layer | Technologies | Rationale |
 | :--- | :--- | :--- |
-| **Backend** | Python 3.12+ / 3.14+, FastAPI, Pydantic v2, `pydantic-settings` | High performance asynchronous REST API with automatic OpenAPI validation schemas and dependency injection. |
-| **Database &amp; ORM** | PostgreSQL 16+, SQLAlchemy 2 (ORM &amp; 2.0 Core style), `psycopg` 3 (`psycopg[binary]`), Alembic | ACID-compliant relational persistence, declarative typing, and version-controlled database schema migrations. |
-| **Frontend** | React 18, TypeScript (strict, zero `any`), Vite, React Router, Tailwind CSS, Lucide React | Modern SPA with type safety, clean component-driven architecture, and responsive styling. |
+| **Backend** | Python 3.12+ / 3.14+, FastAPI, Pydantic v2, `pydantic-settings` | FastAPI REST API with synchronous threadpool execution, automatic OpenAPI schemas, and dependency injection. |
+| **Database & ORM** | PostgreSQL 16+, SQLAlchemy 2 (ORM & 2.0 Core style), `psycopg` 3 (`psycopg[binary]`), Alembic | ACID-compliant relational persistence, declarative typing, and version-controlled database schema migrations. |
+| **Frontend** | React 18, TypeScript (strict, zero `any`), Vite, React Router 7, Tailwind CSS, Lucide React | Modern SPA with type safety, clean component-driven architecture, and responsive styling. |
 | **Testing** | Pytest, FastAPI `TestClient`, Vitest, React Testing Library | Full test pyramid: unit, service, integration, and UI component tests across both stacks. |
-| **Code Quality** | Ruff (backend lint &amp; format), ESLint 9 (flat config) + Prettier (frontend) | Enforced zero-warning policy, automated formatting, and strict code hygiene. |
+| **Code Quality** | Ruff (backend lint & format), ESLint 9 (flat config) + Prettier (frontend) | Enforced zero-warning policy, automated formatting, and strict code hygiene. |
 | **CI / CD** | GitHub Actions (`.github/workflows/ci.yml`) | Automated pull request and push validation matrix covering backend tests, frontend tests, and migration checks. |
 
 ---
@@ -87,20 +87,26 @@ The platform provides tailored workspaces and dashboards for five primary user r
 
 ```mermaid
 flowchart TD
-    subgraph Client["Client Tier (Port 5173)"]
-        SPA["React 18 SPA (TypeScript)"]
-        Router["React Router 6/7"]
-        AuthContext["Auth Context &amp; Route Guards"]
-        SPA --> Router --> AuthContext
+    subgraph Client["Client Browser"]
+        BrowserProd["Browser (http://localhost:8080)"]
+        BrowserDev["Browser (http://localhost:5173)"]
     end
 
-    subgraph API_Gateway["API Gateway &amp; Reverse Proxy"]
-        ViteProxy["Vite Dev Server Proxy (/api)"]
+    subgraph DockerPath["Docker Path (Port 8080)"]
+        NginxProxy["Nginx Container (:8080)"]
+        StaticBundle["Static React Build Bundle"]
+        NginxProxy -->|"Serves UI"| StaticBundle
     end
 
-    subgraph Backend["Backend Application Tier (Port 8001)"]
-        FastAPI["FastAPI REST Application"]
-        Middleware["Session Auth &amp; Rate Limit Middleware"]
+    subgraph DevPath["Dev Path (Port 5173)"]
+        ViteDev["Vite Dev Server (:5173)"]
+        ViteProxy["Vite Proxy (/api -> :8001)"]
+        ViteDev --> ViteProxy
+    end
+
+    subgraph Backend["Backend Application Tier (FastAPI)"]
+        FastAPI["FastAPI REST Application (:8000 Docker / :8001 Dev)"]
+        Middleware["Session Auth, Sliding-Window Rate Limiter & Security Headers"]
         Routers["Domain Routers (/api/*)"]
         Services["Domain Services (Business Logic)"]
         Models["SQLAlchemy Declarative Models"]
@@ -115,8 +121,10 @@ flowchart TD
         Alembic -.-> PG
     end
 
-    SPA -->|HTTP / JSON with Session Cookie| ViteProxy
-    ViteProxy -->|Proxy Pass| FastAPI
+    BrowserProd -->|HTTP :8080| NginxProxy
+    NginxProxy -->|Proxy /api/* to :8000| FastAPI
+    BrowserDev -->|HTTP :5173| ViteDev
+    ViteProxy -->|Proxy /api/* to :8001| FastAPI
 ```
 
 ---
@@ -187,7 +195,7 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local evaluati
 Set-Location backend
 .\.venv\Scripts\Activate.ps1
 
-# Run complete backend test suite (219 tests across 46 test suites)
+# Run complete backend test suite
 python -m pytest -v
 
 # Or run quiet summary
@@ -198,14 +206,14 @@ python -m pytest -q
 ```powershell
 Set-Location frontend
 
-# Run complete frontend test suite (213 tests across 61 test suites)
+# Run complete frontend test suite
 npm test
 
 # Run Vitest in watch mode
 npm run test:watch
 ```
 
-### Linting &amp; Formatting Checks
+### Linting & Formatting Checks
 ```powershell
 # Backend (Ruff)
 Set-Location backend
@@ -274,21 +282,23 @@ university-internship-platform/
 
 Security is integrated into every layer of the platform architecture:
 - **Server-Side Session Authentication**: Session IDs are generated with cryptographically secure random bytes (`secrets.token_urlsafe(32)`), stored hashed in PostgreSQL, and transmitted exclusively via `HttpOnly`, `SameSite=Lax` cookies. Identity is **never** accepted from client headers or request bodies.
-- **Argon2id Password Hashing**: User credentials are protected using `pwdlib`'s Argon2id algorithm with per-user salt and high memory/time hardness factors.
-- **Role-Based Access Control (RBAC)**: Enforced strictly at the service and route dependency layer (`get_current_user`, `require_role`). Frontend route guards and UI button states are purely ergonomic conveniences.
-- **Ownership Verification &amp; Cascading Guards**: Instructors can only modify their own courses; organizations can only edit their own postings; students can only submit work for courses in which they are actively enrolled.
-- **Rate Limiting &amp; Defense-in-Depth**: In-memory token-bucket rate limiting guards sensitive endpoints against brute force attacks; client handles `429 Too Many Requests` with automatic cooldown banners.
+- **Scrypt Password Hashing**: User credentials are protected using Python's standard library `hashlib.scrypt` with a cryptographically secure 16-byte random salt and memory-hard computational parameters.
+- **Role-Based Access Control (RBAC)**: Enforced strictly at the service and route dependency layer (`get_current_user`, `require_roles`). Frontend route guards and UI button states are purely ergonomic conveniences.
+- **Ownership Verification & Cascading Guards**: Instructors can only modify their own courses; organizations can only edit their own postings; students can only submit work for courses in which they are actively enrolled.
+- **Sliding-Window Rate Limiting**: In-memory sliding-window rate limiting guards sensitive endpoints (`/api/auth/login`, `/api/auth/register`, `/api/auth/change-password`) against brute-force attacks; clients receive `HTTP 429` with `Retry-After` headers and automatic frontend countdown notices.
 
 For in-depth threat modeling, STRIDE analysis, and vulnerability mitigation matrices, refer to [docs/security.md](docs/security.md).
 
 ---
 
-## 11. Known Limitations &amp; Future Work
+## 11. Known Limitations & Future Work
 
-The platform was built under a strict MVP-first specification. The following features were deliberately left out of scope and represent clear opportunities for future phases:
+The platform was built under a strict MVP-first specification. The following items reflect current project boundaries and planned future enhancements:
 
-1. **In-App Notification Center &amp; Webhooks**: Asynchronous events (such as submission grading or application status changes) are reflected immediately upon dashboard queries, but persistent notification inbox tables, email push alerts, and webhooks are not implemented.
-2. **Badges, Gamification &amp; Rankings**: Course achievement badges, student leaderboards, and gamified ranking points are not implemented.
-3. **Binary File Uploads &amp; Media Streaming**: Direct binary file uploads (PDF slides, lecture videos, downloadable archives) and multimedia streaming are not implemented; curated external learning resources and documentation links are supported.
-4. **AI-Driven Recommendation Features**: Automated resume parsing, candidate scoring, and machine-learning-based internship recommendations are not implemented; only keyword search and a work-mode filter exist.
-5. **Email Verification &amp; Self-Service Emailed Password Resets**: External SMTP/SES email delivery is not configured; user activation is immediate upon registration and password resets are managed administratively or via CLI tools.
+1. **Implemented in Recent Phases**:
+   - **In-App Notifications**: Full notification center (`/notifications`) with real-time unread badge, 60s visibility-aware polling, domain event hooks, and automated 200-item database capacity pruning trigger.
+   - **Course Learning Resources**: Curated external learning resources and documentation links with full instructor CRUD controls and enrolled student visibility.
+2. **Badges, Gamification & Rankings**: Course achievement badges, student leaderboards, and gamified ranking points are not implemented.
+3. **Binary File Uploads & Media Streaming**: Direct binary file uploads (PDF slides, lecture videos, downloadable archives) and multimedia streaming are not implemented; curated external learning resource links are supported.
+4. **AI-Driven Recommendations**: Automated resume parsing, candidate scoring, and machine-learning-based internship recommendations are not implemented; structured keyword search and work mode filters are provided.
+5. **Email Verification & Self-Service Password Reset**: External SMTP/SES email delivery is not configured; accounts activate immediately upon registration, and password recovery is performed administratively or via authenticated password changes.
