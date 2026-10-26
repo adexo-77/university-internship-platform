@@ -20,6 +20,7 @@ from app.routers.admin_user import router as admin_user_router
 from app.routers.application import router as application_router
 from app.routers.assignment import router as assignment_router
 from app.routers.auth import router as auth_router
+from app.routers.badge import router as badge_router
 from app.routers.course import router as course_router
 from app.routers.course_resource import router as course_resource_router
 from app.routers.dashboard import router as dashboard_router
@@ -123,6 +124,7 @@ async def unhandled_exception_handler(request: Request, _: Exception) -> JSONRes
 # Mount routers under /api only
 app.include_router(health_router, prefix="/api")
 app.include_router(auth_router, prefix="/api")
+app.include_router(badge_router, prefix="/api")
 app.include_router(student_profile_router, prefix="/api")
 app.include_router(organization_profile_router, prefix="/api")
 app.include_router(course_router, prefix="/api")
