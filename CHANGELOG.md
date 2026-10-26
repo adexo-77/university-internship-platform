@@ -36,34 +36,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Realistic demo coordinator Ms. Selamawit Tadesse seeded into demo dataset, with updated seed tests, user guide, demo script, and documentation.
 
 ### Fixed
-- Corrected internship application profile prerequisite claims in documentation from bio and skills to university and department only.
+- **Documentation Truth Audit**:
+  - Corrected password hashing claims to Python standard library `hashlib.scrypt` with 16-byte random salt.
+  - Corrected rate limiter description to in-memory sliding-window rate limiting with injectable clock.
+  - Corrected course status claims to `draft` and `published` only (removed fictional `archived` status).
+  - Corrected internship posting claims by removing fictional `stipend` field (`duration_weeks` represents tenure).
+  - Corrected organization profile claims by removing fictional `company_size` field.
+  - Corrected API handler concurrency claims from asynchronous to synchronous threadpool execution.
+  - Corrected student application prerequisite claims to require only `university` and `department`.
+  - Updated React Router version claim to React Router 7.
+  - Replaced hard-coded test counts with exact execution commands (`pytest` and `npm run test`).
+  - Updated `README.md` architecture diagram to show both the Docker path (Nginx on 8080) and local dev path (Vite on 5173).
+  - Updated `scripts/create_user.py` help description to `scrypt`, removed CLI `--password` argument, and added environment variable support (`CREATE_USER_PASSWORD` or `PASSWORD`) with secure fallback to `getpass`.
+  - Removed obsolete one-off `scripts/docker_check.py` test script.
 
 ---
 
 ## [1.0.0] - 2026-10-23
 
 ### Added
-- **Phase 0: Foundation &amp; Architecture**:
+- **Phase 0: Foundation & Architecture**:
   - FastAPI application structure, database connection pooling via `psycopg` 3 and SQLAlchemy 2, and Alembic version-controlled migration harness.
   - React 18 single-page application with TypeScript (strict, zero `any`), Vite reverse-proxy configuration, and Tailwind CSS design tokens (`petrol`, `chalk`, `ink`, `pencil`, `line`, `moss`, `brick`, `marigold`).
   - Base layout shell with responsive mobile drawer navigation and system health probes (`/api/health`, `/api/health/db`).
-- **Phase 1: Authentication &amp; Profile Provisioning**:
+- **Phase 1: Authentication & Profile Provisioning**:
   - Stateful server-side session management with cryptographically random tokens stored hashed in PostgreSQL and transmitted via `HttpOnly`, `SameSite=Lax` cookies.
   - Scrypt password hashing with per-user cryptographic salts and timing attack defense (`hashlib.scrypt`).
   - Public registration and authentication flows for students and organizations.
-  - Student profile management with bio and skill tag lists; organization corporate profiles with industry, size, and website metadata.
+  - Student profile management with bio and skill tag lists; organization corporate profiles with industry and website metadata.
   - CLI administrative user creation tool (`scripts/create_user.py`).
-- **Phase 2: Academic Course Management &amp; Enrollment**:
-  - Course authoring and lifecycle management (`draft`, `published`, `archived`) for instructors.
+- **Phase 2: Academic Course Management & Enrollment**:
+  - Course authoring and lifecycle management (`draft`, `published`) for instructors.
   - Searchable public course catalog with keyword, course code, and department filtering.
   - Course enrollment workflows with database-level duplicate guards and withdrawal support (`leave course`).
   - Instructor student roster table displaying enrolled student names, emails, and enrollment dates.
-- **Phase 3: Course Assignments &amp; Submission Grading**:
+- **Phase 3: Course Assignments & Submission Grading**:
   - Assignment creation with due dates, description prompts, and maximum score values.
   - Student text submission engine with automatic late submission tagging (`is_late=true`) based on UTC server timestamps.
   - Instructor grading interface with numeric score bounding (0 to max points), qualitative feedback comments, and submission locking once graded.
-- **Phase 4: Internship Opportunities &amp; Application Pipeline**:
-  - Organization internship posting creation with work modes (`remote`, `hybrid`, `onsite`), stipends, and deadlines.
+- **Phase 4: Internship Opportunities & Application Pipeline**:
+  - Organization internship posting creation with work modes (`remote`, `hybrid`, `onsite`), durations, and deadlines.
   - Student profile prerequisite guard: students with incomplete profiles are blocked from applying to internships until university and department are saved.
   - Student application pipeline with personalized cover letters, application tracking (`/my-applications`), and safe application withdrawal with confirmation dialogs.
   - Employer decision workflows (`shortlisted`, `accepted`, `rejected`) with terminal candidate locking.
