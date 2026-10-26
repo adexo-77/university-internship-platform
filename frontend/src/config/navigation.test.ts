@@ -81,6 +81,7 @@ describe('Navigation Configuration', () => {
     expect(labels).toContain('Users');
     expect(labels).toContain('Organizations');
     expect(labels).toContain('Internship reviews');
+    expect(labels).toContain('Reports');
     expect(labels).toContain('Courses');
     expect(labels).toContain('Internships');
     expect(labels).toContain('Account');
@@ -100,6 +101,7 @@ describe('Navigation Configuration', () => {
     expect(labels).toContain('Dashboard');
     expect(labels).toContain('Organizations');
     expect(labels).toContain('Internship reviews');
+    expect(labels).toContain('Reports');
     expect(labels).toContain('Internships');
     expect(labels).toContain('Account');
     expect(labels).not.toContain('Users');
@@ -139,6 +141,7 @@ describe('Navigation Configuration', () => {
       expect(resolveSectionTitle('/status')).toBe('System status');
       expect(resolveSectionTitle('/admin/organizations')).toBe('Organizations');
       expect(resolveSectionTitle('/admin/internship-reviews')).toBe('Internship reviews');
+      expect(resolveSectionTitle('/admin/reports')).toBe('Reports');
     });
 
     it('uses provided fallback when route is unknown', () => {

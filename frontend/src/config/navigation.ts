@@ -51,6 +51,12 @@ export const navigationItems: NavItem[] = [
     roles: ['admin', 'coordinator'],
   },
   {
+    path: '/admin/reports',
+    label: 'Reports',
+    icon: FileText,
+    roles: ['admin', 'coordinator'],
+  },
+  {
     path: '/courses',
     label: 'Courses',
     icon: BookOpen,
@@ -108,6 +114,7 @@ export const SECTION_ROUTES: Array<{ prefix: string; title: string }> = [
   { prefix: '/admin/users', title: 'Users' },
   { prefix: '/admin/organizations', title: 'Organizations' },
   { prefix: '/admin/internship-reviews', title: 'Internship reviews' },
+  { prefix: '/admin/reports', title: 'Reports' },
   { prefix: '/my-courses', title: 'My courses' },
   { prefix: '/my-applications', title: 'My applications' },
   { prefix: '/my-internships', title: 'My internships' },

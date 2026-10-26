@@ -178,6 +178,7 @@ export const InternshipDetailPage: React.FC = () => {
 
         {(isOwner || isPrivileged) && (
           <InternshipApplicantsSection
+            postingId={postingId}
             roster={roster}
             statusFilter={statusFilter}
             onStatusFilterChange={setStatusFilter}

@@ -111,6 +111,15 @@ export const CourseDetailPage: React.FC = () => {
                       Edit course
                     </Link>
                   )}
+                  {(isOwner || isAdmin) && (
+                    <a
+                      href={`/api/courses/${course.id}/gradebook.csv`}
+                      download={`course_${course.id}_gradebook.csv`}
+                      className="inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-control border px-3 py-1.5 text-xs leading-snug bg-surface text-ink border-line hover:bg-chalk"
+                    >
+                      Export CSV
+                    </a>
+                  )}
                   {isOwner && course.status === 'draft' && (
                     <Button
                       type="button"
@@ -172,6 +181,13 @@ export const CourseDetailPage: React.FC = () => {
                   <h2 className="text-lg font-semibold text-ink">
                     Enrolled students ({roster.length})
                   </h2>
+                  <a
+                    href={`/api/courses/${course.id}/gradebook.csv`}
+                    download={`course_${course.id}_gradebook.csv`}
+                    className="inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-control border px-3 py-1.5 text-xs leading-snug bg-surface text-ink border-line hover:bg-chalk"
+                  >
+                    Export CSV
+                  </a>
                 </div>
                 <StudentRosterTable students={roster} />
               </section>

@@ -32,6 +32,7 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { RegisterPage } from './pages/RegisterPage';
+import { ReportsPage } from './pages/ReportsPage';
 import { SubmissionGradePage } from './pages/SubmissionGradePage';
 import { SystemStatusPage } from './pages/SystemStatusPage';
 
@@ -123,6 +124,7 @@ export const AppRoutes: React.FC = () => {
         <Route element={<RoleRoute allowedRoles={['admin', 'coordinator']} />}>
           <Route path="/admin/organizations" element={<AdminOrganizationsPage />} />
           <Route path="/admin/internship-reviews" element={<AdminInternshipReviewsPage />} />
+          <Route path="/admin/reports" element={<ReportsPage />} />
         </Route>
 
         {/* Admin management routes: admin role only */}

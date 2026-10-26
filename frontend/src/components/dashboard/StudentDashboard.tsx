@@ -7,6 +7,7 @@ import { formatDate } from '../../lib/dates';
 import { StatStrip } from './StatStrip';
 import { StudentApplicationsSection } from './StudentApplicationsSection';
 import { StudentCoursesSection } from './StudentCoursesSection';
+import { StudentBadgesSection } from '../badges/StudentBadgesSection';
 
 export interface StudentDashboardProps {
   data: StudentDashboardResponse;
@@ -129,6 +130,9 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ data }) => {
         applications={data.applications}
         totalApplications={totalApplications}
       />
+
+      {/* Achievement Badges Section */}
+      <StudentBadgesSection />
     </div>
   );
 };

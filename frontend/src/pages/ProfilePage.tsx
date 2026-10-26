@@ -1,4 +1,5 @@
 import React from 'react';
+import { StudentBadgesSection } from '../components/badges/StudentBadgesSection';
 import { AppShell } from '../components/layout/AppShell';
 import { OrganizationProfileForm } from '../components/profile/OrganizationProfileForm';
 import { StudentProfileForm } from '../components/profile/StudentProfileForm';
@@ -26,7 +27,14 @@ export const ProfilePage: React.FC = () => {
           }
         />
 
-        {user.role === 'student' && <StudentProfileForm />}
+        {user.role === 'student' && (
+          <div className="space-y-8">
+            <StudentProfileForm />
+            <div className="pt-6 border-t border-line">
+              <StudentBadgesSection />
+            </div>
+          </div>
+        )}
         {user.role === 'organization' && <OrganizationProfileForm />}
       </div>
     </AppShell>
