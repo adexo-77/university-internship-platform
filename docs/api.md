@@ -56,7 +56,7 @@ Authentication uses stateful, server-managed sessions with cryptographically ran
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/students/me` | Student | Retrieve student bio, university, department, year, skills, and profile completion status. |
 | `PUT` | `/api/students/me` | Student | Update student profile attributes (university, department, year, bio, skills). |
-| `GET` | `/api/organizations/me` | Organization | Retrieve corporate profile, industry, size, website, and approval status. |
+| `GET` | `/api/organizations/me` | Organization | Retrieve corporate profile, industry, location, website, and approval status. |
 | `PUT` | `/api/organizations/me` | Organization | Update organization profile attributes. |
 
 ### Course Management Endpoints
@@ -65,7 +65,7 @@ Authentication uses stateful, server-managed sessions with cryptographically ran
 | `GET` | `/api/courses` | Authenticated | Browse published courses or filter by instructor ownership. |
 | `POST` | `/api/courses` | Instructor | Author a new course (`draft` or `published`). |
 | `GET` | `/api/courses/{id}` | Authenticated | Retrieve detailed course view, syllabus outline, and instructor info. |
-| `PATCH` | `/api/courses/{id}` | Course Instructor, Admin | Update course details, syllabus, or lifecycle state (`draft`, `published`, `archived`). |
+| `PATCH` | `/api/courses/{id}` | Course Instructor, Admin | Update course details, syllabus, or lifecycle state (`draft`, `published`). |
 | `GET` | `/api/courses/{id}/students` | Course Instructor, Admin | Inspect enrolled student roster with enrollment timestamps. |
 
 ### Course Enrollment Endpoints
@@ -98,14 +98,14 @@ Authentication uses stateful, server-managed sessions with cryptographically ran
 ### Internship Postings &amp; Application Endpoints
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/internships` | Student, Admin | Search published listings with work mode and keyword filters. |
+| `GET` | `/api/internships` | Student, Coordinator, Admin | Search published listings with work mode and keyword filters. |
 | `POST` | `/api/internships` | Approved Org | Create a new internship posting (`draft` or `pending_review`). |
 | `GET` | `/api/internships/{id}` | Authenticated | View internship posting details and application status. |
 | `PATCH` | `/api/internships/{id}` | Posting Org | Update posting details or extend deadline up to 90 days. |
-| `POST` | `/api/internships/{id}/submit` | Posting Org | Submit draft posting for admin review (requires approved org). |
+| `POST` | `/api/internships/{id}/submit` | Posting Org | Submit draft posting for admin/coordinator review (requires approved org). |
 | `POST` | `/api/internships/{id}/withdraw` | Posting Org | Withdraw pending_review posting back to draft. |
 | `POST` | `/api/internships/{id}/close` | Posting Org | Close open internship posting. |
-| `GET` | `/api/internships/{id}/applications` | Posting Org, Admin | Review student applications and cover letters for a posting. |
+| `GET` | `/api/internships/{id}/applications` | Posting Org, Coordinator, Admin | Review student applications and cover letters for a posting. |
 | `POST` | `/api/internships/{id}/applications` | Student | Apply with personalized cover letter (requires profile with university &amp; department). |
 | `GET` | `/api/students/me/applications` | Student | List all applications submitted by the current student. |
 | `POST` | `/api/applications/{id}/withdraw` | Student | Withdraw a pending application before final hiring decision. |
@@ -115,13 +115,13 @@ Authentication uses stateful, server-managed sessions with cryptographically ran
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/admin/users` | Admin | Search and filter platform user accounts by role and status. |
-| `POST` | `/api/admin/users` | Admin | Provision instructor or administrator account. |
+| `POST` | `/api/admin/users` | Admin | Provision instructor, administrator, or coordinator account. |
 | `PATCH` | `/api/admin/users/{id}` | Admin | Activate or deactivate account (self-deactivation guarded). |
 | `PUT` | `/api/admin/users/{id}/password` | Admin | Administratively reset user password and invalidate active sessions. |
-| `GET` | `/api/admin/organizations` | Admin | Review pending organization registrations. |
-| `PUT` | `/api/admin/organizations/{user_id}/approval` | Admin | Approve, reject, or reset company registration status with note. |
-| `GET` | `/api/admin/internships` | Admin | Moderation queue for submitted internship postings. |
-| `PUT` | `/api/admin/internships/{id}/review` | Admin | Approve, reject, or take down listing with review note. |
+| `GET` | `/api/admin/organizations` | Coordinator, Admin | Review pending organization registrations. |
+| `PUT` | `/api/admin/organizations/{user_id}/approval` | Coordinator, Admin | Approve, reject, or reset company registration status with note. |
+| `GET` | `/api/admin/internships` | Coordinator, Admin | Moderation queue for submitted internship postings. |
+| `PUT` | `/api/admin/internships/{id}/review` | Coordinator, Admin | Approve, reject, or take down listing with review note. |
 
 ### Notification Endpoints
 | Method | Endpoint | Access | Description |
@@ -137,6 +137,7 @@ Authentication uses stateful, server-managed sessions with cryptographically ran
 | `GET` | `/api/dashboard/student` | Student | Enrolled courses, assignments due soon, recent grades, and application metrics. |
 | `GET` | `/api/dashboard/instructor` | Instructor | Active courses, student count, and "Needs Grading" queue. |
 | `GET` | `/api/dashboard/organization` | Organization | Active postings, pending reviews, and candidate pipeline totals. |
+| `GET` | `/api/dashboard/coordinator` | Coordinator | Pending approvals, pending reviews, open postings, and application breakdowns. |
 | `GET` | `/api/dashboard/admin` | Admin | Platform-wide user metrics, pending reviews, and status breakdowns. |
 
 ---

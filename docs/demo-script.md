@@ -58,9 +58,9 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 > **Action**: Log out and log in as `yohannes.haile@example.com` (Kaffa Digital Solutions, password `12345678`).
 
 > **What to Say**:
-> *"Now let's look at corporate recruiting partners. An approved organization manages their corporate profile, including industry category, company size, and verified website.*
+> *"Now let's look at corporate recruiting partners. An approved organization manages their corporate profile, including industry category, location, and verified website.*
 >
-> *Organizations can create internship postings specifying role responsibilities, required skills, work mode—remote, hybrid, or on-site—stipend details, and application deadlines. When created, postings enter a `pending_review` state because universities cannot allow unvetted job listings to reach students.*
+> *Organizations can create internship postings specifying role responsibilities, required skills, work mode—remote, hybrid, or on-site—duration in weeks, and application deadlines. When created, postings enter a `pending_review` state because universities cannot allow unvetted job listings to reach students.*
 >
 > *Notice our onboarding guard: if we log in as an unverified company, `eyob.kassa@example.com` (Abay Data Labs), posting creation is blocked until a university administrator approves their registration.*
 >
@@ -96,10 +96,10 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 > **What to Say**:
 > *"To conclude, I'd like to highlight our engineering standards. We adhered strictly to the AGENTS.md constitution throughout development:
 > 1. Authentication relies on server-side session tokens stored hashed in PostgreSQL with `HttpOnly` and `SameSite=Lax` cookies—never trusting client headers.
-> 2. Passwords use Argon2id hashing.
+> 2. Passwords use standard library `hashlib.scrypt` hashing with per-user cryptographic salts.
 > 3. File sizes are strictly capped under 250 physical lines across all Python, TypeScript, and test files.
 > 4. We maintain zero linter warnings on Ruff and ESLint.
-> 5. Our test suite includes 192 Pytest integration tests against a real PostgreSQL database and 207 Vitest unit and component tests across 60 suites (399 automated tests total).
+> 5. Our test suite includes automated Pytest integration tests against a real PostgreSQL database and Vitest unit and component tests across all frontend suites (runnable with `pytest` and `npm run test`).
 >
 > Thank you, and I am ready for any questions!"*
 
@@ -108,7 +108,7 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 ## 2. Q&amp;A Preparation: 15 Likely Evaluator Questions &amp; Answers
 
 ### Q1: Why did you choose FastAPI over traditional frameworks like Django or Flask?
-**Answer**: FastAPI provides native asynchronous concurrency, strict runtime schema validation via Pydantic v2, and automated OpenAPI documentation out of the box. Its lightweight dependency injection system allows us to enforce database sessions, authentication, and role guards cleanly without the monolithic bloat of Django or the lack of built-in typing in Flask.
+**Answer**: FastAPI provides clean synchronous request handling in worker threadpools with SQLAlchemy 2, strict runtime schema validation via Pydantic v2, and automated OpenAPI documentation out of the box. Its lightweight dependency injection system allows us to enforce database sessions, authentication, and role guards cleanly without the monolithic bloat of Django or the lack of built-in typing in Flask.
 
 ### Q2: Why did you use PostgreSQL with `psycopg` 3 and SQLAlchemy 2 instead of raw SQL or an async ORM like Tortoise?
 **Answer**: SQLAlchemy 2 offers modern type-safe ORM and 2.0 Core querying with explicit session boundaries, pairing seamlessly with Alembic for version-controlled schema migrations. We chose PostgreSQL because our domain models require relational foreign key integrity, unique constraints, and ACID transactions (e.g., student enrollment guards and candidate state transitions). `psycopg` 3 is the modern, fast standard driver for Python and PostgreSQL.
@@ -117,26 +117,26 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 **Answer**: We implement stateful server-side sessions. Upon login, the backend generates a cryptographically random 32-byte token via `secrets.token_urlsafe(32)`. The token's SHA-256 hash is persisted in the `sessions` table alongside user ID and expiry timestamp. The token is sent to the browser in an `HttpOnly`, `SameSite=Lax` cookie. Identity is decoded on the server per request and is **never** accepted from request bodies or custom headers.
 
 ### Q4: How are passwords secured?
-**Answer**: User passwords are encrypted using Argon2id via `pwdlib` (`pwdlib[argon2]`). Argon2id provides memory-hardness and side-channel resistance, far superior to legacy MD5, SHA-256, or vanilla bcrypt. Passwords are never logged or exposed in API response schemas.
+**Answer**: User passwords are encrypted using Python's standard library `hashlib.scrypt` with a unique 16-byte random salt per user (N=16384, r=8, p=1). Scrypt provides memory-hardness and ASIC resistance without external C/Rust dependencies. Hashes are persisted in the format `scrypt${salt_hex}${hash_hex}` and are never logged or exposed in API response schemas.
 
 ### Q5: How do you enforce authorization and Role-Based Access Control (RBAC)?
-**Answer**: RBAC is enforced on the server at two levels: route dependencies (`require_role(...)` in `app/core/deps.py`) and inside domain services (`app/services/*`). If an unauthorized user attempts an action (e.g., a student calling an instructor grading endpoint), the server raises an HTTP 403 Forbidden. UI visibility guards in React are purely ergonomic conveniences.
+**Answer**: RBAC is enforced on the server at two levels: route dependencies (`require_roles(...)` in `app/core/deps.py`) and inside domain services (`app/services/*`). If an unauthorized user attempts an action (e.g., a student calling an instructor grading endpoint), the server raises an HTTP 403 Forbidden. UI visibility guards in React are purely ergonomic conveniences.
 
-### Q6: Why are internship postings reviewed by university administrators before going live?
-**Answer**: In educational platforms, students are vulnerable to predatory recruiters, unpaid labor violations, or fraudulent job offers. Requiring administrator review ensures institutional vetting, protects student safety, and verifies that listed stipends, responsibilities, and required skills meet academic standards.
+### Q6: Why are internship postings reviewed by university administrators and coordinators before going live?
+**Answer**: In educational platforms, students are vulnerable to predatory recruiters, unpaid labor violations, or fraudulent job offers. Requiring administrator or coordinator review ensures institutional vetting, protects student safety, and verifies that listed roles, responsibilities, and required skills meet academic standards.
 
 ### Q7: Why is organization approval separated from internship posting review?
 **Answer**: This represents a defense-in-depth model:
-1. Stage 1: Organization verification validates corporate legitimacy (domain, tax entity, business size).
+1. Stage 1: Organization verification validates corporate legitimacy (official website URL, industry category, location, and description).
 2. Stage 2: Listing moderation reviews the specific opportunity terms, ensuring the job description is suitable for university students.
 
 ### Q8: How did you implement assignment deadlines and late submission tracking?
-**Answer**: When an assignment is created, a UTC `due_date` timestamp is recorded. When a student submits, the backend captures `submitted_at`. If `submitted_at > due_date`, the system sets `is_late=True`. Once an instructor submits a numeric grade, the submission is permanently locked against further updates to preserve academic honesty.
+**Answer**: When an assignment is created, a timezone-aware UTC `due_at` timestamp is recorded. When a student submits, the backend captures `submitted_at`. If `submitted_at > due_at`, the system sets `is_late=True`. Once an instructor submits a numeric grade, the submission is permanently locked against further updates to preserve academic honesty.
 
 ### Q9: What is your automated testing strategy across the stack?
 **Answer**: We employ a comprehensive test pyramid:
-- **Backend (192 Pytest tests across 28 suites)**: Integration and domain tests executed against a real PostgreSQL test database (`university_platform_test`). Tests cover registration, role sweeps, session expiry, deadline enforcement, bounded grading, and concurrent enrollment.
-- **Frontend (207 Vitest tests across 60 suites)**: Unit and integration tests using React Testing Library and Vitest, testing component rendering, form validations, route guards, error boundaries, and WCAG color token compliance.
+- **Backend**: Integration and domain tests executed against a real PostgreSQL test database via `pytest`. Tests cover registration, role sweeps, session expiry, deadline enforcement, bounded grading, and concurrent enrollment.
+- **Frontend**: Unit and integration tests using React Testing Library and Vitest via `npm run test`, testing component rendering, form validations, route guards, error boundaries, and WCAG color token compliance.
 
 ### Q10: How does the application protect against common web vulnerabilities (OWASP Top 10)?
 **Answer**:
@@ -150,7 +150,7 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 **Answer**: Monolithic files quickly turn into unmaintainable "god classes" with tangled responsibilities. A strict 250 physical line limit forces developers to decompose features into focused, single-responsibility modules (e.g., splitting catalog search, status transitions, and deadline checks into separate domain services).
 
 ### Q12: How are rate limits handled on both backend and frontend?
-**Answer**: The backend uses an in-memory token-bucket limiter on sensitive endpoints (`/api/auth/login`, `/api/auth/register`). When exceeded, it returns HTTP 429 with a `Retry-After` header. The frontend interceptor detects 429 responses, displays an in-app cooldown countdown banner, and disables the submit button until the cooldown period elapses.
+**Answer**: The backend uses an in-memory sliding-window limiter on sensitive endpoints (`/api/auth/login`, `/api/auth/register`, `/api/auth/change-password`). When exceeded, it returns HTTP 429 with a `Retry-After` header. The frontend interceptor detects 429 responses, displays an in-app cooldown countdown banner, and disables the submit button until the cooldown period elapses.
 
 ### Q13: What happens if an instructor tries to delete a course with active assignments or enrollments?
 **Answer**: Our database models and service methods enforce foreign key integrity. If dependent submissions exist, deletion is rejected with a descriptive business error, preventing orphaned student records and grade loss.
@@ -160,7 +160,7 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 
 ### Q15: What features would you implement next if given another development phase?
 **Answer**:
-1. **Asynchronous Notification Center**: Persistent in-app notifications and email alerts (via AWS SES/SendGrid) for grade releases and interview invitations.
-2. **Binary Learning Resources**: S3/MinIO presigned URL integration for PDF slides, assignment attachments, and resume uploads.
+1. **External Email & Push Notifications**: Integration with external email providers (AWS SES/SendGrid) and web push alerts (in-app notifications are already fully implemented).
+2. **Binary Learning Resources**: S3/MinIO presigned URL integration for PDF slides, assignment attachments, and resume uploads (course resource links are already implemented).
 3. **Badges &amp; Gamification**: Achievement badges for course completion and skill milestones.
 4. **AI-Assisted Candidate Matching**: Currently only title/description search and a work-mode filter exist; future phases could add vector embeddings or resume matching.

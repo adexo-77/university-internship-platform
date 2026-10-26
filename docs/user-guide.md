@@ -205,7 +205,7 @@ Ensure both backend and frontend development servers are running:
 ### Step 3: Internship Posting Moderation (`/admin/internships`)
 1. Click **Internship reviews** in the navigation bar.
 2. Moderate submitted postings with status `pending_review` (e.g. Mobile Application Intern).
-3. Inspect role details, requirements, stipend, and deadlines.
+3. Inspect role details, requirements, work mode, and application deadline.
 4. Click **Approve** to publish to students, or **Reject** with feedback for the employer.
 5. Take down listings when necessary to safeguard student placements.
 
@@ -225,20 +225,17 @@ Any authenticated user can update their password:
 3. Upon submission, the server verifies the current hash, updates the hash, and refreshes your session.
 
 ### Logging Out
-1. Click **Sign out** in the navigation bar.
-2. The server invalidates the session record in PostgreSQL and clears the `HttpOnly` cookie.
-3. The browser is redirected to `/login`, and protected route access is immediately blocked.
+1. Click **Sign out** in the navigation bar. The server invalidates the session in PostgreSQL, clears the `HttpOnly` cookie, and redirects to `/login`.
 
 ---
 
-## 8. In-App Notifications &amp; Activity Tracking
-
+## 8. In-App Notifications & Activity Tracking
 The platform includes an automated in-app notifications center that keeps all personas informed of critical lifecycle events across courses, assignments, applications, and account security.
 
-### Notification Bell &amp; Unread Counter
+### Notification Bell & Unread Counter
 - A notification bell icon is situated in the top navigation header across all authenticated views.
 - If there are unread notifications, a bold petrol badge displays the exact unread count (e.g., `3`).
-- **Visibility-Aware Polling**: The unread counter polls the server every 60 seconds when the browser tab is active and visible. Refetches trigger instantly when the browser window regains focus.
+- **Visibility-Aware Polling**: The unread counter polls the server every 60 seconds when active, refetching instantly when window regains focus.
 
 ### Notifications Page (`/notifications`)
 1. Click the notification bell icon (or navigate to `/notifications`) to open your notifications feed.
