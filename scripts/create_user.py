@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""CLI administrative tool to create instructor, admin, and coordinator accounts."""
+"""CLI administrative tool to create instructor, admin, and coordinator accounts with scrypt hashing."""
 
 import argparse
 import getpass
+import os
 import sys
 from pathlib import Path
 
@@ -30,7 +31,7 @@ ALLOWED_ROLES = (
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Create an instructor, admin, or coordinator account directly in the database."
+        description="Create an instructor, admin, or coordinator account directly in the database using scrypt password hashing."
     )
     parser.add_argument(
         "--email",
@@ -66,18 +67,22 @@ def main(db_session: Session | None = None) -> None:
         print("Error: Full name cannot be blank.", file=sys.stderr)
         sys.exit(1)
 
-    # Read password safely with getpass (never passed as CLI argument or printed)
-    password = getpass.getpass("Enter password (8-128 characters): ")
+    # Password must come from getpass or an environment variable only (never passed as CLI option)
+    env_password = os.environ.get("CREATE_USER_PASSWORD") or os.environ.get("PASSWORD")
+    if env_password:
+        password = env_password
+    else:
+        password = getpass.getpass("Enter password (8-128 characters): ")
+        confirm = getpass.getpass("Confirm password: ")
+        if password != confirm:
+            print("Error: Passwords do not match.", file=sys.stderr)
+            sys.exit(1)
+
     if len(password) < 8 or len(password) > 128:
         print(
             "Error: Password must be between 8 and 128 characters.",
             file=sys.stderr,
         )
-        sys.exit(1)
-
-    confirm = getpass.getpass("Confirm password: ")
-    if password != confirm:
-        print("Error: Passwords do not match.", file=sys.stderr)
         sys.exit(1)
 
     should_close_db = db_session is None
