@@ -405,4 +405,19 @@ stateDiagram-v2
 23. **Applicant Data Isolation**: Detailed applicant profile data and cover letters are strictly confined to the posting's owner organization, platform administrators, and internship coordinators. Other organizations receive 404 Not Found.
 24. **Course Resource Constraints & Access**: Course resources are bounded to a maximum of 50 links per course. Resource URLs must strictly use `http` or `https` schemes and cannot contain null bytes, control characters, or Javascript URIs. Access to resources is restricted to the owning instructor, platform admin, or students enrolled in the published course (returning 404 Not Found for non-enrolled students or draft courses). Only the owning instructor may add, edit, or delete resources.
 25. **Notification Isolation, Link Validation & Capacity Pruning**: In-app notifications are strictly bound to their recipient `user_id`; cross-user access returns 404 Not Found. Actions performed by an actor never generate self-notifications for that actor. Target `link_path` strings are validated to start with `/` and contain no external schemes, control characters, or invalid URIs. Capacity is strictly constrained to 200 notifications per user, enforced by an atomic PostgreSQL database trigger (`trg_prune_notifications`) and service-layer fallback pruning.
+26. **Achievement Badges (Computed on Read, No Table)**: Student achievement badges are calculated dynamically on read from existing tables (`submissions`, `assignments`, `courses`, `student_profiles`, `applications`) without requiring an additional database table or persistent state:
+    - `first_submission`: Student has at least 1 submission in `submissions`.
+    - `ontime_habit`: Student has 5 or more on-time submissions (`is_late == False`). Progress tracked as `(current, target=5)`.
+    - `high_achiever`: Student has at least one graded submission with percentage $\ge 90.0\%$.
+    - `perfect_score`: Student has at least one graded submission where awarded `grade == max_points`.
+    - `course_finisher`: Student has submitted all assignments in at least one course with at least 1 assignment.
+    - `profile_complete`: Student profile has all five core fields non-empty (`university`, `department`, `year_of_study`, `bio`, and `skills`).
+    - `first_application`: Student has submitted at least 1 internship application.
+    - `offer_accepted`: Student has at least 1 application in `accepted` status.
+27. **CSV Data Exports & Safety Controls**: CSV reports stream read-only projections from database tables without writing disk artifacts:
+    - Formula-injection defense: Any cell starting with `=`, `+`, `-`, `@`, `\t`, or `\r` is sanitized with a leading single quote `'`.
+    - UTF-8 with BOM (`\xef\xbb\xbf`) guarantees proper decoding of Amharic and international script names in Excel.
+    - Exports are row-capped at `MAX_CSV_ROWS = 10000` to prevent query resource exhaustion.
+    - Credential exclusion: Account reports never expose password hashes, salts, reset tokens, or session IDs.
+
 

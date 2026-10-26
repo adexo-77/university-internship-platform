@@ -246,3 +246,45 @@ The platform includes an automated in-app notifications center that keeps all pe
    - Click the checkmark icon on an individual item to mark it as read without navigating away.
    - Click **Mark all as read** at the top right to clear all unread badges simultaneously.
 5. **Retention**: The platform automatically caps history at the 200 most recent notifications per user via an automated database pruning trigger.
+
+---
+
+## 9. Student Achievement Badges
+
+Student milestone achievements are dynamically calculated on read from actual database coursework and applications.
+
+### Badge Definitions
+- **First submission**: Awarded upon submitting your first course assignment.
+- **On-time habit**: Awarded after recording 5 assignments submitted on or before the due date (tracks progress `current of 5`).
+- **High achiever**: Awarded when achieving a graded assignment score of 90% or higher.
+- **Perfect score**: Awarded when earning 100% of maximum possible points on any graded assignment.
+- **Course finisher**: Awarded upon submitting all assignments in at least one course (with $\ge 1$ assignment).
+- **Profile complete**: Awarded when university, department, year of study, bio, and technical skills are fully filled.
+- **First application**: Awarded upon submitting your first internship application.
+- **Offer accepted**: Awarded when at least one internship application is decided as accepted.
+
+### Where to View Badges
+1. **Student Dashboard (`/dashboard`)**: The Achievements &amp; Badges grid is displayed directly above course summaries, highlighting earned badges in solid petrol and unearned badges with subtle progress indicators (e.g. "3 of 5").
+2. **Profile Page (`/profile`)**: The complete badge showcase is presented below the profile edit form for quick self-review.
+
+---
+
+## 10. CSV Data Exports &amp; Administrative Reporting
+
+Authorized personas can export platform records as safe UTF-8 spreadsheets encoded with a Byte Order Mark (`\xef\xbb\xbf`) for correct Amharic character display in Microsoft Excel and LibreOffice Calc.
+
+### 1. Course Gradebook Export
+- **Accessible To**: Course owner instructor and platform administrators.
+- **Location**: Course detail page (`/courses/:id`) header action and enrolled student roster table.
+- **Data Fields**: Student name, email address, one column per assignment with numeric score, total submitted count, total graded count, and student average percent score.
+
+### 2. Internship Applicants Export
+- **Accessible To**: Posting owner organization, internship coordinators, and platform administrators.
+- **Location**: Internship details page (`/internships/:id`) Applicants section header.
+- **Data Fields**: Applicant full name, email, university, department, year of study, application status, and application timestamp.
+
+### 3. Cross-Platform Reports Area (`/admin/reports`)
+- **Accessible To**: Platform administrators and internship coordinators (via sidebar navigation **Reports**).
+- **Applications Report (Admin &amp; Coordinator)**: Comprehensive candidate pipeline audit spreadsheet containing posting title, organization name, applicant name, status, application date, and decision date.
+- **Users Report (Admin Only)**: Master user accounts registry containing user ID, full name, email address, role, active status, and creation date. Excludes password hashes and tokens.
+

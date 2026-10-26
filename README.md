@@ -23,16 +23,18 @@ The platform provides tailored workspaces and dashboards for five primary user r
 
 ### 🎓 Student
 - **Interactive Student Dashboard**: View enrolled courses, assignments due soon (flagged as urgent, upcoming, or past due), recent grade cards, and application pipeline metrics.
+- **Achievement Badges**: Dynamically computed student milestone achievements across 8 rules (First submission, On-time habit, High achiever, Perfect score, Course finisher, Profile complete, First application, Offer accepted) with progress counters.
 - **Course Enrollment**: Search the course catalog, enroll with duplicate guards, access assignment rosters, and monitor progress.
 - **Course Learning Resources**: Access curated external documentation and study links associated with published courses in which the student is enrolled.
 - **Assignment Submissions**: Submit text-based assignments before deadlines; late submissions are automatically flagged with timestamp metadata; submissions are locked against edits once graded.
-- **Profile Management**: Maintain bio and technical skills tags; incomplete profiles trigger clear visual banners.
+- **Profile Management**: Maintain bio and technical skills tags; incomplete profiles trigger clear visual banners; showcase earned achievement badges.
 - **Internship Discovery &amp; Applications**: Search published internships with work mode filters (remote, hybrid, onsite) and keyword searches; apply with personalized cover letters; withdraw pending applications with automatic confirmation guards.
 
 ### 👨‍🏫 Instructor
 - **Instructor Dashboard**: Monitor active and draft courses, student enrollment totals, and a dedicated "Needs Grading" queue highlighting pending assignments.
 - **Course Lifecycle**: Author courses with titles, descriptions, and syllabus outlines; manage status transitions (`draft`, `published`).
 - **Course Learning Resources**: Author and curate external learning resources and documentation links (up to 50 per course) with validated HTTP/HTTPS URLs and full CRUD controls.
+- **Gradebook CSV Export**: One-click export of complete enrolled student gradebook as a safe UTF-8 spreadsheet with per-assignment grades, submission totals, and class score averages.
 - **Assignment Authoring**: Define assignments with due dates and maximum scores; edit or delete assignments with cascade protection.
 - **Grading & Feedback**: Review student submissions in an organized roster, assign numeric scores (strictly bounded between 0 and max points), and provide actionable instructor feedback comments.
 
@@ -41,12 +43,14 @@ The platform provides tailored workspaces and dashboards for five primary user r
 - **Corporate Profile**: Maintain company details, industry category, and official website URL.
 - **Internship Posting Lifecycle**: Create postings with roles, requirements, locations, and deadlines; manage states (`draft` &rarr; `pending_review` &rarr; `open` &rarr; `closed`).
 - **Applicant Pipeline Management**: Review student applications, inspect applicant profiles and cover letters, and execute hiring decisions (`shortlisted`, `accepted`, `rejected`) with state locking.
+- **Applicants CSV Export**: Export applicant pipeline dataset with student academic profiles and timestamps.
 
 ### 📋 Internship Coordinator
 - **Coordinator Dashboard**: Dedicated operational dashboard tracking pending employer registrations, internship postings awaiting moderation, live open postings, applicant pipeline distributions, and completed review counts.
 - **Organization Vetting**: Review and decide on corporate partner registrations (`/api/admin/organizations*`) with full approval and rejection workflows.
 - **Internship Moderation**: Review submitted postings (`/api/admin/internships*`), approve listings for public student discovery, reject with feedback notes, or take down compromised listings.
 - **Listing & Applicant Visibility**: Search and inspect all internship listings across every lifecycle status and inspect applicant rosters in read-only mode to mentor students and monitor placement health.
+- **Cross-Platform Reports**: Export comprehensive internship applications audit spreadsheet.
 - **Institutional Boundaries**: Strictly separated from administrative user provisioning (`/api/admin/users*`), password resets, course administration, or system health operations.
 
 ### 🛡️ Administrator
@@ -54,6 +58,13 @@ The platform provides tailored workspaces and dashboards for five primary user r
 - **User Provisioning & Management**: Search, filter, inspect, activate, or deactivate user accounts across all roles; trigger administrative password resets.
 - **Organization Vetting**: Review incoming employer registrations; approve or reject organizations before they are permitted to post listings.
 - **Internship Moderation**: Review submitted postings; approve for public discovery or reject with explanatory review notes; take down compromised listings.
+- **Cross-Platform Reports Area**: Export comprehensive platform application audits and master user accounts registry.
+
+### 📊 Safe CSV Reports & Data Exports
+- **Formula-Injection Defense**: Centralized sanitizer prefixes `'` to dangerous triggers (`=`, `+`, `-`, `@`, `\t`, `\r`) to protect Excel users from malicious execution.
+- **UTF-8 with BOM**: Guarantees international script and Amharic text renders seamlessly in spreadsheet software.
+- **Resource Protection**: Exports are row-capped at 10,000 rows with `Cache-Control: no-store` headers.
+- **Sensitive Column Exclusion**: Never exposes password hashes, salts, reset tokens, or session IDs in exported data.
 
 ### 🔔 In-App Notifications (All Roles)
 - **Top Navigation Indicator**: Real-time bell icon with petrol badge displaying unread notification count.

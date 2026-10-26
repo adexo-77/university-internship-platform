@@ -34,6 +34,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Dedicated coordinator dashboard (`GET /api/dashboard/coordinator`) returning pending organization approvals, postings pending moderation, live open postings, applicant pipeline distribution, and coordinator completed reviews count.
   - Frontend coordinator workspace: custom navigation (Dashboard, Organizations, Internship reviews, Internships, Account, notification bell), dedicated `CoordinatorDashboard` component, route guards, admin user form coordinator option, and badge rendering.
   - Realistic demo coordinator Ms. Selamawit Tadesse seeded into demo dataset, with updated seed tests, user guide, demo script, and documentation.
+- **Phase 8d: Achievement Badges &amp; Safe CSV Reports**:
+  - Student achievement badges computed dynamically on read from live data without persistent table overhead (`GET /api/students/me/badges`), evaluating 8 milestone definitions (First submission, On-time habit, High achiever, Perfect score, Course finisher, Profile complete, First application, Offer accepted) with progress counters.
+  - Centralized safe CSV exporter (`services/csv_export_writer.py`) implementing formula-injection protection (neutralizing cells starting with `=`, `+`, `-`, `@`, `\t`, or `\r` via leading single quote `'`), UTF-8 Byte Order Mark (`\xef\xbb\xbf`) for correct Amharic decoding in Excel, 10,000 row capping, and `Cache-Control: no-store` header.
+  - CSV endpoints under `/api`: `GET /api/courses/{id}/gradebook.csv` (owner instructor or admin), `GET /api/internships/{id}/applicants.csv` (owner organization, coordinator, or admin), `GET /api/admin/reports/applications.csv` (coordinator or admin), and `GET /api/admin/reports/users.csv` (admin only, excluding sensitive credentials and hashes).
+  - Frontend badges display: Achievements &amp; Badges component on student dashboard and profile page rendering earned badges in solid petrol and unearned badges with progress text.
+  - Frontend CSV exports: One-click Export CSV buttons on course detail page, internship applicants section, and dedicated Reports page (`/admin/reports`) for admin and coordinator roles.
+  - Seed demo enhancements: Abel earns 6 achievement badges, Meron earns 3; extended seed tests.
+  - Refactored `services/assignment.py` into `assignment.py` and `assignment_query.py` to maintain all files strictly under 250 physical lines.
+  - Synchronized OpenAPI specification (`docs/openapi.json`) and updated architectural, database, security, and requirements documentation.
 
 ### Fixed
 - **Documentation Truth Audit**:

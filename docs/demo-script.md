@@ -162,5 +162,12 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 **Answer**:
 1. **External Email & Push Notifications**: Integration with external email providers (AWS SES/SendGrid) and web push alerts (in-app notifications are already fully implemented).
 2. **Binary Learning Resources**: S3/MinIO presigned URL integration for PDF slides, assignment attachments, and resume uploads (course resource links are already implemented).
-3. **Badges &amp; Gamification**: Achievement badges for course completion and skill milestones.
+3. **Multi-Institution Federation**: Cross-university credit recognition, multi-campus tenancy, and consortium-wide internship sharing (student achievement badges and safe CSV reports are already fully implemented).
 4. **AI-Assisted Candidate Matching**: Currently only title/description search and a work-mode filter exist; future phases could add vector embeddings or resume matching.
+
+### Q16: How are student achievement badges calculated and rendered?
+**Answer**: Student badges are computed dynamically on read (`services/badge.py`) from live relational data (`submissions`, `assignments`, `courses`, `student_profiles`, `applications`) without storing duplicate state or introducing migration overhead. Eight milestones evaluate submissions, on-time submissions, 90%+ grades, 100% perfect scores, course completion, profile completeness, and internship offers. On the frontend, earned badges appear in solid petrol while unearned ones show subtle progress indicators (e.g., "3 of 5").
+
+### Q17: How does the platform defend CSV spreadsheet downloads against injection attacks?
+**Answer**: All CSV reports stream through a safe centralized generator (`services/csv_export_writer.py`). It applies CSV formula-injection neutralization by prefixing any cell starting with `=`, `+`, `-`, `@`, `\t`, or `\r` with a single quote `'`. Responses include a UTF-8 Byte Order Mark (`\xef\xbb\xbf`) so Excel renders Amharic text properly, set `Cache-Control: no-store`, enforce a 10,000 row cap, and project strict public field whitelists that permanently omit password hashes, salts, and session tokens.
+

@@ -140,6 +140,21 @@ Authentication uses stateful, server-managed sessions with cryptographically ran
 | `GET` | `/api/dashboard/coordinator` | Coordinator | Pending approvals, pending reviews, open postings, and application breakdowns. |
 | `GET` | `/api/dashboard/admin` | Admin | Platform-wide user metrics, pending reviews, and status breakdowns. |
 
+### Achievement Badges Endpoints
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/students/me/badges` | Student | Compute and return list of 8 achievement badges with progress for the authenticated student. |
+
+### CSV Export Endpoints
+All CSV endpoints return safe UTF-8 spreadsheets with BOM (`\xef\xbb\xbf`), formula-injection sanitization, `Cache-Control: no-store`, and a max limit of 10,000 rows.
+
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/courses/{id}/gradebook.csv` | Instructor (owner), Admin | Export course gradebook: student name, email, per-assignment grade, submitted count, graded count, average percent. |
+| `GET` | `/api/internships/{id}/applicants.csv` | Org (owner), Coordinator, Admin | Export applicant dataset: name, email, university, department, year, status, applied date. |
+| `GET` | `/api/admin/reports/applications.csv` | Coordinator, Admin | Export audit report: posting title, organization name, applicant name, status, applied date, decided date. |
+| `GET` | `/api/admin/reports/users.csv` | Admin | Export user registry: id, name, email, role, active status, created date (excludes password hashes and tokens). |
+
 ---
 
 ## 4. Standard Response &amp; Error Format

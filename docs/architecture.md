@@ -121,6 +121,8 @@ flowchart TD
   - `internship.py`: `/internships`, `/organizations/me/internships`, `/internships/{id}`.
   - `application.py`: `/internships/{id}/applications`, `/students/me/applications`, `/applications/{id}/withdraw`, `/applications/{id}`, `/applications/{id}/decision`.
   - `notification.py`: `/notifications`, `/notifications/unread-count`, `/notifications/{id}/read`, `/notifications/read-all`.
+  - `badge.py`: `/students/me/badges`.
+  - `csv_export.py`: `/courses/{id}/gradebook.csv`, `/internships/{id}/applicants.csv`, `/admin/reports/applications.csv`, `/admin/reports/users.csv`.
 - **Services (`services/`)**:
   - `AuthService`: Registration (atomic user + profile), authentication, session lifecycle.
   - `StudentProfileService`: Student profile retrieval and updates.
@@ -129,15 +131,17 @@ flowchart TD
   - `course_catalog.py`: Course search and pagination.
   - `course_resource.py`: Course learning resources listing with published/enrolled access check, creation (max 50 limit, URL scheme validation), updating, and cascade deletion.
   - `enrollment.py`: Course enrollment with duplicate prevention, unenrollment, and roster retrieval.
-  - `assignment.py`: Assignment creation, course assignment listing with student submission status mapping, assignment detail lookup, update with max_points grade floor check, and deletion protected against existing submissions.
+  - `assignment.py` & `assignment_query.py`: Assignment creation, course assignment listing with student submission status mapping, assignment detail lookup, update with max_points grade floor check, and deletion protected against existing submissions.
   - `submission.py`: Student assignment submission with server-clock late flag calculation and locked-after-graded protection, student submission lookup, instructor/admin submissions roster, and instructor grading with max_points bounds.
   - `internship.py`: Internship posting creation, detail lookup, update with status transitions (`draft`->`open`, `open`->`closed`), organization own postings list with applicant counts.
   - `internship_catalog.py`: Catalogue search and pagination for students and admin with applied status mapping.
   - `application.py`: Student application submission with profile completeness and open deadline guards, duplicate prevention, student application listing, withdrawal window, applicant roster retrieval, and organization decision transitions.
   - `notification.py`: Notification creation on 10 domain events, user notifications listing with pagination, unread counter, read status updates, link path validation, and 200-item capacity pruning.
+  - `badge.py`: Dynamic student achievement badge computation on read across 8 milestone definitions with progress indicators.
+  - `csv_export.py` & `csv_export_writer.py`: Safe CSV streaming generation with UTF-8 BOM, formula-injection sanitization, 10,000 row limits, and role/ownership security checks.
 - **Frontend Layer (`frontend/src/`)**:
 - **API (`api/`)**:
-  - `auth.ts`, `profile.ts`, `course.ts`, `assignment.ts`, `internship.ts`, `application.ts`, `notification.ts`, `health.ts`.
+  - `auth.ts`, `profile.ts`, `course.ts`, `assignment.ts`, `internship.ts`, `application.ts`, `notification.ts`, `health.ts`, `badge.ts`.
 - **Context &amp; Navigation (`context/`, `config/`)**:
   - `AuthContext`: Session lifecycle and user identity.
   - `navigation.ts`: Navigation items filtered per role, role-based `getHomePath` (organization routes to `/my-internships`).
@@ -245,6 +249,11 @@ flowchart TD
 | `/api/notifications/unread-count` | `GET` | Authenticated | Get total count of unread notifications for badge counter | `200 OK` |
 | `/api/notifications/{id}/read` | `PATCH` | Authenticated | Mark a single notification owned by current user as read | `200 OK` |
 | `/api/notifications/read-all` | `POST` | Authenticated | Mark all notifications owned by current user as read | `200 OK` |
+| `/api/students/me/badges` | `GET` | `student` | Compute and retrieve student achievement badges on read | `200 OK` |
+| `/api/courses/{id}/gradebook.csv` | `GET` | `instructor` (owner), `admin` | Export course student gradebook spreadsheet as safe UTF-8 CSV | `200 OK` |
+| `/api/internships/{id}/applicants.csv` | `GET` | `organization` (owner), `coordinator`, `admin` | Export internship applicants dataset as safe UTF-8 CSV | `200 OK` |
+| `/api/admin/reports/applications.csv` | `GET` | `coordinator`, `admin` | Export cross-platform internship applications audit spreadsheet | `200 OK` |
+| `/api/admin/reports/users.csv` | `GET` | `admin` | Export registered user accounts registry spreadsheet (no secrets) | `200 OK` |
 | `/api/health` | `GET` | Public | Basic platform status probe | `200 OK` |
 | `/api/health/db` | `GET` | Public | Database query connectivity probe | `200 OK` |
 
@@ -258,6 +267,11 @@ The table below outlines role access across platform route domains. Anonymous re
 | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
 | **Authentication &amp; Self-Service** (`/api/auth/*`) | ✅ | ✅ | ✅ | ✅ | ✅ | Register (student, org only), login, logout, password change |
 | **In-App Notifications** (`/api/notifications/*`) | ✅ | ✅ | ✅ | ✅ | ✅ | Scoped strictly to authenticated user's ID |
+| **Achievement Badges** (`/api/students/me/badges`) | ✅ | ❌ | ❌ | ❌ | ❌ | Computed on read; student own data only |
+| **Course Gradebook CSV** (`/api/courses/{id}/gradebook.csv`) | ❌ | ✅ (owner) | ❌ | ❌ | ✅ | Owner instructor or admin; UTF-8 BOM, formula defense |
+| **Internship Applicants CSV** (`/api/internships/{id}/applicants.csv`) | ❌ | ❌ | ✅ (owner) | ✅ | ✅ | Owner org, coordinator, or admin |
+| **Applications Report CSV** (`/api/admin/reports/applications.csv`) | ❌ | ❌ | ❌ | ✅ | ✅ | Admin or coordinator audit export |
+| **User Accounts Report CSV** (`/api/admin/reports/users.csv`) | ❌ | ❌ | ❌ | ❌ | ✅ | Platform admin only; no hashes or tokens |
 | **Student Profiles** (`/api/students/*`) | ✅ | ❌ | ❌ | ❌ | ✅ | Student self-management; admin inspect |
 | **Organization Profiles** (`/api/organizations/*`) | ❌ | ❌ | ✅ | ❌ | ✅ | Org self-management; admin inspect |
 | **Course Catalog &amp; View** (`/api/courses`, `GET /courses/{id}`) | ✅ | ✅ | ❌ | ❌ | ✅ | Published courses visible; draft visible to owner/admin |

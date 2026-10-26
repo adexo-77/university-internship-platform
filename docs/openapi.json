@@ -238,6 +238,32 @@
         }
       }
     },
+    "/api/students/me/badges": {
+      "get": {
+        "tags": [
+          "badges"
+        ],
+        "summary": "Get current student achievement badges",
+        "description": "Retrieve computed achievement badges for the authenticated student.",
+        "operationId": "get_my_badges_api_students_me_badges_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BadgeResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get My Badges Api Students Me Badges Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/students/me": {
       "get": {
         "tags": [
@@ -2864,6 +2890,124 @@
           }
         }
       }
+    },
+    "/api/courses/{id}/gradebook.csv": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Export course gradebook as CSV",
+        "description": "Export student grades for a course as a UTF-8 CSV with BOM.",
+        "operationId": "export_course_gradebook_api_courses__id__gradebook_csv_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "Course ID",
+              "title": "Id"
+            },
+            "description": "Course ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Safe CSV export of course gradebook.",
+            "content": {
+              "text/csv": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internships/{id}/applicants.csv": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Export internship applicants as CSV",
+        "description": "Export applicants for an internship posting as a UTF-8 CSV with BOM.",
+        "operationId": "export_internship_applicants_api_internships__id__applicants_csv_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "Internship ID",
+              "title": "Id"
+            },
+            "description": "Internship ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Safe CSV export of applicants roster.",
+            "content": {
+              "text/csv": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/reports/applications.csv": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Export all applications report as CSV",
+        "description": "Export platform applications as a UTF-8 CSV with BOM for admin and coordinator.",
+        "operationId": "export_applications_report_api_admin_reports_applications_csv_get",
+        "responses": {
+          "200": {
+            "description": "Safe CSV export of platform applications.",
+            "content": {
+              "text/csv": {}
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/reports/users.csv": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Export all users report as CSV",
+        "description": "Export platform users as a UTF-8 CSV with BOM for admin only.",
+        "operationId": "export_users_report_api_admin_reports_users_csv_get",
+        "responses": {
+          "200": {
+            "description": "Safe CSV export of platform users.",
+            "content": {
+              "text/csv": {}
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3676,6 +3820,66 @@
         "type": "object",
         "title": "AssignmentUpdate",
         "description": "Payload to update an existing assignment."
+      },
+      "BadgeProgress": {
+        "properties": {
+          "current": {
+            "type": "integer",
+            "title": "Current"
+          },
+          "target": {
+            "type": "integer",
+            "title": "Target"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "current",
+          "target"
+        ],
+        "title": "BadgeProgress",
+        "description": "Current progress and target count for countable achievement badges."
+      },
+      "BadgeResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "earned": {
+            "type": "boolean",
+            "title": "Earned"
+          },
+          "progress": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BadgeProgress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description",
+          "earned"
+        ],
+        "title": "BadgeResponse",
+        "description": "Achievement badge item representing student milestone accomplishment."
       },
       "ChangePasswordRequest": {
         "properties": {

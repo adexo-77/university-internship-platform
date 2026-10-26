@@ -12,7 +12,10 @@ This document details the security posture, threat model, control mechanisms, kn
 | **Cross-Site Request Forgery (CSRF)** | High | State-modifying endpoints (`POST`, `PUT`, `PATCH`, `DELETE`) | Origin and Referer validation middleware blocking requests from unapproved third-party origins. |
 | **Clickjacking** | Medium | Web UI and authenticated sessions | `X-Frame-Options: DENY` header prevents framing in hostile sites. |
 | **MIME Sniffing** | Medium | API and media responses | `X-Content-Type-Options: nosniff` header blocks content sniffing. |
+| **CSV Formula Injection** | High | CSV spreadsheet downloads | Prepends single quote `'` to cells starting with `=`, `+`, `-`, `@`, `\t`, or `\r`. |
+| **Credential & Hash Leakage in Exports** | High | User account data exports | Whitelist-only row mapping in `services/csv_export.py`; strict exclusion of password hashes and tokens. |
 | **Denial of Service (Large Payloads)** | High | API request handling &amp; memory | Request size limiting middleware blocking requests exceeding 256 KB (`HTTP 413 Payload Too Large`). |
+| **Denial of Service (Unbounded CSV Export)** | Medium | CSV export queries &amp; buffers | Strict 10,000 row cap on all CSV exports (`MAX_CSV_ROWS`). |
 | **PostgreSQL Driver Crashes (NUL Bytes)** | High | Database driver (`psycopg`) and auth queries | Pydantic string sanitization rejecting NUL bytes (`\x00`) and control characters with `422 Unprocessable Entity`. |
 | **Session Hijacking &amp; Token Exposure** | High | User credentials &amp; session states | `HttpOnly`, `SameSite=Lax`, `Secure` (production) cookies. Database stores SHA-256 token hashes, never raw tokens. |
 | **Sensitive Data Exposure in Errors/Logs** | Medium | Stack traces, password hashes, secrets | Structured logging filtering passwords and tokens; generic JSON 500 handler returning only UUID `request_id`. |
@@ -23,6 +26,8 @@ This document details the security posture, threat model, control mechanisms, kn
 
 | Control Category | Implementation File | Key Configurations &amp; Enforcement Rules |
 | :--- | :--- | :--- |
+| **CSV Injection Defense** | `backend/app/services/csv_export_writer.py` | Prepends `'` to dangerous formula trigger characters (`=`, `+`, `-`, `@`, `\t`, `\r`); prepends UTF-8 BOM (`\xef\xbb\xbf`) for safe Amharic rendering; caps output at 10,000 rows; sets `Cache-Control: no-store` and `X-Content-Type-Options: nosniff`. |
+| **Data Exposure Guard** | `backend/app/services/csv_export.py` | Strict field projection: `users.csv` exports only `id`, `name`, `email`, `role`, `active`, and `created_at`. Password hashes, reset tokens, and session identifiers are never queried or emitted. |
 | **Rate Limiter** | `backend/app/core/rate_limit.py` | Sliding window: 5 failed logins / 15 min per (IP+email), 20 / 15 min per IP, 10 registrations / hr per IP, 5 password changes / 15 min per user. Returns `429` with `Retry-After`. |
 | **Rate Limit Frontend** | `frontend/src/hooks/useRateLimitCooldown.ts` | Listens for `429` responses with `Retry-After` header, displays live countdown notice, disables submit button. |
 | **CSRF Defense** | `backend/app/core/csrf.py` | Validates `Origin` and `Referer` against `CORS_ORIGINS` for mutations. Allows non-browser clients (missing headers). |
