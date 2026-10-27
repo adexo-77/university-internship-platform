@@ -60,14 +60,29 @@ The platform provides tailored workspaces and dashboards for five primary user r
 - **Internship Moderation**: Review submitted postings; approve for public discovery or reject with explanatory review notes; take down compromised listings.
 - **Cross-Platform Reports Area**: Export comprehensive platform application audits and master user accounts registry.
 
+### 🏆 Student Achievement Badges (8 Rules)
+Dynamically computed milestones calculated on read from actual database records without duplicate state:
+- **First submission** (`first_submission`): Awarded upon submitting your first course assignment.
+- **On-time habit** (`ontime_habit`): Awarded after submitting 5 assignments on or before the due date (tracks progress `current of 5`).
+- **High achiever** (`high_achiever`): Awarded when scoring 90% or higher on any graded assignment.
+- **Perfect score** (`perfect_score`): Awarded when earning 100% of maximum possible points on any graded assignment.
+- **Course finisher** (`course_finisher`): Awarded upon submitting all assignments in at least one course (with &ge; 1 assignment).
+- **Profile complete** (`profile_complete`): Awarded when university, department, year of study, bio, and skills are fully completed.
+- **First application** (`first_application`): Awarded upon submitting your first internship application.
+- **Offer accepted** (`offer_accepted`): Awarded when at least one internship application is decided as accepted.
+
 ### 📊 Safe CSV Reports & Data Exports
+The platform provides four role-scoped CSV exports protected by formula-injection sanitization, UTF-8 Byte Order Mark (`\xef\xbb\xbf`) encoding for Amharic text support, a 10,000-row cap, and `Cache-Control: no-store` headers:
+1. **Course Gradebook CSV** (`GET /api/courses/{id}/gradebook.csv`): Available to course owner instructor and administrators. Exports enrolled student roster, per-assignment numeric grades, submission counts, and overall student grade percent averages.
+2. **Internship Applicants CSV** (`GET /api/internships/{id}/applicants.csv`): Available to posting owner organization, internship coordinators, and administrators. Exports candidate pipeline with student name, email, university, department, year of study, application status, and submission timestamp.
+3. **Cross-Platform Applications Audit CSV** (`GET /api/admin/reports/applications.csv`): Available to administrators and internship coordinators via the Reports area. Exports platform-wide application records with posting title, organization name, applicant name, status, application date, and decision date.
+4. **Master Users Registry CSV** (`GET /api/admin/reports/users.csv`): Available exclusively to administrators via the Reports area. Exports complete user account registry with user ID, full name, email address, role, active status, and registration date (strictly excludes password hashes, salts, and tokens).
+
 - **Formula-Injection Defense**: Centralized sanitizer prefixes `'` to dangerous triggers (`=`, `+`, `-`, `@`, `\t`, `\r`) to protect Excel users from malicious execution.
-- **UTF-8 with BOM**: Guarantees international script and Amharic text renders seamlessly in spreadsheet software.
-- **Resource Protection**: Exports are row-capped at 10,000 rows with `Cache-Control: no-store` headers.
 - **Sensitive Column Exclusion**: Never exposes password hashes, salts, reset tokens, or session IDs in exported data.
 
 ### 🔔 In-App Notifications (All Roles)
-- **Top Navigation Indicator**: Real-time bell icon with petrol badge displaying unread notification count.
+- **Top Navigation Indicator**: Near-real-time bell icon (60 second polling) with petrol badge displaying unread notification count.
 - **Visibility-Aware Polling**: Background check every 60 seconds while active, with immediate refetch on window focus.
 - **Comprehensive Notification Center (`/notifications`)**: Dedicated feed with unread highlights, filter, individual mark-as-read, bulk read-all, and direct deep-linking to relevant resources.
 - **Domain Event Triggers**: 10 lifecycle events across grading, submissions, reviews, applications, and security.
@@ -307,9 +322,12 @@ For in-depth threat modeling, STRIDE analysis, and vulnerability mitigation matr
 The platform was built under a strict MVP-first specification. The following items reflect current project boundaries and planned future enhancements:
 
 1. **Implemented in Recent Phases**:
-   - **In-App Notifications**: Full notification center (`/notifications`) with real-time unread badge, 60s visibility-aware polling, domain event hooks, and automated 200-item database capacity pruning trigger.
+   - **In-App Notifications**: Full notification center (`/notifications`) with near-real-time unread badge (60-second polling), domain event hooks, and automated 200-item database capacity pruning trigger.
    - **Course Learning Resources**: Curated external learning resources and documentation links with full instructor CRUD controls and enrolled student visibility.
-2. **Badges, Gamification & Rankings**: Course achievement badges, student leaderboards, and gamified ranking points are not implemented.
+   - **Student Achievement Badges**: Milestone badge computations across 8 dynamic rules with progress tracking and profile showcase.
+   - **Safe CSV Reports & Data Exports**: Four role-scoped CSV exports (Gradebook, Applicants, Platform Applications, and Users Registry) protected against formula injection.
+2. **Rankings & Gamification**: Competitive student leaderboards, peer ranking comparisons, and gamified ranking points are not implemented; milestone badges are provided without peer ranking competition.
 3. **Binary File Uploads & Media Streaming**: Direct binary file uploads (PDF slides, lecture videos, downloadable archives) and multimedia streaming are not implemented; curated external learning resource links are supported.
 4. **AI-Driven Recommendations**: Automated resume parsing, candidate scoring, and machine-learning-based internship recommendations are not implemented; structured keyword search and work mode filters are provided.
 5. **Email Verification & Self-Service Password Reset**: External SMTP/SES email delivery is not configured; accounts activate immediately upon registration, and password recovery is performed administratively or via authenticated password changes.
+6. **Cloud Deployment & Managed Orchestration**: Multi-region cloud infrastructure, CDN distribution, and managed container orchestration (Kubernetes, AWS ECS) are not configured; containerized Docker Compose and local developer environments are fully supported.
