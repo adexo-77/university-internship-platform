@@ -5,7 +5,7 @@ All notable changes to the **University Learning &amp; Internship Platform** wil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.0] - Unreleased
+## [1.1.0] - 2026-10-27
 
 ### Added
 - **Phase 8a: Course Learning Resources**:
@@ -45,7 +45,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Synchronized OpenAPI specification (`docs/openapi.json`) and updated architectural, database, security, and requirements documentation.
 
 ### Fixed
-- **Documentation Truth Audit**:
+- **Consistency &amp; Documentation Truth Audit**:
+  - Synchronized demo facts across `README.md` and `docs/user-guide.md` to reflect Abel Tesfaye's ER Diagramming grade of 100/100 matching seeded dataset.
+  - Clarified top navigation notification bell documentation to near-real-time (60-second polling).
+  - Fully documented all 8 student achievement badge rules and the 4 role-scoped CSV exports in `README.md`.
+  - Updated limitations in `README.md` and traceability matrix in `docs/requirements.md` to confirm badges are implemented while preserving rankings, file uploads, AI recommendations, email verification, and cloud deployment as honest boundaries.
   - Corrected password hashing claims to Python standard library `hashlib.scrypt` with 16-byte random salt.
   - Corrected rate limiter description to in-memory sliding-window rate limiting with injectable clock.
   - Corrected course status claims to `draft` and `published` only (removed fictional `archived` status).
