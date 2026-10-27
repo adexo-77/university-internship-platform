@@ -36,7 +36,7 @@ Ensure both backend and frontend development servers are running:
    - "Relational Schema Design &amp; Normalization" due in 3 days displays an urgent badge.
    - "Advanced SQL Queries &amp; Index Optimization" due in 18 days displays an upcoming badge.
    - "ER Diagramming &amp; Conceptual Modeling" past due displays a past due badge.
-4. Review the **Recent Grades** panel showing scored assignments with percentage chips and instructor feedback (e.g., 94% on ER Diagramming).
+4. Review the **Recent Grades** panel showing scored assignments with percentage chips and instructor feedback (e.g., 100% on ER Diagramming).
 
 ### Step 2: Browse &amp; Enroll in Courses (`/courses`)
 1. Click **Courses** in the main navigation.
