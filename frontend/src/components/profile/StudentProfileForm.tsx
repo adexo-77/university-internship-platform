@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getStudentProfile, ProfileApiError, updateStudentProfile } from '../../api/profile';
 import { formatSkills, parseSkills } from '../../lib/skills';
 import { Button, Notice, Select, Textarea, TextField } from '../ui';
+import { StudentPreferencesFields } from './StudentPreferencesFields';
 
 export const StudentProfileForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -15,6 +16,8 @@ export const StudentProfileForm: React.FC = () => {
   const [yearOfStudy, setYearOfStudy] = useState('');
   const [bio, setBio] = useState('');
   const [skillsText, setSkillsText] = useState('');
+  const [preferredWorkModes, setPreferredWorkModes] = useState<string[]>([]);
+  const [preferredLocation, setPreferredLocation] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -31,6 +34,8 @@ export const StudentProfileForm: React.FC = () => {
           setYearOfStudy(profile.year_of_study ? String(profile.year_of_study) : '');
           setBio(profile.bio ?? '');
           setSkillsText(formatSkills(profile.skills));
+          setPreferredWorkModes(profile.preferred_work_modes ?? []);
+          setPreferredLocation(profile.preferred_location ?? '');
         }
       } catch (err) {
         if (isMounted) {
@@ -65,9 +70,18 @@ export const StudentProfileForm: React.FC = () => {
     if (bio.length > 1000) {
       errors.bio = 'Bio cannot exceed 1000 characters.';
     }
+    if (preferredLocation.length > 80) {
+      errors.preferredLocation = 'Preferred location cannot exceed 80 characters.';
+    }
 
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
+  };
+
+  const handleToggleWorkMode = (mode: string) => {
+    setPreferredWorkModes((prev) =>
+      prev.includes(mode) ? prev.filter((m) => m !== mode) : [...prev, mode]
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,6 +102,8 @@ export const StudentProfileForm: React.FC = () => {
         year_of_study: yearOfStudy ? parseInt(yearOfStudy, 10) : null,
         bio: bio.trim() || null,
         skills: parsedSkills,
+        preferred_work_modes: preferredWorkModes,
+        preferred_location: preferredLocation.trim() || null,
       });
       setSavedSuccess(true);
     } catch (err) {
@@ -193,6 +209,15 @@ export const StudentProfileForm: React.FC = () => {
           onChange={(e) => setSkillsText(e.target.value)}
           error={fieldErrors.skills}
           helperText="Enter skills separated by commas (e.g. Python, SQL, React). Up to 20 skills."
+        />
+
+        <StudentPreferencesFields
+          preferredWorkModes={preferredWorkModes}
+          onToggleWorkMode={handleToggleWorkMode}
+          preferredLocation={preferredLocation}
+          onLocationChange={setPreferredLocation}
+          locationError={fieldErrors.preferredLocation}
+          disabled={isSaving}
         />
 
         <div className="pt-2">

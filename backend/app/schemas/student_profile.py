@@ -30,6 +30,14 @@ class StudentProfileUpdateRequest(BaseModel):
         default_factory=list,
         description="List of skills (at most 20 skills, up to 40 characters each)",
     )
+    preferred_work_modes: list[str] = Field(
+        default_factory=list,
+        description="Preferred internship work modes (onsite, remote, hybrid)",
+    )
+    preferred_location: str | None = Field(
+        default=None,
+        description="Preferred work location (up to 80 characters)",
+    )
 
     model_config = ConfigDict(extra="forbid")
 
@@ -76,6 +84,36 @@ class StudentProfileUpdateRequest(BaseModel):
 
         return cleaned_skills
 
+    @field_validator("preferred_work_modes")
+    @classmethod
+    def validate_preferred_work_modes(cls, value: list[str]) -> list[str]:
+        """Validate, trim, deduplicate, and enforce allowed work modes."""
+        cleaned_modes: list[str] = []
+        seen: set[str] = set()
+        allowed = {"onsite", "remote", "hybrid"}
+
+        for raw_mode in value:
+            trimmed = clean_text(
+                raw_mode, field_name="Work mode", max_length=20, allow_newlines=False
+            ).lower()
+            if trimmed not in allowed:
+                raise ValueError(
+                    f"Invalid work mode: {trimmed}. Allowed modes are onsite, remote, hybrid."
+                )
+            if trimmed not in seen:
+                seen.add(trimmed)
+                cleaned_modes.append(trimmed)
+
+        return cleaned_modes
+
+    @field_validator("preferred_location")
+    @classmethod
+    def validate_preferred_location(cls, value: str | None) -> str | None:
+        """Sanitize preferred location, enforcing max length 80 and no control characters."""
+        return clean_optional_text(
+            value, field_name="Preferred location", max_length=80, allow_newlines=False
+        )
+
 
 class StudentProfileResponse(BaseModel):
     """Safe student profile response representation."""
@@ -87,6 +125,8 @@ class StudentProfileResponse(BaseModel):
     year_of_study: int | None = None
     bio: str | None = None
     skills: list[str] = Field(default_factory=list)
+    preferred_work_modes: list[str] = Field(default_factory=list)
+    preferred_location: str | None = None
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True, frozen=True)

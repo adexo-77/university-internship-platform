@@ -10,6 +10,8 @@ export interface StudentProfile {
   year_of_study: number | null;
   bio: string | null;
   skills: string[];
+  preferred_work_modes: string[];
+  preferred_location: string | null;
   updated_at: string;
 }
 
@@ -19,6 +21,8 @@ export interface StudentProfileUpdatePayload {
   year_of_study?: number | null;
   bio?: string | null;
   skills?: string[];
+  preferred_work_modes?: string[];
+  preferred_location?: string | null;
 }
 
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected';

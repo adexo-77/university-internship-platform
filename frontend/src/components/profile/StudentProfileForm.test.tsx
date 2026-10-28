@@ -21,6 +21,8 @@ describe('StudentProfileForm Component', () => {
               year_of_study: 3,
               bio: 'Passionate about systems.',
               skills: ['Python', 'SQL'],
+              preferred_work_modes: ['remote', 'hybrid'],
+              preferred_location: 'Addis Ababa',
               updated_at: '2026-10-18T00:00:00Z',
             }),
             { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -39,6 +41,10 @@ describe('StudentProfileForm Component', () => {
     expect(screen.getByLabelText('Year of study')).toHaveValue('3');
     expect(screen.getByLabelText('Bio')).toHaveValue('Passionate about systems.');
     expect(screen.getByLabelText('Skills')).toHaveValue('Python, SQL');
+    expect(screen.getByLabelText('Remote')).toBeChecked();
+    expect(screen.getByLabelText('Hybrid')).toBeChecked();
+    expect(screen.getByLabelText('On-site')).not.toBeChecked();
+    expect(screen.getByLabelText('Preferred Location')).toHaveValue('Addis Ababa');
   });
 
   it('saves student profile successfully and shows success notice', async () => {
@@ -95,6 +101,9 @@ describe('StudentProfileForm Component', () => {
     fireEvent.change(screen.getByLabelText('Year of study'), { target: { value: '4' } });
     fireEvent.change(screen.getByLabelText('Bio'), { target: { value: 'Updated bio' } });
     fireEvent.change(screen.getByLabelText('Skills'), { target: { value: 'Python, React' } });
+    fireEvent.click(screen.getByLabelText('Remote'));
+    fireEvent.click(screen.getByLabelText('Hybrid'));
+    fireEvent.change(screen.getByLabelText('Preferred Location'), { target: { value: 'Hawassa' } });
 
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
 
@@ -108,6 +117,8 @@ describe('StudentProfileForm Component', () => {
       year_of_study: 4,
       bio: 'Updated bio',
       skills: ['Python', 'React'],
+      preferred_work_modes: ['remote', 'hybrid'],
+      preferred_location: 'Hawassa',
     });
   });
 

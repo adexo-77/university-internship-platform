@@ -51,6 +51,13 @@ class StudentProfile(Base):
         default=list,
         server_default="{}",
     )
+    preferred_work_modes: Mapped[list[str]] = mapped_column(
+        ARRAY(String(20)),
+        nullable=False,
+        default=list,
+        server_default="{}",
+    )
+    preferred_location: Mapped[str | None] = mapped_column(String(80), nullable=True)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

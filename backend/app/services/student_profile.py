@@ -16,7 +16,7 @@ class StudentProfileService:
         """Retrieve student profile for the authenticated user, creating if missing."""
         profile = db.scalar(select(StudentProfile).where(StudentProfile.user_id == user.id))
         if profile is None:
-            profile = StudentProfile(user_id=user.id, skills=[])
+            profile = StudentProfile(user_id=user.id, skills=[], preferred_work_modes=[])
             db.add(profile)
             db.commit()
             db.refresh(profile)
@@ -31,7 +31,7 @@ class StudentProfileService:
         """Update student profile details for the authenticated user."""
         profile = db.scalar(select(StudentProfile).where(StudentProfile.user_id == user.id))
         if profile is None:
-            profile = StudentProfile(user_id=user.id, skills=[])
+            profile = StudentProfile(user_id=user.id, skills=[], preferred_work_modes=[])
             db.add(profile)
 
         profile.university = update_data.university
@@ -39,6 +39,8 @@ class StudentProfileService:
         profile.year_of_study = update_data.year_of_study
         profile.bio = update_data.bio
         profile.skills = update_data.skills
+        profile.preferred_work_modes = update_data.preferred_work_modes
+        profile.preferred_location = update_data.preferred_location
 
         db.commit()
         db.refresh(profile)
