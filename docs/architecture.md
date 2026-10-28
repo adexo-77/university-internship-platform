@@ -224,6 +224,7 @@ flowchart TD
 | `/api/internships/{id}/withdraw` | `POST` | `organization` (owner) | Withdraw pending_review posting back to draft for further editing | `200 OK` |
 | `/api/internships/{id}/close` | `POST` | `organization` (owner) | Close open internship posting | `200 OK` |
 | `/api/internships` | `GET` | `student`, `coordinator`, `admin` | Search catalogue (?q=, ?work_mode=, pagination); 403 for others | `200 OK` |
+| `/api/internships/suggestions` | `GET` | `student` | Rule-based deterministic scored suggestions (?limit=) | `200 OK` |
 | `/api/internships/{id}` | `GET` | `student` (if open), owner `organization`, `coordinator`, `admin` | Get internship details (404 for others) | `200 OK` |
 | `/api/admin/internships` | `GET` | `coordinator`, `admin` | List postings for review queue (?status=, oldest first) | `200 OK` |
 | `/api/admin/internships/{id}/review` | `PUT` | `coordinator`, `admin` | Approve, reject, or take down posting (note required for reject/takedown) | `200 OK` |
@@ -281,6 +282,7 @@ The table below outlines role access across platform route domains. Anonymous re
 | **Assignment Authoring &amp; Grading** (`/assignments`, `/grade`) | ❌ | ✅ | ❌ | ❌ | ❌ | Instructor owns course; admin read-only submissions |
 | **Assignment Submissions** (`/assignments/{id}/submission`) | ✅ | ❌ | ❌ | ❌ | ❌ | Enrolled students only |
 | **Internship Catalog Search** (`GET /api/internships`) | ✅ | ❌ | ❌ | ✅ | ✅ | Students (open only), Coordinators &amp; Admins (all) |
+| **Rule-Based Suggested Internships** (`GET /api/internships/suggestions`) | ✅ | ❌ | ❌ | ❌ | ❌ | Scored suggestions; student only (403 for others) |
 | **Internship Posting Detail** (`GET /api/internships/{id}`) | ✅ (open) | ❌ | ✅ (owner) | ✅ | ✅ | Student (open only), Owner org, Coordinator, Admin |
 | **Internship Authoring &amp; Close** (`POST /internships`, `/close`) | ❌ | ❌ | ✅ | ❌ | ❌ | Approved organizations only |
 | **Internship Moderation Queue** (`/api/admin/internships*`) | ❌ | ❌ | ❌ | ✅ | ✅ | Review queue, approve, reject with note, takedown |

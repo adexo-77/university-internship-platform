@@ -93,6 +93,18 @@ POSTINGS_DATA = [
         InternshipStatus.CLOSED,
         None,
     ),
+    (
+        "org2",
+        "Frontend Operations Intern",
+        "Assist in maintaining and modernizing internal web dashboards and customer portals using React and TypeScript. Monthly stipend: 4,000 ETB.",
+        "Experience with React and TypeScript; knowledge of responsive design with Tailwind CSS and modern web fundamentals.",
+        "Jimma",
+        InternshipWorkMode.HYBRID,
+        12,
+        timedelta(days=30),
+        InternshipStatus.OPEN,
+        None,
+    ),
 ]
 
 

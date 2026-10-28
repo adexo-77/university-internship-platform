@@ -106,7 +106,7 @@ def test_seed_demo_idempotency(real_db_session: Session) -> None:
     assert counts_first["courses"] == 3
     assert counts_first["assignments"] == 3
     assert counts_first["resources"] == 6
-    assert counts_first["postings"] == 7
+    assert counts_first["postings"] == 8
     assert counts_first["submissions"] == 3
     assert counts_first["apps"] == 5
     assert counts_first["notifications"] == 11

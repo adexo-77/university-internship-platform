@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '../../lib/cn';
 import { TextField } from '../ui';
 
 interface StudentPreferencesFieldsProps {
@@ -38,11 +39,12 @@ export const StudentPreferencesFields: React.FC<StudentPreferencesFieldsProps> =
               <label
                 key={opt.value}
                 htmlFor={`work-mode-${opt.value}`}
-                className={`flex items-start gap-2 p-2.5 rounded-control border text-sm cursor-pointer transition-colors ${
+                className={cn(
+                  'flex items-start gap-2 p-2.5 rounded-control border text-sm cursor-pointer transition-colors',
                   checked
-                    ? 'border-brand bg-brand-soft text-ink font-medium'
-                    : 'border-line bg-surface hover:bg-canvas text-pencil'
-                }`}
+                    ? 'border-petrol bg-surface ring-1 ring-petrol text-ink font-medium'
+                    : 'border-line bg-surface hover:bg-chalk text-pencil'
+                )}
               >
                 <input
                   id={`work-mode-${opt.value}`}
@@ -52,7 +54,7 @@ export const StudentPreferencesFields: React.FC<StudentPreferencesFieldsProps> =
                   checked={checked}
                   disabled={disabled}
                   onChange={() => onToggleWorkMode(opt.value)}
-                  className="mt-0.5 rounded border-line text-brand focus:ring-brand"
+                  className="mt-0.5 rounded border-line text-petrol focus:ring-petrol accent-petrol"
                 />
                 <div>
                   <span className="block text-sm text-ink">{opt.label}</span>

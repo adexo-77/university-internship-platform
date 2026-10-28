@@ -5,6 +5,27 @@ All notable changes to the **University Learning &amp; Internship Platform** wil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-10-28
+
+### Added
+- **Phase 8e: Rule-Based Suggested Internships &amp; Student Preferences**:
+  - `student_profiles` model extended with `preferred_work_modes` (`VARCHAR(16)[]`, options: `remote`, `hybrid`, `onsite`) and `preferred_location` (`VARCHAR(80)`), backed by Alembic migration `04aa253deb9b`.
+  - Pydantic schema validation rejecting invalid work modes, duplicates, control characters, or oversized location strings.
+  - Pure business logic scoring service (`services/internship_suggestion.py`) computing deterministic suggestion scores ($0\% \text{ to } 100\%$) dynamically on read from live data without persistent table overhead:
+    - Skill overlap: up to 60 points (12 points per matched skill, up to 5 skills).
+    - Preferred work mode match: up to 20 points (20 for exact preference match, 10 if student has no preference, 0 for mismatch).
+    - Preferred location / remote match: up to 20 points (20 for remote posting or exact city match, 10 if student has no preference, 0 for mismatch).
+    - Qualifying threshold: $\ge 30$ points total and at least 1 matched skill required.
+    - Tie-breaking: sorted deterministically by score descending, then application deadline ascending (soonest first), then posting ID descending.
+    - Transparent reason payloads detailing matched skills, work mode alignment, location alignment, and contextual reason codes (e.g. `NO_SKILLS`).
+  - Thin router endpoint `GET /api/internships/suggestions` with `limit` query parameter (default 5, max 20), restricted to authenticated students (401 signed out, 403 non-students).
+  - Frontend `StudentPreferencesFields` component integrated into `StudentProfileForm` enabling students to toggle preferred work modes and update target locality.
+  - Frontend `SuggestedInternshipsSection` component with score badge chips (`XX% match`), matched skill badges, work mode and location matching explanations, toggleable "How matching works" breakdown note, and profile navigation empty state when skills are unset.
+  - Integrated suggestions into `InternshipsPage` (limit 5) and `StudentDashboard` (compact mode, limit 3).
+  - Realistic demo dataset seeding: student preferences seeded for Abel Tesfaye and Meron Girma, plus a new `Frontend Operations Intern` posting at Jimma University ICT Directorate.
+  - Extended test suite: `test_student_profile_preferences.py`, `test_internship_suggestion_scoring.py`, `test_internship_suggestions.py`, `SuggestedInternshipsSection.test.tsx`, `StudentPreferencesFields.test.tsx`, and updated demo seed tests.
+  - Synchronized OpenAPI specification in `docs/openapi.json`.
+
 ## [1.1.0] - 2026-10-27
 
 ### Added

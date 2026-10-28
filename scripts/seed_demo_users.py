@@ -48,6 +48,8 @@ def _seed_student_profiles(db: Session, s1: User, s2: User, s3: User) -> None:
                 department="Information Technology",
                 year_of_study=4,
                 skills=["Python", "FastAPI", "React", "PostgreSQL", "Docker", "Git"],
+                preferred_work_modes=["hybrid", "onsite"],
+                preferred_location="Addis Ababa",
                 bio="Final-year Information Technology student at Jimma University focused on full-stack web development and API engineering.",
             )
         )
@@ -59,11 +61,20 @@ def _seed_student_profiles(db: Session, s1: User, s2: User, s3: User) -> None:
                 department="Information Technology",
                 year_of_study=3,
                 skills=["Python", "TypeScript", "React", "Tailwind CSS", "SQL"],
+                preferred_work_modes=["remote", "hybrid"],
+                preferred_location="Addis Ababa",
                 bio="Third-year IT undergraduate passionate about front-end architecture, UI/UX systems, and modern web application development.",
             )
         )
     if not db.scalar(select(StudentProfile).where(StudentProfile.user_id == s3.id)):
-        db.add(StudentProfile(user_id=s3.id, skills=[]))
+        db.add(
+            StudentProfile(
+                user_id=s3.id,
+                skills=[],
+                preferred_work_modes=[],
+                preferred_location=None,
+            )
+        )
 
 
 def _seed_organization_profiles(

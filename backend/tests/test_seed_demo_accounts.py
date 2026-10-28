@@ -62,16 +62,22 @@ def test_demo_profile_completeness_and_approval_states(
     assert s1 is not None
     sp1 = real_db_session.scalar(select(StudentProfile).where(StudentProfile.user_id == s1.id))
     assert sp1 is not None and sp1.university == "Jimma University" and len(sp1.skills) > 0
+    assert sp1.preferred_work_modes == ["hybrid", "onsite"]
+    assert sp1.preferred_location == "Addis Ababa"
 
     s2 = real_db_session.scalar(select(User).where(User.email == "meron.girma@example.com"))
     assert s2 is not None
     sp2 = real_db_session.scalar(select(StudentProfile).where(StudentProfile.user_id == s2.id))
     assert sp2 is not None and sp2.university == "Jimma University" and len(sp2.skills) > 0
+    assert sp2.preferred_work_modes == ["remote", "hybrid"]
+    assert sp2.preferred_location == "Addis Ababa"
 
     s3 = real_db_session.scalar(select(User).where(User.email == "dawit.lemma@example.com"))
     assert s3 is not None
     sp3 = real_db_session.scalar(select(StudentProfile).where(StudentProfile.user_id == s3.id))
     assert sp3 is not None and len(sp3.skills) == 0
+    assert sp3.preferred_work_modes == []
+    assert sp3.preferred_location is None
 
     coord = real_db_session.scalar(
         select(User).where(User.email == "selamawit.tadesse@example.com")

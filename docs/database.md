@@ -50,6 +50,8 @@ erDiagram
         int year_of_study "nullable, check: 1 <= year <= 6"
         string bio "nullable, max 1000"
         string_array skills "text array, default empty, max 20 items"
+        string_array preferred_work_modes "text array, default empty, max 3 items ('remote','hybrid','onsite')"
+        string preferred_location "nullable, max 80"
         timestamp updated_at "with time zone, server default now(), on update"
     }
 
@@ -207,6 +209,8 @@ Represents optional academic background and skills profile for student accounts.
 | `year_of_study` | `INTEGER` | `NULLABLE`, `CHECK (1 <= year_of_study <= 6)` | Academic progress year (1 to 6) |
 | `bio` | `VARCHAR(1000)` | `NULLABLE` | Student background and career interests |
 | `skills` | `VARCHAR(40)[]` | `NOT NULL`, `DEFAULT '{}'` | Array of up to 20 skill tags |
+| `preferred_work_modes` | `VARCHAR(16)[]` | `NOT NULL`, `DEFAULT '{}'` | Array of preferred modes (`remote`, `hybrid`, `onsite`) |
+| `preferred_location` | `VARCHAR(80)` | `NULLABLE` | Preferred target city or locality |
 | `updated_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Profile last modification timestamp |
 
 ### `organization_profiles`
@@ -419,5 +423,11 @@ stateDiagram-v2
     - UTF-8 with BOM (`\xef\xbb\xbf`) guarantees proper decoding of Amharic and international script names in Excel.
     - Exports are row-capped at `MAX_CSV_ROWS = 10000` to prevent query resource exhaustion.
     - Credential exclusion: Account reports never expose password hashes, salts, reset tokens, or session IDs.
+28. **Rule-Based Internship Suggestions (Computed on Read, No Table)**: Deterministic suggestion scores ($0\% \text{ to } 100\%$) are calculated dynamically on read from `internships`, `student_profiles`, and `organization_profiles` without persistent table overhead:
+    - Skills match: up to 60 points (12 points per matched skill, up to 5 skills).
+    - Preferred work mode match: up to 20 points (20 for exact preference match, 10 if student has no preference, 0 for mismatch).
+    - Preferred location / remote match: up to 20 points (20 for remote posting or exact city match, 10 if student has no preference, 0 for mismatch).
+    - Qualifying threshold: $\ge 30$ points total and at least 1 matched skill required.
+    - Tie-breaking: sorted deterministically by score descending, then application deadline ascending (soonest first), then posting ID descending.
 
 

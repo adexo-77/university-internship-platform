@@ -52,15 +52,19 @@ Ensure both backend and frontend development servers are running:
 4. Log in as `meron.girma@example.com` to observe a late submission tagged with a red **Late** badge.
 5. Once the instructor grades your submission, notice that your score and comments appear, and further edits are strictly locked.
 
-### Step 4: Manage Profile &amp; Test Profile-Complete Rule Before Applying (`/profile`)
+### Step 4: Manage Profile &amp; Preferences (`/profile`)
 1. Log in as `abel.tesfaye@example.com`. Click your name in the top navigation and select **Profile**.
 2. Notice your profile attributes: Jimma University, Information Technology, Year 4, and technical skills tags (`Python`, `FastAPI`, `React`, `PostgreSQL`, `Docker`, `Git`).
-3. **Profile-Complete Rule Test**: Log in as `dawit.lemma@example.com`. Notice the warning banner stating your profile is incomplete (missing university and department). Navigate to `/internships`, select an internship, and observe that submitting an application is blocked until your university and department profile fields are completed.
+3. Notice your internship preferences: preferred work arrangements (**Hybrid**, **On-site**) and target locality (**Addis Ababa**). Students can update these preferences at any time to tune matching results.
+4. **Profile-Complete Rule Test**: Log in as `dawit.lemma@example.com`. Notice the warning banner stating your profile is incomplete (missing university and department). Navigate to `/internships`, select an internship, and observe that submitting an application is blocked until your university and department profile fields are completed.
 
-### Step 5: Search &amp; Apply for Internships (`/internships`)
+### Step 5: Explore Suggested Internships &amp; Apply (`/internships`)
 1. Log in as `abel.tesfaye@example.com`.
-2. Navigate to **Internships** to browse vetted opportunities (e.g., Junior Web Developer Intern at Kaffa Digital Solutions).
-3. Filter by work mode: **Remote**, **Hybrid**, or **On-site**.
+2. Review the **Suggested for you** card deck at the top of the **Internships** catalog and on your Student Dashboard:
+   - Notice the match score chip (e.g., `72% match`) and matched skills list (`Python`, `FastAPI`).
+   - Notice matching reasons confirming preferred work mode and location alignments.
+   - Click **How matching works** to inspect the transparent point allocation breakdown (up to 60 pts skills, 20 pts work mode, 20 pts location).
+3. Filter the broader catalog by work mode: **Remote**, **Hybrid**, or **On-site**, or search by keyword.
 4. Select an active listing and click **Apply**.
 5. Fill in your personalized cover letter and submit your application.
 6. Navigate to **My Applications** (`/my-applications`) to monitor review statuses:

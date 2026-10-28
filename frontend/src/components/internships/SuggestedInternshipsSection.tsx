@@ -92,7 +92,7 @@ export const SuggestedInternshipsSection: React.FC<SuggestedInternshipsSectionPr
       {showHowItWorks && (
         <div
           data-testid="how-matching-works-note"
-          className="p-3 bg-canvas border border-line rounded-control text-xs text-pencil space-y-1"
+          className="p-3 bg-chalk border border-line rounded-control text-xs text-pencil space-y-1"
         >
           <p className="font-medium text-ink">How matching works:</p>
           <p>
@@ -117,7 +117,7 @@ export const SuggestedInternshipsSection: React.FC<SuggestedInternshipsSectionPr
             </Link>
           }
         />
-      ) : data.items.length === 0 ? (
+      ) : (data.items ?? []).length === 0 ? (
         <EmptyState
           title="No matching suggestions right now"
           description="No open internship postings currently match your skills and preferences. Check back later as new positions are added."
@@ -128,13 +128,13 @@ export const SuggestedInternshipsSection: React.FC<SuggestedInternshipsSectionPr
             compact ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
           }`}
         >
-          {data.items.map((item) => (
+          {(data.items ?? []).map((item) => (
             <SuggestionCard key={item.id} item={item} />
           ))}
         </div>
       )}
 
-      {compact && data.items.length > 0 && (
+      {compact && (data.items ?? []).length > 0 && (
         <div className="pt-2 text-right">
           <Link to="/internships" className="text-xs font-medium text-petrol hover:underline">
             Browse all internships &rarr;

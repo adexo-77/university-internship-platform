@@ -1801,6 +1801,54 @@
         }
       }
     },
+    "/api/internships/suggestions": {
+      "get": {
+        "tags": [
+          "internships"
+        ],
+        "summary": "Get rule-based internship suggestions for authenticated student",
+        "description": "Retrieve personalized rule-based internship suggestions for the authenticated student.",
+        "operationId": "get_internship_suggestions_api_internships_suggestions_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10,
+              "minimum": 1,
+              "description": "Maximum suggestions to return",
+              "default": 5,
+              "title": "Limit"
+            },
+            "description": "Maximum suggestions to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternshipSuggestionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/internships/{id}/applications": {
       "post": {
         "tags": [
@@ -4835,6 +4883,232 @@
         "title": "InternshipStatus",
         "description": "Lifecycle status for an internship posting."
       },
+      "InternshipSuggestionItem": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "integer",
+            "title": "Organization Id"
+          },
+          "organization_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organization Name"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "requirements": {
+            "type": "string",
+            "title": "Requirements"
+          },
+          "location": {
+            "type": "string",
+            "title": "Location"
+          },
+          "work_mode": {
+            "$ref": "#/components/schemas/InternshipWorkMode"
+          },
+          "duration_weeks": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Weeks"
+          },
+          "application_deadline": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Application Deadline"
+          },
+          "status": {
+            "$ref": "#/components/schemas/InternshipStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "applicant_count": {
+            "type": "integer",
+            "title": "Applicant Count",
+            "default": 0
+          },
+          "applications_accepted": {
+            "type": "boolean",
+            "title": "Applications Accepted",
+            "default": true
+          },
+          "applied": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applied",
+            "default": false
+          },
+          "application_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Application Status"
+          },
+          "review_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Note"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "reviewed_by": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed By"
+          },
+          "score": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Score"
+          },
+          "reasons": {
+            "$ref": "#/components/schemas/InternshipSuggestionReasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "organization_id",
+          "title",
+          "description",
+          "requirements",
+          "location",
+          "work_mode",
+          "application_deadline",
+          "status",
+          "created_at",
+          "updated_at",
+          "score",
+          "reasons"
+        ],
+        "title": "InternshipSuggestionItem",
+        "description": "Suggested internship posting with match score and reasons."
+      },
+      "InternshipSuggestionReasons": {
+        "properties": {
+          "matched_skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Matched Skills"
+          },
+          "work_mode_match": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Work Mode Match"
+          },
+          "location_match": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location Match"
+          }
+        },
+        "type": "object",
+        "title": "InternshipSuggestionReasons",
+        "description": "Detailed matching criteria reasons for a suggested internship."
+      },
+      "InternshipSuggestionResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/InternshipSuggestionItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "reason_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Code"
+          }
+        },
+        "type": "object",
+        "title": "InternshipSuggestionResponse",
+        "description": "Response containing list of suggested internships and optional reason code."
+      },
       "InternshipUpdate": {
         "properties": {
           "title": {
@@ -5679,6 +5953,24 @@
             "type": "array",
             "title": "Skills"
           },
+          "preferred_work_modes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Preferred Work Modes"
+          },
+          "preferred_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Location"
+          },
           "updated_at": {
             "type": "string",
             "format": "date-time",
@@ -5751,6 +6043,26 @@
             "type": "array",
             "title": "Skills",
             "description": "List of skills (at most 20 skills, up to 40 characters each)"
+          },
+          "preferred_work_modes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Preferred Work Modes",
+            "description": "Preferred internship work modes (onsite, remote, hybrid)"
+          },
+          "preferred_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Location",
+            "description": "Preferred work location (up to 80 characters)"
           }
         },
         "additionalProperties": false,
