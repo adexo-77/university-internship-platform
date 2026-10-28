@@ -13,8 +13,10 @@ from app.schemas.internship import (
     InternshipResponse,
     InternshipUpdate,
 )
+from app.schemas.internship_suggestion import InternshipSuggestionResponse
 from app.services import internship as internship_service
 from app.services import internship_catalog as catalog_service
+from app.services import internship_suggestion as suggestion_service
 
 router = APIRouter(tags=["internships"])
 
@@ -157,6 +159,25 @@ def list_internships(
         work_mode=work_mode,
         limit=limit,
         offset=offset,
+    )
+
+
+@router.get(
+    "/internships/suggestions",
+    response_model=InternshipSuggestionResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get rule-based internship suggestions for authenticated student",
+)
+def get_internship_suggestions(
+    limit: int = Query(default=5, ge=1, le=10, description="Maximum suggestions to return"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> InternshipSuggestionResponse:
+    """Retrieve personalized rule-based internship suggestions for the authenticated student."""
+    return suggestion_service.get_internship_suggestions(
+        db=db,
+        current_user=current_user,
+        limit=limit,
     )
 
 
