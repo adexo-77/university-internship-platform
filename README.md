@@ -92,7 +92,37 @@ The platform provides four role-scoped CSV exports protected by formula-injectio
 
 ## 3. Screenshots
 
-Screenshots are located in `docs/screenshots/` when they exist.
+### Authentication & Role Selection
+![Login screen with demo credentials and role switcher](docs/screenshots/login.png)
+*Secure authentication portal featuring one-click demo credentials and institutional role switching.*
+
+### Student Learning Dashboard
+![Student dashboard with course enrollments, urgent assignments, and progress tracking](docs/screenshots/student-dashboard..png)
+*Student dashboard displaying active course progress, urgent assignment deadlines, and milestone achievements.*
+
+### Instructor Assessment & Grading
+![Instructor grading interface with rubric bounds and student submission review](docs/screenshots/instructor-grading.png)
+*Instructor grading interface with score validation, feedback entry, and late submission flags.*
+
+### Organization Candidate Pipeline
+![Organization applicant management pipeline with cover letters and hiring decisions](docs/screenshots/organization-applicants.png)
+*Organization applicant pipeline with candidate cover letters, skill tags, and multi-stage hiring decisions.*
+
+### Internship Coordinator Moderation
+![Internship coordinator review queue for employer vetting and posting moderation](docs/screenshots/coordinator-reviews.png)
+*Internship coordinator moderation interface for reviewing employer registrations and approving job postings.*
+
+### Notification Center
+![In-app notifications center with deep linking and read state management](docs/screenshots/notifications.png)
+*In-app notifications center with category filters, unread badge indicators, and direct resource navigation.*
+
+### Career Matching Recommendations
+![Deterministic skill and preference matching recommendations for student internships](docs/screenshots/suggested-internships.png)
+*Rule-based deterministic internship recommendations calculated from student skills and work mode preferences.*
+
+### Mobile Responsive Layout
+![Mobile responsive navigation drawer and layout on 360px viewport](docs/screenshots/mobile-360.png)
+*Mobile responsive view showcasing the accessible navigation drawer and compact UI components.*
 
 ---
 
