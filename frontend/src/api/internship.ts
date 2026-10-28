@@ -2,6 +2,7 @@ import {
   Internship,
   InternshipCreateRequest,
   InternshipListResponse,
+  InternshipSuggestionResponse,
   InternshipUpdateRequest,
 } from '../types/internship';
 
@@ -170,4 +171,20 @@ export async function closeInternship(id: number): Promise<Internship> {
   }
 
   return (await response.json()) as Internship;
+}
+
+export async function getInternshipSuggestions(
+  limit: number = 5
+): Promise<InternshipSuggestionResponse> {
+  const response = await fetch(`/api/internships/suggestions?limit=${limit}`, {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    await handleResponseError(response);
+  }
+
+  return (await response.json()) as InternshipSuggestionResponse;
 }

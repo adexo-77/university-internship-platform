@@ -8,6 +8,7 @@ import { StatStrip } from './StatStrip';
 import { StudentApplicationsSection } from './StudentApplicationsSection';
 import { StudentCoursesSection } from './StudentCoursesSection';
 import { StudentBadgesSection } from '../badges/StudentBadgesSection';
+import { SuggestedInternshipsSection } from '../internships/SuggestedInternshipsSection';
 
 export interface StudentDashboardProps {
   data: StudentDashboardResponse;
@@ -124,6 +125,9 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ data }) => {
           </div>
         )}
       </section>
+
+      {/* Rule-Based Suggested Internships Section */}
+      <SuggestedInternshipsSection compact limit={3} />
 
       {/* Internship Applications Section */}
       <StudentApplicationsSection

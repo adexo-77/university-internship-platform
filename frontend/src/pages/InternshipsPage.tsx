@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { getInternships } from '../api/internship';
 import { InternshipTable } from '../components/internships/InternshipTable';
+import { SuggestedInternshipsSection } from '../components/internships/SuggestedInternshipsSection';
 import { AppShell } from '../components/layout/AppShell';
 import { Button, ErrorMessage, PageHeader, Select, TextField } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
@@ -77,6 +78,8 @@ export const InternshipsPage: React.FC = () => {
         {error && (
           <ErrorMessage whatHappened={error} howToFix="Please try again or refresh the page." />
         )}
+
+        {user?.role === 'student' && <SuggestedInternshipsSection limit={5} />}
 
         <div className="bg-surface rounded-card p-4 border border-line">
           <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-3 items-end">

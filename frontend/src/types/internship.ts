@@ -56,3 +56,19 @@ export interface InternshipUpdateRequest {
   application_deadline?: string | null;
   status?: InternshipStatus | null;
 }
+
+export interface InternshipSuggestionReasons {
+  matched_skills: string[];
+  work_mode_match: boolean | null;
+  location_match: boolean | null;
+}
+
+export interface InternshipSuggestionItem extends Internship {
+  score: number;
+  reasons: InternshipSuggestionReasons;
+}
+
+export interface InternshipSuggestionResponse {
+  items: InternshipSuggestionItem[];
+  reason_code?: string | null;
+}

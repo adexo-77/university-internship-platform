@@ -66,6 +66,18 @@ describe('InternshipsPage Component', () => {
           headers: { 'Content-Type': 'application/json' },
         });
       }
+      if (url.includes('/api/internships/suggestions')) {
+        return new Response(
+          JSON.stringify({
+            items: [],
+            reason_code: null,
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+      }
       return new Response(
         JSON.stringify({
           items: mockInternships,
