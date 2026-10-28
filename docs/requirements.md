@@ -44,7 +44,7 @@ This document maps the project implementation directly against the **Project 4: 
 
 ## 3. Summary of Gaps &amp; Out-of-Scope Items
 
-In strict adherence to the project guidelines, no unrequested features were implemented. The following capabilities identified in generalized project briefs remain out of scope for v1.1.0:
+In strict adherence to the project guidelines, no unrequested features were implemented. The following capabilities identified in generalized project briefs remain out of scope for v1.2.0:
 
 1. **External Notification Channels**: Push notifications, SMS messaging, and external email dispatches are omitted; in-app notification center is fully implemented.
 2. **Competitive Leaderboards &amp; Student Rankings**: Competitive leaderboards, student rankings, and point gamification are deliberately not built to foster a supportive and collaborative academic environment; milestone achievement badges and safe CSV reporting are fully implemented.

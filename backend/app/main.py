@@ -50,7 +50,7 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(
     title="University Learning & Internship Platform API",
     description="Backend API for Brolf Tech University Learning & Internship Platform",
-    version="1.0.0",
+    version="1.2.0",
     lifespan=lifespan,
 )
 

@@ -65,4 +65,3 @@ def test_check_doc_images_fails_on_missing_reference(tmp_path: Path) -> None:
     missing = _check_doc_images(fake_doc)
     assert len(missing) == 1
     assert "non_existent_screenshot.png" in missing[0]
-
