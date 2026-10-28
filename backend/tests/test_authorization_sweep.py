@@ -68,6 +68,7 @@ ROLE_MATRIX: list[tuple[str, str, set[UserRole]]] = [
         {UserRole.ADMIN, UserRole.COORDINATOR},
     ),
     ("GET", "/api/admin/reports/users.csv", {UserRole.ADMIN}),
+    ("GET", "/api/internships/suggestions", {UserRole.STUDENT}),
 ]
 
 
