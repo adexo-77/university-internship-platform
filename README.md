@@ -56,7 +56,7 @@ The platform provides tailored workspaces and dashboards for five primary user r
 ### 🛡️ Administrator
 - **Administrator Dashboard**: High-level platform health metrics, user account distributions, and pending review counts.
 - **User Provisioning & Management**: Search, filter, inspect, activate, or deactivate user accounts across all roles; trigger administrative password resets.
-- **Organization Vetting**: Review incoming employer registrations; approve or reject organizations before they are permitted to post listings.
+- **Organization Vetting**: Review incoming employer registrations; approve or reject organizations before they can submit internship listings for review or publication.
 - **Internship Moderation**: Review submitted postings; approve for public discovery or reject with explanatory review notes; take down compromised listings.
 - **Cross-Platform Reports Area**: Export comprehensive platform application audits and master user accounts registry.
 
@@ -208,7 +208,7 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local evaluati
 | **Dawit Lemma** | Student | `dawit.lemma@example.com` | `12345678` | Incomplete | Incomplete profile demonstration showing the profile completion banner and the profile-complete rule before applying (blocking internship applications until university and department are saved); submitted application to Network Support Intern. |
 | **Kaffa Digital Solutions** (Yohannes Haile) | Organization | `yohannes.haile@example.com` | `12345678` | Approved | Organization dashboard, postings across lifecycles (`open`, `pending_review`, `draft`, `rejected`), applicant hiring pipeline (accepted Abel Tesfaye, shortlisted Meron Girma). |
 | **Gibe Valley Telecom Services** (Rahel Desta) | Organization | `rahel.desta@example.com` | `12345678` | Approved | Organization dashboard, network support &amp; systems administration postings, candidate rejection decision, and closed listing. |
-| **Abay Data Labs** (Eyob Kassa) | Organization | `eyob.kassa@example.com` | `12345678` | Pending Approval | Pending approval banner demonstration, with internship creation disabled until platform administrator reviews and approves the company profile. |
+| **Abay Data Labs** (Eyob Kassa) | Organization | `eyob.kassa@example.com` | `12345678` | Pending Approval | Pending approval banner demonstration; can create and edit draft postings, but submitting for review or publishing is blocked until an administrator or coordinator reviews and approves the organization profile. |
 
 > **Note**: All people and organizations in this demo dataset are fictional. The password `12345678` is marked demo-only and intentionally public for local demonstration and evaluation.
 

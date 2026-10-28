@@ -30,6 +30,7 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.params.Depends", "fastapi.
 "tests/test_seed_demo.py" = ["E402"]
 "tests/test_seed_demo_accounts.py" = ["E402"]
 "tests/test_seeded_notifications.py" = ["E402"]
+"tests/test_internship_approval_rules.py" = ["E402"]
 
 [tool.ruff.format]
 quote-style = "double"

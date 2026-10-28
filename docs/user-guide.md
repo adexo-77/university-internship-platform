@@ -135,7 +135,7 @@ Ensure both backend and frontend development servers are running:
 2. Fill in the job title, department, description, requirements, location, work mode (`remote`/`hybrid`/`onsite`), and application deadline.
 3. Submit the listing.
    - Postings enter the `pending_review` state to allow platform administrators to verify the opportunity.
-4. **Vetting Demonstration**: Log in as `eyob.kassa@example.com` (Abay Data Labs). Observe that posting creation is disabled with an explanatory banner informing the company that administrative approval is required first.
+4. **Vetting Demonstration**: Log in as `eyob.kassa@example.com` (Abay Data Labs). Observe the pending approval banner informing the company that administrative approval is required before postings can be submitted or published. While draft listings can be created and edited, submitting them for moderation review or attempting direct publication is blocked (returning HTTP 409) until an administrator or coordinator approves the organization.
 
 ### Step 4: Candidate Pipeline &amp; Hiring Decisions (`/internships/:id`)
 1. Navigate to **My Postings** (`/my-internships`) as `yohannes.haile@example.com`.
@@ -174,7 +174,7 @@ Ensure both backend and frontend development servers are running:
 1. Navigate to **Admin** &rarr; **Organizations**.
 2. Find unverified companies (such as Abay Data Labs, contact `eyob.kassa@example.com` with status `pending_review`).
 3. Click **Review**. Verify company details, description, and website.
-4. Click **Approve Organization** to grant full posting privileges, or **Reject** if the company cannot be verified.
+4. Click **Approve Organization** to approve the organization and grant posting submission privileges, or **Reject** if the company cannot be verified.
 
 ### Step 4: Internship Content Moderation (`/admin/internships`)
 1. Navigate to **Admin** &rarr; **Internship Reviews**.

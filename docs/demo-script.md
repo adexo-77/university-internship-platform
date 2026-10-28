@@ -62,7 +62,7 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 >
 > *Organizations can create internship postings specifying role responsibilities, required skills, work mode—remote, hybrid, or on-site—duration in weeks, and application deadlines. When created, postings enter a `pending_review` state because universities cannot allow unvetted job listings to reach students.*
 >
-> *Notice our onboarding guard: if we log in as an unverified company, `eyob.kassa@example.com` (Abay Data Labs), posting creation is blocked until a university administrator approves their registration.*
+> *Notice our onboarding guard: if we log in as an unverified company, `eyob.kassa@example.com` (Abay Data Labs), they can prepare and edit draft listings, but submitting postings for review or publishing them is blocked until a university administrator or coordinator approves their registration.*
 >
 > *For approved organizations with active listings, the hiring manager reviews incoming candidate applications, inspects cover letters and student skill tags, and transitions candidates through the pipeline: `shortlisted`, `accepted`, or `rejected`. Once an acceptance or rejection is finalized, the record is locked to maintain hiring integrity."*
 
