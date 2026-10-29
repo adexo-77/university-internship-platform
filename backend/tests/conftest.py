@@ -88,9 +88,19 @@ def real_db_session() -> Generator[Session, None, None]:
 
 @pytest.fixture
 def client() -> Generator[TestClient, None, None]:
-    """TestClient fixture with default dependencies."""
+    """TestClient fixture configured with test database session."""
+
+    def override_get_db() -> Generator[Session, None, None]:
+        db = TestingSessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as test_client:
         yield test_client
+    app.dependency_overrides.pop(get_db, None)
 
 
 @pytest.fixture
@@ -107,7 +117,7 @@ def real_db_client() -> Generator[TestClient, None, None]:
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as test_client:
         yield test_client
-    app.dependency_overrides.clear()
+    app.dependency_overrides.pop(get_db, None)
 
 
 @pytest.fixture
