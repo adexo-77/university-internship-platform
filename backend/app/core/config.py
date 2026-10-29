@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     PORT: int = 8001
     DATABASE_URL: str
-    TEST_DATABASE_URL: str
+    TEST_DATABASE_URL: str | None = None
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
     COOKIE_SECURE: bool | None = None
     TRUSTED_PROXY: bool = False

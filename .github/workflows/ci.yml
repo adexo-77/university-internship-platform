@@ -102,6 +102,9 @@ jobs:
   migrations:
     name: Migrations Drift & Single-Head Verification
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql+psycopg://postgres:postgrespassword@localhost:5432/university_platform_fresh
+      TEST_DATABASE_URL: postgresql+psycopg://postgres:postgrespassword@localhost:5432/university_platform_fresh
 
     services:
       postgres:
