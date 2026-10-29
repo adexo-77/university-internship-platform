@@ -97,7 +97,7 @@ The platform provides four role-scoped CSV exports protected by formula-injectio
 *Secure authentication portal featuring one-click demo credentials and institutional role switching.*
 
 ### Student Learning Dashboard
-![Student dashboard with course enrollments, urgent assignments, and progress tracking](docs/screenshots/student-dashboard..png)
+![Student dashboard with course enrollments, urgent assignments, and progress tracking](docs/screenshots/student-dashboard.png)
 *Student dashboard displaying active course progress, urgent assignment deadlines, and milestone achievements.*
 
 ### Instructor Assessment & Grading
