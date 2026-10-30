@@ -17,6 +17,25 @@ Ensure both backend and frontend development servers are running:
 3. Enter the standard evaluation demo password: `12345678` (demo-only).
 4. Click **Sign in**. The application will authenticate your session and route you directly to your role-specific dashboard.
 
+![Login screen with demo credentials and role switcher](screenshots/login.png)
+
+### Pre-Seeded Demo Accounts Reference
+
+All demo accounts are provisioned via `scripts/seed_demo.py`. For local evaluation, all demo accounts share the password `12345678` (demo-only and intentionally public).
+
+| Name | Role | Email | Password | Profile State | What This Account Demonstrates |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Dr. Mulugeta Assefa** | Admin | `mulugeta.assefa@example.com` | `12345678` | Complete | Administrative dashboard, user provisioning and password resets, organization registration approvals, internship moderation review queue, and listing takedowns. |
+| **Ms. Selamawit Tadesse** | Coordinator | `selamawit.tadesse@example.com` | `12345678` | Complete | Coordinator dashboard, organization registration review and approvals, internship moderation review queue, listing takedowns, and read-only applicant roster inspection. |
+| **Dr. Tadesse Bekele** | Instructor | `tadesse.bekele@example.com` | `12345678` | Complete | Instructor dashboard, courses "Database Systems" (published) and "Introduction to Programming" (published), assignment authoring, and student submission grading. |
+| **Ms. Hana Worku** | Instructor | `hana.worku@example.com` | `12345678` | Complete | Course authoring in draft state ("Software Engineering"), curriculum planning, and department course rosters. |
+| **Abel Tesfaye** | Student | `abel.tesfaye@example.com` | `12345678` | Complete | Student dashboard, course progress, submitted ER Diagramming assignment (graded 100/100 with instructor feedback), accepted internship offer from Kaffa Digital Solutions, rejected application, and withdrawn application. |
+| **Meron Girma** | Student | `meron.girma@example.com` | `12345678` | Complete | Student dashboard, course progress, late assignment submission awaiting instructor grading, shortlisted internship candidate at Kaffa Digital Solutions. |
+| **Dawit Lemma** | Student | `dawit.lemma@example.com` | `12345678` | Incomplete | Incomplete profile demonstration showing the profile completion banner and the profile-complete rule before applying (blocking internship applications until university and department are saved); submitted application to Network Support Intern. |
+| **Kaffa Digital Solutions** (Yohannes Haile) | Organization | `yohannes.haile@example.com` | `12345678` | Approved | Organization dashboard, postings across lifecycles (`open`, `pending_review`, `draft`, `rejected`), applicant hiring pipeline (accepted Abel Tesfaye, shortlisted Meron Girma). |
+| **Gibe Valley Telecom Services** (Rahel Desta) | Organization | `rahel.desta@example.com` | `12345678` | Approved | Organization dashboard, network support and systems administration postings, candidate rejection decision, and closed listing. |
+| **Abay Data Labs** (Eyob Kassa) | Organization | `eyob.kassa@example.com` | `12345678` | Pending Approval | Pending approval banner demonstration; can create and edit draft postings, but submitting for review or publishing is blocked until an administrator or coordinator reviews and approves the organization profile. |
+
 ---
 
 ## 2. Student Role Guide
@@ -37,6 +56,8 @@ Ensure both backend and frontend development servers are running:
    - "Advanced SQL Queries &amp; Index Optimization" due in 18 days displays an upcoming badge.
    - "ER Diagramming &amp; Conceptual Modeling" past due displays a past due badge.
 4. Review the **Recent Grades** panel showing scored assignments with percentage chips and instructor feedback (e.g., 100% on ER Diagramming).
+
+![Student dashboard with course enrollments, urgent assignments, and progress tracking](screenshots/student-dashboard.png)
 
 ### Step 2: Browse &amp; Enroll in Courses (`/courses`)
 1. Click **Courses** in the main navigation.
@@ -72,6 +93,8 @@ Ensure both backend and frontend development servers are running:
    - Network Support Intern: **Rejected**
    - Systems Administration Intern 2025: **Withdrawn**
 
+![Career matching recommendations for student internships](screenshots/suggested-internships.png)
+
 ---
 
 ## 3. Instructor Role Guide
@@ -105,6 +128,8 @@ Ensure both backend and frontend development servers are running:
 3. Click **Grade** next to the submission.
 4. Enter a numeric grade (enforced between `0` and `max_score`) and enter constructive instructor feedback.
 5. Click **Submit Grade**. The submission status transitions to `graded`, and the student's dashboard updates immediately.
+
+![Instructor grading interface with rubric bounds and student submission review](screenshots/instructor-grading.png)
 
 ---
 
@@ -145,6 +170,8 @@ Ensure both backend and frontend development servers are running:
    - Abel Tesfaye: **Accepted**
    - Meron Girma: **Shortlisted**
 5. Click **Review Application** to advance candidate decisions. Terminal decisions lock the application against tampering.
+
+![Organization applicant management pipeline with cover letters and hiring decisions](screenshots/organization-applicants.png)
 
 ---
 
@@ -213,6 +240,8 @@ Ensure both backend and frontend development servers are running:
 4. Click **Approve** to publish to students, or **Reject** with feedback for the employer.
 5. Take down listings when necessary to safeguard student placements.
 
+![Internship coordinator review queue for employer vetting and posting moderation](screenshots/coordinator-reviews.png)
+
 ### Step 4: Internship Listings and Read-Only Applicant Inspection (`/internships`)
 1. Click **Internships** to browse all platform listings across all statuses (`draft`, `pending_review`, `open`, `closed`, `rejected`).
 2. Open any internship details page to inspect listing details and view incoming candidate applications and statuses in read-only mode.
@@ -250,6 +279,8 @@ The platform includes an automated in-app notifications center that keeps all pe
    - Click the checkmark icon on an individual item to mark it as read without navigating away.
    - Click **Mark all as read** at the top right to clear all unread badges simultaneously.
 5. **Retention**: The platform automatically caps history at the 200 most recent notifications per user via an automated database pruning trigger.
+
+![In-app notifications center with deep linking and read state management](screenshots/notifications.png)
 
 ---
 
@@ -291,4 +322,15 @@ Authorized personas can export platform records as safe UTF-8 spreadsheets encod
 - **Accessible To**: Platform administrators and internship coordinators (via sidebar navigation **Reports**).
 - **Applications Report (Admin &amp; Coordinator)**: Comprehensive candidate pipeline audit spreadsheet containing posting title, organization name, applicant name, status, application date, and decision date.
 - **Users Report (Admin Only)**: Master user accounts registry containing user ID, full name, email address, role, active status, and creation date. Excludes password hashes and tokens.
+
+---
+
+## 11. Mobile Responsive Layout
+
+The web application is fully responsive across mobile, tablet, and desktop displays:
+- Adaptive navigation drawer with toggle button and accessible overlay on viewports under 768px.
+- Responsive data tables with horizontal scroll containers and card layouts.
+- Tested on narrow 360px mobile viewports for student course access and application tracking.
+
+![Mobile responsive navigation drawer and layout on 360px viewport](screenshots/mobile-360.png)
 

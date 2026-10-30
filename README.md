@@ -2,194 +2,13 @@
 
 [![CI](https://github.com/adexo-77/university-internship-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/adexo-77/university-internship-platform/actions/workflows/ci.yml)
 
-A production-grade, modular web platform designed for university student learning tracking, assignment evaluation, and internship discovery and application tracking. Built for the Brolf Tech internship technical challenge with a strict **MVP first, one phase at a time** methodology and comprehensive test coverage.
+A modular web platform for university coursework tracking, assignment evaluation, and vetted internship discovery and application management.
 
----
+![Student learning dashboard and internship tracker](docs/screenshots/student-dashboard.png)
 
-## 1. What the Platform Is &amp; Why It Was Built
+## Quick Start
 
-Universities often face a disconnected ecosystem: academic coursework lives in a Learning Management System (LMS), while internship hunting occurs across external job boards and untracked emails. This leads to fragmented student records, lack of visibility for faculty mentors, and high friction for partner companies recruiting student talent.
-
-The **University Learning &amp; Internship Platform** unifies these two critical workflows into a single system:
-- **Academic Progress**: Instructors publish courses, issue structured assignments with deadlines, collect student submissions, and record grades with feedback comments.
-- **Career Pathways**: Partner organizations register verified profiles, publish vetted internship opportunities, and manage candidate pipelines.
-- **Institutional Governance**: University administrators oversee user accounts, approve corporate partners, and review internship postings before listings go live to protect students from unverified employers.
-
----
-
-## 2. Features by Role
-
-The platform provides tailored workspaces and dashboards for five primary user roles:
-
-### 🎓 Student
-- **Interactive Student Dashboard**: View enrolled courses, assignments due soon (flagged as urgent, upcoming, or past due), recent grade cards, and application pipeline metrics.
-- **Achievement Badges**: Dynamically computed student milestone achievements across 8 rules (First submission, On-time habit, High achiever, Perfect score, Course finisher, Profile complete, First application, Offer accepted) with progress counters.
-- **Course Enrollment**: Search the course catalog, enroll with duplicate guards, access assignment rosters, and monitor progress.
-- **Course Learning Resources**: Access curated external documentation and study links associated with published courses in which the student is enrolled.
-- **Assignment Submissions**: Submit text-based assignments before deadlines; late submissions are automatically flagged with timestamp metadata; submissions are locked against edits once graded.
-- **Profile Management**: Maintain bio and technical skills tags; incomplete profiles trigger clear visual banners; showcase earned achievement badges.
-- **Internship Discovery &amp; Applications**: Search published internships with work mode filters (remote, hybrid, onsite) and keyword searches; apply with personalized cover letters; withdraw pending applications with automatic confirmation guards.
-
-### 👨‍🏫 Instructor
-- **Instructor Dashboard**: Monitor active and draft courses, student enrollment totals, and a dedicated "Needs Grading" queue highlighting pending assignments.
-- **Course Lifecycle**: Author courses with titles, descriptions, and syllabus outlines; manage status transitions (`draft`, `published`).
-- **Course Learning Resources**: Author and curate external learning resources and documentation links (up to 50 per course) with validated HTTP/HTTPS URLs and full CRUD controls.
-- **Gradebook CSV Export**: One-click export of complete enrolled student gradebook as a safe UTF-8 spreadsheet with per-assignment grades, submission totals, and class score averages.
-- **Assignment Authoring**: Define assignments with due dates and maximum scores; edit or delete assignments with cascade protection.
-- **Grading & Feedback**: Review student submissions in an organized roster, assign numeric scores (strictly bounded between 0 and max points), and provide actionable instructor feedback comments.
-
-### 🏢 Organization (Employer)
-- **Organization Dashboard**: Track live postings, pending administrator reviews, and applicant pipeline counts.
-- **Corporate Profile**: Maintain company details, industry category, and official website URL.
-- **Internship Posting Lifecycle**: Create postings with roles, requirements, locations, and deadlines; manage states (`draft` &rarr; `pending_review` &rarr; `open` &rarr; `closed`).
-- **Applicant Pipeline Management**: Review student applications, inspect applicant profiles and cover letters, and execute hiring decisions (`shortlisted`, `accepted`, `rejected`) with state locking.
-- **Applicants CSV Export**: Export applicant pipeline dataset with student academic profiles and timestamps.
-
-### 📋 Internship Coordinator
-- **Coordinator Dashboard**: Dedicated operational dashboard tracking pending employer registrations, internship postings awaiting moderation, live open postings, applicant pipeline distributions, and completed review counts.
-- **Organization Vetting**: Review and decide on corporate partner registrations (`/api/admin/organizations*`) with full approval and rejection workflows.
-- **Internship Moderation**: Review submitted postings (`/api/admin/internships*`), approve listings for public student discovery, reject with feedback notes, or take down compromised listings.
-- **Listing & Applicant Visibility**: Search and inspect all internship listings across every lifecycle status and inspect applicant rosters in read-only mode to mentor students and monitor placement health.
-- **Cross-Platform Reports**: Export comprehensive internship applications audit spreadsheet.
-- **Institutional Boundaries**: Strictly separated from administrative user provisioning (`/api/admin/users*`), password resets, course administration, or system health operations.
-
-### 🛡️ Administrator
-- **Administrator Dashboard**: High-level platform health metrics, user account distributions, and pending review counts.
-- **User Provisioning & Management**: Search, filter, inspect, activate, or deactivate user accounts across all roles; trigger administrative password resets.
-- **Organization Vetting**: Review incoming employer registrations; approve or reject organizations before they can submit internship listings for review or publication.
-- **Internship Moderation**: Review submitted postings; approve for public discovery or reject with explanatory review notes; take down compromised listings.
-- **Cross-Platform Reports Area**: Export comprehensive platform application audits and master user accounts registry.
-
-### 🏆 Student Achievement Badges (8 Rules)
-Dynamically computed milestones calculated on read from actual database records without duplicate state:
-- **First submission** (`first_submission`): Awarded upon submitting your first course assignment.
-- **On-time habit** (`ontime_habit`): Awarded after submitting 5 assignments on or before the due date (tracks progress `current of 5`).
-- **High achiever** (`high_achiever`): Awarded when scoring 90% or higher on any graded assignment.
-- **Perfect score** (`perfect_score`): Awarded when earning 100% of maximum possible points on any graded assignment.
-- **Course finisher** (`course_finisher`): Awarded upon submitting all assignments in at least one course (with &ge; 1 assignment).
-- **Profile complete** (`profile_complete`): Awarded when university, department, year of study, bio, and skills are fully completed.
-- **First application** (`first_application`): Awarded upon submitting your first internship application.
-- **Offer accepted** (`offer_accepted`): Awarded when at least one internship application is decided as accepted.
-
-### 📊 Safe CSV Reports & Data Exports
-The platform provides four role-scoped CSV exports protected by formula-injection sanitization, UTF-8 Byte Order Mark (`\xef\xbb\xbf`) encoding for Amharic text support, a 10,000-row cap, and `Cache-Control: no-store` headers:
-1. **Course Gradebook CSV** (`GET /api/courses/{id}/gradebook.csv`): Available to course owner instructor and administrators. Exports enrolled student roster, per-assignment numeric grades, submission counts, and overall student grade percent averages.
-2. **Internship Applicants CSV** (`GET /api/internships/{id}/applicants.csv`): Available to posting owner organization, internship coordinators, and administrators. Exports candidate pipeline with student name, email, university, department, year of study, application status, and submission timestamp.
-3. **Cross-Platform Applications Audit CSV** (`GET /api/admin/reports/applications.csv`): Available to administrators and internship coordinators via the Reports area. Exports platform-wide application records with posting title, organization name, applicant name, status, application date, and decision date.
-4. **Master Users Registry CSV** (`GET /api/admin/reports/users.csv`): Available exclusively to administrators via the Reports area. Exports complete user account registry with user ID, full name, email address, role, active status, and registration date (strictly excludes password hashes, salts, and tokens).
-
-- **Formula-Injection Defense**: Centralized sanitizer prefixes `'` to dangerous triggers (`=`, `+`, `-`, `@`, `\t`, `\r`) to protect Excel users from malicious execution.
-- **Sensitive Column Exclusion**: Never exposes password hashes, salts, reset tokens, or session IDs in exported data.
-
-### 🔔 In-App Notifications (All Roles)
-- **Top Navigation Indicator**: Near-real-time bell icon (60 second polling) with petrol badge displaying unread notification count.
-- **Visibility-Aware Polling**: Background check every 60 seconds while active, with immediate refetch on window focus.
-- **Comprehensive Notification Center (`/notifications`)**: Dedicated feed with unread highlights, filter, individual mark-as-read, bulk read-all, and direct deep-linking to relevant resources.
-- **Domain Event Triggers**: 10 lifecycle events across grading, submissions, reviews, applications, and security.
-- **Automated Capacity Pruning**: PostgreSQL database trigger automatically caps history at 200 items per user.
-
----
-
-## 3. Screenshots
-
-### Authentication & Role Selection
-![Login screen with demo credentials and role switcher](docs/screenshots/login.png)
-*Secure authentication portal featuring one-click demo credentials and institutional role switching.*
-
-### Student Learning Dashboard
-![Student dashboard with course enrollments, urgent assignments, and progress tracking](docs/screenshots/student-dashboard.png)
-*Student dashboard displaying active course progress, urgent assignment deadlines, and milestone achievements.*
-
-### Instructor Assessment & Grading
-![Instructor grading interface with rubric bounds and student submission review](docs/screenshots/instructor-grading.png)
-*Instructor grading interface with score validation, feedback entry, and late submission flags.*
-
-### Organization Candidate Pipeline
-![Organization applicant management pipeline with cover letters and hiring decisions](docs/screenshots/organization-applicants.png)
-*Organization applicant pipeline with candidate cover letters, skill tags, and multi-stage hiring decisions.*
-
-### Internship Coordinator Moderation
-![Internship coordinator review queue for employer vetting and posting moderation](docs/screenshots/coordinator-reviews.png)
-*Internship coordinator moderation interface for reviewing employer registrations and approving job postings.*
-
-### Notification Center
-![In-app notifications center with deep linking and read state management](docs/screenshots/notifications.png)
-*In-app notifications center with category filters, unread badge indicators, and direct resource navigation.*
-
-### Career Matching Recommendations
-![Deterministic skill and preference matching recommendations for student internships](docs/screenshots/suggested-internships.png)
-*Rule-based deterministic internship recommendations calculated from student skills and work mode preferences.*
-
-### Mobile Responsive Layout
-![Mobile responsive navigation drawer and layout on 360px viewport](docs/screenshots/mobile-360.png)
-*Mobile responsive view showcasing the accessible navigation drawer and compact UI components.*
-
----
-
-## 4. Technology Stack
-
-| Layer | Technologies | Rationale |
-| :--- | :--- | :--- |
-| **Backend** | Python 3.12+ / 3.14+, FastAPI, Pydantic v2, `pydantic-settings` | FastAPI REST API with synchronous threadpool execution, automatic OpenAPI schemas, and dependency injection. |
-| **Database & ORM** | PostgreSQL 16+, SQLAlchemy 2 (ORM & 2.0 Core style), `psycopg` 3 (`psycopg[binary]`), Alembic | ACID-compliant relational persistence, declarative typing, and version-controlled database schema migrations. |
-| **Frontend** | React 18, TypeScript (strict, zero `any`), Vite, React Router 7, Tailwind CSS, Lucide React | Modern SPA with type safety, clean component-driven architecture, and responsive styling. |
-| **Testing** | Pytest, FastAPI `TestClient`, Vitest, React Testing Library | Full test pyramid: unit, service, integration, and UI component tests across both stacks. |
-| **Code Quality** | Ruff (backend lint & format), ESLint 9 (flat config) + Prettier (frontend) | Enforced zero-warning policy, automated formatting, and strict code hygiene. |
-| **CI / CD** | GitHub Actions (`.github/workflows/ci.yml`) | Automated pull request and push validation matrix covering backend tests, frontend tests, and migration checks. |
-
----
-
-## 5. System Architecture
-
-```mermaid
-flowchart TD
-    subgraph Client["Client Browser"]
-        BrowserProd["Browser (http://localhost:8080)"]
-        BrowserDev["Browser (http://localhost:5173)"]
-    end
-
-    subgraph DockerPath["Docker Path (Port 8080)"]
-        NginxProxy["Nginx Container (:8080)"]
-        StaticBundle["Static React Build Bundle"]
-        NginxProxy -->|"Serves UI"| StaticBundle
-    end
-
-    subgraph DevPath["Dev Path (Port 5173)"]
-        ViteDev["Vite Dev Server (:5173)"]
-        ViteProxy["Vite Proxy (/api -> :8001)"]
-        ViteDev --> ViteProxy
-    end
-
-    subgraph Backend["Backend Application Tier (FastAPI)"]
-        FastAPI["FastAPI REST Application (:8000 Docker / :8001 Dev)"]
-        Middleware["Session Auth, Sliding-Window Rate Limiter & Security Headers"]
-        Routers["Domain Routers (/api/*)"]
-        Services["Domain Services (Business Logic)"]
-        Models["SQLAlchemy Declarative Models"]
-
-        FastAPI --> Middleware --> Routers --> Services --> Models
-    end
-
-    subgraph Database["Data Tier (Port 5432)"]
-        PG[("PostgreSQL Database")]
-        Alembic["Alembic Migrations"]
-        Models --> PG
-        Alembic -.-> PG
-    end
-
-    BrowserProd -->|HTTP :8080| NginxProxy
-    NginxProxy -->|Proxy /api/* to :8000| FastAPI
-    BrowserDev -->|HTTP :5173| ViteDev
-    ViteProxy -->|Proxy /api/* to :8001| FastAPI
-```
-
----
-
-## 6. Quick Start
-
-### Option A: Docker Compose (Fastest & Containerized)
-
-Get up and running locally in three commands:
+Run the application locally in three commands:
 
 ```powershell
 Copy-Item .env.docker.example .env.docker
@@ -197,168 +16,105 @@ docker compose up --build -d --wait
 docker compose run --rm backend python scripts/seed_demo.py
 ```
 
-> **Troubleshooting 502 Bad Gateway**: If you encounter a `502 Bad Gateway` error in the first few seconds of startup, the backend container is still executing initial database migrations (`alembic upgrade head`). Using `docker compose up --build -d --wait` ensures the command returns only after all services pass their healthchecks. If the backend is restarting, Nginx automatically retries and resolves the upstream container dynamically.
+Open [http://localhost:8080](http://localhost:8080) to access the platform.
 
-Open [http://localhost:8080](http://localhost:8080) to access the application.
+For native local development without Docker, see [docs/user-guide.md](docs/user-guide.md).
 
----
+## Demo Accounts
 
-### Option B: Native Host Environment (PowerShell)
+All demo accounts use password `12345678` (demo-only, seeded via `scripts/seed_demo.py`). For complete capability details for each persona, see [docs/user-guide.md](docs/user-guide.md).
 
-```powershell
-# 1. Run Automated Setup & Seed
-python scripts/setup_dev.py --seed
+| Name | Role | Email |
+| :--- | :--- | :--- |
+| Dr. Mulugeta Assefa | Admin | `mulugeta.assefa@example.com` |
+| Ms. Selamawit Tadesse | Coordinator | `selamawit.tadesse@example.com` |
+| Dr. Tadesse Bekele | Instructor | `tadesse.bekele@example.com` |
+| Ms. Hana Worku | Instructor | `hana.worku@example.com` |
+| Abel Tesfaye | Student | `abel.tesfaye@example.com` |
+| Meron Girma | Student | `meron.girma@example.com` |
+| Dawit Lemma | Student | `dawit.lemma@example.com` |
+| Kaffa Digital Solutions (Yohannes Haile) | Organization | `yohannes.haile@example.com` |
+| Gibe Valley Telecom Services (Rahel Desta) | Organization | `rahel.desta@example.com` |
+| Abay Data Labs (Eyob Kassa) | Organization | `eyob.kassa@example.com` |
 
-# 2. Start Backend Server (:8001)
-Set-Location backend
-.\.venv\Scripts\Activate.ps1
-python -m uvicorn app.main:app --host 127.0.0.1 --port 8001 --reload
+## Features by Role
 
-# 3. Start Frontend Client (:5173) in a separate terminal
-Set-Location frontend
-npm run dev
+- **Student**: Course enrollment, assignment submission with late flags and locked grades, profile skills and work mode preferences, career recommendations, internship applications with cover letters, 8 dynamic achievement badges, and in-app notifications.
+- **Instructor**: Course and syllabus authoring (`draft`/`published`), external learning resources management (up to 50 links per course), assignment lifecycle, numeric rubric grading with feedback comments, and course gradebook CSV export.
+- **Organization**: Company profile management, internship posting lifecycle (`draft` -> `pending_review` -> `open` -> `closed`), applicant roster review, hiring decisions (`shortlisted`, `accepted`, `rejected`), and applicants CSV export.
+- **Internship Coordinator**: Dedicated coordinator dashboard, organization vetting and approval, internship posting moderation queue (approval or rejection with notes), platform-wide listing and applicant inspection in read-only mode, and applications audit CSV export.
+- **Administrator**: Comprehensive dashboard metrics, user account provisioning, activation/deactivation guards, administrative password resets, organization approvals, internship moderation, and master users registry CSV export.
+
+## Technology Stack
+
+| Layer | Technologies | Notes |
+| :--- | :--- | :--- |
+| Backend | Python 3.12+, FastAPI, Pydantic v2, `pydantic-settings` | REST API, synchronous threadpool execution, OpenAPI schema generation, dependency injection. |
+| Database & ORM | PostgreSQL 16+, SQLAlchemy 2 (ORM & 2.0 Core), `psycopg` 3, Alembic | ACID transactions, declarative models, version-controlled migrations. |
+| Frontend | React 18, TypeScript (strict), Vite, React Router 7, Tailwind CSS, Lucide | Single-page application, custom design system tokens, responsive mobile drawer. |
+| Testing | Pytest, FastAPI TestClient, Vitest, React Testing Library | Full test pyramid: backend unit and integration tests, frontend component tests. |
+| Code Quality | Ruff, ESLint 9, Prettier | Enforced zero-warning policy, formatting checks, type guards. |
+| CI | GitHub Actions | Automated lint, format, migration drift check, backend/frontend tests, and docker smoke test. |
+
+## System Architecture
+
+```mermaid
+flowchart TD
+    Client["Client Browser (:8080 prod / :5173 dev)"]
+    Proxy["Nginx Reverse Proxy / Vite Proxy"]
+    FastAPI["FastAPI REST Application (:8000 / :8001)"]
+    Middleware["Session Auth, Sliding Rate Limiter & Security Headers"]
+    Routers["Domain Routers (/api/*)"]
+    Services["Domain Services (Business Logic)"]
+    Models["SQLAlchemy Declarative Models"]
+    DB[("PostgreSQL 16 Database")]
+
+    Client --> Proxy --> FastAPI --> Middleware --> Routers --> Services --> Models --> DB
 ```
 
-Visit [http://localhost:5173](http://localhost:5173) to explore the platform.
+## Running the Tests
 
----
-
-## 7. Demo Accounts &amp; Capabilities
-
-All demo accounts are provisioned via `scripts/seed_demo.py`. For local evaluation, all demo roster accounts share the password `12345678`, marked demo-only and intentionally public.
-
-| Name | Role | Email | Password (Demo-Only) | Profile State | What This Account Demonstrates |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Dr. Mulugeta Assefa** | Admin | `mulugeta.assefa@example.com` | `12345678` | Complete | Administrative dashboard, user provisioning &amp; password resets, organization registration approvals, internship moderation review queue, and listing takedowns. |
-| **Ms. Selamawit Tadesse** | Coordinator | `selamawit.tadesse@example.com` | `12345678` | Complete | Coordinator dashboard, organization registration review &amp; approvals, internship moderation review queue, listing takedowns, and read-only applicant roster inspection. |
-| **Dr. Tadesse Bekele** | Instructor | `tadesse.bekele@example.com` | `12345678` | Complete | Instructor dashboard, courses "Database Systems" (published) and "Introduction to Programming" (published), assignment authoring, and student submission grading. |
-| **Ms. Hana Worku** | Instructor | `hana.worku@example.com` | `12345678` | Complete | Course authoring in draft state ("Software Engineering"), curriculum planning, and department course rosters. |
-| **Abel Tesfaye** | Student | `abel.tesfaye@example.com` | `12345678` | Complete | Student dashboard, course progress, submitted ER Diagramming assignment (graded 100/100 with instructor feedback), accepted internship offer from Kaffa Digital Solutions, rejected application, and withdrawn application. |
-| **Meron Girma** | Student | `meron.girma@example.com` | `12345678` | Complete | Student dashboard, course progress, late assignment submission awaiting instructor grading, shortlisted internship candidate at Kaffa Digital Solutions. |
-| **Dawit Lemma** | Student | `dawit.lemma@example.com` | `12345678` | Incomplete | Incomplete profile demonstration showing the profile completion banner and the profile-complete rule before applying (blocking internship applications until university and department are saved); submitted application to Network Support Intern. |
-| **Kaffa Digital Solutions** (Yohannes Haile) | Organization | `yohannes.haile@example.com` | `12345678` | Approved | Organization dashboard, postings across lifecycles (`open`, `pending_review`, `draft`, `rejected`), applicant hiring pipeline (accepted Abel Tesfaye, shortlisted Meron Girma). |
-| **Gibe Valley Telecom Services** (Rahel Desta) | Organization | `rahel.desta@example.com` | `12345678` | Approved | Organization dashboard, network support &amp; systems administration postings, candidate rejection decision, and closed listing. |
-| **Abay Data Labs** (Eyob Kassa) | Organization | `eyob.kassa@example.com` | `12345678` | Pending Approval | Pending approval banner demonstration; can create and edit draft postings, but submitting for review or publishing is blocked until an administrator or coordinator reviews and approves the organization profile. |
-
-> **Note**: All people and organizations in this demo dataset are fictional. The password `12345678` is marked demo-only and intentionally public for local demonstration and evaluation.
-
----
-
-## 8. How to Run the Tests
-
-### Backend Tests (Pytest)
 ```powershell
-Set-Location backend
-.\.venv\Scripts\Activate.ps1
-
-# Run complete backend test suite
+# Backend tests (from backend/ with virtual environment activated)
 python -m pytest -v
 
-# Or run quiet summary
-python -m pytest -q
+# Frontend tests (from frontend/)
+npm test -- --run
+
+# Linting and formatting checks
+ruff check backend/
+ruff format --check backend/
+npm --prefix frontend run lint
+npm --prefix frontend run format:check
 ```
 
-### Frontend Tests (Vitest)
-```powershell
-Set-Location frontend
+## Security Summary
 
-# Run complete frontend test suite
-npm test
+- **Server-Side Session Authentication**: 32-byte cryptographically secure random session tokens, stored hashed in PostgreSQL, transmitted exclusively via `HttpOnly`, `SameSite=Lax` cookies. Identity is never accepted from client headers or request bodies.
+- **Scrypt Password Hashing**: Passwords hashed using standard library `hashlib.scrypt` with a 16-byte random salt and memory-hard parameters.
+- **Role-Based Access Control**: Server-enforced authorization across all endpoints via route dependencies (`require_roles`).
+- **Resource Ownership Guards**: Strict checks ensure instructors only modify their own courses and organizations only edit their own postings.
+- **Sliding-Window Rate Limiting**: In-memory sliding-window limiter on `/api/auth/login`, `/api/auth/register`, and `/api/auth/change-password` returning HTTP 429 with `Retry-After`.
+- **Safe CSV Exports**: Formula-injection sanitization (prepends `'` to `=`, `+`, `-`, `@`) and UTF-8 BOM encoding for Amharic text support.
 
-# Run Vitest in watch mode
-npm run test:watch
-```
+## Known Limitations
 
-### Linting & Formatting Checks
-```powershell
-# Backend (Ruff)
-Set-Location backend
-.\.venv\Scripts\ruff.exe check .
-.\.venv\Scripts\ruff.exe format --check .
+- **Rankings and Gamification**: Competitive student leaderboards and peer ranking comparisons are not built; milestone badges are individual without competitive scoring.
+- **AI and Machine Learning**: No LLM parsing or vector embeddings are used; matching uses a deterministic rule-based scoring algorithm (skills, work mode, and location).
+- **Binary File Storage**: Direct file and media uploads are not implemented; external documentation URLs are supported.
+- **Mobile Application**: Provided as a responsive web application tested on narrow (360px) viewports, not as a native mobile application.
+- **Email Delivery**: External SMTP email delivery is not configured; accounts activate immediately upon registration.
+- **Cloud Infrastructure**: Cloud orchestration and deployment (e.g. AWS/GCP/Kubernetes) are not built; local Docker Compose is provided.
 
-# Frontend (ESLint 9 & Prettier)
-Set-Location frontend
-npm run lint
-npm run format:check
-```
+## Documentation Index
 
----
-
-## 9. Project Structure
-
-```text
-university-internship-platform/
-├── .dockerignore              # Root Docker build context exclusion rules
-├── .env.docker.example        # Template environment configuration for Docker Compose
-├── .github/workflows/ci.yml   # Automated CI test, migration & docker smoke matrix
-├── docker-compose.yml         # Container orchestration (db, backend, frontend)
-├── docs/                      # Architectural designs, schemas, and specifications
-│   ├── api.md                 # REST API reference and schema guide
-│   ├── architecture.md        # Architecture topology and endpoint matrix
-│   ├── database.md            # Mermaid ER diagram and schema specifications
-│   ├── demo-script.md         # Evaluator walkthrough script & Q&A preparation
-│   ├── design.md              # Design system tokens and UX rules
-│   ├── openapi.json           # Exported OpenAPI 3.1 specification
-│   ├── requirements.md        # Functional and non-functional requirements traceability
-│   ├── security.md            # Threat model, controls matrix, and security policies
-│   └── user-guide.md          # Step-by-step role-based user manual
-├── scripts/                   # Administrative automation CLI tools
-│   ├── create_user.py         # CLI administrative user provisioning tool
-│   ├── export_openapi.py      # OpenAPI JSON schema exporter
-│   ├── seed_demo.py           # Idempotent demo dataset seeder
-│   └── setup_dev.py           # Cross-platform developer environment setup
-├── backend/
-│   ├── .dockerignore          # Backend Docker build exclusion rules
-│   ├── Dockerfile             # Multi-stage backend container definition
-│   ├── alembic/               # Database migration environment
-│   ├── app/
-│   │   ├── core/              # Config, database engine, security helpers, deps
-│   │   ├── models/            # SQLAlchemy declarative models (one file per model)
-│   │   ├── routers/           # Thin FastAPI HTTP endpoints (/api only)
-│   │   ├── schemas/           # Pydantic validation schemas
-│   │   └── services/          # Pure business logic and domain rules
-│   └── tests/                 # Pytest test suite mirroring app/ domain modules
-└── frontend/
-    ├── .dockerignore          # Frontend Docker build exclusion rules
-    ├── Dockerfile             # Multi-stage frontend container (build + Nginx)
-    ├── nginx.conf             # Nginx reverse proxy, SPA fallback, gzip & security headers
-    ├── src/
-    │   ├── api/               # Typed API client wrappers
-    │   ├── components/        # Modular, accessible UI components
-    │   ├── context/           # React context providers (AuthContext)
-    │   ├── hooks/             # Custom React hooks
-    │   ├── pages/             # Page-level route views
-    │   └── types/             # Shared TypeScript type definitions
-    └── package.json           # Dependencies and test scripts
-```
-
----
-
-## 10. Security Summary
-
-Security is integrated into every layer of the platform architecture:
-- **Server-Side Session Authentication**: Session IDs are generated with cryptographically secure random bytes (`secrets.token_urlsafe(32)`), stored hashed in PostgreSQL, and transmitted exclusively via `HttpOnly`, `SameSite=Lax` cookies. Identity is **never** accepted from client headers or request bodies.
-- **Scrypt Password Hashing**: User credentials are protected using Python's standard library `hashlib.scrypt` with a cryptographically secure 16-byte random salt and memory-hard computational parameters.
-- **Role-Based Access Control (RBAC)**: Enforced strictly at the service and route dependency layer (`get_current_user`, `require_roles`). Frontend route guards and UI button states are purely ergonomic conveniences.
-- **Ownership Verification & Cascading Guards**: Instructors can only modify their own courses; organizations can only edit their own postings; students can only submit work for courses in which they are actively enrolled.
-- **Sliding-Window Rate Limiting**: In-memory sliding-window rate limiting guards sensitive endpoints (`/api/auth/login`, `/api/auth/register`, `/api/auth/change-password`) against brute-force attacks; clients receive `HTTP 429` with `Retry-After` headers and automatic frontend countdown notices.
-
-For in-depth threat modeling, STRIDE analysis, and vulnerability mitigation matrices, refer to [docs/security.md](docs/security.md).
-
----
-
-## 11. Known Limitations & Future Work
-
-The platform was built under a strict MVP-first specification. The following items reflect current project boundaries and planned future enhancements:
-
-1. **Implemented in Recent Phases**:
-   - **In-App Notifications**: Full notification center (`/notifications`) with near-real-time unread badge (60-second polling), domain event hooks, and automated 200-item database capacity pruning trigger.
-   - **Course Learning Resources**: Curated external learning resources and documentation links with full instructor CRUD controls and enrolled student visibility.
-   - **Student Achievement Badges**: Milestone badge computations across 8 dynamic rules with progress tracking and profile showcase.
-   - **Safe CSV Reports & Data Exports**: Four role-scoped CSV exports (Gradebook, Applicants, Platform Applications, and Users Registry) protected against formula injection.
-   - **Rule-Based Suggested Internships & Student Preferences**: Deterministic matching (`GET /api/internships/suggestions`) based on skill overlap (up to 60 pts), work mode preference (up to 20 pts), and location preference (up to 20 pts) with match score badges and explanatory breakdowns.
-2. **Rankings & Gamification**: Competitive student leaderboards, peer ranking comparisons, and gamified ranking points are not implemented; milestone badges are provided without peer ranking competition.
-3. **Binary File Uploads & Media Streaming**: Direct binary file uploads (PDF slides, lecture videos, downloadable archives) and multimedia streaming are not implemented; curated external learning resource links are supported.
-4. **AI-Driven Recommendations**: Automated resume parsing, candidate scoring, and machine-learning-based vector ranking are not implemented; structured keyword search, work mode filters, and transparent rule-based deterministic skill-and-preference suggestions are provided.
-5. **Email Verification & Self-Service Password Reset**: External SMTP/SES email delivery is not configured; accounts activate immediately upon registration, and password recovery is performed administratively or via authenticated password changes.
-6. **Cloud Deployment & Managed Orchestration**: Multi-region cloud infrastructure, CDN distribution, and managed container orchestration (Kubernetes, AWS ECS) are not configured; containerized Docker Compose and local developer environments are fully supported.
+- [docs/architecture.md](docs/architecture.md): System topology, middleware pipeline, and endpoint permission matrix.
+- [docs/database.md](docs/database.md): Schema specifications, Mermaid ER diagram, and migration history.
+- [docs/api.md](docs/api.md): REST API endpoint reference and query parameters.
+- [docs/user-guide.md](docs/user-guide.md): Role-by-role user manual and pre-seeded demo walkthrough.
+- [docs/demo-script.md](docs/demo-script.md): Evaluator demonstration script and Q&A reference.
+- [docs/security.md](docs/security.md): Threat model, security controls, and vulnerability mitigations.
+- [docs/requirements.md](docs/requirements.md): Functional and non-functional requirements traceability.
+- [docs/design.md](docs/design.md): Design tokens, color palette, typography, and UX guidelines.
+- [CHANGELOG.md](CHANGELOG.md): Project release history.
+- [AGENTS.md](AGENTS.md): Development guidelines, architecture rules, and conventions.
