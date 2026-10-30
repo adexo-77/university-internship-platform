@@ -45,6 +45,26 @@ All demo accounts use password `12345678` (demo-only, seeded via `scripts/seed_d
 - **Internship Coordinator**: Dedicated coordinator dashboard, organization vetting and approval, internship posting moderation queue (approval or rejection with notes), platform-wide listing and applicant inspection in read-only mode, and applications audit CSV export.
 - **Administrator**: Comprehensive dashboard metrics, user account provisioning, activation/deactivation guards, administrative password resets, organization approvals, internship moderation, and master users registry CSV export.
 
+## Coverage of the Project Brief
+
+| Brief Item | Status | Where to See It / Notes |
+| :--- | :---: | :--- |
+| Users | Implemented | 5 roles with RBAC; see `backend/app/models/user.py`, `/api/auth/*`, and `/admin/users`. |
+| Profiles and progress | Implemented | Academic profiles, technical skills, and preferences; see `/profile` and `StudentDashboard.tsx`. |
+| Courses and learning resources | Implemented | Course lifecycle, syllabi, and external resource links (up to 50); see `/courses`. |
+| Assignments and submissions | Implemented | Due dates, late flags, rubric grading, locked submissions; see `/assignments/:id`. |
+| Internship opportunities and applications | Implemented | Postings lifecycle, moderation queue, applications, and decisions; see `/internships`. |
+| Instructor dashboards | Implemented | Active courses, student counts, Needs Grading queue, and gradebook export; see `/dashboard`. |
+| Progress tracking and notifications | Implemented | In-app notification center (`/notifications`), top-nav unread bell, 10 events, 200-item auto-pruning. |
+| Reports and badges | Implemented | 8 dynamic achievement badges; 4 formula-injection-safe CSV exports; see `/admin/reports`. |
+| Rankings | Not implemented | Competitive student leaderboards are not built; achievement badges are individual milestones. |
+| AI opportunities | Partial | Rule-based matching (`/api/internships/suggestions`) on skills/preferences; LLM/vector models are not built. |
+| Web | Implemented | Responsive single-page application built with React 18, TypeScript, and Tailwind CSS. |
+| Mobile | Partial | Responsive web application tested on narrow viewports (360px); native mobile apps are not built. |
+| REST API | Implemented | FastAPI REST API with OpenAPI 3.1 documentation at `/docs` and exported at `docs/openapi.json`. |
+| PostgreSQL | Implemented | Relational schema, foreign keys, cascade rules, indexes, and Alembic migrations; see `backend/alembic/`. |
+| Cloud | Not implemented | Managed cloud infrastructure is not built; local container orchestration uses Docker Compose. |
+
 ## Technology Stack
 
 | Layer | Technologies | Notes |
