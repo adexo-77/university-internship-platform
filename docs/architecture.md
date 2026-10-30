@@ -5,7 +5,7 @@
 The **University Learning & Internship Platform** is engineered with a modular, decoupled architecture prioritizing maintainability, strict typing, and high reliability.
 
 - **Authentication & Profiles**: Sessions, RBAC (`student`, `instructor`, `organization`, `coordinator`, `admin`), atomic user and profile provisioning.
-- **Academic Coursework**: Courses, syllabi, enrollments, rosters, coursework submissions with late flags, and rubric grading with score floors.
+- **Academic Coursework**: Courses, syllabi, enrollments, rosters, coursework submissions with late flags, and bounded grading with score floors.
 - **Career & Internships**: Internship postings (draft/open/closed), search catalog, student applications with profile prerequisites, and decision workflows.
 - **Institutional Governance**: Admin user management, organization vetting, password changes, moderation review queue, and deadline extension guards.
 - **Role Dashboards**: Role-tailored dashboards with aggregated metrics, progress percentages, and grade calculations.

@@ -267,7 +267,7 @@ Represents coursework, problem sets, and practical assignments created by instru
 | `id` | `INTEGER` | `PRIMARY KEY`, `AUTOINCREMENT` | Unique assignment identifier |
 | `course_id` | `INTEGER` | `NOT NULL`, `FK courses(id) ON DELETE CASCADE`, `INDEX` | Owning course reference |
 | `title` | `VARCHAR(120)` | `NOT NULL` | Assignment title (3 to 120 characters) |
-| `description` | `TEXT` | `NULLABLE` | Assignment instructions and rubric (up to 2000 chars) |
+| `description` | `TEXT` | `NULLABLE` | Assignment instructions (up to 2000 chars) |
 | `due_at` | `TIMESTAMPTZ` | `NOT NULL` | Timezone-aware due deadline (must be in future on creation) |
 | `max_points` | `INTEGER` | `NOT NULL`, `DEFAULT 100`, `1 <= points <= 1000` | Maximum points achievable |
 | `created_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()` | Creation timestamp in UTC |

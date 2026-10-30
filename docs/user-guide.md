@@ -17,7 +17,8 @@ Ensure both backend and frontend development servers are running:
 3. Enter the standard demo password: `12345678` (demo-only).
 4. Click **Sign in**. The application will authenticate your session and route you directly to your role-specific dashboard.
 
-![Login screen with demo credentials and role switcher](screenshots/login.png)
+![Login screen with email and password fields and registration link](screenshots/login.png)
+*Login page with email and password input fields and role registration link.*
 
 ### Pre-Seeded Demo Accounts Reference
 
@@ -57,7 +58,8 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
    - "ER Diagramming &amp; Conceptual Modeling" past due displays a past due badge.
 4. Review the **Recent Grades** panel showing scored assignments with percentage chips and instructor feedback (e.g., 100% on ER Diagramming).
 
-![Student dashboard with course enrollments, urgent assignments, and progress tracking](screenshots/student-dashboard.png)
+![Student dashboard with course progress, due assignments, recommendations, and achievement badges](screenshots/student-dashboard.png)
+*Student dashboard displaying course progress bars, upcoming due dates, matching internship suggestions, and achievement badges.*
 
 ### Step 2: Browse &amp; Enroll in Courses (`/courses`)
 1. Click **Courses** in the main navigation.
@@ -93,7 +95,8 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
    - Network Support Intern: **Rejected**
    - Systems Administration Intern 2025: **Withdrawn**
 
-![Career matching recommendations for student internships](screenshots/suggested-internships.png)
+![Internship catalog with rule-based recommendation cards and search filters](screenshots/suggested-internships.png)
+*Internship catalog displaying rule-based suggestion cards with percentage match scores, keyword search, and work mode filter.*
 
 ---
 
@@ -129,7 +132,8 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
 4. Enter a numeric grade (enforced between `0` and `max_score`) and enter constructive instructor feedback.
 5. Click **Submit Grade**. The submission status transitions to `graded`, and the student's dashboard updates immediately.
 
-![Instructor grading interface with rubric bounds and student submission review](screenshots/instructor-grading.png)
+![Instructor grading interface with student submission content, bounded numeric score, and feedback textarea](screenshots/instructor-grading.png)
+*Instructor grading form showing student submission notes, artifact link, numeric score input bounded by maximum points, and feedback text area.*
 
 ---
 
@@ -171,7 +175,8 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
    - Meron Girma: **Shortlisted**
 5. Click **Review Application** to advance candidate decisions. Terminal decisions lock the application against tampering.
 
-![Organization applicant management pipeline with cover letters and hiring decisions](screenshots/organization-applicants.png)
+![Organization dashboard showing posting overview and latest applicants with status badges](screenshots/organization-applicants.png)
+*Organization dashboard displaying posting counts across lifecycle stages and recent applicant status summary.*
 
 ---
 
@@ -240,7 +245,8 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
 4. Click **Approve** to publish to students, or **Reject** with feedback for the employer.
 5. Take down listings when necessary to safeguard student placements.
 
-![Internship coordinator review queue for employer vetting and posting moderation](screenshots/coordinator-reviews.png)
+![Internship reviews moderation queue with status filter and listing review actions](screenshots/coordinator-reviews.png)
+*Internship moderation table displaying pending listings with organization, location, submission timestamp, and review action button.*
 
 ### Step 4: Internship Listings and Read-Only Applicant Inspection (`/internships`)
 1. Click **Internships** to browse all platform listings across all statuses (`draft`, `pending_review`, `open`, `closed`, `rejected`).
@@ -272,7 +278,7 @@ The platform includes an automated in-app notifications center that keeps all pe
 
 ### Notifications Page (`/notifications`)
 1. Click the notification bell icon (or navigate to `/notifications`) to open your notifications feed.
-2. **Visual Indicators**: Unread notifications are distinguished with a petrol tint background, bold title, and an unread dot indicator.
+2. **Visual Indicators**: Unread notifications are distinguished with a petrol tint background, bold title, and an unread dot indicator. Filter between **All** and **Unread only** tabs.
 3. **Deep Linking**: Click any notification to navigate directly to its related entity (e.g., assignment details, course syllabus, application decision, or internship posting).
 4. **Mark as Read**:
    - Clicking a notification automatically marks it as read on the server.
@@ -280,7 +286,8 @@ The platform includes an automated in-app notifications center that keeps all pe
    - Click **Mark all as read** at the top right to clear all unread badges simultaneously.
 5. **Retention**: The platform automatically caps history at the 200 most recent notifications per user via an automated database pruning trigger.
 
-![In-app notifications center with deep linking and read state management](screenshots/notifications.png)
+![In-app notifications inbox with All and Unread filter tabs and Mark all as read button](screenshots/notifications.png)
+*Notifications view with All and Unread filter buttons, Mark all as read action, and timestamped alert entries.*
 
 ---
 
@@ -332,5 +339,6 @@ The web application is fully responsive across mobile, tablet, and desktop displ
 - Responsive data tables with horizontal scroll containers and card layouts.
 - Tested on narrow 360px mobile viewports for student course access and application tracking.
 
-![Mobile responsive navigation drawer and layout on 360px viewport](screenshots/mobile-360.png)
+![Mobile responsive dashboard layout on 360px viewport with header menu toggle and stacked cards](screenshots/mobile-360.png)
+*Mobile viewport rendering at 360px width showing stacked dashboard metric cards, due dates, and top navigation header with menu toggle.*
 
