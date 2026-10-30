@@ -24,7 +24,7 @@ export interface NavItem {
 /**
  * Platform navigation items.
  * Only pages that exist are listed; roles restrict visibility per user role.
- * Each phase adds items here — no hard-coded items elsewhere.
+ * Central navigation configuration — no hard-coded items elsewhere.
  */
 export const navigationItems: NavItem[] = [
   {

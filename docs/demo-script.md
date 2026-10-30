@@ -1,6 +1,6 @@
-# Evaluator Walkthrough Script &amp; Q&amp;A Preparation
+# Demo Walkthrough Script &amp; Q&amp;A Reference
 
-This document provides an **8 to 10 minute end-to-end presentation script** for evaluators and interviewers, followed by **15 likely evaluator questions and accurate answers** grounded directly in this codebase.
+This document provides an **8 to 10 minute end-to-end presentation script** for live demonstrations, followed by **17 key technical questions and accurate answers** grounded directly in this codebase.
 
 ---
 
@@ -20,9 +20,9 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 
 #### [0:00 - 0:45] Introduction &amp; Motivation
 > **What to Say**:
-> *"Welcome! Today I am presenting the University Learning &amp; Internship Platform, built for the Brolf Tech challenge. Traditional university portals separate academic coursework from career recruitment, creating data silos. This platform integrates course tracking, assignment submissions with strict deadline enforcement, verified corporate internship postings, and university administrative governance into a single, cohesive system.*
+> *"Welcome! Today I am presenting the University Learning &amp; Internship Platform. Traditional university portals separate academic coursework from career recruitment, creating data silos. This platform integrates course tracking, assignment submissions with strict deadline enforcement, verified corporate internship postings, and university administrative governance into a single, cohesive system.*
 >
-> *Under the hood, it's powered by FastAPI, PostgreSQL with SQLAlchemy 2, Alembic migrations, and a React 18 TypeScript frontend. Everything has been built with an MVP-first discipline, zero linter warnings, and over 390 automated tests."*
+> *Under the hood, it's powered by FastAPI, PostgreSQL with SQLAlchemy 2, Alembic migrations, and a React 18 TypeScript frontend. Everything has been built with clean modular architecture, zero linter warnings, and over 390 automated tests."*
 
 ---
 
@@ -50,7 +50,7 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 >
 > *Under any course, the instructor can create assignments with strict due dates and maximum point values. In the assignment roster, instructors see student submissions in real time.*
 >
-> *Let's grade a pending submission: clicking 'Grade' opens our evaluation interface. Notice our validation rules: scores must be numeric between 0 and maximum points—the server rejects out-of-bounds grades with a 422 error. The instructor provides qualitative feedback comments, saves the grade, and the submission status transitions immediately to `graded`, locking it against further student edits."*
+> *Let's grade a pending submission: clicking 'Grade' opens our grading interface. Notice our validation rules: scores must be numeric between 0 and maximum points—the server rejects out-of-bounds grades with a 422 error. The instructor provides qualitative feedback comments, saves the grade, and the submission status transitions immediately to `graded`, locking it against further student edits."*
 
 ---
 
@@ -105,7 +105,7 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 
 ---
 
-## 2. Q&amp;A Preparation: 15 Likely Evaluator Questions &amp; Answers
+## 2. Q&amp;A Preparation: 17 Key Technical Questions &amp; Answers
 
 ### Q1: Why did you choose FastAPI over traditional frameworks like Django or Flask?
 **Answer**: FastAPI provides clean synchronous request handling in worker threadpools with SQLAlchemy 2, strict runtime schema validation via Pydantic v2, and automated OpenAPI documentation out of the box. Its lightweight dependency injection system allows us to enforce database sessions, authentication, and role guards cleanly without the monolithic bloat of Django or the lack of built-in typing in Flask.

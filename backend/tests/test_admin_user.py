@@ -17,7 +17,7 @@ def test_admin_user_endpoints_role_guards(
             "POST",
             "/api/admin/users",
             {
-                "email": "u@brolf.com",
+                "email": "u@example.com",
                 "password": "Password123!",
                 "full_name": "U",
                 "role": "instructor",

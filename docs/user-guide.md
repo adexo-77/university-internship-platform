@@ -14,14 +14,14 @@ Ensure both backend and frontend development servers are running:
 ### Logging In
 1. Navigate to [http://localhost:5173/login](http://localhost:5173/login).
 2. Enter the email corresponding to the role you wish to test.
-3. Enter the standard evaluation demo password: `12345678` (demo-only).
+3. Enter the standard demo password: `12345678` (demo-only).
 4. Click **Sign in**. The application will authenticate your session and route you directly to your role-specific dashboard.
 
 ![Login screen with demo credentials and role switcher](screenshots/login.png)
 
 ### Pre-Seeded Demo Accounts Reference
 
-All demo accounts are provisioned via `scripts/seed_demo.py`. For local evaluation, all demo accounts share the password `12345678` (demo-only and intentionally public).
+All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing and demonstration, all demo accounts share the password `12345678` (demo-only and intentionally public).
 
 | Name | Role | Email | Password | Profile State | What This Account Demonstrates |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -108,7 +108,7 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local evaluati
 2. The dashboard highlights:
    - **Active Courses** published (Database Systems, Introduction to Programming).
    - **Total Enrolled Students** across all courses.
-   - **Needs Grading** count of student submissions awaiting evaluation (Meron Girma's submission).
+   - **Needs Grading** count of student submissions awaiting grading (Meron Girma's submission).
 3. Click any submission in the "Needs Grading" list to jump directly to the grading interface.
 
 ### Step 2: Create &amp; Manage Courses (`/courses/new`)

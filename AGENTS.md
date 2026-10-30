@@ -1,6 +1,6 @@
 # AGENTS.md &bull; Project Guidelines &amp; Architectural Rules
 
-This document establishes the architecture, conventions, workflows, and strict rules for the **University Learning & Internship Platform** (Brolf Tech Internship Challenge). All agents, developers, and tools working on this codebase must adhere strictly to these principles across every phase.
+This document establishes the architecture, conventions, workflows, and strict rules for the **University Learning & Internship Platform**. All developers, agents, and tools working on this codebase must adhere strictly to these principles across the repository.
 
 ---
 
@@ -17,7 +17,7 @@ This document establishes the architecture, conventions, workflows, and strict r
 
 ## 2. Project Structure Guide
 
-The official **PROJECT STRUCTURE GUIDE** outlines the file tree and structural conventions across all phases:
+The official **PROJECT STRUCTURE GUIDE** outlines the file tree and structural conventions across the project:
 
 ```text
 university-internship-platform/
@@ -27,8 +27,8 @@ university-internship-platform/
 ├── .env.example               # Template environment configuration
 ├── .gitattributes             # Enforce LF line endings (* text=auto eol=lf)
 ├── .gitignore                 # Ignore .env, .venv, node_modules, dist, __pycache__, etc.
-├── AGENTS.md                  # Project constitution and multi-phase agent guidelines
-├── CHANGELOG.md               # Versioned changelog across phases
+├── AGENTS.md                  # Project architecture guidelines and rules
+├── CHANGELOG.md               # Versioned changelog across releases
 ├── docker-compose.yml         # Container orchestration (db, backend, frontend)
 ├── README.md                  # Setup instructions, exact PowerShell commands
 ├── docs/                      # Architectural designs, schemas, and specifications
@@ -362,15 +362,15 @@ university-internship-platform/
         └── main.tsx           # React entry point
 ```
 
-### Structure Rules for Every Future Phase
+### Structure Rules for Project Modules
 
 - New code goes in the folder that matches its job. Business logic lives in services, never in routers.
 - Models: one file per model. Schemas, routers, services and tests: one file per domain, with the same name across them (for example `course.py`).
 - Each file has one job and stays under 250 physical lines (counted with `(Get-Content <file>).Count`, including blank lines and test files). Split before it grows past that.
 - No files named `utils` or `helpers` that collect unrelated code.
 - No scratch, backup, debug or unused files. Only source and docs are committed.
-- Each phase updates README, docs/database.md and docs/architecture.md when it changes them.
-- Before finishing any phase, run `git ls-files` and compare it to this guide.
+- Each feature updates README, docs/database.md and docs/architecture.md when it changes them.
+- Before finishing any task, run `git ls-files` and compare it to this guide.
 
 ---
 
@@ -415,7 +415,7 @@ npm run test
 
 ---
 
-## 4. Mandatory Architectural Rules for Every Future Phase
+## 4. Mandatory Architectural Rules
 
 1. **Server Session Identity**:
    Identity always comes from the server session (or validated token decoded on the server), **never** from the request body or client headers. The client cannot forge or specify its own user identity.
@@ -428,7 +428,7 @@ npm run test
 5. **Thin Routers, Business Logic in Services**:
    Routers only handle request parsing, parameter injection, status codes, and response serialization. All database interactions and domain logic live inside `backend/app/services/`.
 6. **File Size Limit**:
-   Keep all source and test files strictly under 250 physical lines, counted with `(Get-Content <file>).Count` (including blank lines and test files). From now on, any file above 250 physical lines must be split into focused sub-modules before the phase is called done.
+   Keep all source and test files strictly under 250 physical lines, counted with `(Get-Content <file>).Count` (including blank lines and test files). Any file above 250 physical lines must be split into focused sub-modules before the task is called done.
 7. **Strict Typing Everywhere**:
    - Python: Complete type hints on all functions, parameters, return types, and variables.
    - TypeScript: Strict compiler options enabled. Absolute prohibition of the `any` type (`@typescript-eslint/no-explicit-any` is configured as an error).
@@ -444,23 +444,23 @@ npm run test
    ```
 10. **Conventional, Focused Commits**:
     Commit messages must use standard conventional commit prefixes (`feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`) and be small, focused, and verified before committing.
-11. **Strict Phase Discipline**:
-    Never touch or implement code outside the active phase. Build Phase 0 foundation first, then progress phase by phase without premature feature bloat.
+11. **Strict Scope Discipline**:
+    Never touch or implement code outside the active task. Build core foundations first, then progress systematically without premature feature bloat.
 12. **Credential and Secret Hygiene**:
-    NEVER put credentials (passwords, connection strings, API tokens, secret keys) inline in any command, commit message, or report; read them from `.env` or system environment variables and mask them in any output. *Exception*: documented demo-only passwords (such as `12345678` for seeded demo roster accounts) are allowed in public documentation for evaluators; real secrets, private keys, connection strings, and production credentials never are.
+    NEVER put credentials (passwords, connection strings, API tokens, secret keys) inline in any command, commit message, or report; read them from `.env` or system environment variables and mask them in any output. *Exception*: documented demo-only passwords (such as `12345678` for seeded demo roster accounts) are allowed in public documentation for demonstration; real secrets, private keys, connection strings, and production credentials never are.
 
 ---
 
 ## 5. Definition of Done
 
-Every phase, feature, or refactoring task must satisfy the following checklist before completion:
+Every feature, milestone, or refactoring task must satisfy the following checklist before completion:
 
 1. **Lint and format pass with 0 warnings** (`ruff check .`, `ruff format --check .`, `npm run lint`, `npm run format:check`).
 2. **All tests pass** (`pytest -v`, `npm run test`).
 3. **No unused files, imports, or dependencies**.
 4. **Documentation is complete** (`README.md`, `docs/architecture.md`, `docs/database.md`, `docs/design.md`).
 5. **Working tree is clean and committed** with small, focused conventional commits.
-6. **Report the 8 largest files by physical line count with `(Get-Content <file>).Count`, including blank lines and including test files; none may exceed 250 physical lines. From now on, any file above 250 physical lines must be split before the phase is called done.** Run:
+6. **Report the 8 largest files by physical line count with `(Get-Content <file>).Count`, including blank lines and including test files; none may exceed 250 physical lines. Any file above 250 physical lines must be split before the task is called done.** Run:
    ```powershell
    Get-ChildItem backend\app, backend\tests, frontend\src -Recurse -Include *.py,*.ts,*.tsx | ForEach-Object { [pscustomobject]@{Lines=(Get-Content $_.FullName).Count; File=$_.Name} } | Sort-Object Lines -Descending | Select-Object -First 8
    ```

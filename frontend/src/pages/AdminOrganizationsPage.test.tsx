@@ -14,7 +14,7 @@ vi.mock('../api/admin_organization', () => ({
 
 const mockAdminUser: User = {
   id: 1,
-  email: 'admin@brolf.edu',
+  email: 'admin@example.edu',
   full_name: 'Admin Boss',
   role: 'admin',
   is_active: true,

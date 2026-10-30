@@ -26,7 +26,7 @@ const mockAdminAuthUser: User = {
 const mockAdminUsers: AdminUser[] = [
   {
     id: 1,
-    email: 'alice@brolf.edu',
+    email: 'alice@example.edu',
     full_name: 'Alice Instructor',
     role: 'instructor',
     is_active: true,
@@ -35,7 +35,7 @@ const mockAdminUsers: AdminUser[] = [
   },
   {
     id: 2,
-    email: 'bob@brolf.edu',
+    email: 'bob@example.edu',
     full_name: 'Bob Student',
     role: 'student',
     is_active: false,

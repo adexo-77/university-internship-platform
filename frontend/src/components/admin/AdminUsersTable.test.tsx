@@ -6,7 +6,7 @@ import { AdminUsersTable } from './AdminUsersTable';
 const mockUsers: AdminUser[] = [
   {
     id: 1,
-    email: 'admin@brolf.edu',
+    email: 'admin@example.edu',
     full_name: 'Super Admin',
     role: 'admin',
     is_active: true,
@@ -15,7 +15,7 @@ const mockUsers: AdminUser[] = [
   },
   {
     id: 2,
-    email: 'instructor@brolf.edu',
+    email: 'instructor@example.edu',
     full_name: 'Dr. Jane Instructor',
     role: 'instructor',
     is_active: false,
@@ -31,12 +31,12 @@ describe('AdminUsersTable Component', () => {
     );
 
     expect(screen.getByText('Super Admin')).toBeInTheDocument();
-    expect(screen.getByText('admin@brolf.edu')).toBeInTheDocument();
+    expect(screen.getByText('admin@example.edu')).toBeInTheDocument();
     expect(screen.getByText('admin')).toBeInTheDocument();
     expect(screen.getByText('Active')).toBeInTheDocument();
 
     expect(screen.getByText('Dr. Jane Instructor')).toBeInTheDocument();
-    expect(screen.getByText('instructor@brolf.edu')).toBeInTheDocument();
+    expect(screen.getByText('instructor@example.edu')).toBeInTheDocument();
     expect(screen.getByText('instructor')).toBeInTheDocument();
     expect(screen.getByText('Inactive')).toBeInTheDocument();
   });

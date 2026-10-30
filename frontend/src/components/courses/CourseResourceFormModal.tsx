@@ -152,7 +152,7 @@ export const CourseResourceFormModal: React.FC<CourseResourceFormModalProps> = (
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             error={errors.description}
-            placeholder="Brief explanation of this reference material..."
+            placeholder="Short description of this reference material..."
             disabled={isSubmitting}
             rows={3}
           />

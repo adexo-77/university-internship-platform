@@ -9,7 +9,7 @@ const mockSuggestionsData: InternshipSuggestionResponse = {
     {
       id: 101,
       organization_id: 1,
-      organization_name: 'Brolf Tech',
+      organization_name: 'Acme Corp',
       title: 'Backend Python Intern',
       description: 'Work with Python and FastAPI.',
       requirements: 'Python skills required.',
@@ -43,7 +43,7 @@ describe('SuggestedInternshipsSection Component', () => {
 
     // Check card details
     expect(screen.getByRole('link', { name: 'Backend Python Intern' })).toBeInTheDocument();
-    expect(screen.getByText(/Brolf Tech/)).toBeInTheDocument();
+    expect(screen.getByText(/Acme Corp/)).toBeInTheDocument();
     expect(screen.getByText('72% match')).toBeInTheDocument();
     expect(screen.getByText('Skills:')).toBeInTheDocument();
     expect(screen.getByText(/Python, FastAPI/)).toBeInTheDocument();

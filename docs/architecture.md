@@ -267,33 +267,33 @@ The table below outlines role access across platform route domains. Anonymous re
 
 | Route Domain / Resource | Student | Instructor | Organization | Coordinator | Admin | Notes / Enforcement Guards |
 | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **Authentication &amp; Self-Service** (`/api/auth/*`) | ✅ | ✅ | ✅ | ✅ | ✅ | Register (student, org only), login, logout, password change |
-| **In-App Notifications** (`/api/notifications/*`) | ✅ | ✅ | ✅ | ✅ | ✅ | Scoped strictly to authenticated user's ID |
-| **Achievement Badges** (`/api/students/me/badges`) | ✅ | ❌ | ❌ | ❌ | ❌ | Computed on read; student own data only |
-| **Course Gradebook CSV** (`/api/courses/{id}/gradebook.csv`) | ❌ | ✅ (owner) | ❌ | ❌ | ✅ | Owner instructor or admin; UTF-8 BOM, formula defense |
-| **Internship Applicants CSV** (`/api/internships/{id}/applicants.csv`) | ❌ | ❌ | ✅ (owner) | ✅ | ✅ | Owner org, coordinator, or admin |
-| **Applications Report CSV** (`/api/admin/reports/applications.csv`) | ❌ | ❌ | ❌ | ✅ | ✅ | Admin or coordinator audit export |
-| **User Accounts Report CSV** (`/api/admin/reports/users.csv`) | ❌ | ❌ | ❌ | ❌ | ✅ | Platform admin only; no hashes or tokens |
-| **Student Profiles** (`/api/students/*`) | ✅ | ❌ | ❌ | ❌ | ✅ | Student self-management; admin inspect |
-| **Organization Profiles** (`/api/organizations/*`) | ❌ | ❌ | ✅ | ❌ | ✅ | Org self-management; admin inspect |
-| **Course Catalog &amp; View** (`/api/courses`, `GET /courses/{id}`) | ✅ | ✅ | ❌ | ❌ | ✅ | Published courses visible; draft visible to owner/admin |
-| **Course Authoring &amp; Resources** (`POST /courses`, `/resources`) | ❌ | ✅ | ❌ | ❌ | ✅ | Instructor owns course/resources; admin read/delete |
-| **Course Enrollment** (`/courses/{id}/enrollment`) | ✅ | ❌ | ❌ | ❌ | ❌ | Students only |
-| **Course Roster** (`/courses/{id}/roster`) | ❌ | ✅ | ❌ | ❌ | ✅ | Course instructor &amp; admin |
-| **Assignment Authoring &amp; Grading** (`/assignments`, `/grade`) | ❌ | ✅ | ❌ | ❌ | ❌ | Instructor owns course; admin read-only submissions |
-| **Assignment Submissions** (`/assignments/{id}/submission`) | ✅ | ❌ | ❌ | ❌ | ❌ | Enrolled students only |
-| **Internship Catalog Search** (`GET /api/internships`) | ✅ | ❌ | ❌ | ✅ | ✅ | Students (open only), Coordinators &amp; Admins (all) |
-| **Rule-Based Suggested Internships** (`GET /api/internships/suggestions`) | ✅ | ❌ | ❌ | ❌ | ❌ | Scored suggestions; student only (403 for others) |
-| **Internship Posting Detail** (`GET /api/internships/{id}`) | ✅ (open) | ❌ | ✅ (owner) | ✅ | ✅ | Student (open only), Owner org, Coordinator, Admin |
-| **Internship Authoring &amp; Close** (`POST /internships`, `/close`) | ❌ | ❌ | ✅ | ❌ | ❌ | Approved organizations only |
-| **Internship Moderation Queue** (`/api/admin/internships*`) | ❌ | ❌ | ❌ | ✅ | ✅ | Review queue, approve, reject with note, takedown |
-| **Organization Approval Vetting** (`/api/admin/organizations*`) | ❌ | ❌ | ❌ | ✅ | ✅ | Vetting queue, approve, reject with note |
-| **Internship Applicant Roster** (`GET /internships/{id}/applications`)| ❌ | ❌ | ✅ (owner) | ✅ (read-only) | ✅ (read-only) | Owner organization, Coordinator, Admin |
-| **Application Decisions** (`PUT /applications/{id}/decision`) | ❌ | ❌ | ✅ (owner) | ❌ | ❌ | Posting owner organization only |
-| **Student Applications** (`POST /internships/{id}/applications`) | ✅ | ❌ | ❌ | ❌ | ❌ | Profile completeness required |
-| **User Administration** (`/api/admin/users*`) | ❌ | ❌ | ❌ | ❌ | ✅ | Admin only; Coordinator returns 403 |
-| **Administrative Password Reset** (`PUT /admin/users/{id}/password`) | ❌ | ❌ | ❌ | ❌ | ✅ | Admin only; Coordinator returns 403 |
-| **System Status Probe** (`/system-status`) | ❌ | ❌ | ❌ | ❌ | ✅ | Admin only; Coordinator returns 403 |
+| **Authentication &amp; Self-Service** (`/api/auth/*`) | Yes | Yes | Yes | Yes | Yes | Register (student, org only), login, logout, password change |
+| **In-App Notifications** (`/api/notifications/*`) | Yes | Yes | Yes | Yes | Yes | Scoped strictly to authenticated user's ID |
+| **Achievement Badges** (`/api/students/me/badges`) | Yes | No | No | No | No | Computed on read; student own data only |
+| **Course Gradebook CSV** (`/api/courses/{id}/gradebook.csv`) | No | Yes (owner) | No | No | Yes | Owner instructor or admin; UTF-8 BOM, formula defense |
+| **Internship Applicants CSV** (`/api/internships/{id}/applicants.csv`) | No | No | Yes (owner) | Yes | Yes | Owner org, coordinator, or admin |
+| **Applications Report CSV** (`/api/admin/reports/applications.csv`) | No | No | No | Yes | Yes | Admin or coordinator audit export |
+| **User Accounts Report CSV** (`/api/admin/reports/users.csv`) | No | No | No | No | Yes | Platform admin only; no hashes or tokens |
+| **Student Profiles** (`/api/students/*`) | Yes | No | No | No | Yes | Student self-management; admin inspect |
+| **Organization Profiles** (`/api/organizations/*`) | No | No | Yes | No | Yes | Org self-management; admin inspect |
+| **Course Catalog &amp; View** (`/api/courses`, `GET /courses/{id}`) | Yes | Yes | No | No | Yes | Published courses visible; draft visible to owner/admin |
+| **Course Authoring &amp; Resources** (`POST /courses`, `/resources`) | No | Yes | No | No | Yes | Instructor owns course/resources; admin read/delete |
+| **Course Enrollment** (`/courses/{id}/enrollment`) | Yes | No | No | No | No | Students only |
+| **Course Roster** (`/courses/{id}/roster`) | No | Yes | No | No | Yes | Course instructor &amp; admin |
+| **Assignment Authoring &amp; Grading** (`/assignments`, `/grade`) | No | Yes | No | No | No | Instructor owns course; admin read-only submissions |
+| **Assignment Submissions** (`/assignments/{id}/submission`) | Yes | No | No | No | No | Enrolled students only |
+| **Internship Catalog Search** (`GET /api/internships`) | Yes | No | No | Yes | Yes | Students (open only), Coordinators &amp; Admins (all) |
+| **Rule-Based Suggested Internships** (`GET /api/internships/suggestions`) | Yes | No | No | No | No | Scored suggestions; student only (403 for others) |
+| **Internship Posting Detail** (`GET /api/internships/{id}`) | Yes (open) | No | Yes (owner) | Yes | Yes | Student (open only), Owner org, Coordinator, Admin |
+| **Internship Authoring &amp; Close** (`POST /internships`, `/close`) | No | No | Yes | No | No | Approved organizations only |
+| **Internship Moderation Queue** (`/api/admin/internships*`) | No | No | No | Yes | Yes | Review queue, approve, reject with note, takedown |
+| **Organization Approval Vetting** (`/api/admin/organizations*`) | No | No | No | Yes | Yes | Vetting queue, approve, reject with note |
+| **Internship Applicant Roster** (`GET /internships/{id}/applications`)| No | No | Yes (owner) | Yes (read-only) | Yes (read-only) | Owner organization, Coordinator, Admin |
+| **Application Decisions** (`PUT /applications/{id}/decision`) | No | No | Yes (owner) | No | No | Posting owner organization only |
+| **Student Applications** (`POST /internships/{id}/applications`) | Yes | No | No | No | No | Profile completeness required |
+| **User Administration** (`/api/admin/users*`) | No | No | No | No | Yes | Admin only; Coordinator returns 403 |
+| **Administrative Password Reset** (`PUT /admin/users/{id}/password`) | No | No | No | No | Yes | Admin only; Coordinator returns 403 |
+| **System Status Probe** (`/system-status`) | No | No | No | No | Yes | Admin only; Coordinator returns 403 |
 | **Role Dashboard** (`/api/dashboard/{role}`) | Student | Instructor | Org | Coordinator | Admin | Scoped strictly to matching role |
 
 ---

@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/adexo-77/university-internship-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/adexo-77/university-internship-platform/actions/workflows/ci.yml)
 
-A modular web platform for university coursework tracking, assignment evaluation, and vetted internship discovery and application management.
+A modular web platform for university coursework tracking, assignment grading, and vetted internship discovery and application management.
 
 ![Student learning dashboard and internship tracker](docs/screenshots/student-dashboard.png)
 
@@ -45,9 +45,9 @@ All demo accounts use password `12345678` (demo-only, seeded via `scripts/seed_d
 - **Internship Coordinator**: Dedicated coordinator dashboard, organization vetting and approval, internship posting moderation queue (approval or rejection with notes), platform-wide listing and applicant inspection in read-only mode, and applications audit CSV export.
 - **Administrator**: Comprehensive dashboard metrics, user account provisioning, activation/deactivation guards, administrative password resets, organization approvals, internship moderation, and master users registry CSV export.
 
-## Coverage of the Project Brief
+## Coverage of Project Specifications
 
-| Brief Item | Status | Where to See It / Notes |
+| Specification Item | Status | Where to See It / Notes |
 | :--- | :---: | :--- |
 | Users | Implemented | 5 roles with RBAC; see `backend/app/models/user.py`, `/api/auth/*`, and `/admin/users`. |
 | Profiles and progress | Implemented | Academic profiles, technical skills, and preferences; see `/profile` and `StudentDashboard.tsx`. |
@@ -136,7 +136,7 @@ npm --prefix frontend run format:check
 - [docs/database.md](docs/database.md): Schema specifications, Mermaid ER diagram, and migration history.
 - [docs/api.md](docs/api.md): REST API endpoint reference and query parameters.
 - [docs/user-guide.md](docs/user-guide.md): Role-by-role user manual and pre-seeded demo walkthrough.
-- [docs/demo-script.md](docs/demo-script.md): Evaluator demonstration script and Q&A reference.
+- [docs/demo-script.md](docs/demo-script.md): Demo walkthrough script and Q&A reference.
 - [docs/security.md](docs/security.md): Threat model, security controls, and vulnerability mitigations.
 - [docs/requirements.md](docs/requirements.md): Functional and non-functional requirements traceability.
 - [docs/design.md](docs/design.md): Design tokens, color palette, typography, and UX guidelines.

@@ -197,7 +197,7 @@ export const StudentProfileForm: React.FC = () => {
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           error={fieldErrors.bio}
-          helperText="Brief summary of your academic interests and career goals (up to 1000 characters)."
+          helperText="Summary of your academic interests and career goals (up to 1000 characters)."
           rows={4}
         />
 

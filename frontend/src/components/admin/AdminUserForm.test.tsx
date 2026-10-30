@@ -56,7 +56,7 @@ describe('AdminUserForm Component', () => {
   it('submits valid form and displays success notice', async () => {
     vi.mocked(adminUserApi.createAdminUser).mockResolvedValueOnce({
       id: 5,
-      email: 'john.watson@brolf.edu',
+      email: 'john.watson@example.edu',
       full_name: 'Dr. John Watson',
       role: 'instructor',
       is_active: true,
@@ -70,7 +70,7 @@ describe('AdminUserForm Component', () => {
       target: { value: 'Dr. John Watson' },
     });
     fireEvent.change(screen.getByLabelText(/email address/i), {
-      target: { value: '  John.Watson@brolf.edu  ' },
+      target: { value: '  John.Watson@example.edu  ' },
     });
     fireEvent.change(screen.getByLabelText(/initial password/i), {
       target: { value: 'SecurePassword123!' },
@@ -82,7 +82,7 @@ describe('AdminUserForm Component', () => {
       expect(adminUserApi.createAdminUser).toHaveBeenCalledWith({
         role: 'instructor',
         full_name: 'Dr. John Watson',
-        email: 'john.watson@brolf.edu',
+        email: 'john.watson@example.edu',
         password: 'SecurePassword123!',
       });
     });
@@ -90,7 +90,7 @@ describe('AdminUserForm Component', () => {
     expect(await screen.findByText(/user created/i)).toBeInTheDocument();
     expect(
       await screen.findByText(
-        /Account for Dr. John Watson \(john.watson@brolf.edu\) created successfully\./i
+        /Account for Dr. John Watson \(john.watson@example.edu\) created successfully\./i
       )
     ).toBeInTheDocument();
   });
