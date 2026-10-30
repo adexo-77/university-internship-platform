@@ -89,7 +89,7 @@ Authentication uses stateful, server-managed sessions with cryptographically ran
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/courses/{id}/assignments` | Authenticated | List all assignments defined for a specific course (with submission state). |
 | `POST` | `/api/courses/{id}/assignments` | Course Instructor | Create an assignment with due date and maximum points. |
-| `GET` | `/api/assignments/{id}` | Authenticated | Retrieve assignment prompt, deadline, and scoring details. |
+| `GET` | `/api/assignments/{id}` | Authenticated | Retrieve assignment instructions, deadline, and scoring details. |
 | `PATCH` | `/api/assignments/{id}` | Course Instructor | Update assignment parameters (max_points floor checked). |
 | `DELETE` | `/api/assignments/{id}` | Course Instructor | Delete assignment (protected against active submissions). |
 | `GET` | `/api/assignments/{id}/submissions` | Course Instructor, Admin | View submission roster for an assignment. |

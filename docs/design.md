@@ -81,7 +81,7 @@ All UI components are built in-house with zero external widget kits:
 - **Sentence Case**: Standard capitalisation for all headings, labels, buttons, and badges (e.g., "System status", "Check again", "Core API").
 - **Plain Verbs**: Clear, direct actions ("Save changes", "Check again") instead of vague marketing terms ("Submit", "Explore").
 - **Error Clarity**: Errors must explicitly explain **what went wrong** and **how to fix it**.
-- **No Placeholder Copy**: No placeholder, invented, or phase text anywhere in the UI (e.g. no mock academic terms, fictional environments, or phase badges). Navigation exclusively displays routes that actually exist via `frontend/src/config/navigation.ts`.
+- **No Placeholder Copy**: No placeholder, unverified, or internal development text anywhere in the UI. Navigation exclusively displays routes that actually exist via `frontend/src/config/navigation.ts`.
 
 ---
 

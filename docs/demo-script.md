@@ -158,12 +158,12 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 ### Q14: Why did you choose a Vite Single-Page Application (SPA) instead of Next.js?
 **Answer**: For an internal authenticated portal, Server-Side Rendering (SSR) adds architectural complexity and server node overhead without meaningful benefits. A Vite SPA with strict TypeScript provides instant hot-module replacement during development, minimal bundle size, and a clean separation from our independent FastAPI backend.
 
-### Q15: What features would you implement next if given another development phase?
+### Q15: What features would you implement next in future development?
 **Answer**:
 1. **External Email & Push Notifications**: Integration with external email providers (AWS SES/SendGrid) and web push alerts (in-app notifications are already fully implemented).
 2. **Binary Learning Resources**: S3/MinIO presigned URL integration for PDF slides, assignment attachments, and resume uploads (course resource links are already implemented).
 3. **Multi-Institution Federation**: Cross-university credit recognition, multi-campus tenancy, and consortium-wide internship sharing (student achievement badges and safe CSV reports are already fully implemented).
-4. **AI-Assisted Candidate Matching**: Currently only title/description search and a work-mode filter exist; future phases could add vector embeddings or resume matching.
+4. **AI-Assisted Candidate Matching**: Currently, deterministic rule-based matching, keyword search, and work-mode filters are implemented; future releases could explore vector embeddings or automated resume parsing.
 
 ### Q16: How are student achievement badges calculated and rendered?
 **Answer**: Student badges are computed dynamically on read (`services/badge.py`) from live relational data (`submissions`, `assignments`, `courses`, `student_profiles`, `applications`) without storing duplicate state or introducing migration overhead. Eight milestones evaluate submissions, on-time submissions, 90%+ grades, 100% perfect scores, course completion, profile completeness, and internship offers. On the frontend, earned badges appear in solid petrol while unearned ones show subtle progress indicators (e.g., "3 of 5").

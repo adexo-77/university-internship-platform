@@ -119,7 +119,7 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local evaluati
 
 ### Step 3: Create Course Assignments (`/courses/:id`)
 1. On your course detail page, click **New Assignment**.
-2. Enter the assignment title, detailed prompt instructions, due date, and maximum possible points (e.g., `100`).
+2. Enter the assignment title, detailed instructions, due date, and maximum possible points (e.g., `100`).
 3. Click **Create Assignment**. The assignment becomes immediately available to all enrolled students.
 
 ### Step 4: Grade Student Submissions (`/submissions/:id/grade`)

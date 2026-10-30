@@ -4,15 +4,16 @@
 
 The **University Learning & Internship Platform** is engineered with a modular, decoupled architecture prioritizing maintainability, strict typing, and high reliability.
 
-- **Phase 1-2**: Authentication, sessions, RBAC (`student`, `instructor`, `organization`, `admin`), atomic user & profile provisioning.
-- **Phase 3-4**: Courses, syllabi, enrollments, rosters, coursework submissions with late flags, and grading with score floors.
-- **Phase 5**: Internship postings (draft/open/closed), search, applications with profile guards, and decision workflows.
-- **Phase 5b-c**: Admin user management, organization approval, password changes, moderation review queue, and 90-day deadline extension caps.
-- **Phase 6**: Role dashboards with aggregated metrics, progress percentages, and average grades.
-- **Phase 7a**: Security hardening: sliding-window rate limiting, CSRF defense, security headers (`X-Frame-Options: DENY`, `no-store` cache), production cookie guards, 256 KB request limits, string/null-byte sanitization, structured logging, and generic 500 handlers.
-- **Phase 8a**: Course learning resources: curated external documentation links (up to 50 per course) with owner management and enrolled student visibility.
-- **Phase 8b**: In-app notifications: 10 domain lifecycle events, recipient isolation, no self-notifications, 200-notification capacity pruning trigger, bell icon with unread count indicator, 60s visibility-aware polling with focus refetch, mark as read, read-all, and full notifications page.
-- **Phase 8c**: Internship coordinator role: dedicated institutional liaison persona for organization approval vetting, internship moderation queue decisions, read-only applicant roster inspection, and dedicated coordinator dashboard.
+- **Authentication & Profiles**: Sessions, RBAC (`student`, `instructor`, `organization`, `coordinator`, `admin`), atomic user and profile provisioning.
+- **Academic Coursework**: Courses, syllabi, enrollments, rosters, coursework submissions with late flags, and rubric grading with score floors.
+- **Career & Internships**: Internship postings (draft/open/closed), search catalog, student applications with profile prerequisites, and decision workflows.
+- **Institutional Governance**: Admin user management, organization vetting, password changes, moderation review queue, and deadline extension guards.
+- **Role Dashboards**: Role-tailored dashboards with aggregated metrics, progress percentages, and grade calculations.
+- **Security & Hardening**: Sliding-window rate limiting, CSRF defense, defensive security headers (`X-Frame-Options: DENY`, `no-store` cache), cookie guards, 256 KB request limits, string/null-byte sanitization, structured logging, and generic 500 handlers.
+- **Course Learning Resources**: Curated external documentation links (up to 50 per course) with owner management and enrolled student visibility.
+- **In-App Notifications**: 10 domain lifecycle events, recipient isolation, no self-notifications, 200-notification capacity pruning trigger, bell icon with unread count indicator, 60s visibility-aware polling with focus refetch, mark as read, read-all, and full notifications page.
+- **Internship Coordination**: Dedicated institutional liaison persona for organization approval vetting, internship moderation queue decisions, read-only applicant roster inspection, and dedicated coordinator dashboard.
+- **Achievements & Data Exports**: 8 dynamic milestone badges; 4 formula-injection-safe CSV exports across gradebooks, applicants, and platform audits.
 
 ```mermaid
 flowchart TD
