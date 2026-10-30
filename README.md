@@ -92,6 +92,10 @@ flowchart TD
     Client --> Proxy --> FastAPI --> Middleware --> Routers --> Services --> Models --> DB
 ```
 
+## Development Approach
+
+This project was built with AI coding assistance and reviewed, tested, and validated by the author. Architectural standards, strict file line constraints, security policies, and technical conventions were enforced continuously through the project guidelines in [AGENTS.md](AGENTS.md), automated tests, and continuous integration workflows.
+
 ## Running the Tests
 
 ```powershell
