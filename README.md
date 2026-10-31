@@ -90,7 +90,7 @@ npm run --prefix frontend build
 ## Security Overview
 
 - **Authentication & Sessions**: Stateful server sessions using cryptographically random 32-byte tokens hashed with SHA-256 in PostgreSQL, transmitted via `HttpOnly`, `SameSite=Lax` cookies.
-- **Password Security**: Standard library `hashlib.scrypt` with unique 16-byte random salts per user (N=16384, r=8, p=1). Hashes are excluded from all API response models.
+- **Password Security**: Password hashing uses Python standard library `hashlib.scrypt` (per-user salt, N=16384, r=8, p=1). Hashes are excluded from all API response models.
 - **Authorization**: Server-side Role-Based Access Control (RBAC) enforced via FastAPI dependencies and service logic. UI guards are convenience layers only.
 - **Input & Output Defenses**: Pydantic runtime schema validation, SQLAlchemy parameterized queries against SQL injection, HTML input sanitization against XSS, and formula-injection neutralization on CSV exports.
 - **Traffic Controls**: Sliding-window rate limiters on authentication routes, origin verification on state-changing requests, and a 256 KB request size cap.
@@ -109,11 +109,11 @@ npm run --prefix frontend build
 
 ## Roadmap & Known Limitations
 
-- **Rankings**: Competitive leaderboards and peer rankings are deliberately omitted in favor of criterion-based milestone achievement badges.
-- **File Uploads**: Course resources and submission artifacts are managed via validated external URLs rather than direct binary file storage.
-- **Email Verification**: User registration activates accounts immediately without third-party SMTP email verification flows.
-- **AI Features**: Internship suggestions use deterministic heuristic scoring based on profile skills, work mode, and location rather than machine learning models.
-- **Cloud Deployment**: Containerized deployment is optimized for Docker Compose locally, with production deployment topologies documented in the architecture guide.
+- Rankings and leaderboards are not built.
+- File uploads are not built (resources are links).
+- Email verification and self-service password reset are not built.
+- AI features are not built (matching is rule-based).
+- Cloud deployment is not provisioned (Docker Compose only).
 
 ## Development
 
