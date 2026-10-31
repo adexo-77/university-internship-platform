@@ -184,8 +184,8 @@ jobs:
           curl --fail --retry 5 --retry-delay 2 --retry-connrefused http://localhost:8080/api/health
           curl --fail --retry 5 --retry-delay 2 --retry-connrefused http://localhost:8080/api/health/db
 
-      - name: Seed demo dataset in container
-        run: docker compose run --rm backend python scripts/seed_demo.py
+      - name: Verify all demo accounts across API and frontend
+        run: python3 scripts/verify_demo.py --base-url http://localhost:8080
 
       - name: Tear down Docker Compose stack
         if: always()
