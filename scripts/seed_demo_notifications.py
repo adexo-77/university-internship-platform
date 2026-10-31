@@ -2,9 +2,6 @@
 
 from datetime import datetime, timedelta
 
-from sqlalchemy import select
-from sqlalchemy.orm import Session
-
 from app.models.application import Application
 from app.models.assignment import Assignment
 from app.models.course import Course
@@ -13,6 +10,8 @@ from app.models.notification import Notification, NotificationKind
 from app.models.organization_profile import OrganizationProfile
 from app.models.submission import Submission
 from app.models.user import User
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 
 def seed_notifications(db: Session, users: dict[str, User], now: datetime) -> int:
@@ -38,9 +37,7 @@ def seed_notifications(db: Session, users: dict[str, User], now: datetime) -> in
             Assignment.title == "Relational Schema Design & Normalization"
         )
     )
-    course_db = db.scalar(
-        select(Course).where(Course.title == "Database Systems")
-    )
+    course_db = db.scalar(select(Course).where(Course.title == "Database Systems"))
 
     p_web = db.scalar(
         select(Internship).where(Internship.title == "Junior Web Developer Intern")
