@@ -16,22 +16,35 @@ A web platform that integrates academic coursework management, assignment submis
 
 ## Quick Start
 
-### Docker (Recommended)
+### 1. Demo (Docker)
 
-Run the application locally in three commands:
+Run the full containerized platform (PostgreSQL, auto-migrated & pre-seeded FastAPI backend, and Nginx reverse proxy) with a single command:
 
 ```powershell
-Copy-Item .env.docker.example .env.docker
 docker compose up --build -d --wait
-docker compose run --rm backend python scripts/seed_demo.py
 ```
 
-Open [http://localhost:8080](http://localhost:8080) to access the platform.
+Open [http://localhost:8080](http://localhost:8080). This stack runs on port `8080` and uses an isolated container PostgreSQL database volume (`postgres_data`).
 
-### Native Local Development
+To stop and remove containers and demo volumes:
 
-1. **Backend**: From `backend/`, copy `.env.example` to `.env`, create a Python 3.12+ virtual environment, install dependencies (`pip install -r requirements.txt -r requirements-dev.txt`), run migrations (`alembic upgrade head`), and start the API with `uvicorn app.main:app --port 8001 --reload`.
-2. **Frontend**: From `frontend/`, install packages with `npm install` and run the development server with `npm run dev` (proxied to `:8001` at `http://localhost:5173`).
+```powershell
+docker compose down -v
+```
+
+### 2. Development (Native)
+
+For development with Hot Module Replacement (HMR) and FastAPI auto-reload:
+
+```powershell
+# One-time setup: configure virtual environment, install dependencies, and run migrations
+python scripts/setup_dev.py
+
+# Launch backend (:8001) and frontend (:5173) together with prefixed logs
+python scripts/dev.py
+```
+
+Open [http://localhost:5173](http://localhost:5173). This stack runs on port `5173` (proxied to `:8001`) and connects to your local host PostgreSQL instance on port `5432` (`university_platform`).
 
 ## Demo Accounts
 

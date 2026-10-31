@@ -7,12 +7,25 @@ This guide provides step-by-step instructions for evaluating and operating the p
 ## 1. Getting Started &amp; Authentication
 
 ### Running the Services
-Ensure both backend and frontend development servers are running:
-- **Backend API**: `http://localhost:8001` (FastAPI with OpenAPI docs at `/docs`)
-- **Frontend SPA**: `http://localhost:5173` (Vite + React)
+
+The platform provides two distinct operating modes:
+
+1. **Containerized Demo Stack (`:8080`)**:
+   Run the entire stack with a single command:
+   ```powershell
+   docker compose up --build -d --wait
+   ```
+   This automatically runs migrations, seeds the demo accounts, and serves the platform at **`http://localhost:8080`** using an isolated container database volume.
+
+2. **Native Development Stack (`:5173`)**:
+   Run the backend and frontend simultaneously with live reloading:
+   ```powershell
+   python scripts/dev.py
+   ```
+   This verifies database connectivity and migrations against local PostgreSQL on port `5432`, launches FastAPI at **`http://localhost:8001`**, and serves the frontend Vite development server at **`http://localhost:5173`**.
 
 ### Logging In
-1. Navigate to [http://localhost:5173/login](http://localhost:5173/login).
+1. Navigate to the login page ([http://localhost:8080/login](http://localhost:8080/login) for Docker demo or [http://localhost:5173/login](http://localhost:5173/login) for local dev).
 2. Enter the email corresponding to the role you wish to test.
 3. Enter the standard demo password: `12345678` (demo-only).
 4. Click **Sign in**. The application will authenticate your session and route you directly to your role-specific dashboard.

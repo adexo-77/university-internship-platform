@@ -14,6 +14,10 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 - **7:00 - 8:45**: Administrator Persona (User Management, Org Approvals, Internship Moderation)
 - **8:45 - 10:00**: Architectural Summary &amp; Quality Engineering Standards
 
+### Setup Options
+- **Docker Demo Stack**: Run `docker compose up --build -d --wait` and access the platform at [http://localhost:8080](http://localhost:8080) (database migrations and demo dataset are applied automatically on startup).
+- **Native Development Stack**: Run `python scripts/dev.py` and access the platform at [http://localhost:5173](http://localhost:5173) (connected to local PostgreSQL on port `5432` with API on port `8001`).
+
 ---
 
 ### Step-by-Step Script
