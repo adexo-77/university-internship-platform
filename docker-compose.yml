@@ -3,7 +3,12 @@ services:
     image: postgres:16.4-alpine
     restart: unless-stopped
     env_file:
-      - .env.docker
+      - path: .env.docker
+        required: false
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-university_platform}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -18,8 +23,20 @@ services:
       dockerfile: backend/Dockerfile
     restart: unless-stopped
     env_file:
-      - .env.docker
-    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+      - path: .env.docker
+        required: false
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-university_platform}
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-university_platform}}
+      TEST_DATABASE_URL: ${DOCKER_TEST_DATABASE_URL:-postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-university_platform}_test}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      PORT: ${DOCKER_PORT:-8000}
+      CORS_ORIGINS: ${DOCKER_CORS_ORIGINS:-["http://localhost:8080","http://127.0.0.1:8080"]}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      SEED_DEMO: ${SEED_DEMO:-true}
+    command: sh -c "alembic upgrade head && (if [ \"$$SEED_DEMO\" = \"true\" ]; then python scripts/seed_demo.py; fi) && uvicorn app.main:app --host 0.0.0.0 --port 8000"
     depends_on:
       db:
         condition: service_healthy
@@ -28,7 +45,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-      start_period: 20s
+      start_period: 40s
 
   frontend:
     build:

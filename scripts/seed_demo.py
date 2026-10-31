@@ -7,6 +7,7 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -19,10 +20,12 @@ for d in (BACKEND_DIR, SCRIPTS_DIR):
 from app.core.config import settings
 from app.core.database import SessionLocal
 from app.core.security import hash_password
+from app.models.notification import Notification
+from app.models.user import User
 from seed_demo_academics import seed_academics
 from seed_demo_internships import seed_internships_and_apps
 from seed_demo_notifications import seed_notifications
-from seed_demo_reset import reset_demo
+from seed_demo_reset import ALL_DEMO_EMAILS, reset_demo
 from seed_demo_users import seed_demo_users_and_profiles
 
 DEMO_PASSWORD = "12345678"
@@ -36,6 +39,22 @@ def seed_demo(db: Session, force: bool = False) -> None:
             file=sys.stderr,
         )
         sys.exit(1)
+
+    if not force:
+        user_count = db.scalar(
+            select(func.count(User.id)).where(User.email.in_(ALL_DEMO_EMAILS))
+        )
+        if user_count == len(ALL_DEMO_EMAILS):
+            notif_count = db.scalar(
+                select(func.count(Notification.id)).where(
+                    Notification.user_id.in_(
+                        select(User.id).where(User.email.in_(ALL_DEMO_EMAILS))
+                    )
+                )
+            )
+            if notif_count and notif_count >= 12:
+                print("Demo dataset already seeded (skipping fast).")
+                return
 
     now = datetime.now(UTC)
     pw_hash = hash_password(DEMO_PASSWORD)
