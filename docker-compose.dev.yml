@@ -1,0 +1,5 @@
+# Compose override publishing PostgreSQL port for host-level development (scripts/dev.py)
+services:
+  db:
+    ports:
+      - "127.0.0.1:5432:5432"

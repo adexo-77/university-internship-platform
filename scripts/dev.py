@@ -81,8 +81,11 @@ def check_database_and_migrations(python_bin: Path) -> bool:
     print("\n[dev] Could not connect to local PostgreSQL.", file=sys.stderr)
     print(f"[dev] Error details: {out}", file=sys.stderr)
     print("[dev] Ensure PostgreSQL is running on port 5432:", file=sys.stderr)
-    print("[dev]   docker compose up -d db", file=sys.stderr)
-    print("[dev] Or configure local environment with:", file=sys.stderr)
+    print(
+        "[dev]   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db",
+        file=sys.stderr,
+    )
+    print("[dev] Or configure local environment with native PostgreSQL:", file=sys.stderr)
     print("[dev]   python scripts/setup_dev.py", file=sys.stderr)
     return False
 
