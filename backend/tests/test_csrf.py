@@ -75,3 +75,65 @@ def test_csrf_allows_safe_methods_with_any_origin(client: TestClient) -> None:
     """Safe methods (GET, HEAD, OPTIONS) do not trigger CSRF rejection."""
     resp = client.get("/api/health", headers={"Origin": "https://attacker.example.com"})
     assert resp.status_code == 200
+
+
+def test_csrf_allows_same_origin_from_trusted_proxy_tunnel(client: TestClient) -> None:
+    """Dynamic tunnel hostname matching Origin is accepted via same-origin rule."""
+    from app.core.config import settings
+
+    settings.TRUSTED_PROXY = True
+    try:
+        resp = client.post(
+            "/api/auth/login",
+            json={"email": "nobody@example.com", "password": "wrongpassword123"},
+            headers={
+                "Host": "backend:8000",
+                "X-Forwarded-Host": "unique-quick-tunnel.trycloudflare.com",
+                "X-Forwarded-Proto": "https",
+                "Origin": "https://unique-quick-tunnel.trycloudflare.com",
+            },
+        )
+        # Reaches auth service and returns 401 (not 403 CSRF_FORBIDDEN)
+        assert resp.status_code == 401
+    finally:
+        settings.TRUSTED_PROXY = False
+
+
+def test_csrf_blocks_foreign_origin_from_trusted_proxy_tunnel(client: TestClient) -> None:
+    """Foreign Origin sent against a tunnel hostname is rejected."""
+    from app.core.config import settings
+
+    settings.TRUSTED_PROXY = True
+    try:
+        resp = client.post(
+            "/api/auth/login",
+            json={"email": "nobody@example.com", "password": "wrongpassword123"},
+            headers={
+                "Host": "backend:8000",
+                "X-Forwarded-Host": "unique-quick-tunnel.trycloudflare.com",
+                "X-Forwarded-Proto": "https",
+                "Origin": "https://malicious-attacker.com",
+            },
+        )
+        assert resp.status_code == 403
+        assert resp.json()["code"] == "CSRF_FORBIDDEN"
+    finally:
+        settings.TRUSTED_PROXY = False
+
+
+def test_csrf_blocks_spoofed_forwarded_host_when_untrusted(client: TestClient) -> None:
+    """When TRUSTED_PROXY is False, attacker cannot spoof X-Forwarded-Host to bypass CSRF."""
+    from app.core.config import settings
+
+    settings.TRUSTED_PROXY = False
+    resp = client.post(
+        "/api/auth/login",
+        json={"email": "nobody@example.com", "password": "wrongpassword123"},
+        headers={
+            "Host": "localhost:8001",
+            "X-Forwarded-Host": "evil-phishing.com",
+            "Origin": "https://evil-phishing.com",
+        },
+    )
+    assert resp.status_code == 403
+    assert resp.json()["code"] == "CSRF_FORBIDDEN"
