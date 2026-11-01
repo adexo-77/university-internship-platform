@@ -4,6 +4,8 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.requests import Request
 from starlette.responses import Response
 
+from app.core.security import is_https_request
+
 NO_STORE_PREFIXES = ("/api/auth", "/api/dashboard")
 
 
@@ -17,6 +19,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+
+        if is_https_request(request):
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
 
         path = request.url.path
         if any(path.startswith(prefix) for prefix in NO_STORE_PREFIXES):

@@ -4,6 +4,10 @@ import hashlib
 import hmac
 import secrets
 
+from fastapi import Request
+
+from app.core.config import settings
+
 # Scrypt hashing parameters as named constants
 SCRYPT_N: int = 16384
 SCRYPT_R: int = 8
@@ -78,3 +82,14 @@ def generate_session_token() -> str:
 def hash_session_token(token: str) -> str:
     """Compute SHA-256 hash of a session token for secure database storage."""
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def is_https_request(request: Request) -> bool:
+    """Determine whether request arrived via HTTPS (directly or via trusted proxy)."""
+    if settings.COOKIE_SECURE:
+        return True
+    if settings.TRUSTED_PROXY:
+        fwd_proto = request.headers.get("x-forwarded-proto")
+        if fwd_proto and fwd_proto.split(",")[-1].strip().lower() == "https":
+            return True
+    return request.url.scheme == "https"

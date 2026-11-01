@@ -28,6 +28,46 @@ def test_login_success_sets_cookie(real_db_client: TestClient) -> None:
     assert SESSION_COOKIE_NAME in login_resp.cookies
 
 
+def test_cookie_secure_flag_over_https_and_http(real_db_client: TestClient) -> None:
+    """Session cookie sets Secure flag dynamically when request arrives over HTTPS."""
+    from app.core.config import settings
+
+    real_db_client.post(
+        "/api/auth/register",
+        json={
+            "email": "secure_cookie_test@example.com",
+            "password": "Password123!",
+            "full_name": "Secure Test",
+            "role": "student",
+        },
+    )
+
+    # 1. Plain HTTP request: no Secure flag
+    resp_http = real_db_client.post(
+        "/api/auth/login",
+        json={"email": "secure_cookie_test@example.com", "password": "Password123!"},
+    )
+    raw_cookie_http = resp_http.headers.get("set-cookie", "")
+    assert "httponly" in raw_cookie_http.lower()
+    assert "samesite=lax" in raw_cookie_http.lower()
+    assert "secure" not in raw_cookie_http.lower()
+
+    # 2. HTTPS request through trusted reverse proxy / tunnel: Secure flag is set
+    settings.TRUSTED_PROXY = True
+    try:
+        resp_https = real_db_client.post(
+            "/api/auth/login",
+            json={"email": "secure_cookie_test@example.com", "password": "Password123!"},
+            headers={"X-Forwarded-Proto": "https"},
+        )
+        raw_cookie_https = resp_https.headers.get("set-cookie", "")
+        assert "httponly" in raw_cookie_https.lower()
+        assert "samesite=lax" in raw_cookie_https.lower()
+        assert "secure" in raw_cookie_https.lower()
+    finally:
+        settings.TRUSTED_PROXY = False
+
+
 def test_wrong_password_and_unknown_email_give_identical_response(
     real_db_client: TestClient,
 ) -> None:

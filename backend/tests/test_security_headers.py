@@ -35,3 +35,32 @@ def test_cache_control_not_forced_on_public_health(client: TestClient) -> None:
     """Public endpoints such as health check do not force Cache-Control: no-store."""
     resp = client.get("/api/health")
     assert resp.headers.get("Cache-Control") != "no-store"
+
+
+def test_hsts_sent_only_over_https(client: TestClient) -> None:
+    """Strict-Transport-Security header is sent exclusively on HTTPS requests."""
+    from app.core.config import settings
+
+    # Plain HTTP: no HSTS
+    resp_http = client.get("/api/health")
+    assert "Strict-Transport-Security" not in resp_http.headers
+
+    # HTTPS via trusted reverse proxy / tunnel: HSTS header is present
+    settings.TRUSTED_PROXY = True
+    try:
+        resp_https = client.get(
+            "/api/health",
+            headers={"X-Forwarded-Proto": "https"},
+        )
+        assert resp_https.headers.get("Strict-Transport-Security") == (
+            "max-age=31536000; includeSubDomains"
+        )
+
+        # HTTP via trusted reverse proxy: no HSTS
+        resp_proxy_http = client.get(
+            "/api/health",
+            headers={"X-Forwarded-Proto": "http"},
+        )
+        assert "Strict-Transport-Security" not in resp_proxy_http.headers
+    finally:
+        settings.TRUSTED_PROXY = False

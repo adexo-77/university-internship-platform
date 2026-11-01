@@ -3,11 +3,14 @@
 from fastapi import APIRouter, Depends, Request, Response, status
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.core.rate_limit import get_client_ip
-from app.core.security import SESSION_COOKIE_NAME, SESSION_LIFETIME_SECONDS
+from app.core.security import (
+    SESSION_COOKIE_NAME,
+    SESSION_LIFETIME_SECONDS,
+    is_https_request,
+)
 from app.models.user import User
 from app.schemas.auth import (
     ChangePasswordRequest,
@@ -20,27 +23,29 @@ from app.services.auth import AuthService
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-def _set_auth_cookie(response: Response, raw_token: str) -> None:
-    """Attach secure session cookie to HTTP response."""
+def _set_auth_cookie(request: Request, response: Response, raw_token: str) -> None:
+    """Attach secure session cookie to HTTP response when running over HTTPS."""
+    secure = is_https_request(request)
     response.set_cookie(
         key=SESSION_COOKIE_NAME,
         value=raw_token,
         max_age=SESSION_LIFETIME_SECONDS,
         httponly=True,
         samesite="lax",
-        secure=settings.COOKIE_SECURE,
+        secure=secure,
         path="/",
     )
 
 
-def _clear_auth_cookie(response: Response) -> None:
+def _clear_auth_cookie(request: Request, response: Response) -> None:
     """Clear session cookie from HTTP response."""
+    secure = is_https_request(request)
     response.delete_cookie(
         key=SESSION_COOKIE_NAME,
         path="/",
         httponly=True,
         samesite="lax",
-        secure=settings.COOKIE_SECURE,
+        secure=secure,
     )
 
 
@@ -59,7 +64,7 @@ def register(
     """Register student or organization account and establish an authenticated session."""
     client_ip = get_client_ip(request)
     user, raw_token = AuthService.register(db=db, request=payload, client_ip=client_ip)
-    _set_auth_cookie(response=response, raw_token=raw_token)
+    _set_auth_cookie(request=request, response=response, raw_token=raw_token)
     return user
 
 
@@ -78,7 +83,7 @@ def login(
     """Verify user credentials and establish an authenticated session."""
     client_ip = get_client_ip(request)
     user, raw_token = AuthService.authenticate(db=db, request=payload, client_ip=client_ip)
-    _set_auth_cookie(response=response, raw_token=raw_token)
+    _set_auth_cookie(request=request, response=response, raw_token=raw_token)
     return user
 
 
@@ -95,7 +100,7 @@ def logout(
     """Invalidate session in database and clear session cookie."""
     raw_token = request.cookies.get(SESSION_COOKIE_NAME)
     AuthService.delete_session(db=db, raw_token=raw_token)
-    _clear_auth_cookie(response=response)
+    _clear_auth_cookie(request=request, response=response)
     return {"message": "Logged out successfully"}
 
 
