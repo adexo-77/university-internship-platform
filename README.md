@@ -118,6 +118,7 @@ npm run --prefix frontend build
 - [docs/user-guide.md](docs/user-guide.md): Persona workflows, demo instructions, and visual interface walkthroughs.
 - [docs/demo-script.md](docs/demo-script.md): Demo walkthrough script and technical Q&A reference.
 - [docs/design.md](docs/design.md): Design system tokens, color palettes, and UX component rules.
+- [docs/deployment.md](docs/deployment.md): Demo sharing via Cloudflare tunnel, operational limits, and production upgrade path.
 - [CHANGELOG.md](CHANGELOG.md): Versioned release history grouped by capability.
 
 ## Roadmap & Known Limitations
