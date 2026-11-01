@@ -3,9 +3,11 @@
 from sqlalchemy import delete, func, or_, select
 from sqlalchemy.orm import Session
 
+from app.core.config import DEMO_ACCOUNT_EMAILS, settings
 from app.core.exceptions import (
     ConflictException,
     EmailAlreadyExistsException,
+    ForbiddenException,
     NotFoundException,
 )
 from app.core.security import hash_password
@@ -72,11 +74,16 @@ class AdminUserService:
     @staticmethod
     def create_user(db: Session, payload: AdminUserCreateRequest) -> User:
         """Create an instructor or admin account with normalized credentials."""
+        target_role = UserRole(payload.role.value)
+        if settings.DEMO_PUBLIC_MODE and target_role in (UserRole.ADMIN, UserRole.COORDINATOR):
+            raise ForbiddenException(
+                message="Disabled in the public demo",
+                code="PUBLIC_DEMO_DISABLED",
+            )
+
         existing_user = db.scalar(select(User).where(User.email == payload.email))
         if existing_user is not None:
             raise EmailAlreadyExistsException()
-
-        target_role = UserRole(payload.role.value)
 
         user = User(
             email=payload.email,
@@ -94,43 +101,61 @@ class AdminUserService:
     def update_user_status(
         db: Session,
         user_id: int,
-        is_active: bool,
+        is_active: bool | None,
         current_admin: User,
+        role: UserRole | None = None,
     ) -> User:
-        """Update user active state with self-deactivation and last-admin guards."""
+        """Update user active state or role with administrative protections."""
         target_user = db.scalar(select(User).where(User.id == user_id))
         if target_user is None:
             raise NotFoundException(message="User not found", code="USER_NOT_FOUND")
 
-        # Guard: An admin cannot deactivate themselves
-        if not is_active and target_user.id == current_admin.id:
-            raise ConflictException(
-                message="You cannot deactivate your own administrative account",
-                code="SELF_DEACTIVATION_FORBIDDEN",
-            )
-
-        # Guard: The last active admin can never be deactivated
-        if not is_active and target_user.role == UserRole.ADMIN and target_user.is_active:
-            active_admin_count = (
-                db.scalar(
-                    select(func.count(User.id)).where(
-                        User.role == UserRole.ADMIN,
-                        User.is_active.is_(True),
-                    )
+        is_demo_account = target_user.email.lower() in DEMO_ACCOUNT_EMAILS
+        if settings.DEMO_PUBLIC_MODE and is_demo_account:
+            if is_active is False:
+                raise ForbiddenException(
+                    message="Disabled in the public demo",
+                    code="PUBLIC_DEMO_DISABLED",
                 )
-                or 0
-            )
-            if active_admin_count <= 1:
+            if role is not None and role != target_user.role:
+                raise ForbiddenException(
+                    message="Disabled in the public demo",
+                    code="PUBLIC_DEMO_DISABLED",
+                )
+
+        if role is not None:
+            target_user.role = role
+
+        if is_active is not None:
+            # Guard: An admin cannot deactivate themselves
+            if not is_active and target_user.id == current_admin.id:
                 raise ConflictException(
-                    message="The last active administrator cannot be deactivated",
-                    code="LAST_ADMIN_PROTECTED",
+                    message="You cannot deactivate your own administrative account",
+                    code="SELF_DEACTIVATION_FORBIDDEN",
                 )
 
-        target_user.is_active = is_active
+            # Guard: The last active admin can never be deactivated
+            if not is_active and target_user.role == UserRole.ADMIN and target_user.is_active:
+                active_admin_count = (
+                    db.scalar(
+                        select(func.count(User.id)).where(
+                            User.role == UserRole.ADMIN,
+                            User.is_active.is_(True),
+                        )
+                    )
+                    or 0
+                )
+                if active_admin_count <= 1:
+                    raise ConflictException(
+                        message="The last active administrator cannot be deactivated",
+                        code="LAST_ADMIN_PROTECTED",
+                    )
 
-        # Deactivating deletes all of that user's sessions
-        if not is_active:
-            db.execute(delete(SessionModel).where(SessionModel.user_id == target_user.id))
+            target_user.is_active = is_active
+
+            # Deactivating deletes all of that user's sessions
+            if not is_active:
+                db.execute(delete(SessionModel).where(SessionModel.user_id == target_user.id))
 
         db.commit()
         db.refresh(target_user)
@@ -147,6 +172,12 @@ class AdminUserService:
         target_user = db.scalar(select(User).where(User.id == user_id))
         if target_user is None:
             raise NotFoundException(message="User not found", code="USER_NOT_FOUND")
+
+        if settings.DEMO_PUBLIC_MODE and target_user.email.lower() in DEMO_ACCOUNT_EMAILS:
+            raise ForbiddenException(
+                message="Disabled in the public demo",
+                code="PUBLIC_DEMO_DISABLED",
+            )
 
         target_user.password_hash = hash_password(new_password)
         db.execute(delete(SessionModel).where(SessionModel.user_id == target_user.id))

@@ -6,6 +6,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.exceptions import DatabaseUnavailableException
 from app.schemas.health import DatabaseHealthResponse, HealthResponse
 
@@ -18,7 +19,7 @@ class HealthService:
     @staticmethod
     def get_system_health() -> HealthResponse:
         """Return the basic system availability status."""
-        return HealthResponse(status="ok")
+        return HealthResponse(status="ok", public_demo=settings.DEMO_PUBLIC_MODE)
 
     @staticmethod
     def check_database_health(db: Session) -> DatabaseHealthResponse:

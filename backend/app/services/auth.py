@@ -3,9 +3,11 @@
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
+from app.core.config import DEMO_ACCOUNT_EMAILS, settings
 from app.core.exceptions import (
     AppException,
     EmailAlreadyExistsException,
+    ForbiddenException,
     InvalidCredentialsException,
 )
 from app.core.rate_limit import rate_limiter
@@ -147,6 +149,11 @@ class AuthService:
         request: ChangePasswordRequest,
     ) -> None:
         """Change authenticated user password, invalidate all other sessions, and keep current."""
+        if settings.DEMO_PUBLIC_MODE and user.email.lower() in DEMO_ACCOUNT_EMAILS:
+            raise ForbiddenException(
+                message="Disabled in the public demo",
+                code="PUBLIC_DEMO_DISABLED",
+            )
         rate_limiter.check_and_record_change_password(user_id=user.id)
         if not verify_password(request.current_password, user.password_hash):
             verify_dummy_password(request.current_password)

@@ -53,9 +53,10 @@ class AdminUserCreateRequest(BaseModel):
 
 
 class AdminUserUpdateRequest(BaseModel):
-    """Schema for updating user active status."""
+    """Schema for updating user active status or role."""
 
-    is_active: bool = Field(..., description="Target active state for user account")
+    is_active: bool | None = Field(default=None, description="Target active state for user account")
+    role: UserRole | None = Field(default=None, description="Target role for user account")
 
     model_config = ConfigDict(extra="forbid")
 

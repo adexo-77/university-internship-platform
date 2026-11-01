@@ -64,7 +64,7 @@ def create_user(
     "/{user_id}",
     status_code=status.HTTP_200_OK,
     response_model=AdminUserResponse,
-    summary="Update user active status",
+    summary="Update user active status or role",
 )
 def update_user_status(
     user_id: int,
@@ -72,11 +72,12 @@ def update_user_status(
     current_admin: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ) -> User:
-    """Activate or deactivate a user account with administrative protections."""
+    """Activate or deactivate a user account or update role with administrative protections."""
     return AdminUserService.update_user_status(
         db=db,
         user_id=user_id,
         is_active=payload.is_active,
+        role=payload.role,
         current_admin=current_admin,
     )
 

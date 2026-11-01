@@ -4,6 +4,7 @@
 
 export interface HealthResponse {
   status: string;
+  public_demo?: boolean;
 }
 
 export interface DatabaseHealthResponse {

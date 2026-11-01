@@ -8,10 +8,10 @@ from app.core.config import settings
 
 
 def test_api_health_returns_status_ok(client: TestClient) -> None:
-    """GET /api/health must return status 200 and {'status': 'ok'}."""
+    """GET /api/health must return status 200 and {'status': 'ok', 'public_demo': False}."""
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    assert response.json() == {"status": "ok", "public_demo": False}
 
 
 def test_root_health_not_mounted(client: TestClient) -> None:

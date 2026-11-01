@@ -7,6 +7,7 @@ class HealthResponse(BaseModel):
     """Schema for root health status."""
 
     status: str
+    public_demo: bool = False
 
     model_config = ConfigDict(frozen=True)
 

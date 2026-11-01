@@ -4,6 +4,7 @@ import { fetchDatabaseHealth, fetchHealth } from '../api/health';
 export interface HealthState {
   apiStatus: string | null;
   dbStatus: string | null;
+  publicDemo: boolean;
   isLoading: boolean;
   error: string | null;
 }
@@ -12,6 +13,7 @@ export function useHealth() {
   const [state, setState] = useState<HealthState>({
     apiStatus: null,
     dbStatus: null,
+    publicDemo: false,
     isLoading: true,
     error: null,
   });
@@ -34,6 +36,7 @@ export function useHealth() {
       setState({
         apiStatus: apiRes.status,
         dbStatus: dbResult,
+        publicDemo: Boolean(apiRes.public_demo),
         isLoading: false,
         error: null,
       });
@@ -42,6 +45,7 @@ export function useHealth() {
       setState({
         apiStatus: null,
         dbStatus: null,
+        publicDemo: false,
         isLoading: false,
         error: message,
       });

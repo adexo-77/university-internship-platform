@@ -10,6 +10,21 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 ENV_PATH = PROJECT_ROOT / ".env"
 
+DEMO_ACCOUNT_EMAILS: frozenset[str] = frozenset(
+    {
+        "mulugeta.assefa@example.com",
+        "selamawit.tadesse@example.com",
+        "tadesse.bekele@example.com",
+        "hana.worku@example.com",
+        "abel.tesfaye@example.com",
+        "meron.girma@example.com",
+        "dawit.lemma@example.com",
+        "yohannes.haile@example.com",
+        "rahel.desta@example.com",
+        "eyob.kassa@example.com",
+    }
+)
+
 
 class Settings(BaseSettings):
     """Application settings loaded strictly from environment variables or .env."""
@@ -30,6 +45,7 @@ class Settings(BaseSettings):
     RATE_LIMIT_REGISTER_WINDOW: int = 3600
     RATE_LIMIT_CHANGE_PASSWORD_LIMIT: int = 5
     RATE_LIMIT_CHANGE_PASSWORD_WINDOW: int = 900
+    DEMO_PUBLIC_MODE: bool = False
 
     @model_validator(mode="after")
     def validate_production_settings(self) -> "Settings":
