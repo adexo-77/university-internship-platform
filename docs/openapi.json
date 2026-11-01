@@ -2290,8 +2290,8 @@
         "tags": [
           "admin-users"
         ],
-        "summary": "Update user active status",
-        "description": "Activate or deactivate a user account with administrative protections.",
+        "summary": "Update user active status or role",
+        "description": "Activate or deactivate a user account or update role with administrative protections.",
         "operationId": "update_user_status_api_admin_users__user_id__patch",
         "parameters": [
           {
@@ -3412,18 +3412,33 @@
       "AdminUserUpdateRequest": {
         "properties": {
           "is_active": {
-            "type": "boolean",
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Is Active",
             "description": "Target active state for user account"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserRole"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Target role for user account"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "is_active"
-        ],
         "title": "AdminUserUpdateRequest",
-        "description": "Schema for updating user active status."
+        "description": "Schema for updating user active status or role."
       },
       "ApplicantProfile": {
         "properties": {
@@ -4460,6 +4475,11 @@
           "status": {
             "type": "string",
             "title": "Status"
+          },
+          "public_demo": {
+            "type": "boolean",
+            "title": "Public Demo",
+            "default": false
           }
         },
         "type": "object",
