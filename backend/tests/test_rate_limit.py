@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.exceptions import RateLimitExceededException
 from app.core.rate_limit import get_client_ip, rate_limiter
 from app.models.user import UserRole
 from tests.factories import create_test_user
@@ -160,16 +161,53 @@ def test_change_password_rate_limit_per_user(
 
 
 def test_client_ip_resolution_respects_trusted_proxy() -> None:
-    """Test get_client_ip respects TRUSTED_PROXY configuration."""
+    """Test get_client_ip respects TRUSTED_PROXY configuration and uses proxy-set IP."""
     req = MagicMock(spec=Request)
-    req.headers = {"x-forwarded-for": "203.0.113.195, 70.41.3.18"}
+    req.headers = {"x-forwarded-for": "198.51.100.1, 203.0.113.195"}
     req.client = MagicMock(host="10.0.0.1")
 
     # TRUSTED_PROXY off (default)
     settings.TRUSTED_PROXY = False
     assert get_client_ip(req) == "10.0.0.1"
 
-    # TRUSTED_PROXY on
+    # TRUSTED_PROXY on: extracts the trusted proxy set/appended address (last entry)
     settings.TRUSTED_PROXY = True
     assert get_client_ip(req) == "203.0.113.195"
     settings.TRUSTED_PROXY = False
+
+
+def test_client_ip_spoofing_attempt_rejected() -> None:
+    """A client supplying spoofed X-Forwarded-For prefixes cannot forge their IP."""
+    req = MagicMock(spec=Request)
+    # Malicious client sends spoofed 1.2.3.4, trusted nginx appends real visitor 198.51.100.42
+    req.headers = {"x-forwarded-for": "1.2.3.4, 5.6.7.8, 198.51.100.42"}
+    req.client = MagicMock(host="172.18.0.2")
+
+    settings.TRUSTED_PROXY = True
+    assert get_client_ip(req) == "198.51.100.42"
+    settings.TRUSTED_PROXY = False
+
+
+def test_distinct_remote_visitors_get_individual_rate_limit_buckets() -> None:
+    """Two different client IPs receive separate rate limiter buckets."""
+    rate_limiter.reset()
+    rate_limiter.enabled = True
+
+    ip_a = "203.0.113.10"
+    ip_b = "203.0.113.20"
+    email = "target@example.com"
+
+    # Max out failures for ip_a (5 failures)
+    for _ in range(5):
+        rate_limiter.check_login_attempt(ip_a, email)
+        rate_limiter.record_login_failure(ip_a, email)
+
+    # Next attempt from ip_a is blocked
+    with pytest.raises(RateLimitExceededException):
+        rate_limiter.check_login_attempt(ip_a, email)
+
+    # ip_b is unaffected and allowed to attempt
+    rate_limiter.check_login_attempt(ip_b, email)
+
+    rate_limiter.enabled = False
+    rate_limiter.reset()

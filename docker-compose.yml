@@ -35,6 +35,7 @@ services:
       PORT: ${DOCKER_PORT:-8000}
       CORS_ORIGINS: ${DOCKER_CORS_ORIGINS:-["http://localhost:8080","http://127.0.0.1:8080"]}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      TRUSTED_PROXY: ${TRUSTED_PROXY:-true}
       SEED_DEMO: ${SEED_DEMO:-true}
     command: sh -c "alembic upgrade head && (if [ \"$$SEED_DEMO\" = \"true\" ]; then python scripts/seed_demo.py; fi) && uvicorn app.main:app --host 0.0.0.0 --port 8000"
     depends_on:

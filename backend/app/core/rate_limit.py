@@ -19,9 +19,13 @@ def get_client_ip(request: Request) -> str:
     if settings.TRUSTED_PROXY:
         forwarded = request.headers.get("x-forwarded-for")
         if forwarded:
-            ip = forwarded.split(",")[0].strip()
+            # Use the verified address set/appended by trusted proxy, never client-supplied prefix
+            ip = forwarded.split(",")[-1].strip()
             if ip:
                 return ip
+        real_ip = request.headers.get("x-real-ip")
+        if real_ip and real_ip.strip():
+            return real_ip.strip()
     if request.client and request.client.host:
         return request.client.host
     return "127.0.0.1"
