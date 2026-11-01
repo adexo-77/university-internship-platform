@@ -38,25 +38,29 @@ if (-not $cloudflaredCmd) {
 }
 
 # Helper to check local demo health endpoint
-function Test-DemoHealth {
+function Test-StackHealth {
     try {
-        $res = Invoke-RestMethod -Uri "http://localhost:8080/api/health" -Method Get -TimeoutSec 2 -ErrorAction Stop
-        return ($res.status -eq "ok")
+        $raw = curl.exe -s -m 3 "http://127.0.0.1:8080/api/health"
+        if ($raw) {
+            $json = $raw | ConvertFrom-Json
+            return ($json.status -eq "ok")
+        }
+        return $false
     } catch {
         return $false
     }
 }
 
-# Ensure local stack is running with DEMO_PUBLIC_MODE=true
-if (-not (Test-DemoHealth)) {
-    Write-Host "Demo stack is not running. Starting containers with DEMO_PUBLIC_MODE=true..." -ForegroundColor Cyan
+# Ensure local stack is running; if down, start with DEMO_PUBLIC_MODE=true
+if (-not (Test-StackHealth)) {
+    Write-Host "Local demo stack is down. Starting containers with DEMO_PUBLIC_MODE=true..." -ForegroundColor Cyan
     $env:DEMO_PUBLIC_MODE = "true"
     docker compose up -d --wait
-    if ($LASTEXITCODE -ne 0 -or -not (Test-DemoHealth)) {
-        Write-Error "Failed to start healthy demo stack on http://localhost:8080"
+    if (-not (Test-StackHealth)) {
+        Write-Error "Failed to reach healthy demo stack on http://localhost:8080"
         exit 1
     }
-    Write-Host "Demo stack is up and operational." -ForegroundColor Green
+    Write-Host "Demo stack is up and operational in public demo mode." -ForegroundColor Green
 }
 
 # Build cloudflared command arguments
@@ -81,16 +85,29 @@ Write-Host "==================================================================" 
 Write-Host ""
 
 $proc = $null
+$tempErr = [System.IO.Path]::GetTempFileName()
+$reader = $null
+$streamReader = $null
+
 try {
-    # Launch cloudflared process
-    $proc = Start-Process -FilePath "cloudflared" -ArgumentList $cfArgs -PassThru -NoNewWindow
+    # Launch cloudflared process redirecting stderr so log output is streamable
+    $proc = Start-Process -FilePath "cloudflared" -ArgumentList $cfArgs -PassThru -NoNewWindow -RedirectStandardError $tempErr
     $targetTime = (Get-Date).AddMinutes($Minutes)
 
     Write-Host "Tunnel process started (PID: $($proc.Id)). Connecting to Cloudflare..." -ForegroundColor Cyan
     Write-Host "Press Ctrl+C to close the tunnel immediately.`n" -ForegroundColor DarkGray
 
+    $fileStream = [System.IO.File]::Open($tempErr, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+    $streamReader = New-Object System.IO.StreamReader($fileStream)
+
     while ((Get-Date) -lt $targetTime -and -not $proc.HasExited) {
-        Start-Sleep -Seconds 1
+        while (-not $streamReader.EndOfStream) {
+            $logLine = $streamReader.ReadLine()
+            if ($logLine) {
+                Write-Host $logLine
+            }
+        }
+        Start-Sleep -Milliseconds 500
     }
 
     if ($proc.HasExited) {
@@ -99,6 +116,10 @@ try {
         Write-Host "`nTime limit of $Minutes minute(s) reached. Shutting down tunnel..." -ForegroundColor Yellow
     }
 } finally {
+    if ($streamReader) { $streamReader.Dispose() }
+    if ($fileStream) { $fileStream.Dispose() }
+    Remove-Item -Force -ErrorAction SilentlyContinue $tempErr
+
     if ($proc -and -not $proc.HasExited) {
         Write-Host "Stopping cloudflared process (PID: $($proc.Id))..." -ForegroundColor Cyan
         Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
