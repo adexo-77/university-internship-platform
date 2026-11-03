@@ -1,12 +1,17 @@
 # Design Foundation &bull; Academic Work Tool
 
-## 1. Design Philosophy
+## 1. Design Philosophy &amp; Brand Identity
 
 The **University Learning & Internship Platform** is designed as a calm, focused academic work tool, not a marketing website. The aesthetic prioritizes legibility, information density, and functional restraint.
 
 - **Light Theme Only**: High clarity, paper-like contrast.
 - **No Marketing Fluff**: No hero banners, glowing cards, blurred backgrounds, or decorative badges.
 - **Academic Restraint**: Strict 1px borders, flat surfaces, zero gradients.
+- **Brand Identity (`Brand`)**:
+  - Visible wordmark: **UNIVERSITY** in uppercase tracking (`tracking-wider`) styled in platform `ink` (`#1C2733`).
+  - Subtitle tagline: **Learning & Internship Platform** styled in secondary `pencil` (`#5B6772`).
+  - Shared component `src/components/ui/Brand.tsx` (`sm`, `md`, `lg` sizes) mounted on headers, drawer, login, register, and error views.
+  - Browser tab title standard: `[Page Title] - UNIVERSITY` via `usePageTitle`.
 
 ---
 
@@ -36,7 +41,7 @@ The Tailwind configuration replaces default color scales with this dedicated tok
 ## 3. Typography &amp; Numerals
 
 - **Typeface**: **IBM Plex Sans** (weights 400, 500, 600) self-hosted via `@fontsource/ibm-plex-sans`. No third-party font CDNs.
-- **Body Sizing**: 15px base with 1.5 line height.
+- **Body Sizing**: 15px base with 1.5 line height. Form controls use `text-[16px]` to prevent mobile iOS viewport auto-zoom.
 - **Line Length**: Body paragraphs and descriptive labels are constrained to under 80 characters (`max-w-[75ch]`) to maintain comfortable reading ergonomics.
 - **Tabular Numerals**: Tabular figures (`.tabular-nums` / `font-variant-numeric: tabular-nums`) are enforced on grades, dates, timestamps, ports, and numeric data.
 
@@ -48,17 +53,22 @@ All UI components are built in-house with zero external widget kits:
 
 | Component | Variants / Options | Description |
 | :--- | :--- | :--- |
-| `Button` | `primary`, `secondary`, `quiet`, `danger` | 6px radius, 1px border, 150ms state motion, no hover-lift |
+| `Brand` | `sm`, `md`, `lg` | Unified platform wordmark and subtitle lockup |
+| `Button` | `primary`, `secondary`, `quiet`, `danger` | 6px radius, 1px border, 150ms state motion, min 44px touch targets |
+| `TextLink` | `to`, `href`, `children` | Accessible styled text navigation link with petrol underline |
+| `IconButton` | `icon`, `aria-label`, `quiet` | 44px min touch target square button with accessible label |
+| `Card` | `interactive`, `to`, `children` | Surface container; link-wrapped with border highlight when interactive |
+| `BackLink` | `fallbackTo`, `label` | Contextual back navigation with history fallback |
 | `Badge` | `success`, `attention`, `error`, `neutral` | 4px radius, 1px border, sentence case, no pill shapes |
-| `TextField` | `label`, `helperText`, `error` | Form input with 1px border and visible petrol focus ring |
-| `Select` | `label`, `options`, `error` | Dropdown control styled to platform tokens |
-| `Textarea` | `label`, `helperText`, `error` | Multi-line text field with 6px radius |
-| `DataTable` | Generic rows with column definitions | 1px border table with sentence case headers and tabular nums |
+| `TextField` | `label`, `helperText`, `error` | Form input with 1px border, petrol focus ring, and 16px font |
+| `Select` | `label`, `options`, `error` | Dropdown control styled to platform tokens with 16px font |
+| `Textarea` | `label`, `helperText`, `error` | Multi-line text field with 6px radius and 16px font |
+| `DataTable` | Generic rows with column definitions | 1px border table with container scrolling and tabular numerals |
 | `EmptyState` | `title`, `description`, `action` | Guides users on what to do next when data is absent |
 | `ErrorMessage` | `whatHappened`, `howToFix`, `action` | Explains what failed and provides exact steps to resolve |
 | `Notice` | `info`, `attention`, `error` | Informational or attention banner with platform tints |
 | `PageHeader` | `title`, `description`, `actions` | Top view header with sentence case and actions slot |
-| `AppShell` | Left sidebar + Top bar + Main canvas | Responsive layout (min 360px wide) with academic hierarchy. Sidebar navigation is configured centrally via `src/config/navigation.ts`, displaying only existing routes |
+| `AppShell` | Left sidebar + Top bar + Main canvas | Responsive shell with drawer, focus trap, and safe area insets |
 
 ---
 
@@ -66,39 +76,64 @@ All UI components are built in-house with zero external widget kits:
 
 1. **Corner Radius**: `6px` on controls (buttons, inputs, cards) and `4px` on badges.
 2. **Borders &amp; Shadows**: Strict 1px borders (`#D7DDDB`). Shadows are prohibited except for floating menus and dialog overlays (`shadow-menu`, `shadow-dialog`).
-3. **Motion**: Transitions are restricted to 150ms for interactive state changes. Respects `prefers-reduced-motion`.
-4. **Icons**: `lucide-react` used sparingly. No emojis.
-5. **No Decorative Bloat**: No all-caps labels, no small eyebrow text above headings, no decorative pill badges, no hover-lift elevation effects.
-6. **Accessibility**:
-   - Focus rings: 2px solid petrol with 1px offset (`:focus-visible`).
-   - Contrast: All text and border combinations strictly satisfy WCAG AA.
-   - Viewport: Full functional responsiveness down to 360px mobile width.
+3. **Interactive Affordances**:
+   - Every interactive element has a visible default visual cue (borders or fills on buttons; underline on text links; cursor-pointer).
+   - Hover state: 150ms transition to hover token (`bg-petrol-hover` or `text-petrol-hover`).
+   - Active state: Pressed feedback via subtle scale (`active:scale-[0.99]`).
+   - Focus ring: 2px solid petrol with 1px offset (`:focus-visible`).
+   - Disabled state: Clear `cursor-not-allowed` and reduced opacity or muted background.
+   - Guarded by `affordance-guard.test.ts` ensuring no unstyled raw `<button>` or `<a>` elements outside shared UI components.
+4. **Motion**: Transitions restricted to 150ms. Respects `prefers-reduced-motion`.
+5. **Icons**: `lucide-react` used sparingly. No emojis.
+6. **No Decorative Bloat**: No all-caps labels, no small eyebrow text above headings, no decorative pill badges, no hover-lift elevation effects.
 
 ---
 
-## 6. Copy Rules
+## 6. Back Navigation Rules
+
+1. **Placement**: Detail views, creation/editing forms, report views, and notification center feature a `BackLink` above the view header.
+2. **Behavior**:
+   - If browser history within the app exists (`canGoBack` / `history.state.idx > 0`), clicking triggers `navigate(-1)`.
+   - If user landed directly on the page, it resolves to the deterministic parent view via `resolveBackTarget(pathname)` in `src/config/navigation.ts`.
+3. **Touch Targets**: Guaranteed minimum 44px touch target height with visible chevron and underline on hover.
+
+---
+
+## 7. Mobile &amp; Responsive Layout Rules (Down to 360px)
+
+1. **Zero Horizontal Overflow**: `scrollWidth <= window.innerWidth` verified at 360px, 390px, 768px, and 1440px via Playwright tests.
+2. **Navigation Drawer**:
+   - Accessible hamburger toggle with min 44px hit target.
+   - Dimmed backdrop overlay (`bg-ink/40`).
+   - Trapped keyboard focus within drawer when open.
+   - Body scroll locked (`document.body.style.overflow = 'hidden'`).
+   - Dismisses cleanly on Escape key, outside click, close button, or link navigation.
+   - Respects mobile safe area insets (`env(safe-area-inset-top)` / `bottom`).
+3. **Mobile Form Ergonomics**:
+   - All input fields, selects, and textareas enforce minimum 16px font size to prevent iOS Safari auto-zoom on focus.
+   - Form action button bars stack vertically (primary submit full-width on top, secondary/cancel below).
+   - Radio buttons and checkboxes feature min 44px touch target tap areas.
+4. **Modal Dialogs as Bottom Sheets**:
+   - Modals align as bottom sheets on screens < 640px (`items-end`, `rounded-t-xl`, full width).
+   - Include visible close button and handle Escape key dismissal.
+5. **Data Tables &amp; Stat Strips**:
+   - Tables provide container scrolling (`overflow-x-auto overscroll-x-contain`) with clear borders.
+   - Stat strips stack vertically on small screens (`grid-cols-1 md:grid-flow-col divide-y md:divide-y-0 md:divide-x`).
+
+---
+
+## 8. Copy Rules
 
 - **Sentence Case**: Standard capitalisation for all headings, labels, buttons, and badges (e.g., "System status", "Check again", "Core API").
 - **Plain Verbs**: Clear, direct actions ("Save changes", "Check again") instead of vague marketing terms ("Submit", "Explore").
 - **Error Clarity**: Errors must explicitly explain **what went wrong** and **how to fix it**.
-- **No Placeholder Copy**: No placeholder, unverified, or internal development text anywhere in the UI. Navigation exclusively displays routes that actually exist via `frontend/src/config/navigation.ts`.
+- **No Placeholder Copy**: Navigation exclusively displays routes that actually exist via `src/config/navigation.ts`.
 
 ---
 
-## 7. Page Layouts &amp; Routing
+## 9. Page Layouts &amp; Routing
 
-- **Root Redirect (`/`)**:
-  - Has no page of its own. Unauthenticated users are sent to `/login`; authenticated users are sent to their role's home page via `getHomePath(role)` in `src/config/navigation.ts` (currently `/account` for all roles).
-- **Public Authentication Pages (`/login`, `/register`)**:
-  - Plain centered form on `bg-chalk` page background with a single card (`bg-surface`, 1px border `border-line`, rounded `rounded-control`).
-  - No sidebar, navigation links, or decorative heroes.
-  - Direct, sentence-case headings and plain actionable error notices.
-  - Submit buttons display active progress states (`Signing in...`, `Creating account...`) and prevent double submission.
-- **Authenticated Application Shell (`AppShell`)**:
-  - Left navigation sidebar dynamically filtered according to the active user's role (`roles` configuration in `src/config/navigation.ts`).
-  - Top header displays the active page title, current user's full name, role badge, and a quiet `Log out` action.
-- **System Status (`/status`)**: Admin-only. Displays health-check results for the API server and database connection (`SystemStatusPage`).
-- **Route Authorization Guards**:
-  - `ProtectedRoute`: Seamlessly redirects unauthenticated requests to `/login` preserving intended destination state.
-  - `RoleRoute`: Renders a single access-denied message — heading "You don't have access to this page", description "This page is only available to [role names] accounts." (role names derived from the route's `allowedRoles`), and a "Go to your account" button.
-
+- **Root Redirect (`/`)**: Unauthenticated users redirect to `/login`; authenticated users redirect to role dashboard via `getHomePath(role)`.
+- **Authentication Pages (`/login`, `/register`)**: Centered form with `Brand` lockup, clear notices, and progress indicators.
+- **Authenticated Shell (`AppShell`)**: Responsive sidebar or drawer with role-filtered links, user header, and notifications bell.
+- **Route Authorization**: `ProtectedRoute` and `RoleRoute` with explicit access-denied message and navigation back to account.

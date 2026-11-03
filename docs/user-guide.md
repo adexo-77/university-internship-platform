@@ -30,6 +30,12 @@ The platform provides two distinct operating modes:
 3. Enter the standard demo password: `12345678` (demo-only).
 4. Click **Sign in**. The application will authenticate your session and route you directly to your role-specific dashboard.
 
+### Interface Navigation &amp; Mobile Experience
+- **Brand Lockup**: All views feature the unified **UNIVERSITY** wordmark and **Learning & Internship Platform** subtitle.
+- **Contextual Back Navigation**: Detail, form, notification, and report pages feature a **Back to [Parent]** navigation control above the page heading.
+- **Mobile Navigation Drawer**: On mobile screens (viewports under 768px), click the menu icon in the top header to reveal the navigation drawer with full keyboard focus management and scroll lock.
+- **Touch-Friendly Controls**: Interactive buttons, navigation links, and inputs provide a minimum 44px hit target for touchscreen devices.
+
 ![Login screen with email and password fields and registration link](screenshots/login.png)
 *Login page with email and password input fields and role registration link.*
 
