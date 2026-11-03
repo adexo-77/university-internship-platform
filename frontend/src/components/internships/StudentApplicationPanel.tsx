@@ -1,9 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Application } from '../../types/application';
 import { Internship } from '../../types/internship';
-import { Button } from '../ui/Button';
-import { Notice } from '../ui/Notice';
+import { Button, Notice, TextLink } from '../ui';
 import { ApplicationStatusBadge } from './ApplicationStatusBadge';
 import { ApplyForm } from './ApplyForm';
 
@@ -54,10 +52,7 @@ export const StudentApplicationPanel: React.FC<StudentApplicationPanelProps> = (
         <Notice variant="info">Applications closed</Notice>
       ) : !isProfileComplete ? (
         <Notice variant="attention">
-          Complete your profile before applying.{' '}
-          <Link to="/profile" className="text-petrol underline font-medium">
-            Go to Profile
-          </Link>
+          Complete your profile before applying. <TextLink to="/profile">Go to Profile</TextLink>
         </Notice>
       ) : (
         <ApplyForm onSubmit={onApply} isSubmitting={submitting} error={error} />

@@ -1,9 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { StudentSubmissionRosterItem } from '../../types/assignment';
-import { Badge } from '../ui/Badge';
+import { Badge, Button, EmptyState } from '../ui';
 import { Column, DataTable } from '../ui/DataTable';
-import { EmptyState } from '../ui/EmptyState';
 
 export interface SubmissionsTableProps {
   roster: StudentSubmissionRosterItem[];
@@ -70,11 +69,10 @@ export const SubmissionsTable: React.FC<SubmissionsTableProps> = ({
           return <span className="text-pencil text-xs italic">Awaiting submission</span>;
         }
         return (
-          <Link
-            to={`/assignments/${assignmentId}/submissions/${item.submission.id}/grade`}
-            className="inline-flex items-center justify-center font-medium transition-colors duration-150 rounded-control border px-3 py-1 text-xs bg-surface text-ink border-line hover:bg-chalk"
-          >
-            {item.submission.grade !== null ? 'Regrade' : 'Grade'}
+          <Link to={`/assignments/${assignmentId}/submissions/${item.submission.id}/grade`}>
+            <Button variant="secondary" size="sm">
+              {item.submission.grade !== null ? 'Regrade' : 'Grade'}
+            </Button>
           </Link>
         );
       },

@@ -30,6 +30,16 @@ describe('Button Component', () => {
     expect(button).toHaveClass('hover:text-ink');
   });
 
+  it('renders ghost variant identically to quiet variant', () => {
+    render(<Button variant="ghost">Ghost Action</Button>);
+    const button = screen.getByRole('button', { name: 'Ghost Action' });
+    expect(button).toHaveClass('bg-transparent');
+    expect(button).toHaveClass('text-pencil');
+    expect(button).toHaveClass('border-transparent');
+    expect(button).toHaveClass('hover:text-ink');
+    expect(button).toHaveClass('cursor-pointer');
+  });
+
   it('renders danger variant with expected design token classes', () => {
     render(<Button variant="danger">Danger Action</Button>);
     const button = screen.getByRole('button', { name: 'Danger Action' });

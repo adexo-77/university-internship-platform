@@ -1,9 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Assignment } from '../../types/assignment';
-import { Button } from '../ui/Button';
+import { Button, EmptyState, TextLink } from '../ui';
 import { Column, DataTable } from '../ui/DataTable';
-import { EmptyState } from '../ui/EmptyState';
 import { DueBadge } from './DueBadge';
 import { SubmissionStatusBadge } from './SubmissionStatusBadge';
 
@@ -28,12 +27,12 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
       header: 'Title',
       render: (item) => (
         <div>
-          <Link
+          <TextLink
             to={`/assignments/${item.id}`}
-            className="font-medium text-ink hover:text-petrol underline-offset-2 hover:underline"
+            className="font-medium text-ink hover:text-petrol"
           >
             {item.title}
-          </Link>
+          </TextLink>
           {item.description && (
             <p className="text-xs text-pencil truncate max-w-xs">{item.description}</p>
           )}
@@ -74,19 +73,13 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
     header: 'Actions',
     render: (item) => (
       <div className="flex items-center justify-end gap-2">
-        <Link
-          to={`/assignments/${item.id}`}
-          className="text-xs text-petrol hover:underline font-medium"
-        >
+        <TextLink to={`/assignments/${item.id}`} className="text-xs">
           View
-        </Link>
+        </TextLink>
         {(isOwner || isAdmin) && (
-          <Link
-            to={`/assignments/${item.id}/edit`}
-            className="text-xs text-pencil hover:text-ink hover:underline font-medium"
-          >
+          <TextLink to={`/assignments/${item.id}/edit`} variant="subtle" className="text-xs">
             Edit
-          </Link>
+          </TextLink>
         )}
       </div>
     ),

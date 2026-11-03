@@ -40,7 +40,7 @@ export const StatStrip: React.FC<StatStripProps> = ({ items, className }) => {
             <Link
               key={index}
               to={item.to}
-              className="p-4 flex flex-col justify-between hover:bg-chalk transition-colors group"
+              className="p-4 flex flex-col justify-between hover:bg-chalk active:bg-line/30 transition-colors group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-petrol focus-visible:ring-offset-1 rounded-control min-h-[44px]"
             >
               {content}
             </Link>

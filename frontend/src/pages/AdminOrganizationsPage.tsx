@@ -100,13 +100,9 @@ export const AdminOrganizationsPage: React.FC = () => {
         {successNotice && (
           <div className="rounded-control border border-petrol bg-petrol-tint p-4 text-sm text-ink flex items-center justify-between">
             <span>{successNotice}</span>
-            <button
-              type="button"
-              className="text-pencil hover:text-ink text-xs underline"
-              onClick={() => setSuccessNotice(null)}
-            >
+            <Button type="button" variant="ghost" size="sm" onClick={() => setSuccessNotice(null)}>
               Dismiss
-            </button>
+            </Button>
           </div>
         )}
 

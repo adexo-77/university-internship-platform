@@ -11,9 +11,7 @@ import { SubmissionForm } from '../components/assignments/SubmissionForm';
 import { SubmissionStatusPanel } from '../components/assignments/SubmissionStatusPanel';
 import { SubmissionsTable } from '../components/assignments/SubmissionsTable';
 import { AppShell } from '../components/layout/AppShell';
-import { Badge } from '../components/ui/Badge';
-import { Notice } from '../components/ui/Notice';
-import { PageHeader } from '../components/ui/PageHeader';
+import { Badge, Notice, PageHeader, TextLink } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
@@ -106,12 +104,9 @@ export const AssignmentDetailPage: React.FC = () => {
             <PageHeader
               title={assignment.title}
               description={
-                <Link
-                  to={`/courses/${assignment.course_id}`}
-                  className="text-petrol hover:underline font-medium"
-                >
+                <TextLink to={`/courses/${assignment.course_id}`}>
                   {assignment.course_title || `Course #${assignment.course_id}`}
-                </Link>
+                </TextLink>
               }
               actions={
                 <div className="flex items-center gap-3">

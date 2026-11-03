@@ -1,7 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Course } from '../../types/course';
-import { Badge } from '../ui/Badge';
+import { Badge, TextLink } from '../ui';
 import { Column, DataTable } from '../ui/DataTable';
 
 export interface CourseTableProps {
@@ -25,11 +24,7 @@ export const CourseTable: React.FC<CourseTableProps> = ({
     {
       key: 'title',
       header: 'Course title',
-      render: (item) => (
-        <Link to={`/courses/${item.id}`} className="font-medium text-petrol hover:underline">
-          {item.title}
-        </Link>
-      ),
+      render: (item) => <TextLink to={`/courses/${item.id}`}>{item.title}</TextLink>,
     },
     {
       key: 'instructor',

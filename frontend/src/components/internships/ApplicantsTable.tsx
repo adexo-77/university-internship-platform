@@ -1,7 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Application } from '../../types/application';
 import { Column, DataTable } from '../ui/DataTable';
+import { TextLink } from '../ui';
 import { ApplicationStatusBadge } from './ApplicationStatusBadge';
 
 export interface ApplicantsTableProps {
@@ -49,12 +49,9 @@ export const ApplicantsTable: React.FC<ApplicantsTableProps> = ({
       key: 'action',
       header: 'Action',
       render: (item) => (
-        <Link
-          to={`/applications/${item.id}`}
-          className="text-petrol hover:underline font-medium text-sm"
-        >
+        <TextLink to={`/applications/${item.id}`} className="text-sm">
           Review
-        </Link>
+        </TextLink>
       ),
     },
   ];

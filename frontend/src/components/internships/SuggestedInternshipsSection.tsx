@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Sparkles, HelpCircle } from 'lucide-react';
 import { getInternshipSuggestions } from '../../api/internship';
 import { InternshipSuggestionItem, InternshipSuggestionResponse } from '../../types/internship';
-import { Badge, EmptyState } from '../ui';
+import { Badge, Button, EmptyState } from '../ui';
 
 export interface SuggestedInternshipsSectionProps {
   limit?: number;
@@ -79,14 +79,15 @@ export const SuggestedInternshipsSection: React.FC<SuggestedInternshipsSectionPr
           </div>
           <Badge variant="neutral">Rule-based suggestions</Badge>
         </div>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => setShowHowItWorks((prev) => !prev)}
-          className="text-xs text-pencil hover:text-ink flex items-center gap-1 self-start sm:self-auto transition-colors"
+          className="text-xs flex items-center gap-1 self-start sm:self-auto"
         >
           <HelpCircle className="w-3.5 h-3.5" />
           <span>How matching works</span>
-        </button>
+        </Button>
       </div>
 
       {showHowItWorks && (

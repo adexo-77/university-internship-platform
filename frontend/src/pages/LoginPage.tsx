@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthApiError } from '../api/auth';
-import { Brand, Button, Notice, TextField } from '../components/ui';
+import { Brand, Button, Notice, TextField, TextLink } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useRateLimitCooldown } from '../hooks/useRateLimitCooldown';
@@ -141,9 +141,7 @@ export const LoginPage: React.FC = () => {
         <div className="mt-6 border-t border-line pt-4 text-center">
           <p className="text-xs text-pencil">
             Do not have an account?{' '}
-            <Link to="/register" className="text-petrol hover:underline font-medium">
-              Register as student or organization
-            </Link>
+            <TextLink to="/register">Register as student or organization</TextLink>
           </p>
         </div>
       </div>

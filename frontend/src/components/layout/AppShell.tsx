@@ -5,7 +5,7 @@ import { navigationItems, NavItem, resolveSectionTitle } from '../../config/navi
 import { useAuth } from '../../hooks/useAuth';
 import { useUnreadCount } from '../../hooks/useUnreadCount';
 import { cn } from '../../lib/cn';
-import { Badge, Brand, Button } from '../ui';
+import { Badge, Brand, Button, IconButton } from '../ui';
 import { NotificationBell } from '../notifications/NotificationBell';
 
 export interface AppShellProps {
@@ -50,15 +50,12 @@ export const AppShell: React.FC<AppShellProps> = ({
         </Link>
         <div className="flex items-center gap-2">
           {user && <NotificationBell count={unreadCount} />}
-          <button
-            type="button"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          <IconButton
             aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isMobileMenuOpen}
-            className="rounded-control border border-line p-1.5 text-pencil hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-petrol"
-          >
-            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+            icon={isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          />
         </div>
       </div>
 
@@ -106,10 +103,10 @@ export const AppShell: React.FC<AppShellProps> = ({
                 onClick={() => setIsMobileMenuOpen(false)}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  'flex items-center gap-3 rounded-control px-3 py-2 text-base font-medium transition-colors duration-150',
+                  'flex items-center gap-3 rounded-control px-3 py-2 text-base font-medium min-h-[44px] cursor-pointer transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-petrol active:scale-[0.99]',
                   isActive
                     ? 'bg-petrol-tint text-petrol font-semibold'
-                    : 'text-pencil hover:bg-chalk hover:text-ink'
+                    : 'text-pencil hover:bg-chalk hover:text-ink active:bg-line'
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0 text-current" />

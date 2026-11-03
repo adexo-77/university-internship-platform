@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { AuthApiError } from '../api/auth';
-import { Brand, Button, Notice, TextField } from '../components/ui';
+import { Brand, Button, Notice, TextField, TextLink } from '../components/ui';
 import { RegisterRoleSelector } from '../components/auth/RegisterRoleSelector';
 import { useAuth } from '../hooks/useAuth';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -191,10 +191,7 @@ export const RegisterPage: React.FC = () => {
 
         <div className="mt-6 border-t border-line pt-4 text-center">
           <p className="text-xs text-pencil">
-            Already have an account?{' '}
-            <Link to="/login" className="text-petrol hover:underline font-medium">
-              Sign in
-            </Link>
+            Already have an account? <TextLink to="/login">Sign in</TextLink>
           </p>
         </div>
       </div>

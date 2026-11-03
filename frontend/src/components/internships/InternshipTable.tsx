@@ -1,8 +1,8 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Internship } from '../../types/internship';
 import { ApplicationStatus } from '../../types/application';
 import { Column, DataTable } from '../ui/DataTable';
+import { TextLink } from '../ui';
 import { DueBadge } from '../assignments/DueBadge';
 import { InternshipStatusBadge } from './InternshipStatusBadge';
 import { ApplicationStatusBadge } from './ApplicationStatusBadge';
@@ -30,11 +30,7 @@ export const InternshipTable: React.FC<InternshipTableProps> = ({
     {
       key: 'title',
       header: 'Title',
-      render: (item) => (
-        <Link to={`/internships/${item.id}`} className="font-medium text-petrol hover:underline">
-          {item.title}
-        </Link>
-      ),
+      render: (item) => <TextLink to={`/internships/${item.id}`}>{item.title}</TextLink>,
     },
   ];
 

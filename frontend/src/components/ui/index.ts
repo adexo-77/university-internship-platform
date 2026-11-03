@@ -10,3 +10,6 @@ export * from './Notice';
 export * from './PageHeader';
 export * from './ConfirmModal';
 export * from './Brand';
+export * from './IconButton';
+export * from './TextLink';
+export * from './Card';

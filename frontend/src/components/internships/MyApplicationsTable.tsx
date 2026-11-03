@@ -1,8 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Application } from '../../types/application';
 import { formatDate } from '../../lib/dates';
-import { Button } from '../ui/Button';
+import { Button, TextLink } from '../ui';
 import { Column, DataTable } from '../ui/DataTable';
 import { ApplicationStatusBadge } from './ApplicationStatusBadge';
 
@@ -24,12 +23,9 @@ export const MyApplicationsTable: React.FC<MyApplicationsTableProps> = ({
       key: 'posting',
       header: 'Internship',
       render: (item) => (
-        <Link
-          to={`/internships/${item.posting_id}`}
-          className="font-medium text-petrol hover:underline"
-        >
+        <TextLink to={`/internships/${item.posting_id}`}>
           {item.posting_title || `Internship #${item.posting_id}`}
-        </Link>
+        </TextLink>
       ),
     },
     {

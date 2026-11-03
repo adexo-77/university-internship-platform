@@ -6,7 +6,7 @@ import {
   updateCourseResource,
 } from '../../api/course_resource';
 import { CourseResource } from '../../types/course';
-import { Button, ConfirmModal, EmptyState, ErrorMessage } from '../ui';
+import { Button, ConfirmModal, EmptyState, ErrorMessage, TextLink } from '../ui';
 import { CourseResourceFormModal } from './CourseResourceFormModal';
 
 export interface CourseResourcesSectionProps {
@@ -150,17 +150,17 @@ export const CourseResourcesSection: React.FC<CourseResourcesSectionProps> = ({
               className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
             >
               <div className="space-y-1 min-w-0 flex-1">
-                <a
+                <TextLink
                   href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium text-petrol hover:underline text-base inline-flex items-center gap-1.5 break-words"
+                  className="font-medium text-base inline-flex items-center gap-1.5 break-words"
                 >
                   <span>{item.title}</span>
                   <span className="text-xs text-pencil font-normal" aria-hidden="true">
                     ↗
                   </span>
-                </a>
+                </TextLink>
                 <p className="text-xs text-pencil truncate">{item.url}</p>
                 {item.description && (
                   <p className="text-sm text-ink whitespace-pre-wrap mt-1">{item.description}</p>

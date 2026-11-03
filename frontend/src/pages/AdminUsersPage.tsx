@@ -101,13 +101,14 @@ export const AdminUsersPage: React.FC = () => {
         {actionSuccessNotice && (
           <div className="rounded-control border border-petrol bg-petrol-tint p-4 text-sm text-ink flex items-center justify-between">
             <span>{actionSuccessNotice}</span>
-            <button
+            <Button
               type="button"
-              className="text-pencil hover:text-ink text-xs underline"
+              variant="ghost"
+              size="sm"
               onClick={() => setActionSuccessNotice(null)}
             >
               Dismiss
-            </button>
+            </Button>
           </div>
         )}
 

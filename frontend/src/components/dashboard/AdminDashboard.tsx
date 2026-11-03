@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge } from '../ui';
+import { Badge, TextLink } from '../ui';
 import { AdminDashboardResponse } from '../../types/dashboard';
 import { StatStrip } from './StatStrip';
 
@@ -56,9 +56,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ data }) => {
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold text-ink">Users by role</h2>
-            <a href="/admin/users" className="text-xs font-medium text-petrol hover:underline">
+            <TextLink to="/admin/users" className="text-xs">
               Manage users
-            </a>
+            </TextLink>
           </div>
           <div className="bg-surface border border-line rounded-control divide-y divide-line overflow-hidden">
             {Object.entries(data.users_by_role).map(([role, count]) => (
@@ -77,9 +77,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ data }) => {
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold text-ink">Courses overview</h2>
-            <a href="/courses" className="text-xs font-medium text-petrol hover:underline">
+            <TextLink to="/courses" className="text-xs">
               Browse catalog ({totalCourses})
-            </a>
+            </TextLink>
           </div>
           <div className="bg-surface border border-line rounded-control divide-y divide-line overflow-hidden">
             {Object.entries(data.courses_by_status).map(([status, count]) => (

@@ -29,7 +29,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
       aria-label={label}
       title={label}
       className={cn(
-        'relative inline-flex items-center justify-center rounded-control p-2 text-pencil hover:bg-chalk hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-petrol transition-colors',
+        'relative inline-flex items-center justify-center rounded-control p-2 text-pencil hover:bg-chalk hover:text-ink active:scale-95 cursor-pointer min-h-[44px] min-w-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-petrol transition-colors',
         className
       )}
     >

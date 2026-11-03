@@ -39,24 +39,20 @@ export const NotificationList: React.FC<NotificationListProps> = ({
       {/* Controls Bar: Filters and Mark All Read */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
         <div className="flex items-center gap-2">
-          <button
-            type="button"
+          <Button
+            variant={!unreadOnly ? 'primary' : 'secondary'}
+            size="sm"
             onClick={() => onFilterChange(false)}
-            className={`rounded-control px-3 py-1.5 text-sm font-medium transition-colors ${
-              !unreadOnly ? 'bg-petrol text-surface' : 'text-pencil hover:bg-chalk hover:text-ink'
-            }`}
           >
             All
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant={unreadOnly ? 'primary' : 'secondary'}
+            size="sm"
             onClick={() => onFilterChange(true)}
-            className={`rounded-control px-3 py-1.5 text-sm font-medium transition-colors ${
-              unreadOnly ? 'bg-petrol text-surface' : 'text-pencil hover:bg-chalk hover:text-ink'
-            }`}
           >
             Unread only {unreadCount > 0 && `(${unreadCount})`}
-          </button>
+          </Button>
         </div>
 
         <Button
