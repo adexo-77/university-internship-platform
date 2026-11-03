@@ -34,7 +34,7 @@ export const Textarea: React.FC<TextareaProps> = ({
         aria-invalid={error ? 'true' : undefined}
         aria-describedby={error ? errorId : helperText ? helperId : undefined}
         className={cn(
-          'w-full min-h-[88px] rounded-control border bg-surface px-3 py-2 text-base text-ink placeholder:text-pencil transition-colors duration-150',
+          'w-full min-h-[88px] rounded-control border bg-surface px-3 py-2 text-[16px] text-ink placeholder:text-pencil transition-colors duration-150',
           'border-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-petrol focus-visible:ring-offset-1 focus-visible:ring-offset-surface',
           'disabled:cursor-not-allowed disabled:bg-chalk disabled:text-pencil',
           error && 'border-brick focus-visible:ring-brick',

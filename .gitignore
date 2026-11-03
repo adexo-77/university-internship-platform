@@ -43,6 +43,8 @@ wheels/
 .coverage
 htmlcov/
 .mypy_cache/
+test-results/
+playwright-report/
 
 # Node & Frontend
 node_modules/
