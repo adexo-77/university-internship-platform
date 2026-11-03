@@ -23,7 +23,7 @@ powershell -File .\scripts\share-demo.ps1 -AllowedMail "reviewer@example.com,lea
 
 When invoked, the script:
 1. Verifies `cloudflared` is installed and available in `PATH`.
-2. Checks whether the container stack is active; if down, starts containers with `DEMO_PUBLIC_MODE=true`.
+2. Checks container stack health: if stopped, starts containers with `DEMO_PUBLIC_MODE=true`; if active in normal mode, recreates the backend with `DEMO_PUBLIC_MODE=true` and restores normal mode on session completion.
 3. Launches a Cloudflare Quick Tunnel forwarding traffic to `http://localhost:8080`.
 4. Displays an operational warning and runs an active countdown timer.
 5. Terminates the tunnel cleanly upon timeout expiration or when `Ctrl+C` is pressed.
@@ -56,7 +56,9 @@ When sharing the platform with external reviewers, the backend operates in **Pub
    Administrators cannot provision new `admin` or `coordinator` accounts (`403 Forbidden`). Creating non-privileged instructor accounts remains enabled.
 5. **UI Transparency**:
    A visible notice banner is displayed across the top of all pages indicating fictional demo data that may be reset at any time.
-6. **Teardown &amp; Session Cleanup**:
+6. **Origin &amp; Cookie Verification**:
+   The backend validates incoming `Origin` and `Referer` headers against the proxied tunnel host (`X-Forwarded-Host`). Requests from foreign origins are rejected (`403 Forbidden: CSRF_FORBIDDEN`). Authentication cookies carry `Secure`, `HttpOnly`, and `SameSite=Lax` attributes across TLS termination.
+7. **Teardown &amp; Session Cleanup**:
    Stopping the tunnel halts external ingress immediately. Using `-ResetAfter` clears all database changes made during the session.
 
 ---
