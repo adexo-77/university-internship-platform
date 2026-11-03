@@ -54,11 +54,9 @@ When sharing the platform with external reviewers, the backend operates in **Pub
    Seeded demo account roles cannot be modified (`403 Forbidden`).
 4. **Privileged Account Creation Restrictions**:
    Administrators cannot provision new `admin` or `coordinator` accounts (`403 Forbidden`). Creating non-privileged instructor accounts remains enabled.
-5. **UI Transparency**:
-   A visible notice banner is displayed across the top of all pages indicating fictional demo data that may be reset at any time.
-6. **Origin &amp; Cookie Verification**:
+5. **Origin &amp; Cookie Verification**:
    The backend validates incoming `Origin` and `Referer` headers against the proxied tunnel host (`X-Forwarded-Host`). Requests from foreign origins are rejected (`403 Forbidden: CSRF_FORBIDDEN`). Authentication cookies carry `Secure`, `HttpOnly`, and `SameSite=Lax` attributes across TLS termination.
-7. **Teardown &amp; Session Cleanup**:
+6. **Teardown &amp; Session Cleanup**:
    Stopping the tunnel halts external ingress immediately. Using `-ResetAfter` clears all database changes made during the session.
 
 ---

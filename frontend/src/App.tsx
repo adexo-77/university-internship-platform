@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ErrorBoundary } from './components/layout/ErrorBoundary';
-import { PublicDemoBanner } from './components/layout/PublicDemoBanner';
 import { ProtectedRoute } from './components/routes/ProtectedRoute';
 import { RoleRoute } from './components/routes/RoleRoute';
 import { getHomePath } from './config/navigation';
@@ -147,7 +146,6 @@ export const App: React.FC = () => {
     <BrowserRouter>
       <AuthProvider>
         <ErrorBoundary>
-          <PublicDemoBanner />
           <AppRoutes />
         </ErrorBoundary>
       </AuthProvider>
