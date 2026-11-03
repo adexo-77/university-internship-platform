@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getInternshipById, updateInternship } from '../api/internship';
 import { getOrganizationProfile } from '../api/profile';
 import { InternshipForm, InternshipFormData } from '../components/internships/InternshipForm';
 import { OrganizationApprovalNotice } from '../components/internships/OrganizationApprovalNotice';
 import { AppShell } from '../components/layout/AppShell';
-import { ErrorMessage, PageHeader } from '../components/ui';
+import { BackLink, ErrorMessage, PageHeader } from '../components/ui';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Internship } from '../types/internship';
 import { OrganizationProfile } from '../types/profile';
@@ -71,12 +71,7 @@ export const InternshipEditPage: React.FC = () => {
     <AppShell>
       <div className="space-y-6 max-w-2xl">
         <div>
-          <Link
-            to={`/internships/${postingId}`}
-            className="text-sm text-petrol hover:underline font-medium mb-2 inline-block"
-          >
-            &larr; Back to internship
-          </Link>
+          <BackLink to={`/internships/${postingId}`} label="Back to Internship" />
           <PageHeader
             title="Edit internship"
             description="Update the details of your internship posting."

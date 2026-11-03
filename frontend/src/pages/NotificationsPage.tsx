@@ -6,7 +6,7 @@ import {
   markNotificationAsRead,
 } from '../api/notification';
 import { NotificationList } from '../components/notifications/NotificationList';
-import { ErrorMessage, PageHeader } from '../components/ui';
+import { BackLink, ErrorMessage, PageHeader } from '../components/ui';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { NotificationItemData } from '../types/notification';
 
@@ -77,6 +77,7 @@ export const NotificationsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <BackLink />
       <PageHeader
         title="Notifications"
         description="Stay updated on courses, submissions, applications, and account activity."

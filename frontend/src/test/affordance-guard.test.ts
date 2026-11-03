@@ -7,6 +7,7 @@ const ALLOWLIST_FILES = new Set([
   path.normalize('src/components/ui/IconButton.tsx'),
   path.normalize('src/components/ui/TextLink.tsx'),
   path.normalize('src/components/ui/Card.tsx'),
+  path.normalize('src/components/ui/BackLink.tsx'),
 ]);
 
 function findTsxFiles(dir: string, fileList: string[] = []): string[] {

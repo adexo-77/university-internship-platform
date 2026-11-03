@@ -3,7 +3,7 @@ import { StudentBadgesSection } from '../components/badges/StudentBadgesSection'
 import { AppShell } from '../components/layout/AppShell';
 import { OrganizationProfileForm } from '../components/profile/OrganizationProfileForm';
 import { StudentProfileForm } from '../components/profile/StudentProfileForm';
-import { PageHeader } from '../components/ui';
+import { BackLink, PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { usePageTitle } from '../hooks/usePageTitle';
 
@@ -18,6 +18,7 @@ export const ProfilePage: React.FC = () => {
   return (
     <AppShell>
       <div className="space-y-6 max-w-2xl">
+        <BackLink />
         <PageHeader
           title="Profile"
           description={

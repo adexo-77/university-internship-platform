@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { createInternship } from '../api/internship';
 import { getOrganizationProfile } from '../api/profile';
 import { InternshipForm, InternshipFormData } from '../components/internships/InternshipForm';
 import { OrganizationApprovalNotice } from '../components/internships/OrganizationApprovalNotice';
 import { AppShell } from '../components/layout/AppShell';
-import { PageHeader } from '../components/ui';
+import { BackLink, PageHeader } from '../components/ui';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { OrganizationProfile } from '../types/profile';
 
@@ -43,12 +43,7 @@ export const InternshipCreatePage: React.FC = () => {
     <AppShell>
       <div className="space-y-6 max-w-2xl">
         <div>
-          <Link
-            to="/my-internships"
-            className="text-sm text-petrol hover:underline font-medium mb-2 inline-block"
-          >
-            &larr; Back to my internships
-          </Link>
+          <BackLink to="/my-internships" label="Back to My Internships" />
           <PageHeader
             title="New internship"
             description="Create an internship posting in draft status."

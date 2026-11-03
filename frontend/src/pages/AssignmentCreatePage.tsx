@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { createCourseAssignment } from '../api/assignment';
 import { AssignmentForm } from '../components/assignments/AssignmentForm';
 import { AppShell } from '../components/layout/AppShell';
-import { PageHeader } from '../components/ui/PageHeader';
+import { BackLink, PageHeader } from '../components/ui';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { AssignmentCreatePayload } from '../types/assignment';
 
@@ -27,6 +27,7 @@ export const AssignmentCreatePage: React.FC = () => {
   return (
     <AppShell>
       <div className="max-w-2xl mx-auto space-y-6">
+        <BackLink />
         <PageHeader
           title="Create assignment"
           description="Add a new coursework assignment for students enrolled in this course."

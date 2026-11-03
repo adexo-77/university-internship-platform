@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getHomePath, navigationItems, resolveSectionTitle } from './navigation';
+import { getHomePath, navigationItems, resolveBackTarget, resolveSectionTitle } from './navigation';
 
 describe('Navigation Configuration', () => {
   it('returns /dashboard home path for every role', () => {
@@ -147,6 +147,61 @@ describe('Navigation Configuration', () => {
     it('uses provided fallback when route is unknown', () => {
       expect(resolveSectionTitle('/unknown/subpage', 'Custom Fallback')).toBe('Custom Fallback');
       expect(resolveSectionTitle('/unknown/subpage')).toBe('Dashboard');
+    });
+  });
+
+  describe('resolveBackTarget', () => {
+    it('resolves correct parent targets for create and edit pages', () => {
+      expect(resolveBackTarget('/courses/new')).toEqual({
+        parentPath: '/courses',
+        label: 'Back to Courses',
+      });
+      expect(resolveBackTarget('/courses/5/edit')).toEqual({
+        parentPath: '/courses/5',
+        label: 'Back to Course',
+      });
+      expect(resolveBackTarget('/courses/5/assignments/new')).toEqual({
+        parentPath: '/courses/5',
+        label: 'Back to Course',
+      });
+      expect(resolveBackTarget('/internships/new')).toEqual({
+        parentPath: '/my-internships',
+        label: 'Back to My Internships',
+      });
+      expect(resolveBackTarget('/admin/users/new')).toEqual({
+        parentPath: '/admin/users',
+        label: 'Back to Users',
+      });
+    });
+
+    it('resolves correct parent targets for detail and grading pages', () => {
+      expect(resolveBackTarget('/courses/12')).toEqual({
+        parentPath: '/courses',
+        label: 'Back to Courses',
+      });
+      expect(resolveBackTarget('/assignments/101')).toEqual({
+        parentPath: '/courses',
+        label: 'Back to Courses',
+      });
+      expect(resolveBackTarget('/assignments/101/submissions/7/grade')).toEqual({
+        parentPath: '/assignments/101',
+        label: 'Back to Assignment',
+      });
+      expect(resolveBackTarget('/notifications')).toEqual({
+        parentPath: '/dashboard',
+        label: 'Back to Dashboard',
+      });
+      expect(resolveBackTarget('/admin/reports')).toEqual({
+        parentPath: '/dashboard',
+        label: 'Back to Dashboard',
+      });
+    });
+
+    it('returns null for top-level navigation routes without parent', () => {
+      expect(resolveBackTarget('/dashboard')).toBeNull();
+      expect(resolveBackTarget('/courses')).toBeNull();
+      expect(resolveBackTarget('/internships')).toBeNull();
+      expect(resolveBackTarget('/status')).toBeNull();
     });
   });
 });

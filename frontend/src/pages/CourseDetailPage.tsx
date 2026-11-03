@@ -6,7 +6,7 @@ import { CourseResourcesSection } from '../components/courses/CourseResourcesSec
 import { EnrollButton } from '../components/courses/EnrollButton';
 import { StudentRosterTable } from '../components/courses/StudentRosterTable';
 import { AppShell } from '../components/layout/AppShell';
-import { Badge, Button, ErrorMessage, Notice, PageHeader } from '../components/ui';
+import { BackLink, Badge, Button, ErrorMessage, Notice, PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Course, EnrolledStudent } from '../types/course';
@@ -82,6 +82,7 @@ export const CourseDetailPage: React.FC = () => {
   return (
     <AppShell>
       <div className="space-y-8 max-w-4xl">
+        <BackLink />
         {error && (
           <ErrorMessage
             whatHappened={error}

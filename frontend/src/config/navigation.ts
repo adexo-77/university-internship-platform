@@ -152,3 +152,70 @@ export function getHomePath(role?: UserRole): string {
   }
   return '/dashboard';
 }
+
+export interface BackTarget {
+  parentPath: string;
+  label: string;
+}
+
+/**
+ * Resolves the parent route and back label for a nested page.
+ * Returns null for top-level navigation routes that do not have a parent.
+ */
+export function resolveBackTarget(path: string): BackTarget | null {
+  if (path === '/notifications') {
+    return { parentPath: '/dashboard', label: 'Back to Dashboard' };
+  }
+  if (path === '/profile') {
+    return { parentPath: '/dashboard', label: 'Back to Dashboard' };
+  }
+  if (path === '/account') {
+    return { parentPath: '/dashboard', label: 'Back to Dashboard' };
+  }
+  if (path === '/admin/users/new') {
+    return { parentPath: '/admin/users', label: 'Back to Users' };
+  }
+  if (path === '/admin/reports') {
+    return { parentPath: '/dashboard', label: 'Back to Dashboard' };
+  }
+  if (path === '/courses/new') {
+    return { parentPath: '/courses', label: 'Back to Courses' };
+  }
+  if (/^\/courses\/\d+\/edit$/.test(path)) {
+    const courseId = path.split('/')[2];
+    return { parentPath: `/courses/${courseId}`, label: 'Back to Course' };
+  }
+  if (/^\/courses\/\d+\/assignments\/new$/.test(path)) {
+    const courseId = path.split('/')[2];
+    return { parentPath: `/courses/${courseId}`, label: 'Back to Course' };
+  }
+  if (/^\/courses\/\d+$/.test(path)) {
+    return { parentPath: '/courses', label: 'Back to Courses' };
+  }
+  if (/^\/assignments\/\d+\/edit$/.test(path)) {
+    const assignmentId = path.split('/')[2];
+    return { parentPath: `/assignments/${assignmentId}`, label: 'Back to Assignment' };
+  }
+  if (/^\/assignments\/\d+\/submissions\/\d+\/grade$/.test(path)) {
+    const assignmentId = path.split('/')[2];
+    return { parentPath: `/assignments/${assignmentId}`, label: 'Back to Assignment' };
+  }
+  if (/^\/assignments\/\d+$/.test(path)) {
+    return { parentPath: '/courses', label: 'Back to Courses' };
+  }
+  if (path === '/internships/new') {
+    return { parentPath: '/my-internships', label: 'Back to My Internships' };
+  }
+  if (/^\/internships\/\d+\/edit$/.test(path)) {
+    const internshipId = path.split('/')[2];
+    return { parentPath: `/internships/${internshipId}`, label: 'Back to Internship' };
+  }
+  if (/^\/internships\/\d+$/.test(path)) {
+    return { parentPath: '/internships', label: 'Back to Internships' };
+  }
+  if (/^\/applications\/\d+$/.test(path)) {
+    return { parentPath: '/my-internships', label: 'Back to My Internships' };
+  }
+
+  return null;
+}

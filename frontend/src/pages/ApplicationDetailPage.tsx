@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { decideApplication, getApplicationById } from '../api/application';
 import { ApplicationStatusBadge } from '../components/internships/ApplicationStatusBadge';
 import { DecisionForm } from '../components/internships/DecisionForm';
 import { AppShell } from '../components/layout/AppShell';
-import { Badge, ErrorMessage, PageHeader } from '../components/ui';
+import { BackLink, Badge, ErrorMessage, PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { formatDateTime } from '../lib/dates';
@@ -96,12 +96,7 @@ export const ApplicationDetailPage: React.FC = () => {
     <AppShell>
       <div className="space-y-6 max-w-3xl">
         <div>
-          <Link
-            to={backLink}
-            className="text-sm text-petrol hover:underline font-medium mb-2 inline-block"
-          >
-            &larr; Back to {backLabel}
-          </Link>
+          <BackLink to={backLink} label={`Back to ${backLabel}`} />
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <PageHeader
               title={`Application #${application.id}`}

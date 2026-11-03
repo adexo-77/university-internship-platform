@@ -1,7 +1,7 @@
 import React from 'react';
 import { Download, FileSpreadsheet, Users } from 'lucide-react';
 import { AppShell } from '../components/layout/AppShell';
-import { PageHeader } from '../components/ui';
+import { BackLink, PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { usePageTitle } from '../hooks/usePageTitle';
 
@@ -15,6 +15,7 @@ export const ReportsPage: React.FC = () => {
   return (
     <AppShell>
       <div className="space-y-6">
+        <BackLink />
         <PageHeader
           title="Reports"
           description="Generate and export platform datasets as safe UTF-8 CSV spreadsheets."

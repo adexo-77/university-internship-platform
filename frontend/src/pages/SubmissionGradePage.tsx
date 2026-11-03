@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { getAssignment, gradeSubmission, listAssignmentSubmissions } from '../api/assignment';
 import { GradeForm } from '../components/assignments/GradeForm';
 import { AppShell } from '../components/layout/AppShell';
-import { PageHeader } from '../components/ui/PageHeader';
+import { BackLink, PageHeader } from '../components/ui';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Assignment,
@@ -73,6 +73,7 @@ export const SubmissionGradePage: React.FC = () => {
   return (
     <AppShell>
       <div className="max-w-2xl mx-auto space-y-6">
+        <BackLink to={`/assignments/${numAssignmentId}`} label="Back to Assignment" />
         <PageHeader
           title={rosterItem ? `Grade submission: ${rosterItem.student_name}` : 'Grade submission'}
           description={assignment ? `Assignment: ${assignment.title}` : 'Score student coursework.'}

@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { getCourseById, updateCourse } from '../api/course';
 import { CourseForm, CourseFormData } from '../components/courses/CourseForm';
 import { AppShell } from '../components/layout/AppShell';
-import { ErrorMessage, PageHeader } from '../components/ui';
+import { BackLink, ErrorMessage, PageHeader } from '../components/ui';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Course } from '../types/course';
 
@@ -68,6 +68,7 @@ export const CourseEditPage: React.FC = () => {
   return (
     <AppShell>
       <div className="space-y-6">
+        <BackLink />
         <PageHeader
           title="Edit course"
           description={course ? `Editing "${course.title}"` : 'Update course details and syllabus.'}

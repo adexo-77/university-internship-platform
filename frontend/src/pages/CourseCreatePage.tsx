@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createCourse } from '../api/course';
 import { CourseForm, CourseFormData } from '../components/courses/CourseForm';
 import { AppShell } from '../components/layout/AppShell';
-import { PageHeader } from '../components/ui';
+import { BackLink, PageHeader } from '../components/ui';
 import { usePageTitle } from '../hooks/usePageTitle';
 
 export const CourseCreatePage: React.FC = () => {
@@ -36,6 +36,7 @@ export const CourseCreatePage: React.FC = () => {
   return (
     <AppShell>
       <div className="space-y-6">
+        <BackLink />
         <PageHeader
           title="New course"
           description="Create a course syllabus and manage student enrollment."

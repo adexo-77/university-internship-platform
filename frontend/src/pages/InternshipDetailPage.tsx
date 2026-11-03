@@ -12,7 +12,7 @@ import { InternshipInfoCard } from '../components/internships/InternshipInfoCard
 import { InternshipReviewNotice } from '../components/internships/InternshipReviewNotice';
 import { StudentApplicationPanel } from '../components/internships/StudentApplicationPanel';
 import { AppShell } from '../components/layout/AppShell';
-import { ConfirmModal, ErrorMessage, PageHeader } from '../components/ui';
+import { BackLink, ConfirmModal, ErrorMessage, PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { useInternshipActions } from '../hooks/useInternshipActions';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -126,6 +126,7 @@ export const InternshipDetailPage: React.FC = () => {
   return (
     <AppShell>
       <div className="space-y-6 max-w-4xl">
+        <BackLink />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <PageHeader
             title={internship.title}

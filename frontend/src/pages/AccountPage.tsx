@@ -1,6 +1,6 @@
 import { ChangePasswordForm } from '../components/account/ChangePasswordForm';
 import { AppShell } from '../components/layout/AppShell';
-import { Badge, Column, DataTable, PageHeader } from '../components/ui';
+import { BackLink, Badge, Column, DataTable, PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { usePageTitle } from '../hooks/usePageTitle';
 
@@ -61,6 +61,7 @@ export const AccountPage: React.FC = () => {
   return (
     <AppShell>
       <div className="space-y-6">
+        <BackLink />
         <PageHeader
           title="Account profile"
           description="Personal details, platform permissions, and credential status for your account."

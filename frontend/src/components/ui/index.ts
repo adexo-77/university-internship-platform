@@ -13,3 +13,4 @@ export * from './Brand';
 export * from './IconButton';
 export * from './TextLink';
 export * from './Card';
+export * from './BackLink';

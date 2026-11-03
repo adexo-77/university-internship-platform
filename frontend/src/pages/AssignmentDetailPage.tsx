@@ -11,7 +11,7 @@ import { SubmissionForm } from '../components/assignments/SubmissionForm';
 import { SubmissionStatusPanel } from '../components/assignments/SubmissionStatusPanel';
 import { SubmissionsTable } from '../components/assignments/SubmissionsTable';
 import { AppShell } from '../components/layout/AppShell';
-import { Badge, Notice, PageHeader, TextLink } from '../components/ui';
+import { BackLink, Badge, Notice, PageHeader, TextLink } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
@@ -91,6 +91,7 @@ export const AssignmentDetailPage: React.FC = () => {
   return (
     <AppShell>
       <div className="max-w-4xl mx-auto space-y-6">
+        <BackLink />
         {notice && <Notice variant="info">{notice}</Notice>}
 
         {loading ? (

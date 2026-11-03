@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { getAssignment, updateAssignment } from '../api/assignment';
 import { AssignmentForm } from '../components/assignments/AssignmentForm';
 import { AppShell } from '../components/layout/AppShell';
-import { PageHeader } from '../components/ui/PageHeader';
+import { BackLink, PageHeader } from '../components/ui';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Assignment, AssignmentCreatePayload } from '../types/assignment';
 
@@ -46,6 +46,7 @@ export const AssignmentEditPage: React.FC = () => {
   return (
     <AppShell>
       <div className="max-w-2xl mx-auto space-y-6">
+        <BackLink />
         <PageHeader
           title="Edit assignment"
           description={assignment ? `Editing ${assignment.title}` : 'Update assignment parameters.'}
