@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { AuthApiError } from '../api/auth';
-import { Button, Notice, TextField } from '../components/ui';
+import { Brand, Button, Notice, TextField } from '../components/ui';
 import { RegisterRoleSelector } from '../components/auth/RegisterRoleSelector';
 import { useAuth } from '../hooks/useAuth';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -104,6 +104,9 @@ export const RegisterPage: React.FC = () => {
     <div className="min-h-screen bg-chalk flex flex-col justify-center items-center px-4 py-12">
       <div className="w-full max-w-md bg-surface border border-line rounded-control p-8 shadow-sm">
         <div className="mb-6">
+          <div className="mb-4">
+            <Brand size="lg" />
+          </div>
           <h1 className="text-2xl font-semibold tracking-tight text-ink">Register account</h1>
           <p className="text-xs text-pencil mt-1">
             Create a student or organization account to get started.

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
-import { Button, EmptyState } from '../components/ui';
+import { Brand, Button, EmptyState } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { usePageTitle } from '../hooks/usePageTitle';
 
@@ -11,6 +11,9 @@ export const NotFoundPage: React.FC = () => {
 
   const content = (
     <div className="flex flex-col items-center justify-center py-16 px-4">
+      <div className="mb-6">
+        <Brand size="md" />
+      </div>
       <EmptyState
         title="Page not found"
         description="The page you requested does not exist on this platform."

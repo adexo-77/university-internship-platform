@@ -9,3 +9,4 @@ export * from './ErrorMessage';
 export * from './Notice';
 export * from './PageHeader';
 export * from './ConfirmModal';
+export * from './Brand';

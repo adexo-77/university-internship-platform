@@ -5,7 +5,7 @@ import { navigationItems, NavItem, resolveSectionTitle } from '../../config/navi
 import { useAuth } from '../../hooks/useAuth';
 import { useUnreadCount } from '../../hooks/useUnreadCount';
 import { cn } from '../../lib/cn';
-import { Badge, Button } from '../ui';
+import { Badge, Brand, Button } from '../ui';
 import { NotificationBell } from '../notifications/NotificationBell';
 
 export interface AppShellProps {
@@ -42,7 +42,12 @@ export const AppShell: React.FC<AppShellProps> = ({
     <div className="min-h-screen bg-chalk text-ink flex flex-col md:flex-row">
       {/* Mobile Top Navigation */}
       <div className="flex md:hidden items-center justify-between border-b border-line bg-surface px-4 py-3">
-        <span className="font-semibold text-ink text-base">University Platform</span>
+        <Link
+          to="/"
+          className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-petrol rounded-control text-left"
+        >
+          <Brand size="sm" />
+        </Link>
         <div className="flex items-center gap-2">
           {user && <NotificationBell count={unreadCount} />}
           <button
@@ -75,9 +80,12 @@ export const AppShell: React.FC<AppShellProps> = ({
       >
         {/* Platform Title */}
         <div className="border-b border-line px-5 py-4">
-          <span className="text-base font-semibold text-ink tracking-tight block">
-            University Platform
-          </span>
+          <Link
+            to="/"
+            className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-petrol rounded-control block text-left"
+          >
+            <Brand size="md" />
+          </Link>
         </div>
 
         {/* Navigation */}

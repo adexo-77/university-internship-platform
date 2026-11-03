@@ -9,7 +9,7 @@ describe('usePageTitle Hook', () => {
 
   it('sets page title with platform suffix', () => {
     renderHook(() => usePageTitle('Courses'));
-    expect(document.title).toBe('Courses - University Platform');
+    expect(document.title).toBe('Courses - UNIVERSITY');
   });
 
   it('updates title when page title argument changes', () => {
@@ -17,27 +17,27 @@ describe('usePageTitle Hook', () => {
       initialProps: { title: 'Courses' },
     });
 
-    expect(document.title).toBe('Courses - University Platform');
+    expect(document.title).toBe('Courses - UNIVERSITY');
 
     rerender({ title: 'Introduction to Programming' });
-    expect(document.title).toBe('Introduction to Programming - University Platform');
+    expect(document.title).toBe('Introduction to Programming - UNIVERSITY');
   });
 
   it('sets platform name fallback when title is empty or whitespace', () => {
     renderHook(() => usePageTitle(''));
-    expect(document.title).toBe('University Platform');
+    expect(document.title).toBe('UNIVERSITY');
 
     renderHook(() => usePageTitle('   '));
-    expect(document.title).toBe('University Platform');
+    expect(document.title).toBe('UNIVERSITY');
   });
 
   it('sets platform name fallback when title is undefined', () => {
     renderHook(() => usePageTitle(undefined));
-    expect(document.title).toBe('University Platform');
+    expect(document.title).toBe('UNIVERSITY');
   });
 
   it('trims whitespace around provided title', () => {
     renderHook(() => usePageTitle('  Log in  '));
-    expect(document.title).toBe('Log in - University Platform');
+    expect(document.title).toBe('Log in - UNIVERSITY');
   });
 });

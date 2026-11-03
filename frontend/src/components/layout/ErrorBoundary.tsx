@@ -1,5 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
-import { Button, ErrorMessage } from '../ui';
+import { Brand, Button, ErrorMessage } from '../ui';
 
 export interface ErrorBoundaryProps {
   children: ReactNode;
@@ -38,6 +38,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       return (
         <div className="min-h-[50vh] flex items-center justify-center p-6">
           <div className="max-w-md w-full">
+            <div className="mb-4">
+              <Brand size="md" />
+            </div>
             <ErrorMessage
               whatHappened="Something went wrong while rendering this page."
               howToFix="An unexpected client error occurred. Please reload the page to try again."

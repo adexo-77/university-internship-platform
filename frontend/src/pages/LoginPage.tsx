@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthApiError } from '../api/auth';
-import { Button, Notice, TextField } from '../components/ui';
+import { Brand, Button, Notice, TextField } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useRateLimitCooldown } from '../hooks/useRateLimitCooldown';
@@ -79,6 +79,9 @@ export const LoginPage: React.FC = () => {
     <div className="min-h-screen bg-chalk flex flex-col justify-center items-center px-4 py-12">
       <div className="w-full max-w-md bg-surface border border-line rounded-control p-8 shadow-sm">
         <div className="mb-6">
+          <div className="mb-4">
+            <Brand size="lg" />
+          </div>
           <h1 className="text-2xl font-semibold tracking-tight text-ink">Log in</h1>
           <p className="text-xs text-pencil mt-1">
             Sign in with your university or organization credentials.
