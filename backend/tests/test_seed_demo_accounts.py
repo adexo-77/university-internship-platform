@@ -48,6 +48,10 @@ def test_demo_accounts_login_and_dashboards(
         assert dash_resp.status_code == 200, f"Dashboard failed for {email}: {dash_resp.text}"
         data = dash_resp.json()
         assert isinstance(data, dict)
+        if email == "abel.tesfaye@example.com":
+            assert len(data.get("courses", [])) == 2
+            assert len(data.get("applications", {}).get("recent", [])) == 3
+            assert data.get("profile_complete") is True
 
         real_db_client.post("/api/auth/logout")
 
