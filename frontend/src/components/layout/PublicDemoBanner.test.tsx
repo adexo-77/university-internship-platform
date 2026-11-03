@@ -18,7 +18,7 @@ describe('PublicDemoBanner Component', () => {
 
     const banner = screen.getByRole('status');
     expect(banner).toBeInTheDocument();
-    expect(banner).toHaveTextContent('Public demo: fictional data, resets after each session');
+    expect(banner).toHaveTextContent('Public demo: fictional data that may be reset at any time');
     expect(banner).toHaveClass('bg-petrol-tint', 'text-ink', 'border-b', 'border-line');
   });
 
@@ -35,6 +35,6 @@ describe('PublicDemoBanner Component', () => {
 
     const banner = await screen.findByRole('status');
     expect(banner).toBeInTheDocument();
-    expect(banner).toHaveTextContent('Public demo: fictional data, resets after each session');
+    expect(banner).toHaveTextContent('Public demo: fictional data that may be reset at any time');
   });
 });

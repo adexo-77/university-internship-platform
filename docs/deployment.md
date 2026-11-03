@@ -55,7 +55,7 @@ When sharing the platform with external reviewers, the backend operates in **Pub
 4. **Privileged Account Creation Restrictions**:
    Administrators cannot provision new `admin` or `coordinator` accounts (`403 Forbidden`). Creating non-privileged instructor accounts remains enabled.
 5. **UI Transparency**:
-   A visible notice banner is displayed across the top of all pages indicating fictional demo data.
+   A visible notice banner is displayed across the top of all pages indicating fictional demo data that may be reset at any time.
 6. **Teardown &amp; Session Cleanup**:
    Stopping the tunnel halts external ingress immediately. Using `-ResetAfter` clears all database changes made during the session.
 

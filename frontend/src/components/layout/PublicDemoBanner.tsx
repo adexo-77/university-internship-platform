@@ -11,7 +11,7 @@ const BannerMessage: React.FC = () => (
     data-testid="public-demo-banner"
     className="w-full bg-petrol-tint text-ink border-b border-line px-4 py-1.5 text-center text-xs font-medium"
   >
-    Public demo: fictional data, resets after each session
+    Public demo: fictional data that may be reset at any time
   </div>
 );
 
