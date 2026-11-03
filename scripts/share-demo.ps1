@@ -38,30 +38,55 @@ if (-not $cloudflaredCmd) {
 }
 
 # Helper to check local demo health endpoint
-function Test-StackHealth {
+function Get-StackHealth {
     try {
         $raw = curl.exe -s -m 3 "http://127.0.0.1:8080/api/health"
         if ($raw) {
-            $json = $raw | ConvertFrom-Json
-            return ($json.status -eq "ok")
+            return ($raw | ConvertFrom-Json)
         }
-        return $false
+        return $null
     } catch {
-        return $false
+        return $null
     }
 }
 
-# Ensure local stack is running; if down, start with DEMO_PUBLIC_MODE=true
-if (-not (Test-StackHealth)) {
+$needRestoreNormalMode = $false
+$initialHealth = Get-StackHealth
+
+# Ensure stack is running and guarantee DEMO_PUBLIC_MODE=true
+if (-not $initialHealth -or $initialHealth.status -ne "ok") {
     Write-Host "Local demo stack is down. Starting containers with DEMO_PUBLIC_MODE=true..." -ForegroundColor Cyan
     $env:DEMO_PUBLIC_MODE = "true"
     docker compose up -d --wait
-    if (-not (Test-StackHealth)) {
-        Write-Error "Failed to reach healthy demo stack on http://localhost:8080"
-        exit 1
-    }
-    Write-Host "Demo stack is up and operational in public demo mode." -ForegroundColor Green
+    $needRestoreNormalMode = $true
+} elseif ($initialHealth.public_demo -ne $true) {
+    Write-Host "Local stack is running in normal mode. Recreating backend with DEMO_PUBLIC_MODE=true..." -ForegroundColor Cyan
+    $env:DEMO_PUBLIC_MODE = "true"
+    docker compose up -d --no-deps --force-recreate backend
+    $needRestoreNormalMode = $true
 }
+
+# Wait until health check verifies public_demo is active
+$sw = [System.Diagnostics.Stopwatch]::StartNew()
+$isPublicDemoReady = $false
+while ($sw.Elapsed.TotalSeconds -lt 30) {
+    $currentHealth = Get-StackHealth
+    if ($currentHealth -and $currentHealth.status -eq "ok" -and $currentHealth.public_demo -eq $true) {
+        $isPublicDemoReady = $true
+        break
+    }
+    Start-Sleep -Milliseconds 500
+}
+
+if (-not $isPublicDemoReady) {
+    Write-Error "Failed to activate public demo mode on http://127.0.0.1:8080"
+    if ($needRestoreNormalMode -and -not $ResetAfter) {
+        $env:DEMO_PUBLIC_MODE = "false"
+        docker compose up -d --no-deps --force-recreate backend | Out-Null
+    }
+    exit 1
+}
+Write-Host "Public demo mode verified (public_demo: true)." -ForegroundColor Green
 
 # Build cloudflared command arguments
 $cfArgs = @("tunnel", "--url", "http://localhost:8080")
@@ -130,6 +155,19 @@ try {
         Write-Host "ResetAfter enabled: resetting Docker Compose volumes and demo state..." -ForegroundColor Cyan
         docker compose down -v
         Write-Host "Demo stack teardown complete." -ForegroundColor Green
+    } elseif ($needRestoreNormalMode) {
+        Write-Host "Restoring normal demo mode (public_demo: false)..." -ForegroundColor Cyan
+        $env:DEMO_PUBLIC_MODE = "false"
+        docker compose up -d --no-deps --force-recreate backend | Out-Null
+        $swRestore = [System.Diagnostics.Stopwatch]::StartNew()
+        while ($swRestore.Elapsed.TotalSeconds -lt 30) {
+            $h = Get-StackHealth
+            if ($h -and $h.status -eq "ok" -and $h.public_demo -eq $false) {
+                break
+            }
+            Start-Sleep -Milliseconds 500
+        }
+        Write-Host "Restored normal demo mode successfully (public_demo: false)." -ForegroundColor Green
     }
 
     Write-Host "Share session ended cleanly." -ForegroundColor Green
