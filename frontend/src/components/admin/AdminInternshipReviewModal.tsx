@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { X } from 'lucide-react';
 import { Internship } from '../../types/internship';
 import { formatDate } from '../../lib/dates';
-import { Button, ErrorMessage, Notice, Textarea } from '../ui';
+import { Button, ErrorMessage, IconButton, Notice, Textarea } from '../ui';
 import { InternshipStatusBadge } from '../internships/InternshipStatusBadge';
 
 export interface AdminInternshipReviewModalProps {
@@ -31,6 +32,17 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
     }
   }, [isOpen, internship?.id]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isSubmitting) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isSubmitting, onClose]);
+
   if (!isOpen || !internship) return null;
 
   const handleApprove = async () => {
@@ -57,9 +69,9 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
       role="dialog"
       aria-modal="true"
       aria-labelledby="review-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-ink/40 p-0 sm:p-4 overflow-y-auto"
     >
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-control border border-line bg-surface p-6 shadow-card space-y-4">
+      <div className="w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-y-auto rounded-t-xl sm:rounded-control border border-line bg-surface p-4 sm:p-6 shadow-card space-y-4">
         <div className="flex items-start justify-between gap-4 border-b border-line pb-4">
           <div>
             <h3 id="review-modal-title" className="text-xl font-semibold text-ink">
@@ -70,14 +82,22 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
               <span className="capitalize">{internship.work_mode}</span>
             </p>
           </div>
-          <InternshipStatusBadge status={internship.status} />
+          <div className="flex items-center gap-2 shrink-0">
+            <InternshipStatusBadge status={internship.status} />
+            <IconButton
+              aria-label="Close review modal"
+              icon={<X className="h-5 w-5" />}
+              onClick={onClose}
+              disabled={isSubmitting}
+            />
+          </div>
         </div>
 
         {error && (
           <ErrorMessage whatHappened={error} howToFix="Please try again or cancel the operation." />
         )}
 
-        <div className="grid grid-cols-2 gap-3 text-sm p-3 bg-surface rounded border border-line">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm p-3 bg-surface rounded border border-line">
           <div>
             <span className="text-pencil block">Duration</span>
             <span className="font-medium text-ink">
@@ -124,8 +144,14 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
               placeholder="Provide feedback on the posting..."
               disabled={isSubmitting}
             />
-            <div className="flex justify-end gap-3">
-              <Button type="button" variant="quiet" onClick={onClose} disabled={isSubmitting}>
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
+              <Button
+                type="button"
+                variant="quiet"
+                onClick={onClose}
+                disabled={isSubmitting}
+                className="w-full sm:w-auto"
+              >
                 Cancel
               </Button>
               <Button
@@ -133,6 +159,7 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
                 variant="danger"
                 onClick={() => validateAndSubmitNote('when rejecting a posting')}
                 disabled={isSubmitting}
+                className="w-full sm:w-auto"
               >
                 {isSubmitting ? 'Submitting...' : 'Reject'}
               </Button>
@@ -141,6 +168,7 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
                 variant="primary"
                 onClick={handleApprove}
                 disabled={isSubmitting}
+                className="w-full sm:w-auto"
               >
                 {isSubmitting ? 'Submitting...' : 'Approve'}
               </Button>
@@ -167,8 +195,14 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
               placeholder="e.g. Terms violation or invalid role details."
               disabled={isSubmitting}
             />
-            <div className="flex justify-end gap-3">
-              <Button type="button" variant="quiet" onClick={onClose} disabled={isSubmitting}>
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
+              <Button
+                type="button"
+                variant="quiet"
+                onClick={onClose}
+                disabled={isSubmitting}
+                className="w-full sm:w-auto"
+              >
                 Cancel
               </Button>
               <Button
@@ -176,6 +210,7 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
                 variant="danger"
                 onClick={() => validateAndSubmitNote('to take down an open posting')}
                 disabled={isSubmitting}
+                className="w-full sm:w-auto"
               >
                 {isSubmitting ? 'Taking down...' : 'Take down'}
               </Button>
@@ -185,7 +220,12 @@ export const AdminInternshipReviewModal: React.FC<AdminInternshipReviewModalProp
 
         {internship.status !== 'pending_review' && internship.status !== 'open' && (
           <div className="pt-2 flex justify-end border-t border-line">
-            <Button type="button" variant="secondary" onClick={onClose}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onClose}
+              className="w-full sm:w-auto"
+            >
               Close
             </Button>
           </div>

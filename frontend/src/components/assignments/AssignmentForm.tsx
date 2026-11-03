@@ -137,8 +137,8 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = ({
         />
       </div>
 
-      <div className="flex items-center gap-3 pt-2">
-        <Button type="submit" variant="primary" disabled={submitting}>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
+        <Button type="submit" variant="primary" disabled={submitting} className="w-full sm:w-auto">
           {submitting ? 'Saving...' : submitLabel}
         </Button>
       </div>

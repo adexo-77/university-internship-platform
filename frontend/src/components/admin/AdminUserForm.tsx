@@ -102,7 +102,7 @@ export const AdminUserForm: React.FC<AdminUserFormProps> = ({ onSuccess }) => {
         <div className="flex items-center gap-6 pt-1">
           <label
             htmlFor="admin-role-instructor"
-            className="flex items-center gap-2 cursor-pointer text-sm text-ink"
+            className="flex items-center gap-2 cursor-pointer text-sm text-ink min-h-[44px]"
           >
             <input
               id="admin-role-instructor"
@@ -118,7 +118,7 @@ export const AdminUserForm: React.FC<AdminUserFormProps> = ({ onSuccess }) => {
           </label>
           <label
             htmlFor="admin-role-admin"
-            className="flex items-center gap-2 cursor-pointer text-sm text-ink"
+            className="flex items-center gap-2 cursor-pointer text-sm text-ink min-h-[44px]"
           >
             <input
               id="admin-role-admin"
@@ -134,7 +134,7 @@ export const AdminUserForm: React.FC<AdminUserFormProps> = ({ onSuccess }) => {
           </label>
           <label
             htmlFor="admin-role-coordinator"
-            className="flex items-center gap-2 cursor-pointer text-sm text-ink"
+            className="flex items-center gap-2 cursor-pointer text-sm text-ink min-h-[44px]"
           >
             <input
               id="admin-role-coordinator"
@@ -197,7 +197,12 @@ export const AdminUserForm: React.FC<AdminUserFormProps> = ({ onSuccess }) => {
       />
 
       <div className="pt-2">
-        <Button type="submit" variant="primary" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={isSubmitting}
+          className="w-full sm:w-auto"
+        >
           {isSubmitting ? 'Creating account...' : 'Create user'}
         </Button>
       </div>

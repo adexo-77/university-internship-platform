@@ -50,9 +50,16 @@ export const ApplyForm: React.FC<ApplyFormProps> = ({
         placeholder="Explain why you are interested in this position and how your skills match the requirements..."
       />
 
-      <div className="flex justify-between items-center pt-1">
-        <span className="text-xs text-pencil">{coverLetter.trim().length} / 5000 characters</span>
-        <Button type="submit" variant="primary" disabled={isSubmitting}>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 pt-1">
+        <span className="text-xs text-pencil order-2 sm:order-1">
+          {coverLetter.trim().length} / 5000 characters
+        </span>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={isSubmitting}
+          className="w-full sm:w-auto order-1 sm:order-2"
+        >
           {isSubmitting ? 'Submitting...' : 'Submit application'}
         </Button>
       </div>

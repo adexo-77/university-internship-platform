@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { X } from 'lucide-react';
 import { CourseResource } from '../../types/course';
-import { Button, ErrorMessage, TextField, Textarea } from '../ui';
+import { Button, ErrorMessage, IconButton, TextField, Textarea } from '../ui';
 
 export interface CourseResourceFormModalProps {
   isOpen: boolean;
@@ -36,6 +37,17 @@ export const CourseResourceFormModal: React.FC<CourseResourceFormModalProps> = (
     setErrors({});
     setSubmitError(null);
   }, [initialData, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isSubmitting) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isSubmitting, onClose]);
 
   if (!isOpen) return null;
 
@@ -104,16 +116,24 @@ export const CourseResourceFormModal: React.FC<CourseResourceFormModalProps> = (
       role="dialog"
       aria-modal="true"
       aria-labelledby="resource-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-ink/40 p-0 sm:p-4 overflow-y-auto"
     >
-      <div className="w-full max-w-lg rounded-control border border-line bg-surface p-6 shadow-card space-y-4">
-        <div>
-          <h3 id="resource-modal-title" className="text-lg font-semibold text-ink">
-            {isEditing ? 'Edit learning resource' : 'Add learning resource'}
-          </h3>
-          <p className="text-sm text-pencil mt-1">
-            Provide a title, an HTTP/HTTPS link, and an optional description.
-          </p>
+      <div className="w-full max-w-lg max-h-[92vh] sm:max-h-[90vh] overflow-y-auto rounded-t-xl sm:rounded-control border border-line bg-surface p-4 sm:p-6 shadow-card space-y-4">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 id="resource-modal-title" className="text-lg font-semibold text-ink">
+              {isEditing ? 'Edit learning resource' : 'Add learning resource'}
+            </h3>
+            <p className="text-sm text-pencil mt-1">
+              Provide a title, an HTTP/HTTPS link, and an optional description.
+            </p>
+          </div>
+          <IconButton
+            aria-label="Close dialog"
+            icon={<X className="h-5 w-5" />}
+            onClick={onClose}
+            disabled={isSubmitting}
+          />
         </div>
 
         {submitError && (
@@ -157,11 +177,22 @@ export const CourseResourceFormModal: React.FC<CourseResourceFormModalProps> = (
             rows={3}
           />
 
-          <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="quiet" onClick={onClose} disabled={isSubmitting}>
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
+            <Button
+              type="button"
+              variant="quiet"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </Button>
-            <Button type="submit" variant="primary" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={isSubmitting}
+              className="w-full sm:w-auto"
+            >
               {isSubmitting ? 'Saving...' : isEditing ? 'Save changes' : 'Add resource'}
             </Button>
           </div>

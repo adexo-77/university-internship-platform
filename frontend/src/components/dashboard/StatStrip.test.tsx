@@ -44,4 +44,26 @@ describe('StatStrip', () => {
     expect(userLink).toHaveAttribute('href', '/admin/users');
     expect(screen.queryByRole('link', { name: /static/i })).not.toBeInTheDocument();
   });
+
+  it('renders 5 metric items cleanly across responsive layouts', () => {
+    render(
+      <MemoryRouter>
+        <StatStrip
+          items={[
+            { label: 'Users', value: 10 },
+            { label: 'Organizations', value: 4 },
+            { label: 'Internships', value: 12 },
+            { label: 'Applications', value: 25 },
+            { label: 'Reviews', value: 3 },
+          ]}
+        />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Users')).toBeInTheDocument();
+    expect(screen.getByText('Organizations')).toBeInTheDocument();
+    expect(screen.getByText('Internships')).toBeInTheDocument();
+    expect(screen.getByText('Applications')).toBeInTheDocument();
+    expect(screen.getByText('Reviews')).toBeInTheDocument();
+  });
 });

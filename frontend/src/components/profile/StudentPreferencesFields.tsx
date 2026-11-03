@@ -40,7 +40,7 @@ export const StudentPreferencesFields: React.FC<StudentPreferencesFieldsProps> =
                 key={opt.value}
                 htmlFor={`work-mode-${opt.value}`}
                 className={cn(
-                  'flex items-start gap-2 p-2.5 rounded-control border text-sm cursor-pointer transition-colors',
+                  'flex items-start gap-2 p-2.5 rounded-control border text-sm cursor-pointer transition-colors min-h-[44px]',
                   checked
                     ? 'border-petrol bg-surface ring-1 ring-petrol text-ink font-medium'
                     : 'border-line bg-surface hover:bg-chalk text-pencil'

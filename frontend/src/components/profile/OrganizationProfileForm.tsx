@@ -199,7 +199,13 @@ export const OrganizationProfileForm: React.FC = () => {
         />
 
         <div className="pt-2">
-          <Button id="profile-save-button" type="submit" variant="primary" disabled={isSaving}>
+          <Button
+            id="profile-save-button"
+            type="submit"
+            variant="primary"
+            disabled={isSaving}
+            className="w-full sm:w-auto"
+          >
             {isSaving ? 'Saving...' : 'Save changes'}
           </Button>
         </div>

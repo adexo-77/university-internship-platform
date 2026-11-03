@@ -174,12 +174,23 @@ export const InternshipForm: React.FC<InternshipFormProps> = ({
         Postings are reviewed by an admin before students can see them.
       </p>
 
-      <div className="flex items-center gap-3 pt-2">
-        <Button type="submit" variant="primary" disabled={isSubmitting}>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={isSubmitting}
+          className="w-full sm:w-auto"
+        >
           {isSubmitting ? 'Saving...' : isEdit ? 'Save changes' : 'Create internship'}
         </Button>
         {onCancel && (
-          <Button type="button" variant="quiet" onClick={onCancel} disabled={isSubmitting}>
+          <Button
+            type="button"
+            variant="quiet"
+            onClick={onCancel}
+            disabled={isSubmitting}
+            className="w-full sm:w-auto"
+          >
             Cancel
           </Button>
         )}

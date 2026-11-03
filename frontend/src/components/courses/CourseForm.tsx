@@ -116,8 +116,13 @@ export const CourseForm: React.FC<CourseFormProps> = ({
         />
       )}
 
-      <div className="flex items-center gap-3 pt-2">
-        <Button type="submit" variant="primary" disabled={isSubmitting}>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={isSubmitting}
+          className="w-full sm:w-auto"
+        >
           {isSubmitting
             ? isEdit
               ? 'Saving...'
@@ -127,7 +132,13 @@ export const CourseForm: React.FC<CourseFormProps> = ({
               : 'Create course'}
         </Button>
         {onCancel && (
-          <Button type="button" variant="secondary" onClick={onCancel} disabled={isSubmitting}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onCancel}
+            disabled={isSubmitting}
+            className="w-full sm:w-auto"
+          >
             Cancel
           </Button>
         )}

@@ -19,7 +19,7 @@ export const StatStrip: React.FC<StatStripProps> = ({ items, className }) => {
   return (
     <div
       className={cn(
-        'grid grid-cols-2 md:grid-flow-col md:auto-cols-fr bg-surface border border-line rounded-control divide-y md:divide-y-0 md:divide-x divide-line',
+        'grid grid-cols-1 md:grid-flow-col md:auto-cols-fr bg-surface border border-line rounded-control divide-y md:divide-y-0 md:divide-x divide-line',
         className
       )}
     >

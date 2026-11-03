@@ -47,13 +47,14 @@ export const DecisionForm: React.FC<DecisionFormProps> = ({
         placeholder="Add constructive feedback or next steps for the applicant (max 1000 characters)..."
       />
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         {currentStatus === 'submitted' && (
           <Button
             type="button"
             variant="secondary"
             disabled={isSubmitting}
             onClick={() => handleAction('shortlisted')}
+            className="w-full sm:w-auto"
           >
             {isSubmitting && targetStatus === 'shortlisted' ? 'Updating...' : 'Shortlist'}
           </Button>
@@ -64,6 +65,7 @@ export const DecisionForm: React.FC<DecisionFormProps> = ({
           variant="primary"
           disabled={isSubmitting}
           onClick={() => handleAction('accepted')}
+          className="w-full sm:w-auto"
         >
           {isSubmitting && targetStatus === 'accepted' ? 'Updating...' : 'Accept'}
         </Button>
@@ -73,6 +75,7 @@ export const DecisionForm: React.FC<DecisionFormProps> = ({
           variant="danger"
           disabled={isSubmitting}
           onClick={() => handleAction('rejected')}
+          className="w-full sm:w-auto"
         >
           {isSubmitting && targetStatus === 'rejected' ? 'Updating...' : 'Reject'}
         </Button>

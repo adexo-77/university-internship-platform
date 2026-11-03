@@ -133,7 +133,7 @@ export const InternshipsPage: React.FC = () => {
             />
 
             {total > 0 && (
-              <div className="flex items-center justify-between text-sm text-pencil pt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm text-pencil gap-2 pt-2">
                 <span>
                   Showing {offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of {total} postings
                 </span>

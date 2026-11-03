@@ -152,7 +152,12 @@ export const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({ onSucces
       />
 
       <div className="pt-2">
-        <Button type="submit" variant="primary" disabled={isSubmitting || isRateLimited}>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={isSubmitting || isRateLimited}
+          className="w-full sm:w-auto"
+        >
           {isSubmitting ? 'Updating password...' : 'Update password'}
         </Button>
       </div>

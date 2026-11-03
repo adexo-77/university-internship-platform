@@ -25,8 +25,10 @@ export function DataTable<T>({
 }: DataTableProps<T>) {
   return (
     <div
+      tabIndex={0}
+      aria-label="Scrollable table container"
       className={cn(
-        'w-full overflow-x-auto rounded-control border border-line bg-surface',
+        'w-full overflow-x-auto rounded-control border border-line bg-surface overscroll-x-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-petrol',
         className
       )}
     >

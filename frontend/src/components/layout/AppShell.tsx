@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { navigationItems, NavItem, resolveSectionTitle } from '../../config/navigation';
@@ -22,6 +22,8 @@ export const AppShell: React.FC<AppShellProps> = ({
   title,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const drawerRef = useRef<HTMLElement>(null);
+  const toggleButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const { user, logout } = useAuth();
   const { unreadCount } = useUnreadCount({ enabled: Boolean(user) });
@@ -38,10 +40,55 @@ export const AppShell: React.FC<AppShellProps> = ({
 
   const topBarTitle = title ?? resolveSectionTitle(activePath, visibleNavItems[0]?.label);
 
+  // Lock body scroll while mobile drawer is open
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isMobileMenuOpen]);
+
+  // Handle Escape key and Tab focus trap inside drawer
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setIsMobileMenuOpen(false);
+        toggleButtonRef.current?.focus();
+        return;
+      }
+
+      if (event.key === 'Tab' && drawerRef.current) {
+        const focusables = drawerRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusables.length === 0) return;
+
+        const firstElement = focusables[0];
+        const lastElement = focusables[focusables.length - 1];
+
+        if (event.shiftKey && document.activeElement === firstElement) {
+          event.preventDefault();
+          lastElement.focus();
+        } else if (!event.shiftKey && document.activeElement === lastElement) {
+          event.preventDefault();
+          firstElement.focus();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMobileMenuOpen]);
+
   return (
     <div className="min-h-screen bg-chalk text-ink flex flex-col md:flex-row">
       {/* Mobile Top Navigation */}
-      <div className="flex md:hidden items-center justify-between border-b border-line bg-surface px-4 py-3">
+      <div className="flex md:hidden items-center justify-between border-b border-line bg-surface px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))]">
         <Link
           to="/"
           className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-petrol rounded-control text-left"
@@ -51,6 +98,7 @@ export const AppShell: React.FC<AppShellProps> = ({
         <div className="flex items-center gap-2">
           {user && <NotificationBell count={unreadCount} />}
           <IconButton
+            ref={toggleButtonRef}
             aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isMobileMenuOpen}
             icon={isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -63,30 +111,47 @@ export const AppShell: React.FC<AppShellProps> = ({
       {isMobileMenuOpen && (
         <div
           role="presentation"
-          onClick={() => setIsMobileMenuOpen(false)}
-          className="fixed inset-0 z-40 bg-ink/20 md:hidden"
+          aria-label="Close menu overlay"
+          onClick={() => {
+            setIsMobileMenuOpen(false);
+            toggleButtonRef.current?.focus();
+          }}
+          className="fixed inset-0 z-40 bg-ink/40 md:hidden"
         />
       )}
 
-      {/* Left Sidebar */}
+      {/* Left Sidebar / Mobile Drawer */}
       <aside
+        ref={drawerRef}
+        aria-label="Navigation drawer"
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 border-r border-line bg-surface flex flex-col transition-transform duration-150 ease-in-out md:static md:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 w-64 border-r border-line bg-surface flex flex-col transition-transform duration-150 ease-in-out md:static md:translate-x-0 pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]',
           isMobileMenuOpen ? 'translate-x-0 shadow-menu' : '-translate-x-full md:translate-x-0'
         )}
       >
         {/* Platform Title */}
-        <div className="border-b border-line px-5 py-4">
+        <div className="border-b border-line px-5 py-4 flex items-center justify-between">
           <Link
             to="/"
+            onClick={() => setIsMobileMenuOpen(false)}
             className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-petrol rounded-control block text-left"
           >
             <Brand size="md" />
           </Link>
+          <div className="md:hidden">
+            <IconButton
+              aria-label="Close menu drawer"
+              icon={<X className="h-5 w-5" />}
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                toggleButtonRef.current?.focus();
+              }}
+            />
+          </div>
         </div>
 
         {/* Navigation */}
-        <nav aria-label="Main navigation" className="flex-1 p-3 space-y-1">
+        <nav aria-label="Main navigation" className="flex-1 p-3 space-y-1 overflow-y-auto">
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const isExact = item.path === activePath;
@@ -126,7 +191,7 @@ export const AppShell: React.FC<AppShellProps> = ({
             <Button
               variant="quiet"
               size="sm"
-              className="w-full justify-start text-brick hover:bg-chalk mt-1"
+              className="w-full justify-start text-brick hover:bg-chalk mt-1 min-h-[44px]"
               onClick={() => {
                 setIsMobileMenuOpen(false);
                 void logout();
