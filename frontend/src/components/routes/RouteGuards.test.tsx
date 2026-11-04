@@ -93,7 +93,7 @@ describe('RoleRoute Guard', () => {
         <Route element={<RoleRoute allowedRoles={['admin']} />}>
           <Route path="/admin-panel" element={<div>Admin Exclusive Panel</div>} />
         </Route>
-        <Route path="/account" element={<div>Account Page</div>} />
+        <Route path="/dashboard" element={<div>Dashboard Page</div>} />
       </Routes>,
       mockStudentUser,
       '/admin-panel'
@@ -101,6 +101,9 @@ describe('RoleRoute Guard', () => {
     expect(screen.getByText("You don't have access to this page")).toBeInTheDocument();
     expect(screen.getByText('This page is only available to admin accounts.')).toBeInTheDocument();
     expect(screen.queryByText('Admin Exclusive Panel')).not.toBeInTheDocument();
+    const backBtn = screen.getByRole('button', { name: 'Back to dashboard' });
+    expect(backBtn).toBeInTheDocument();
+    expect(backBtn.closest('a')).toHaveAttribute('href', '/dashboard');
   });
 
   it('lists multiple role names in the access-denied message', () => {
@@ -150,7 +153,7 @@ describe('RoleRoute Guard', () => {
         <Route element={<RoleRoute allowedRoles={['admin']} />}>
           <Route path="/admin/users" element={<div>Admin Users Content</div>} />
         </Route>
-        <Route path="/account" element={<div>Account Page</div>} />
+        <Route path="/dashboard" element={<div>Dashboard Page</div>} />
       </Routes>,
       mockCoordinatorUser,
       '/admin/users'

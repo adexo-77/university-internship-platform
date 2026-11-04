@@ -114,11 +114,19 @@ export const AppRoutes: React.FC = () => {
           <Route path="/courses/:id/edit" element={<CourseEditPage />} />
         </Route>
 
-        {/* Details: any signed-in user (role permissions handled in pages) */}
-        <Route path="/courses/:id" element={<CourseDetailPage />} />
-        <Route path="/assignments/:id" element={<AssignmentDetailPage />} />
-        <Route path="/internships/:id" element={<InternshipDetailPage />} />
-        <Route path="/applications/:id" element={<ApplicationDetailPage />} />
+        {/* Course and assignment details: student, instructor, and admin */}
+        <Route element={<RoleRoute allowedRoles={['student', 'instructor', 'admin']} />}>
+          <Route path="/courses/:id" element={<CourseDetailPage />} />
+          <Route path="/assignments/:id" element={<AssignmentDetailPage />} />
+        </Route>
+
+        {/* Internship and application details: student, organization, coordinator, and admin */}
+        <Route
+          element={<RoleRoute allowedRoles={['student', 'organization', 'coordinator', 'admin']} />}
+        >
+          <Route path="/internships/:id" element={<InternshipDetailPage />} />
+          <Route path="/applications/:id" element={<ApplicationDetailPage />} />
+        </Route>
 
         {/* Review queues: admin and coordinator */}
         <Route element={<RoleRoute allowedRoles={['admin', 'coordinator']} />}>

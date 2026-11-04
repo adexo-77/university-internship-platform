@@ -119,3 +119,27 @@ def test_assignment_delete_blocked_when_submissions_exist(
     # Subsequent get -> 404
     res = real_db_client.get(f"/api/assignments/{assignment.id}")
     assert res.status_code == 404
+
+
+def test_organization_and_coordinator_cannot_access_assignments(
+    real_db_client: TestClient, real_db_session: Session
+) -> None:
+    """Assignments return 404 to organization and coordinator roles."""
+    inst = create_test_user(real_db_session, "inst_assign_guard@test.edu", UserRole.INSTRUCTOR)
+    create_test_user(real_db_session, "org_assign_guard@test.edu", UserRole.ORGANIZATION)
+    create_test_user(real_db_session, "coord_assign_guard@test.edu", UserRole.COORDINATOR)
+    course = _seed_course(real_db_session, inst)
+    assignment = Assignment(
+        course_id=course.id,
+        title="Protected Assignment",
+        due_at=datetime.now(UTC) + timedelta(days=5),
+        max_points=50,
+    )
+    real_db_session.add(assignment)
+    real_db_session.commit()
+
+    login_test_user(real_db_client, "org_assign_guard@test.edu")
+    assert real_db_client.get(f"/api/assignments/{assignment.id}").status_code == 404
+
+    login_test_user(real_db_client, "coord_assign_guard@test.edu")
+    assert real_db_client.get(f"/api/assignments/{assignment.id}").status_code == 404

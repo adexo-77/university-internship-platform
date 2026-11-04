@@ -138,3 +138,27 @@ def test_enrolled_flag_is_per_student_and_my_courses(
     inst_courses = real_db_client.get("/api/instructors/me/courses").json()
     assert len(inst_courses) == 1
     assert inst_courses[0]["enrolled_count"] == 1
+
+
+def test_organization_and_coordinator_cannot_access_courses(
+    real_db_client: TestClient, real_db_session: Session
+) -> None:
+    """Published courses return 404 to organization and coordinator roles."""
+    inst = create_test_user(real_db_session, "inst_pub@test.edu", UserRole.INSTRUCTOR)
+    create_test_user(real_db_session, "org_pub@test.edu", UserRole.ORGANIZATION)
+    create_test_user(real_db_session, "coord_pub@test.edu", UserRole.COORDINATOR)
+
+    course = Course(
+        instructor_id=inst.id,
+        title="Published Web Course",
+        description="Public syllabus",
+        status=CourseStatus.PUBLISHED,
+    )
+    real_db_session.add(course)
+    real_db_session.commit()
+
+    login_test_user(real_db_client, "org_pub@test.edu")
+    assert real_db_client.get(f"/api/courses/{course.id}").status_code == 404
+
+    login_test_user(real_db_client, "coord_pub@test.edu")
+    assert real_db_client.get(f"/api/courses/{course.id}").status_code == 404

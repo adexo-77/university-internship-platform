@@ -37,8 +37,8 @@ export const RoleRoute: React.FC<RoleRouteProps> = ({ allowedRoles, children }) 
             description={`This page is only available to ${formatRoleNames(allowedRoles)} accounts.`}
           />
           <div>
-            <Link to="/account">
-              <Button variant="secondary">Go to your account</Button>
+            <Link to="/dashboard">
+              <Button variant="secondary">Back to dashboard</Button>
             </Link>
           </div>
         </div>

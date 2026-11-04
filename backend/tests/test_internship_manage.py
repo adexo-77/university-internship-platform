@@ -179,3 +179,15 @@ def test_other_org_cannot_edit_posting(
     login_test_user(real_db_client, org2.email)
     resp = real_db_client.patch(f"/api/internships/{posting.id}", json={"title": "Hacked"})
     assert resp.status_code == 404
+
+
+def test_instructor_cannot_access_internship_posting(
+    real_db_client: TestClient, real_db_session: Session
+) -> None:
+    """Internship postings return 404 to instructor role."""
+    org = create_test_user(real_db_session, "org_guard@org.com", UserRole.ORGANIZATION)
+    create_test_user(real_db_session, "inst_guard@univ.edu", UserRole.INSTRUCTOR)
+    posting = create_test_internship(real_db_session, org)
+
+    login_test_user(real_db_client, "inst_guard@univ.edu")
+    assert real_db_client.get(f"/api/internships/{posting.id}").status_code == 404

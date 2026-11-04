@@ -184,3 +184,17 @@ def test_other_student_cannot_withdraw_application(
     login_test_user(real_db_client, s2.email)
     resp = real_db_client.post(f"/api/applications/{app.id}/withdraw")
     assert resp.status_code == 404
+
+
+def test_instructor_cannot_access_application_detail(
+    real_db_client: TestClient, real_db_session: Session
+) -> None:
+    """Application detail returns 404 to instructor role."""
+    org = create_test_user(real_db_session, "org_app_guard@test.com", UserRole.ORGANIZATION)
+    p = create_test_internship(real_db_session, org)
+    student = create_test_user(real_db_session, "s_app_guard@test.com", UserRole.STUDENT)
+    app = create_test_application(real_db_session, p, student)
+    create_test_user(real_db_session, "inst_app_guard@univ.edu", UserRole.INSTRUCTOR)
+
+    login_test_user(real_db_client, "inst_app_guard@univ.edu")
+    assert real_db_client.get(f"/api/applications/{app.id}").status_code == 404

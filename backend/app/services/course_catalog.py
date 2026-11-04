@@ -72,6 +72,9 @@ def list_courses(
 
 def get_course_by_id(db: Session, course_id: int, current_user: User) -> CourseResponse:
     """Retrieve course details if visible to the user, otherwise 404."""
+    if current_user.role not in (UserRole.STUDENT, UserRole.INSTRUCTOR, UserRole.ADMIN):
+        raise NotFoundException(message="Course not found", code="COURSE_NOT_FOUND")
+
     row = db.execute(
         select(Course, User.full_name)
         .join(User, Course.instructor_id == User.id)
