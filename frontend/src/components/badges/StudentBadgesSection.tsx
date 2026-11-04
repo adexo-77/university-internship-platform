@@ -83,11 +83,7 @@ export const StudentBadgesSection: React.FC<StudentBadgesSectionProps> = ({
               <div
                 key={badge.id}
                 data-testid={`badge-card-${badge.id}`}
-                className={`p-4 rounded-control border flex flex-col justify-between transition-colors ${
-                  isEarned
-                    ? 'border-line bg-surface shadow-none'
-                    : 'border-line bg-chalk/60 opacity-80'
-                }`}
+                className="p-4 rounded-control border border-line bg-surface flex flex-col justify-between transition-colors shadow-none"
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -114,11 +110,7 @@ export const StudentBadgesSection: React.FC<StudentBadgesSectionProps> = ({
                     )}
                   </div>
                   <div>
-                    <h3
-                      className={`text-sm font-semibold ${isEarned ? 'text-ink' : 'text-pencil'}`}
-                    >
-                      {badge.title}
-                    </h3>
+                    <h3 className="text-sm font-semibold text-ink">{badge.title}</h3>
                     <p className="text-xs text-pencil mt-1 leading-relaxed">{badge.description}</p>
                   </div>
                 </div>

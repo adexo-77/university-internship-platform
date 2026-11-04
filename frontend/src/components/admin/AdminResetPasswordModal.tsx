@@ -21,16 +21,23 @@ export const AdminResetPasswordModal: React.FC<AdminResetPasswordModalProps> = (
   const [error, setError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
+    const timer = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && !isSubmitting) {
         onClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isOpen, isSubmitting, onClose]);
 
   if (!isOpen || !user) return null;
@@ -98,6 +105,7 @@ export const AdminResetPasswordModal: React.FC<AdminResetPasswordModalProps> = (
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <TextField
+            ref={inputRef}
             id="admin-reset-password"
             label="New password"
             type="password"
