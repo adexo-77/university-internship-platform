@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { getAssignment, updateAssignment } from '../api/assignment';
+import { deleteAssignment, getAssignment, updateAssignment } from '../api/assignment';
 import { AssignmentForm } from '../components/assignments/AssignmentForm';
 import { AppShell } from '../components/layout/AppShell';
-import { BackLink, PageHeader } from '../components/ui';
+import { BackLink, Button, ConfirmModal, ErrorMessage, PageHeader } from '../components/ui';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Assignment, AssignmentCreatePayload } from '../types/assignment';
 
@@ -14,6 +14,9 @@ export const AssignmentEditPage: React.FC = () => {
   usePageTitle(assignment ? `Edit ${assignment.title}` : 'Edit assignment');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const numericId = Number(id);
 
@@ -43,6 +46,20 @@ export const AssignmentEditPage: React.FC = () => {
     navigate(`/assignments/${numericId}`);
   };
 
+  const handleDelete = async () => {
+    if (!assignment) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteAssignment(numericId);
+      navigate(`/courses/${assignment.course_id}`);
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete assignment.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <AppShell>
       <div className="max-w-2xl mx-auto space-y-6">
@@ -70,6 +87,10 @@ export const AssignmentEditPage: React.FC = () => {
           }
         />
 
+        {deleteError && (
+          <ErrorMessage whatHappened="Could not delete assignment." howToFix={deleteError} />
+        )}
+
         {loading ? (
           <div className="py-12 text-center text-pencil">Loading assignment...</div>
         ) : error ? (
@@ -77,12 +98,43 @@ export const AssignmentEditPage: React.FC = () => {
             {error}
           </div>
         ) : assignment ? (
-          <div className="rounded-control border border-line bg-surface p-6 shadow-subtle">
-            <AssignmentForm
-              initialData={assignment}
-              onSubmit={handleSubmit}
-              submitLabel="Save changes"
-              isEditing={true}
+          <div className="space-y-6">
+            <div className="rounded-control border border-line bg-surface p-6 shadow-subtle">
+              <AssignmentForm
+                initialData={assignment}
+                onSubmit={handleSubmit}
+                submitLabel="Save changes"
+                isEditing={true}
+              />
+            </div>
+
+            <div className="rounded-control border border-line bg-surface p-6 space-y-3">
+              <h3 className="text-sm font-semibold text-ink">Danger zone</h3>
+              <p className="text-xs text-pencil">
+                Delete this assignment permanently. Assignments with existing student submissions cannot be deleted.
+              </p>
+              <Button
+                type="button"
+                variant="danger"
+                size="sm"
+                onClick={() => setIsDeleteOpen(true)}
+              >
+                Delete assignment
+              </Button>
+            </div>
+
+            <ConfirmModal
+              isOpen={isDeleteOpen}
+              title="Delete assignment"
+              message={`Are you sure you want to delete "${assignment.title}"? This action cannot be undone.`}
+              confirmLabel="Delete assignment"
+              confirmVariant="danger"
+              isSubmitting={isDeleting}
+              error={deleteError}
+              onClose={() => {
+                if (!isDeleting) setIsDeleteOpen(false);
+              }}
+              onConfirm={handleDelete}
             />
           </div>
         ) : null}

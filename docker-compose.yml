@@ -39,6 +39,7 @@ services:
       SEED_DEMO: ${SEED_DEMO:-true}
       DEMO_PUBLIC_MODE: ${DEMO_PUBLIC_MODE:-false}
       RATE_LIMIT_LOGIN_IP_LIMIT: ${RATE_LIMIT_LOGIN_IP_LIMIT:-100}
+      RATE_LIMIT_CHANGE_PASSWORD_LIMIT: ${RATE_LIMIT_CHANGE_PASSWORD_LIMIT:-50}
     command: sh -c "alembic upgrade head && (if [ \"$$SEED_DEMO\" = \"true\" ]; then python scripts/seed_demo.py; fi) && uvicorn app.main:app --host 0.0.0.0 --port 8000"
     depends_on:
       db:
