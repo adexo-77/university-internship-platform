@@ -90,7 +90,7 @@ def get_course_by_id(db: Session, course_id: int, current_user: User) -> CourseR
     is_admin = current_user.role == UserRole.ADMIN
     is_published = course.status == CourseStatus.PUBLISHED
 
-    if not (is_published or is_owner or is_admin):
+    if not (is_admin or is_owner or (current_user.role == UserRole.STUDENT and is_published)):
         raise NotFoundException(message="Course not found", code="COURSE_NOT_FOUND")
 
     enrolled: bool | None = None
