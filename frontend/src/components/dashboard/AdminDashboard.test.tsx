@@ -19,7 +19,6 @@ const mockData: AdminDashboardResponse = {
   courses_by_status: {
     draft: 2,
     published: 8,
-    archived: 1,
   },
   applications_by_status: {
     submitted: 15,
