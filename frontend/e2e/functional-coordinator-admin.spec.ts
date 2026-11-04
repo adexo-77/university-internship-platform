@@ -46,6 +46,49 @@ test.describe('Coordinator & Admin Functional Flows', () => {
     }
   });
 
+  test('coordinator can reject a pending internship with a note and take down an open posting', async ({
+    page,
+  }) => {
+    await loginAs(page, DEMO_USERS.coordinator);
+    await page.goto('/admin/internship-reviews');
+    await page.waitForLoadState('networkidle');
+
+    // Reject pending posting
+    const reviewBtn = page.getByRole('button', { name: 'Review' }).first();
+    if (await reviewBtn.isVisible()) {
+      await reviewBtn.click();
+      const modal = page.getByRole('dialog');
+      await expect(modal).toBeVisible();
+
+      // Attempt reject without note -> validation message
+      await modal.getByRole('button', { name: 'Reject' }).click();
+      await expect(page.getByText(/Review note is required/i)).toBeVisible();
+
+      await page.locator('#review-note').fill('Posting requires revised academic requirements.');
+      await modal.getByRole('button', { name: 'Reject' }).click();
+      await expect(modal).not.toBeVisible();
+    }
+
+    // Switch filter to open postings to test takedown
+    await page.selectOption('#admin-status-filter', 'open');
+    await page.waitForLoadState('networkidle');
+
+    const openReviewBtn = page.getByRole('button', { name: 'Review' }).first();
+    if (await openReviewBtn.isVisible()) {
+      await openReviewBtn.click();
+      const modal = page.getByRole('dialog');
+      await expect(modal).toBeVisible();
+
+      // Attempt takedown without note -> validation message
+      await modal.getByRole('button', { name: 'Take down' }).click();
+      await expect(page.getByText(/Review note is required/i)).toBeVisible();
+
+      await page.locator('#admin-takedown-note').fill('Listing taken down for compliance review.');
+      await modal.getByRole('button', { name: 'Take down' }).click();
+      await expect(modal).not.toBeVisible();
+    }
+  });
+
   test('coordinator can export applications report CSV', async ({ page }) => {
     await loginAs(page, DEMO_USERS.coordinator);
     await page.goto('/admin/reports');

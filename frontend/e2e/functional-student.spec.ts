@@ -173,4 +173,27 @@ test.describe('Student Functional Flows', () => {
       expect(page.url()).not.toContain('/404');
     }
   });
+
+  test('graded assignment displays score and locks submission from further edits', async ({
+    page,
+  }) => {
+    await page.goto('/my-courses');
+    await page.waitForLoadState('networkidle');
+
+    await page.getByRole('link', { name: /Database Systems/i }).first().click();
+    await page.waitForURL(/\/courses\/\d+/, { timeout: 10000 });
+
+    await page.getByRole('link', { name: /ER Diagramming/i }).first().click();
+    await page.waitForURL(/\/assignments\/\d+/, { timeout: 10000 });
+
+    // Verify locked notice and score
+    await expect(
+      page.getByText('This submission has been graded and is locked from further edits.')
+    ).toBeVisible();
+    await expect(page.getByText('100 / 100').first()).toBeVisible();
+
+    // Verify submission textarea is disabled and submit button is absent
+    await expect(page.locator('#submission-content')).toBeDisabled();
+    await expect(page.getByRole('button', { name: /Submit assignment|Update submission/i })).toHaveCount(0);
+  });
 });
