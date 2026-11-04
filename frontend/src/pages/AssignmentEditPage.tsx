@@ -111,7 +111,8 @@ export const AssignmentEditPage: React.FC = () => {
             <div className="rounded-control border border-line bg-surface p-6 space-y-3">
               <h3 className="text-sm font-semibold text-ink">Danger zone</h3>
               <p className="text-xs text-pencil">
-                Delete this assignment permanently. Assignments with existing student submissions cannot be deleted.
+                Delete this assignment permanently. Assignments with existing student submissions
+                cannot be deleted.
               </p>
               <Button
                 type="button"

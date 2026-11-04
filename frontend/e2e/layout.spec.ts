@@ -51,7 +51,7 @@ test.describe('Responsive Layout & Viewport Verification', () => {
 
   test('mobile drawer opens, traps focus, and closes via Escape and close button', async ({
     page,
-  }, testInfo) => {
+  }) => {
     // Only run drawer test on mobile viewports (< 768 px)
     const viewport = page.viewportSize();
     if (!viewport || viewport.width >= 768) {
