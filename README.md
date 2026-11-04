@@ -100,6 +100,35 @@ npm test --prefix frontend -- --run
 npm run --prefix frontend build
 ```
 
+### End-to-End (E2E) Browser Testing (Playwright)
+
+The platform provides a comprehensive Playwright browser test suite covering crawler discovery, WCAG AA accessibility, real CSV downloads, responsive viewports (360px to 1920px), error handling, and role-specific user flows.
+
+> [!NOTE]
+> The E2E suite is a developer verification tool run against the local Docker stack; it is not executed in headless CI environments.
+
+**Prerequisites**:
+1. Start the Docker stack with relaxed rate limits for automated browser testing:
+   ```powershell
+   docker compose -f docker-compose.yml -f docker-compose.e2e.yml up -d
+   ```
+2. Reseed the pristine demo dataset:
+   ```powershell
+   docker compose exec backend python -m scripts.seed_demo --reset-demo -y
+   docker compose exec backend python -m scripts.seed_demo
+   ```
+
+**Commands & Runtime**:
+```powershell
+Set-Location frontend
+
+# Run all E2E specs across viewports (~2-3 minutes total runtime)
+npx playwright test -c e2e/playwright.config.ts
+
+# Or run specific functional suites on desktop:
+npx playwright test -c e2e/playwright.config.ts e2e/functional-student.spec.ts --project desktop-1440
+```
+
 ## Security Overview
 
 - **Authentication & Sessions**: Stateful server sessions using cryptographically random 32-byte tokens hashed with SHA-256 in PostgreSQL, transmitted via `HttpOnly`, `SameSite=Lax` cookies.
