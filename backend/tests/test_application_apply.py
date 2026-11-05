@@ -198,3 +198,24 @@ def test_instructor_cannot_access_application_detail(
 
     login_test_user(real_db_client, "inst_app_guard@univ.edu")
     assert real_db_client.get(f"/api/applications/{app.id}").status_code == 404
+
+
+def test_cannot_reapply_after_withdrawing_application(
+    real_db_client: TestClient, real_db_session: Session
+) -> None:
+    """Withdrawn application cannot be resubmitted (409 DUPLICATE_APPLICATION)."""
+    org = create_test_user(real_db_session, "org_wd_re@test.com", UserRole.ORGANIZATION)
+    p = create_test_internship(real_db_session, org)
+    student = create_test_user(real_db_session, "stud_wd_re@test.com", UserRole.STUDENT)
+    prof = StudentProfile(user_id=student.id, university="AAU", department="SE")
+    real_db_session.add(prof)
+    real_db_session.commit()
+    create_test_application(real_db_session, p, student, status=ApplicationStatus.WITHDRAWN)
+
+    login_test_user(real_db_client, student.email)
+    resp = real_db_client.post(
+        f"/api/internships/{p.id}/applications",
+        json={"cover_letter": "Re-applying after withdrawal"},
+    )
+    assert resp.status_code == 409
+    assert resp.json()["code"] == "DUPLICATE_APPLICATION"

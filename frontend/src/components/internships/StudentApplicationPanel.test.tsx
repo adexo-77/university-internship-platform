@@ -118,4 +118,35 @@ describe('StudentApplicationPanel Component', () => {
     fireEvent.click(withdrawBtn);
     expect(handleWithdraw).toHaveBeenCalled();
   });
+
+  it('renders explicit explanation when application is withdrawn', () => {
+    const withdrawnApp: Application = {
+      id: 43,
+      posting_id: 1,
+      student_id: 99,
+      cover_letter: 'Withdrawn cover letter',
+      status: 'withdrawn',
+      created_at: '2026-10-18T00:00:00Z',
+      updated_at: '2026-10-18T00:00:00Z',
+    };
+
+    render(
+      <MemoryRouter>
+        <StudentApplicationPanel
+          internship={mockInternship}
+          myApp={withdrawnApp}
+          isProfileComplete={true}
+          submitting={false}
+          error={null}
+          onApply={vi.fn()}
+          onWithdraw={vi.fn()}
+        />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Withdrawn')).toBeInTheDocument();
+    expect(
+      screen.getByText(/Applications cannot be resubmitted once withdrawn/i)
+    ).toBeInTheDocument();
+  });
 });

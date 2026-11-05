@@ -6,6 +6,7 @@ import { ErrorMessage } from '../ui/ErrorMessage';
 export interface EnrollButtonProps {
   courseId: number;
   enrolled: boolean;
+  hasGradedWork?: boolean;
   onEnrollmentChange: (newEnrolled: boolean) => void;
   disabled?: boolean;
 }
@@ -13,6 +14,7 @@ export interface EnrollButtonProps {
 export const EnrollButton: React.FC<EnrollButtonProps> = ({
   courseId,
   enrolled,
+  hasGradedWork = false,
   onEnrollmentChange,
   disabled = false,
 }) => {
@@ -40,6 +42,22 @@ export const EnrollButton: React.FC<EnrollButtonProps> = ({
       setLoading(false);
     }
   };
+
+  if (enrolled && hasGradedWork) {
+    return (
+      <div className="flex flex-col items-start gap-1">
+        <Button
+          type="button"
+          variant="secondary"
+          disabled
+          title="Cannot leave course after coursework has been graded"
+        >
+          Leave course
+        </Button>
+        <span className="text-xs text-pencil">Coursework graded (enrollment locked)</span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-start gap-2">

@@ -136,6 +136,7 @@ export const CourseDetailPage: React.FC = () => {
                     <EnrollButton
                       courseId={course.id}
                       enrolled={course.enrolled ?? false}
+                      hasGradedWork={course.has_graded_work ?? false}
                       onEnrollmentChange={(newEnrolled) => {
                         setCourse((prev) => (prev ? { ...prev, enrolled: newEnrolled } : null));
                         setNotice(

@@ -85,7 +85,7 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
 2. Use the search bar to filter by course title (e.g., "Database Systems"), code, or department.
 3. Click on a course card to view the **Course Details** page.
 4. Review the syllabus outline, instructor information (Dr. Tadesse Bekele), and assignment list.
-5. Click **Enroll** to join a course (or **Leave Course** to unenroll). Duplicate enrollments are prevented by backend database constraints.
+5. Click **Enroll** to join a course (or **Leave Course** to unenroll). Note: Once any of your submitted coursework in a course has been graded, enrollment is permanently locked for academic integrity and audit records, disabling the leave action. Duplicate enrollments are prevented by backend database constraints.
 
 ### Step 3: Complete &amp; Submit Assignments (`/assignments/:id`)
 1. From a course detail page or your dashboard, click an assignment title.
@@ -112,7 +112,7 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
 6. Navigate to **My Applications** (`/my-applications`) to monitor review statuses:
    - Junior Web Developer Intern: **Accepted**
    - Network Support Intern: **Rejected**
-   - Systems Administration Intern 2025: **Withdrawn**
+   - Systems Administration Intern 2025: **Withdrawn** (Applications can be withdrawn while submitted or shortlisted; note that withdrawal is final and applications cannot be resubmitted for that posting).
 
 ![Internship catalog with rule-based recommendation cards and search filters](screenshots/suggested-internships.png)
 *Internship catalog displaying rule-based suggestion cards with percentage match scores, keyword search, and work mode filter.*

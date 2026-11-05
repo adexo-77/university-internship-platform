@@ -42,6 +42,7 @@ class CourseResponse(BaseModel):
     updated_at: datetime
     enrolled: bool | None = None
     enrolled_count: int | None = None
+    has_graded_work: bool | None = None
 
 
 class CourseListResponse(BaseModel):

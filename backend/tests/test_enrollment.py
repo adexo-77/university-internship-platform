@@ -1,40 +1,18 @@
 """Integration tests for course enrollment, unenrollment, rosters, and cascade deletes."""
 
+from datetime import UTC, datetime, timedelta
+
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.security import hash_password
+from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
 from app.models.enrollment import Enrollment
-from app.models.user import User, UserRole
-
-
-def _create_user(
-    db: Session,
-    email: str,
-    role: UserRole,
-    password: str = "Password123!",
-    full_name: str = "Test User",
-) -> User:
-    """Helper to seed a user directly in the test database."""
-    user = User(
-        email=email,
-        password_hash=hash_password(password),
-        full_name=full_name,
-        role=role,
-        is_active=True,
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
-
-
-def _login(client: TestClient, email: str, password: str = "Password123!") -> None:
-    """Helper to authenticate a test client via login endpoint."""
-    resp = client.post("/api/auth/login", json={"email": email, "password": password})
-    assert resp.status_code == 200
+from app.models.submission import Submission
+from app.models.user import UserRole
+from tests.factories import create_test_user as _create_user
+from tests.factories import login_test_user as _login
 
 
 def test_enrollment_happy_path_and_double_enroll_conflict(
@@ -220,3 +198,35 @@ def test_user_deletion_cascades_to_enrollments(real_db_session: Session) -> None
         select(Enrollment).where(Enrollment.course_id == course.id)
     )
     assert enrollment_after is None
+
+
+def test_leave_course_blocked_when_graded_work_exists(
+    real_db_client: TestClient, real_db_session: Session
+) -> None:
+    """Leaving a course with graded submissions returns 409 GRADED_WORK_EXISTS."""
+    inst = _create_user(real_db_session, "inst_gw@test.edu", UserRole.INSTRUCTOR)
+    stud = _create_user(real_db_session, "stud_gw@test.edu", UserRole.STUDENT)
+    course = Course(instructor_id=inst.id, title="Compilers", status=CourseStatus.PUBLISHED)
+    real_db_session.add(course)
+    real_db_session.commit()
+    real_db_session.add(Enrollment(course_id=course.id, student_id=stud.id))
+    now = datetime.now(UTC)
+    assign = Assignment(
+        course_id=course.id, title="AST", due_at=now + timedelta(days=7), max_points=100
+    )
+    real_db_session.add(assign)
+    real_db_session.commit()
+    sub = Submission(
+        assignment_id=assign.id,
+        student_id=stud.id,
+        content="ast",
+        grade=95,
+        graded_at=now,
+    )
+    real_db_session.add(sub)
+    real_db_session.commit()
+
+    _login(real_db_client, "stud_gw@test.edu")
+    resp = real_db_client.delete(f"/api/courses/{course.id}/enrollment")
+    assert resp.status_code == 409
+    assert resp.json()["code"] == "GRADED_WORK_EXISTS"

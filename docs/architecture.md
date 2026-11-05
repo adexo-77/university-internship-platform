@@ -131,12 +131,12 @@ flowchart TD
   - `course.py`: Course creation, detail lookup with draft visibility guard, update with draft-reversion lock.
   - `course_catalog.py`: Course search and pagination.
   - `course_resource.py`: Course learning resources listing with published/enrolled access check, creation (max 50 limit, URL scheme validation), updating, and cascade deletion.
-  - `enrollment.py`: Course enrollment with duplicate prevention, unenrollment, and roster retrieval.
+  - `enrollment.py`: Course enrollment with duplicate prevention, unenrollment guarded against courses with graded work, and roster retrieval.
   - `assignment.py` & `assignment_query.py`: Assignment creation, course assignment listing with student submission status mapping, assignment detail lookup, update with max_points grade floor check, and deletion protected against existing submissions.
   - `submission.py`: Student assignment submission with server-clock late flag calculation and locked-after-graded protection, student submission lookup, instructor/admin submissions roster, and instructor grading with max_points bounds.
   - `internship.py`: Internship posting creation, detail lookup, update with status transitions (`draft`->`open`, `open`->`closed`), organization own postings list with applicant counts.
   - `internship_catalog.py`: Catalogue search and pagination for students and admin with applied status mapping.
-  - `application.py`: Student application submission with profile completeness and open deadline guards, duplicate prevention, student application listing, withdrawal window, applicant roster retrieval, and organization decision transitions.
+  - `application.py`: Student application submission with profile completeness and open deadline guards, duplicate prevention, student application listing, final withdrawal window (no resubmission), applicant roster retrieval, and organization decision transitions.
   - `notification.py`: Notification creation on 10 domain events, user notifications listing with pagination, unread counter, read status updates, link path validation, and 200-item capacity pruning.
   - `badge.py`: Dynamic student achievement badge computation on read across 8 milestone definitions with progress indicators.
   - `csv_export.py` & `csv_export_writer.py`: Safe CSV streaming generation with UTF-8 BOM, formula-injection sanitization, 10,000 row limits, and role/ownership security checks.

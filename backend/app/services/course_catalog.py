@@ -4,8 +4,10 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import NotFoundException
+from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
 from app.models.enrollment import Enrollment
+from app.models.submission import Submission
 from app.models.user import User, UserRole
 from app.schemas.course import CourseListResponse, CourseResponse
 
@@ -94,12 +96,27 @@ def get_course_by_id(db: Session, course_id: int, current_user: User) -> CourseR
         raise NotFoundException(message="Course not found", code="COURSE_NOT_FOUND")
 
     enrolled: bool | None = None
+    has_graded_work: bool | None = None
     if current_user.role == UserRole.STUDENT:
         enrolled_query = select(Enrollment.id).where(
             Enrollment.course_id == course.id,
             Enrollment.student_id == current_user.id,
         )
         enrolled = db.scalar(enrolled_query) is not None
+        if enrolled:
+            graded_count = (
+                db.scalar(
+                    select(func.count(Submission.id))
+                    .join(Assignment, Submission.assignment_id == Assignment.id)
+                    .where(
+                        Assignment.course_id == course.id,
+                        Submission.student_id == current_user.id,
+                        Submission.grade.is_not(None),
+                    )
+                )
+                or 0
+            )
+            has_graded_work = graded_count > 0
 
     enrolled_count = (
         db.scalar(select(func.count(Enrollment.id)).where(Enrollment.course_id == course.id)) or 0
@@ -116,6 +133,7 @@ def get_course_by_id(db: Session, course_id: int, current_user: User) -> CourseR
         updated_at=course.updated_at,
         enrolled=enrolled,
         enrolled_count=enrolled_count,
+        has_graded_work=has_graded_work,
     )
 
 

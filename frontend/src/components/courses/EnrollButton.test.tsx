@@ -82,4 +82,19 @@ describe('EnrollButton Component', () => {
     expect(screen.getByText('Already enrolled in this course')).toBeInTheDocument();
     expect(handleEnrollmentChange).not.toHaveBeenCalled();
   });
+
+  it('renders disabled button and lock text when coursework has been graded', () => {
+    render(
+      <EnrollButton
+        courseId={42}
+        enrolled={true}
+        hasGradedWork={true}
+        onEnrollmentChange={vi.fn()}
+      />
+    );
+
+    const button = screen.getByRole('button', { name: 'Leave course' });
+    expect(button).toBeDisabled();
+    expect(screen.getByText(/Coursework graded \(enrollment locked\)/i)).toBeInTheDocument();
+  });
 });

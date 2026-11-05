@@ -1,11 +1,13 @@
 """Business logic and database operations for course enrollments and rosters."""
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import ConflictException, ForbiddenException, NotFoundException
+from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
 from app.models.enrollment import Enrollment
+from app.models.submission import Submission
 from app.models.user import User, UserRole
 from app.schemas.enrollment import (
     EnrolledStudentResponse,
@@ -108,6 +110,24 @@ def leave_course(
         raise NotFoundException(
             message="You are not enrolled in this course",
             code="NOT_ENROLLED",
+        )
+
+    has_graded = (
+        db.scalar(
+            select(func.count(Submission.id))
+            .join(Assignment, Submission.assignment_id == Assignment.id)
+            .where(
+                Assignment.course_id == course_id,
+                Submission.student_id == student_id,
+                Submission.grade.is_not(None),
+            )
+        )
+        or 0
+    )
+    if has_graded > 0:
+        raise ConflictException(
+            message="Cannot leave a course after coursework has been graded",
+            code="GRADED_WORK_EXISTS",
         )
 
     db.delete(enrollment)

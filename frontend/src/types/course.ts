@@ -15,6 +15,7 @@ export interface Course {
   updated_at: string;
   enrolled?: boolean | null;
   enrolled_count?: number | null;
+  has_graded_work?: boolean | null;
 }
 
 export interface CourseListResponse {

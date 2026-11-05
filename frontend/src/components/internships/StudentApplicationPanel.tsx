@@ -41,6 +41,12 @@ export const StudentApplicationPanel: React.FC<StudentApplicationPanelProps> = (
               </Button>
             )}
           </div>
+          {myApp.status === 'withdrawn' && (
+            <Notice variant="info">
+              You have withdrawn your application for this internship. Applications cannot be
+              resubmitted once withdrawn.
+            </Notice>
+          )}
           {myApp.decision_message && (
             <div className="pt-2 text-sm text-pencil border-t border-line">
               <span className="font-medium text-ink block">Message from organization:</span>
