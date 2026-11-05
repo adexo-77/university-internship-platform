@@ -12,7 +12,9 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css,json,html}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css,json,html}\"",
     "test": "vitest run",
-    "test:e2e": "playwright test -c e2e/playwright.config.ts"
+    "test:e2e": "playwright test -c e2e/playwright.config.ts",
+    "test:e2e:fast": "playwright test -c e2e/playwright.config.ts --project=setup --project=mobile-360 --project=mobile-390 --project=tablet-768 --project=desktop-1440 --project=desktop-1920",
+    "test:e2e:flows": "playwright test -c e2e/playwright.config.ts --project=setup --project=flows"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans": "^5.3.0",
