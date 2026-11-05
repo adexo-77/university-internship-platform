@@ -4273,6 +4273,17 @@
               }
             ],
             "title": "Enrolled Count"
+          },
+          "has_graded_work": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Has Graded Work"
           }
         },
         "type": "object",
