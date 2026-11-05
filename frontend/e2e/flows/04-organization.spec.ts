@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { authenticateAsRole, loginAs } from './helpers';
+import { authenticateAsRole, loginAs } from '../helpers';
 
 test.describe('Organization Functional Flows', () => {
   test('organization can update company profile', async ({ page }) => {

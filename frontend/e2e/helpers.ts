@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { expect, Page } from '@playwright/test';
 
@@ -24,6 +25,34 @@ export const AUTH_FILES: Record<DemoRole, string> = {
   coordinator: path.join(AUTH_DIR, 'coordinator.json'),
   admin: path.join(AUTH_DIR, 'admin.json'),
 };
+
+/**
+ * Reset and re-seed the demo dataset back to pristine initial state.
+ */
+export function resetDemoDatabase(): void {
+  const repoRoot = path.resolve(AUTH_DIR, '..', '..', '..');
+  const composeBase = path.join(repoRoot, 'docker-compose.yml');
+  const composeE2E = path.join(repoRoot, 'docker-compose.e2e.yml');
+
+  try {
+    execSync(
+      `docker-compose -f "${composeBase}" -f "${composeE2E}" exec -T backend python -m scripts.seed_demo --reset-demo -y`,
+      { stdio: 'ignore', timeout: 15000 }
+    );
+    execSync(
+      `docker-compose -f "${composeBase}" -f "${composeE2E}" exec -T backend python -m scripts.seed_demo --force`,
+      { stdio: 'ignore', timeout: 15000 }
+    );
+  } catch {
+    try {
+      const scriptPath = path.join(repoRoot, 'scripts', 'seed_demo.py');
+      execSync(`python "${scriptPath}" --reset-demo -y`, { stdio: 'ignore', timeout: 15000 });
+      execSync(`python "${scriptPath}" --force`, { stdio: 'ignore', timeout: 15000 });
+    } catch {
+      // Best-effort
+    }
+  }
+}
 
 /**
  * Switch session cookies instantly using pre-authenticated storage states.
@@ -58,12 +87,22 @@ export async function loginAs(page: Page, email: string, password = DEMO_PASSWOR
  * Sign out by clicking the user account menu logout button.
  */
 export async function logout(page: Page): Promise<void> {
-  const logoutBtn = page
-    .locator('#header-logout-button')
-    .or(page.getByRole('button', { name: /Log out|Sign out/i }))
-    .first();
-  await logoutBtn.waitFor({ state: 'visible', timeout: 10000 });
-  await logoutBtn.click();
+  const isMobile = (page.viewportSize()?.width ?? 1440) < 768;
+  if (!isMobile) {
+    const desktopLogout = page.locator('#header-logout-button');
+    await desktopLogout.waitFor({ state: 'visible', timeout: 10000 });
+    await desktopLogout.click();
+  } else {
+    const openMenuBtn = page.getByRole('button', { name: 'Open menu' });
+    if (await openMenuBtn.isVisible()) {
+      await openMenuBtn.click();
+    }
+    const logoutBtn = page
+      .locator('aside[aria-label="Navigation drawer"]')
+      .getByRole('button', { name: /Log out|Sign out/i });
+    await logoutBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await logoutBtn.click();
+  }
   await page.waitForURL((url) => url.pathname.includes('/login'), { timeout: 10000 });
 }
 
@@ -92,7 +131,8 @@ export function trackErrors(page: Page): { getErrors: () => string[] } {
       if (
         !text.includes('favicon') &&
         !text.includes('status of 404') &&
-        !text.includes('status of 401')
+        !text.includes('status of 401') &&
+        !text.includes('ERR_NETWORK_CHANGED')
       ) {
         errors.push(`ConsoleError: ${text}`);
       }

@@ -18,6 +18,8 @@ test.describe('Responsive Layout & Accessibility Verifications', () => {
     test(`role ${account.role}: no horizontal overflow and valid layout`, async ({ page }) => {
       const viewport = page.viewportSize() || { width: 1440, height: 900 };
       await authenticateAsRole(page, account.role as DemoRole);
+      await page.goto('/dashboard');
+      await page.waitForLoadState('networkidle');
       await assertNoHorizontalOverflow(page);
 
       if (viewport.width < 768) {

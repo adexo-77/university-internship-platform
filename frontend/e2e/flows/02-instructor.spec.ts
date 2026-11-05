@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { authenticateAsRole } from './helpers';
+import { authenticateAsRole } from '../helpers';
 
 test.describe('Instructor Functional Flows', () => {
   test.beforeEach(async ({ page }) => {

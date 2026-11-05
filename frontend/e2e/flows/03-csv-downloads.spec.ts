@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { expect, test } from '@playwright/test';
-import { authenticateAsRole } from './helpers';
+import { authenticateAsRole } from '../helpers';
 
 test.describe('CSV Exports in Real Browser Context', () => {
   test('Instructor can export course gradebook CSV', async ({ page }) => {

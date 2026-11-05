@@ -1,19 +1,27 @@
 import { expect, test } from '@playwright/test';
-import { authenticateAsRole, DEMO_PASSWORD } from './helpers';
+import { authenticateAsRole, DEMO_PASSWORD } from '../helpers';
 
 test.describe('Student Functional Flows', () => {
   test.beforeEach(async ({ page }) => {
     await authenticateAsRole(page, 'student');
   });
 
-  test('student can leave and re-enroll in a course', async ({ page }) => {
+  test('student can leave and re-enroll in a course without graded work and is locked on graded course', async ({
+    page,
+  }) => {
     await page.goto('/my-courses');
     await page.waitForLoadState('networkidle');
 
-    // Click first enrolled course
-    const courseLink = page.locator('table a[href^="/courses/"]').first();
-    await expect(courseLink).toBeVisible();
-    await courseLink.click();
+    // Verify Database Systems has locked leave button due to graded work
+    await page.getByRole('link', { name: /Database Systems/i }).first().click();
+    await page.waitForURL(/\/courses\/\d+/, { timeout: 10000 });
+    await expect(page.getByText(/Coursework graded \(enrollment locked\)/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Leave course' })).toBeDisabled();
+
+    // Navigate to Introduction to Programming which has no graded coursework
+    await page.goto('/my-courses');
+    await page.waitForLoadState('networkidle');
+    await page.getByRole('link', { name: /Introduction to Programming/i }).first().click();
     await page.waitForURL(/\/courses\/\d+/, { timeout: 10000 });
 
     const toggleBtn = page.getByRole('button', { name: /Leave course|Enroll in course/i });
@@ -95,7 +103,7 @@ test.describe('Student Functional Flows', () => {
 
     // Withdraw application
     await page.getByRole('button', { name: 'Withdraw' }).click();
-    await expect(page.getByText('Withdrawn', { exact: false })).toBeVisible();
+    await expect(page.getByText('Withdrawn', { exact: true })).toBeVisible();
 
     // Confirm presence on My Applications table
     await page.goto('/my-applications');

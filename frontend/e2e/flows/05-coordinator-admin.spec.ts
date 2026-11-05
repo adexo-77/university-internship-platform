@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { authenticateAsRole } from './helpers';
+import { AUTH_FILES, authenticateAsRole } from '../helpers';
 
 test.describe('Coordinator & Admin Functional Flows', () => {
   test('coordinator can review and approve a pending organization', async ({ page }) => {
@@ -37,7 +37,7 @@ test.describe('Coordinator & Admin Functional Flows', () => {
       const modal = page.getByRole('dialog');
       await expect(modal).toBeVisible();
 
-      const noteArea = page.locator('#review-note');
+      const noteArea = page.locator('#admin-review-note');
       if (await noteArea.isVisible()) {
         await noteArea.fill('Curriculum and academic learning goals approved.');
       }
@@ -53,8 +53,33 @@ test.describe('Coordinator & Admin Functional Flows', () => {
     await page.goto('/admin/internship-reviews');
     await page.waitForLoadState('networkidle');
 
-    // Reject pending posting
-    const reviewBtn = page.getByRole('button', { name: 'Review' }).first();
+    let reviewBtn = page.getByRole('button', { name: 'Review' }).first();
+    if (!(await reviewBtn.isVisible())) {
+      const orgCtx = await page.context().browser()?.newContext({ storageState: AUTH_FILES.organization });
+      if (orgCtx) {
+        const orgPage = await orgCtx.newPage();
+        const res = await orgPage.request.post('/api/internships', {
+          data: {
+            title: `Isolated Review Test ${Date.now()}`,
+            description: 'Test description for rejection review flow in isolation.',
+            requirements: 'Requirements for isolated rejection test.',
+            location: 'Addis Ababa',
+            work_mode: 'remote',
+            duration_weeks: 12,
+            application_deadline: new Date(Date.now() + 86400000 * 30).toISOString(),
+          },
+        });
+        if (res.ok()) {
+          const body = await res.json();
+          await orgPage.request.post(`/api/internships/${body.id}/submit`);
+        }
+        await orgCtx.close();
+        await page.reload();
+        await page.waitForLoadState('networkidle');
+        reviewBtn = page.getByRole('button', { name: 'Review' }).first();
+      }
+    }
+
     if (await reviewBtn.isVisible()) {
       await reviewBtn.click();
       const modal = page.getByRole('dialog');
@@ -64,7 +89,7 @@ test.describe('Coordinator & Admin Functional Flows', () => {
       await modal.getByRole('button', { name: 'Reject' }).click();
       await expect(page.getByText(/Review note is required/i)).toBeVisible();
 
-      await page.locator('#review-note').fill('Posting requires revised academic requirements.');
+      await page.locator('#admin-review-note').fill('Posting requires revised academic requirements.');
       await modal.getByRole('button', { name: 'Reject' }).click();
       await expect(modal).not.toBeVisible();
     }

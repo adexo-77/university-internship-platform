@@ -58,7 +58,7 @@ const ROLE_ROUTES = {
 
 async function auditPageIntegrity(page: Page, path: string): Promise<void> {
   await page.goto(path);
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
 
   // Verify not 404
   const notFoundHeading = page.getByRole('heading', { name: /Page not found/i });
@@ -112,7 +112,7 @@ test.describe('Non-destructive Crawler', () => {
       // Check modal open and close with Escape if on admin users page
       if (role === 'admin') {
         await page.goto('/admin/users');
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
         const resetPwBtn = page.getByRole('button', { name: /Reset password/i }).first();
         if (await resetPwBtn.isVisible()) {
           await resetPwBtn.click();

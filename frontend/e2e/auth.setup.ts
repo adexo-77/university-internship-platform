@@ -1,8 +1,18 @@
 import { test as setup } from '@playwright/test';
 import * as fs from 'fs';
-import { AUTH_DIR, AUTH_FILES, DEMO_PASSWORD, DEMO_USERS, DemoRole, loginAs } from './helpers';
+import {
+  AUTH_DIR,
+  AUTH_FILES,
+  DEMO_PASSWORD,
+  DEMO_USERS,
+  DemoRole,
+  loginAs,
+  resetDemoDatabase,
+} from './helpers';
 
 setup('authenticate all roles and generate storage states', async ({ browser }) => {
+  resetDemoDatabase();
+
   if (!fs.existsSync(AUTH_DIR)) {
     fs.mkdirSync(AUTH_DIR, { recursive: true });
   }
