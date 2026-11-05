@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { DEMO_USERS, loginAs } from './helpers';
+import { authenticateAsRole, loginAs } from './helpers';
 
 test.describe('Organization Functional Flows', () => {
   test('organization can update company profile', async ({ page }) => {
-    await loginAs(page, DEMO_USERS.organization);
+    await authenticateAsRole(page, 'organization');
     await page.goto('/profile');
     await page.waitForLoadState('networkidle');
 
@@ -19,7 +19,7 @@ test.describe('Organization Functional Flows', () => {
   test('organization can create, edit, submit, and close an internship posting', async ({
     page,
   }) => {
-    await loginAs(page, DEMO_USERS.organization);
+    await authenticateAsRole(page, 'organization');
     await page.goto('/internships/new');
     await page.waitForLoadState('networkidle');
 
@@ -81,7 +81,7 @@ test.describe('Organization Functional Flows', () => {
   test('organization can review applicants, update decisions, and export applicants CSV', async ({
     page,
   }) => {
-    await loginAs(page, DEMO_USERS.organization);
+    await authenticateAsRole(page, 'organization');
     await page.goto('/my-internships');
     await page.waitForLoadState('networkidle');
 

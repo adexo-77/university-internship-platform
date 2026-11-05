@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { assertNoHorizontalOverflow, DEMO_USERS, loginAs } from './helpers';
+import { assertNoHorizontalOverflow, authenticateAsRole } from './helpers';
 
 test.describe('Responsive Layout & Viewport Verification', () => {
   const publicPages = ['/login', '/register', '/status'];
@@ -23,7 +23,7 @@ test.describe('Responsive Layout & Viewport Verification', () => {
   });
 
   test('authenticated student pages have zero horizontal overflow', async ({ page }) => {
-    await loginAs(page, DEMO_USERS.student);
+    await authenticateAsRole(page, 'student');
 
     for (const path of authenticatedPages) {
       await page.goto(path);
@@ -35,7 +35,7 @@ test.describe('Responsive Layout & Viewport Verification', () => {
   test('table containers allow internal scroll without overflowing page viewport', async ({
     page,
   }) => {
-    await loginAs(page, DEMO_USERS.student);
+    await authenticateAsRole(page, 'student');
     await page.goto('/courses');
     await page.waitForLoadState('networkidle');
 
@@ -59,7 +59,7 @@ test.describe('Responsive Layout & Viewport Verification', () => {
       return;
     }
 
-    await loginAs(page, DEMO_USERS.student);
+    await authenticateAsRole(page, 'student');
     await page.goto('/dashboard');
     await page.waitForLoadState('networkidle');
 

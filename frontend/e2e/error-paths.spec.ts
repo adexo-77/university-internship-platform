@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { DEMO_PASSWORD, DEMO_USERS, loginAs } from './helpers';
+import { authenticateAsRole, DEMO_PASSWORD, DEMO_USERS } from './helpers';
 
 test.describe('Error Paths & Edge Cases', () => {
   test('404 not-found page displays friendly message and return home link', async ({ page }) => {
@@ -20,7 +20,7 @@ test.describe('Error Paths & Edge Cases', () => {
   test('forbidden access-denied displays allowed roles and Back to dashboard link', async ({
     page,
   }) => {
-    await loginAs(page, DEMO_USERS.student);
+    await authenticateAsRole(page, 'student');
     await page.goto('/admin/users');
     await page.waitForLoadState('networkidle');
 
@@ -34,7 +34,7 @@ test.describe('Error Paths & Edge Cases', () => {
   });
 
   test('401 unauthenticated redirect retains target path in navigation state', async ({ page }) => {
-    await loginAs(page, DEMO_USERS.student);
+    await authenticateAsRole(page, 'student');
     await page.context().clearCookies();
 
     // Access protected route while unauthenticated
@@ -51,7 +51,7 @@ test.describe('Error Paths & Edge Cases', () => {
   });
 
   test('empty states render on zero-result search and clear restores data', async ({ page }) => {
-    await loginAs(page, DEMO_USERS.student);
+    await authenticateAsRole(page, 'student');
     await page.goto('/courses');
     await page.waitForLoadState('networkidle');
 
@@ -70,7 +70,7 @@ test.describe('Error Paths & Edge Cases', () => {
   test('dashboard network failure displays error banner with functioning retry action', async ({
     page,
   }) => {
-    await loginAs(page, DEMO_USERS.student);
+    await authenticateAsRole(page, 'student');
 
     // Mock API failure for dashboard student endpoint
     await page.route('**/api/dashboard/**', async (route) => {

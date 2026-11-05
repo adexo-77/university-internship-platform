@@ -1,10 +1,10 @@
 import * as fs from 'fs';
 import { expect, test } from '@playwright/test';
-import { DEMO_USERS, loginAs } from './helpers';
+import { authenticateAsRole } from './helpers';
 
 test.describe('CSV Exports in Real Browser Context', () => {
   test('Instructor can export course gradebook CSV', async ({ page }) => {
-    await loginAs(page, DEMO_USERS.instructor);
+    await authenticateAsRole(page, 'instructor');
     await page.goto('/my-courses');
     await page.waitForLoadState('networkidle');
 
@@ -33,7 +33,7 @@ test.describe('CSV Exports in Real Browser Context', () => {
   });
 
   test('Organization can export internship applicants CSV', async ({ page }) => {
-    await loginAs(page, DEMO_USERS.organization);
+    await authenticateAsRole(page, 'organization');
     await page.goto('/my-internships');
     await page.waitForLoadState('networkidle');
 
@@ -62,7 +62,7 @@ test.describe('CSV Exports in Real Browser Context', () => {
   });
 
   test('Coordinator can export admin reports for applications', async ({ page }) => {
-    await loginAs(page, DEMO_USERS.coordinator);
+    await authenticateAsRole(page, 'coordinator');
     await page.goto('/admin/reports');
     await page.waitForLoadState('networkidle');
 
@@ -82,7 +82,7 @@ test.describe('CSV Exports in Real Browser Context', () => {
   });
 
   test('Admin can export admin reports for applications and users', async ({ page }) => {
-    await loginAs(page, DEMO_USERS.admin);
+    await authenticateAsRole(page, 'admin');
     await page.goto('/admin/reports');
     await page.waitForLoadState('networkidle');
 

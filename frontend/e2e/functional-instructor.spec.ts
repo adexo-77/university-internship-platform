@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { DEMO_USERS, loginAs } from './helpers';
+import { authenticateAsRole } from './helpers';
 
 test.describe('Instructor Functional Flows', () => {
   test.beforeEach(async ({ page }) => {
-    await loginAs(page, DEMO_USERS.instructor);
+    await authenticateAsRole(page, 'instructor');
   });
 
   test('instructor can create, edit, and publish a course', async ({ page }) => {

@@ -1,3 +1,6 @@
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 import { expect, Page } from '@playwright/test';
 
 export const DEMO_PASSWORD = '12345678';
@@ -11,6 +14,33 @@ export const DEMO_USERS = {
 } as const;
 
 export type DemoRole = keyof typeof DEMO_USERS;
+
+export const AUTH_DIR = fileURLToPath(new URL('./.auth', import.meta.url));
+
+export const AUTH_FILES: Record<DemoRole, string> = {
+  student: path.join(AUTH_DIR, 'student.json'),
+  instructor: path.join(AUTH_DIR, 'instructor.json'),
+  organization: path.join(AUTH_DIR, 'organization.json'),
+  coordinator: path.join(AUTH_DIR, 'coordinator.json'),
+  admin: path.join(AUTH_DIR, 'admin.json'),
+};
+
+/**
+ * Switch session cookies instantly using pre-authenticated storage states.
+ * Falls back to UI login if storage state is missing.
+ */
+export async function authenticateAsRole(page: Page, role: DemoRole): Promise<void> {
+  const filePath = AUTH_FILES[role];
+  if (fs.existsSync(filePath)) {
+    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    await page.context().clearCookies();
+    if (data.cookies && data.cookies.length > 0) {
+      await page.context().addCookies(data.cookies);
+      return;
+    }
+  }
+  await loginAs(page, DEMO_USERS[role]);
+}
 
 /**
  * Log into the platform via the UI login form.
@@ -28,11 +58,13 @@ export async function loginAs(page: Page, email: string, password = DEMO_PASSWOR
  * Sign out by clicking the user account menu logout button.
  */
 export async function logout(page: Page): Promise<void> {
-  const logoutBtn = page.getByRole('button', { name: /Log out|Sign out/i });
-  if (await logoutBtn.isVisible()) {
-    await logoutBtn.click();
-    await page.waitForURL((url) => url.pathname.includes('/login'), { timeout: 10000 });
-  }
+  const logoutBtn = page
+    .locator('#header-logout-button')
+    .or(page.getByRole('button', { name: /Log out|Sign out/i }))
+    .first();
+  await logoutBtn.waitFor({ state: 'visible', timeout: 10000 });
+  await logoutBtn.click();
+  await page.waitForURL((url) => url.pathname.includes('/login'), { timeout: 10000 });
 }
 
 /**

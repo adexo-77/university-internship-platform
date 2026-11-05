@@ -1,19 +1,10 @@
 import { test, expect, Page } from '@playwright/test';
-
-const DEMO_PASSWORD = '12345678';
+import { authenticateAsRole, DemoRole } from './helpers';
 
 const ACCOUNTS = [
   { role: 'student', email: 'abel.tesfaye@example.com', subpage: '/profile' },
   { role: 'admin', email: 'mulugeta.assefa@example.com', subpage: '/admin/users/new' },
 ];
-
-async function loginAs(page: Page, email: string): Promise<void> {
-  await page.goto('/login');
-  await page.fill('#login-email', email);
-  await page.fill('#login-password', DEMO_PASSWORD);
-  await page.click('button[type="submit"]');
-  await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 10000 });
-}
 
 async function assertNoHorizontalOverflow(page: Page): Promise<void> {
   const isOverflowing = await page.evaluate(() => {
@@ -26,7 +17,7 @@ test.describe('Responsive Layout & Accessibility Verifications', () => {
   for (const account of ACCOUNTS) {
     test(`role ${account.role}: no horizontal overflow and valid layout`, async ({ page }) => {
       const viewport = page.viewportSize() || { width: 1440, height: 900 };
-      await loginAs(page, account.email);
+      await authenticateAsRole(page, account.role as DemoRole);
       await assertNoHorizontalOverflow(page);
 
       if (viewport.width < 768) {

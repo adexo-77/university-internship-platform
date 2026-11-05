@@ -13,7 +13,13 @@ export default defineConfig({
   },
   projects: [
     {
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
+    },
+    {
       name: 'mobile-360',
+      dependencies: ['setup'],
+      testIgnore: /auth\.setup\.ts/,
       use: {
         viewport: { width: 360, height: 640 },
         isMobile: true,
@@ -22,6 +28,8 @@ export default defineConfig({
     },
     {
       name: 'mobile-390',
+      dependencies: ['setup'],
+      testIgnore: /auth\.setup\.ts/,
       use: {
         viewport: { width: 390, height: 844 },
         isMobile: true,
@@ -30,18 +38,24 @@ export default defineConfig({
     },
     {
       name: 'tablet-768',
+      dependencies: ['setup'],
+      testIgnore: /auth\.setup\.ts/,
       use: {
         viewport: { width: 768, height: 1024 },
       },
     },
     {
       name: 'desktop-1440',
+      dependencies: ['setup'],
+      testIgnore: /auth\.setup\.ts/,
       use: {
         viewport: { width: 1440, height: 900 },
       },
     },
     {
       name: 'desktop-1920',
+      dependencies: ['setup'],
+      testIgnore: /auth\.setup\.ts/,
       use: {
         viewport: { width: 1920, height: 1080 },
       },

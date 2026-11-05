@@ -1,5 +1,5 @@
 import { expect, Page, test } from '@playwright/test';
-import { DEMO_USERS, loginAs, trackErrors } from './helpers';
+import { authenticateAsRole, DemoRole, trackErrors } from './helpers';
 
 const ROLE_ROUTES = {
   student: [
@@ -103,7 +103,7 @@ test.describe('Non-destructive Crawler', () => {
   for (const [role, routes] of Object.entries(ROLE_ROUTES)) {
     test(`Crawler for role: ${role}`, async ({ page }) => {
       const tracker = trackErrors(page);
-      await loginAs(page, DEMO_USERS[role as keyof typeof DEMO_USERS]);
+      await authenticateAsRole(page, role as DemoRole);
 
       for (const path of routes) {
         await auditPageIntegrity(page, path);

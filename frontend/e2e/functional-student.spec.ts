@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { DEMO_PASSWORD, DEMO_USERS, loginAs } from './helpers';
+import { authenticateAsRole, DEMO_PASSWORD } from './helpers';
 
 test.describe('Student Functional Flows', () => {
   test.beforeEach(async ({ page }) => {
-    await loginAs(page, DEMO_USERS.student);
+    await authenticateAsRole(page, 'student');
   });
 
   test('student can leave and re-enroll in a course', async ({ page }) => {

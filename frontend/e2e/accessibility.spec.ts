@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { DEMO_USERS, loginAs } from './helpers';
+import { authenticateAsRole } from './helpers';
 
 test.describe('Accessibility Audits (axe-core & keyboard)', () => {
   test('Login and Register pages have 0 critical or serious axe violations', async ({ page }) => {
@@ -20,7 +20,7 @@ test.describe('Accessibility Audits (axe-core & keyboard)', () => {
   });
 
   test('Dashboard and catalogues have 0 critical or serious axe violations for student', async ({ page }) => {
-    await loginAs(page, DEMO_USERS.student);
+    await authenticateAsRole(page, 'student');
 
     for (const path of ['/dashboard', '/courses', '/internships', '/account']) {
       await page.goto(path);
@@ -38,7 +38,7 @@ test.describe('Accessibility Audits (axe-core & keyboard)', () => {
   });
 
   test('Admin management pages have 0 critical or serious axe violations', async ({ page }) => {
-    await loginAs(page, DEMO_USERS.admin);
+    await authenticateAsRole(page, 'admin');
 
     for (const path of ['/admin/users', '/admin/organizations', '/admin/reports']) {
       await page.goto(path);
@@ -56,7 +56,7 @@ test.describe('Accessibility Audits (axe-core & keyboard)', () => {
   });
 
   test('Keyboard navigation: tab order, visible focus ring, and Escape closes modal', async ({ page }) => {
-    await loginAs(page, DEMO_USERS.admin);
+    await authenticateAsRole(page, 'admin');
     await page.goto('/admin/users');
     await page.waitForLoadState('networkidle');
 

@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { DEMO_USERS, loginAs } from './helpers';
+import { authenticateAsRole } from './helpers';
 
 test.describe('Coordinator & Admin Functional Flows', () => {
   test('coordinator can review and approve a pending organization', async ({ page }) => {
-    await loginAs(page, DEMO_USERS.coordinator);
+    await authenticateAsRole(page, 'coordinator');
     await page.goto('/admin/organizations');
     await page.waitForLoadState('networkidle');
 
@@ -26,7 +26,7 @@ test.describe('Coordinator & Admin Functional Flows', () => {
   });
 
   test('coordinator can review and approve a pending internship posting', async ({ page }) => {
-    await loginAs(page, DEMO_USERS.coordinator);
+    await authenticateAsRole(page, 'coordinator');
     await page.goto('/admin/internship-reviews');
     await page.waitForLoadState('networkidle');
 
@@ -49,7 +49,7 @@ test.describe('Coordinator & Admin Functional Flows', () => {
   test('coordinator can reject a pending internship with a note and take down an open posting', async ({
     page,
   }) => {
-    await loginAs(page, DEMO_USERS.coordinator);
+    await authenticateAsRole(page, 'coordinator');
     await page.goto('/admin/internship-reviews');
     await page.waitForLoadState('networkidle');
 
@@ -90,7 +90,7 @@ test.describe('Coordinator & Admin Functional Flows', () => {
   });
 
   test('coordinator can export applications report CSV', async ({ page }) => {
-    await loginAs(page, DEMO_USERS.coordinator);
+    await authenticateAsRole(page, 'coordinator');
     await page.goto('/admin/reports');
     await page.waitForLoadState('networkidle');
 
@@ -101,7 +101,7 @@ test.describe('Coordinator & Admin Functional Flows', () => {
   });
 
   test('admin can search, filter, provision user, and toggle active status', async ({ page }) => {
-    await loginAs(page, DEMO_USERS.admin);
+    await authenticateAsRole(page, 'admin');
     await page.goto('/admin/users');
     await page.waitForLoadState('networkidle');
 
@@ -160,7 +160,7 @@ test.describe('Coordinator & Admin Functional Flows', () => {
   });
 
   test('admin can export both applications and users CSV reports', async ({ page }) => {
-    await loginAs(page, DEMO_USERS.admin);
+    await authenticateAsRole(page, 'admin');
     await page.goto('/admin/reports');
     await page.waitForLoadState('networkidle');
 
