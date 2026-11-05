@@ -102,13 +102,18 @@ npm run --prefix frontend build
 
 ### End-to-End (E2E) Browser Testing (Playwright)
 
-The platform provides a comprehensive Playwright browser test suite covering crawler discovery, WCAG AA accessibility, real CSV downloads, responsive viewports (360px to 1920px), error handling, and role-specific user flows.
+The platform provides an automated Playwright browser test suite covering crawler discovery, WCAG AA accessibility audits, real CSV downloads, responsive viewports (360px to 1920px), error boundaries, and end-to-end user flows across all five roles.
 
 > [!NOTE]
 > The E2E suite is a developer verification tool run against the local Docker stack; it is not executed in headless CI environments.
 
+**Test Architecture**:
+- **Authentication Setup & `storageState` Reuse**: The `setup` project (`e2e/auth.setup.ts`) logs in once per role, storing session cookies in `e2e/.auth/<role>.json`. Subsequent test projects reuse these credentials directly, reducing HTTP login volume from hundreds of requests to just 5 initial sessions and staying well below the default security rate limits.
+- **Fast Non-Destructive Suite (`npm run test:e2e:fast`)**: Runs crawler discovery, axe-core WCAG AA audits, layout overflow checks, and error paths across 5 viewport projects (`mobile-360`, `mobile-390`, `tablet-768`, `desktop-1440`, `desktop-1920`) without mutating application data.
+- **Destructive Functional Flows (`npm run test:e2e:flows`)**: Executes multi-step transactional flows (enrollments, assignment grading, internship reviews, and CSV exports) sequentially in a dedicated `flows` project on desktop (`1440px`), with automated demo database resets (`scripts/seed_demo.py --reset-demo`) to guarantee isolation and repeatability.
+
 **Prerequisites**:
-1. Start the Docker stack with relaxed rate limits for automated browser testing:
+1. Start the Docker stack with the testing override for relaxed rate limits:
    ```powershell
    docker compose -f docker-compose.yml -f docker-compose.e2e.yml up -d
    ```
@@ -122,11 +127,14 @@ The platform provides a comprehensive Playwright browser test suite covering cra
 ```powershell
 Set-Location frontend
 
-# Run all E2E specs across viewports (~2-3 minutes total runtime)
-npx playwright test -c e2e/playwright.config.ts
+# Full test suite (setup + 5 viewports + flows, finishes in under 10 minutes):
+npm run test:e2e
 
-# Or run specific functional suites on desktop:
-npx playwright test -c e2e/playwright.config.ts e2e/functional-student.spec.ts --project desktop-1440
+# Fast non-destructive suite across all 5 viewports (~4-5 minutes):
+npm run test:e2e:fast
+
+# Functional flows on desktop with automated seed reset (~1-2 minutes):
+npm run test:e2e:flows
 ```
 
 ## Security Overview

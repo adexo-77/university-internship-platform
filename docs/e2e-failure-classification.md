@@ -31,3 +31,15 @@ This document records the reproduction and classification of failures observed d
 - **Mechanism**: Previously, `leave_course` deleted the `Enrollment` record regardless of whether student work had been submitted and evaluated.
 - **Defect**: While submissions remained in the database, the student disappeared from the course roster and instructor grading views, orphaning assigned grades and compromising academic audit trails.
 - **Remedy**: `leave_course` must verify that no submissions for the course have received a grade. If graded submissions exist, the action is rejected with `409 Conflict` (`GRADED_WORK_EXISTS`), and the UI disables the leave affordance with explanatory messaging.
+
+---
+
+## Resolved Test Architecture &amp; Execution
+
+- **Authentication Caching**: An initial `setup` project logs in once per role and persists session storage in `e2e/.auth/<role>.json`. Tests import these storage states directly via `authenticateAsRole`, reducing HTTP authentication requests to 5 setup sessions and avoiding rate-limiting or lockout issues.
+- **Separation of Concerns**: Non-destructive crawlers, accessibility scans (axe-core), responsive checks, and error paths run across all 5 device viewports (`mobile-360`, `mobile-390`, `tablet-768`, `desktop-1440`, `desktop-1920`). Mutating functional flows are grouped in `frontend/e2e/flows/` and execute sequentially in a dedicated desktop project (`desktop-1440`).
+- **Automated Demo Reset**: A setup hook invokes `scripts/seed_demo.py --reset-demo` prior to running the functional flows, ensuring tests are deterministic and isolated.
+- **Execution Commands**:
+  - `npm run test:e2e`: Runs complete suite under 10 minutes.
+  - `npm run test:e2e:fast`: Runs non-destructive viewports only (~4-5 minutes).
+  - `npm run test:e2e:flows`: Runs functional flows with automated demo reset (~1-2 minutes).

@@ -361,3 +361,32 @@ The web application is fully responsive across mobile, tablet, and desktop displ
 ![Mobile responsive dashboard layout on 360px viewport with header menu toggle and stacked cards](screenshots/mobile-360.png)
 *Mobile viewport rendering at 360px width showing stacked dashboard metric cards, due dates, and top navigation header with menu toggle.*
 
+---
+
+## 12. End-to-End Browser Testing
+
+The platform features an automated Playwright testing framework that verifies real user workflows, navigation, responsiveness, accessibility, and CSV exports against a running stack:
+
+### Architecture &amp; Authentication Reuse
+- **Authentication Setup**: The test runner executes an initial `setup` project (`e2e/auth.setup.ts`) that signs into the platform once for each pre-seeded role (Student, Instructor, Organization, Coordinator, Administrator).
+- **Session Caching (`storageState`)**: Authenticated session cookies are written to local JSON files (`e2e/.auth/<role>.json`). Individual test cases mount these saved sessions directly rather than submitting credentials through the UI login form. This minimizes HTTP authentication requests, preventing rate limit throttling and account lockouts during test runs.
+
+### Test Separation: Fast Viewports vs. Functional Flows
+- **Non-Destructive Suite (`npm run test:e2e:fast`)**: Executes site-wide crawler checks, axe-core WCAG AA accessibility audits, viewport responsive checks, and navigation error boundary tests across five device viewports (mobile 360px, mobile 390px, tablet 768px, desktop 1440px, desktop 1920px) without altering database state.
+- **Destructive Functional Flows (`npm run test:e2e:flows`)**: Tests complex state-changing operations (course enrollment, assignment submission, grading, application reviews, status transitions, and real file downloads) sequentially on a single desktop viewport (`1440px`). A clean database state is automatically guaranteed by executing `scripts/seed_demo.py --reset-demo` before test execution.
+- **Full Suite (`npm run test:e2e`)**: Runs setup, all viewport checks, and destructive flows sequentially, executing end-to-end in under 10 minutes.
+
+### Executing E2E Tests
+```powershell
+Set-Location frontend
+
+# Execute complete E2E test suite
+npm run test:e2e
+
+# Execute fast non-destructive checks across 5 device viewports
+npm run test:e2e:fast
+
+# Execute sequenced functional flows with automated seed reset
+npm run test:e2e:flows
+```
+
