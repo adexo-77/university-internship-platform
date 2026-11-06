@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import adminFixture from '../../test/fixtures/dashboard_admin.json';
 import coordinatorFixture from '../../test/fixtures/dashboard_coordinator.json';
 import instructorFixture from '../../test/fixtures/dashboard_instructor.json';
@@ -27,7 +27,28 @@ const adminData: AdminDashboardResponse = adminFixture;
 const coordinatorData: CoordinatorDashboardResponse = coordinatorFixture;
 
 describe('Dashboards with canonical backend JSON fixtures', () => {
-  it('renders student dashboard with exact contract fixture', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('renders student dashboard with exact contract fixture', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/api/internships/suggestions')) {
+        return new Response(JSON.stringify({ items: [], reason_code: null }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      if (url.includes('/api/badges/my')) {
+        return new Response(JSON.stringify([]), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      return new Response(JSON.stringify({}), { status: 200 });
+    });
+
     render(
       <MemoryRouter>
         <StudentDashboard data={studentData} />
@@ -39,6 +60,11 @@ describe('Dashboards with canonical backend JSON fixtures', () => {
     expect(screen.getByText('Dr. Turing')).toBeInTheDocument();
     expect(screen.getByText('Cloud Infrastructure Intern')).toBeInTheDocument();
     expect(screen.getByText(/Nexus Labs/)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText('No matching suggestions right now')).toBeInTheDocument();
+      expect(screen.getByText('No badges available')).toBeInTheDocument();
+    });
   });
 
   it('renders instructor dashboard with exact contract fixture', () => {

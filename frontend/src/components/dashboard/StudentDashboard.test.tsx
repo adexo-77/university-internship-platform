@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { StudentDashboardResponse } from '../../types/dashboard';
 import { StudentDashboard } from './StudentDashboard';
 
@@ -53,7 +53,27 @@ const mockData: StudentDashboardResponse = {
 };
 
 describe('StudentDashboard', () => {
-  it('renders student data and incomplete profile notice', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/api/internships/suggestions')) {
+        return new Response(JSON.stringify({ items: [], reason_code: null }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      if (url.includes('/api/badges/my')) {
+        return new Response(JSON.stringify([]), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      return new Response(JSON.stringify({}), { status: 200 });
+    });
+  });
+
+  it('renders student data and incomplete profile notice', async () => {
     render(
       <MemoryRouter>
         <StudentDashboard data={mockData} />
@@ -66,9 +86,14 @@ describe('StudentDashboard', () => {
     expect(screen.getByText('50%')).toBeInTheDocument();
     expect(screen.getByText('95 / 100')).toBeInTheDocument();
     expect(screen.getByText('Backend Intern')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText('No matching suggestions right now')).toBeInTheDocument();
+      expect(screen.getByText('No badges available')).toBeInTheDocument();
+    });
   });
 
-  it('hides incomplete profile notice when profile is complete', () => {
+  it('hides incomplete profile notice when profile is complete', async () => {
     render(
       <MemoryRouter>
         <StudentDashboard data={{ ...mockData, profile_complete: true }} />
@@ -76,9 +101,14 @@ describe('StudentDashboard', () => {
     );
 
     expect(screen.queryByText('Incomplete profile')).not.toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText('No matching suggestions right now')).toBeInTheDocument();
+      expect(screen.getByText('No badges available')).toBeInTheDocument();
+    });
   });
 
-  it('renders empty states when there is no data', () => {
+  it('renders empty states when there is no data', async () => {
     const emptyData: StudentDashboardResponse = {
       due_next: [],
       recent_grades: [],
@@ -97,5 +127,10 @@ describe('StudentDashboard', () => {
     expect(screen.getByText('No courses enrolled')).toBeInTheDocument();
     expect(screen.getByText('No graded assignments')).toBeInTheDocument();
     expect(screen.getByText('No applications submitted')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText('No matching suggestions right now')).toBeInTheDocument();
+      expect(screen.getByText('No badges available')).toBeInTheDocument();
+    });
   });
 });

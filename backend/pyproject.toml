@@ -40,6 +40,7 @@ indent-style = "space"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 pythonpath = ["backend"]
+# Starlette testclient issues a premature deprecation warning suggesting httpx2; FastAPI upstream standardly relies on httpx
 filterwarnings = [
     "ignore:.*Using `httpx` with `starlette.testclient` is deprecated.*:Warning",
     "ignore:.*Using `httpx` with `starlette.testclient` is deprecated.*:DeprecationWarning",
