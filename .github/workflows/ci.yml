@@ -47,7 +47,7 @@ jobs:
           pip install -r backend/requirements.txt -r backend/requirements-dev.txt -c backend/constraints.txt
 
       - name: Security audit Python dependencies (pip-audit)
-        run: pip-audit --fail-on=high
+        run: pip-audit -r constraints.txt --no-deps --disable-pip
         working-directory: backend
 
       - name: Check code formatting (ruff format)
