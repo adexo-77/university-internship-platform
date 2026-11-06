@@ -36,9 +36,6 @@ COPY --chown=appuser:appgroup backend/alembic /app/alembic
 COPY --chown=appuser:appgroup backend/app /app/app
 COPY --chown=appuser:appgroup scripts /app/scripts
 
-# Symlink so CLI scripts importing REPO_ROOT / "backend" resolve to /app
-RUN ln -s /app /app/backend
-
 USER appuser
 
 EXPOSE 8000

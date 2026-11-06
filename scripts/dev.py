@@ -13,7 +13,7 @@ import time
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-BACKEND_DIR = REPO_ROOT / "backend"
+BACKEND_DIR = REPO_ROOT / "backend" if (REPO_ROOT / "backend").is_dir() else REPO_ROOT
 FRONTEND_DIR = REPO_ROOT / "frontend"
 
 

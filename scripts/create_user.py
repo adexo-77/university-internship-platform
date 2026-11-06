@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 # Ensure backend directory is in sys.path
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
-BACKEND_DIR = REPO_ROOT / "backend"
+BACKEND_DIR = REPO_ROOT / "backend" if (REPO_ROOT / "backend").is_dir() else REPO_ROOT
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 

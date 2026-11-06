@@ -11,7 +11,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-BACKEND_DIR = REPO_ROOT / "backend"
+BACKEND_DIR = REPO_ROOT / "backend" if (REPO_ROOT / "backend").is_dir() else REPO_ROOT
 SCRIPTS_DIR = REPO_ROOT / "scripts"
 for d in (BACKEND_DIR, SCRIPTS_DIR):
     if str(d) not in sys.path:

@@ -7,7 +7,7 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
-BACKEND_DIR = REPO_ROOT / "backend"
+BACKEND_DIR = REPO_ROOT / "backend" if (REPO_ROOT / "backend").is_dir() else REPO_ROOT
 DOCS_DIR = REPO_ROOT / "docs"
 OUTPUT_FILE = DOCS_DIR / "openapi.json"
 
