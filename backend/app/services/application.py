@@ -17,7 +17,11 @@ from app.schemas.application import (
     ApplicationDecision,
     ApplicationResponse,
 )
-from app.services.application_helpers import get_org_name, to_applicant, to_response
+from app.services.application_serialization import (
+    get_org_name,
+    to_applicant,
+    to_response,
+)
 from app.services.notification import create_notification
 
 
