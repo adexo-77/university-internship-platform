@@ -200,9 +200,9 @@ export const InternshipDetailPage: React.FC = () => {
 
         <ConfirmModal
           isOpen={isCloseModalOpen}
-          title="Close internship"
-          message="Close this internship? Closed postings cannot be reopened."
-          confirmLabel="Close internship"
+          title="Close posting"
+          message="Close this posting? Closed postings cannot be reopened."
+          confirmLabel="Close posting"
           confirmVariant="danger"
           onClose={() => setIsCloseModalOpen(false)}
           onConfirm={async () => {

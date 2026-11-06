@@ -57,7 +57,7 @@ export const InternshipActionsBar: React.FC<InternshipActionsBarProps> = ({
             Extend deadline
           </Button>
           <Button type="button" variant="danger" onClick={onClose}>
-            Close
+            Close posting
           </Button>
         </>
       )}

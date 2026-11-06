@@ -68,14 +68,13 @@ test.describe('Organization Functional Flows', () => {
     await page.getByRole('link', { name: 'Junior Web Developer Intern' }).first().click();
     await page.waitForURL(/\/internships\/\d+/, { timeout: 10000 });
 
-    const closeBtn = page.getByRole('button', { name: 'Close', exact: true });
-    if (await closeBtn.isVisible()) {
-      await closeBtn.click();
-      const confirmModal = page.getByRole('dialog');
-      await expect(confirmModal).toBeVisible();
-      await confirmModal.getByRole('button', { name: 'Close posting' }).click();
-      await expect(page.getByText('Closed', { exact: true })).toBeVisible();
-    }
+    const closeBtn = page.getByRole('button', { name: 'Close posting' });
+    await expect(closeBtn).toBeVisible({ timeout: 10000 });
+    await closeBtn.click();
+    const confirmModal = page.getByRole('dialog');
+    await expect(confirmModal).toBeVisible();
+    await confirmModal.getByRole('button', { name: 'Close posting' }).click();
+    await expect(page.getByText('Closed', { exact: true })).toBeVisible();
   });
 
   test('organization can review applicants, update decisions, and export applicants CSV', async ({
