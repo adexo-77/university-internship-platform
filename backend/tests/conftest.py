@@ -7,13 +7,6 @@ from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import MagicMock
 
-# Filter Starlette's premature deprecation warning suggesting httpx2 (not standard for FastAPI)
-warnings.filterwarnings(
-    "ignore",
-    message=r".*Using `httpx` with `starlette.testclient` is deprecated.*",
-    category=Warning,
-)
-
 import pytest
 from alembic.config import Config
 from fastapi import APIRouter, Depends
@@ -28,6 +21,13 @@ from app.core.database import get_db
 from app.core.deps import require_roles
 from app.main import app
 from app.models.user import User, UserRole
+
+# Filter Starlette's premature deprecation warning suggesting httpx2 (not standard for FastAPI)
+warnings.filterwarnings(
+    "ignore",
+    message=r".*Using `httpx` with `starlette.testclient` is deprecated.*",
+    category=Warning,
+)
 
 TEST_DB_URL = os.getenv("TEST_DATABASE_URL", settings.TEST_DATABASE_URL)
 test_engine = create_engine(TEST_DB_URL, pool_pre_ping=True)

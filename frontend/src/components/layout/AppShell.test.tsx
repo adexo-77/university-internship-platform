@@ -35,9 +35,15 @@ const mockCoordinatorUser: User = {
   role: 'coordinator',
 };
 
+async function renderShell(ui: React.ReactElement) {
+  const res = render(ui);
+  await screen.findAllByRole('link', { name: 'Notifications' });
+  return res;
+}
+
 describe('AppShell Component', () => {
-  it('renders navigation filtered for admin user (Account, Courses, and System status)', () => {
-    render(
+  it('renders navigation filtered for admin user (Account, Courses, and System status)', async () => {
+    await renderShell(
       <MemoryRouter initialEntries={['/status']}>
         <AuthProvider initialUser={mockAdminUser}>
           <AppShell currentPath="/status">
@@ -59,8 +65,8 @@ describe('AppShell Component', () => {
     expect(screen.getAllByRole('button', { name: 'Log out' }).length).toBeGreaterThanOrEqual(1);
   });
 
-  it('filters out admin-only navigation for student role and shows Courses, My courses, Profile', () => {
-    render(
+  it('filters out admin-only navigation for student role and shows Courses, My courses, Profile', async () => {
+    await renderShell(
       <MemoryRouter initialEntries={['/account']}>
         <AuthProvider initialUser={mockStudentUser}>
           <AppShell currentPath="/account">
@@ -78,8 +84,8 @@ describe('AppShell Component', () => {
     expect(screen.getAllByText('Jane Student').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('renders coordinator navigation and role badge correctly', () => {
-    render(
+  it('renders coordinator navigation and role badge correctly', async () => {
+    await renderShell(
       <MemoryRouter initialEntries={['/dashboard']}>
         <AuthProvider initialUser={mockCoordinatorUser}>
           <AppShell currentPath="/dashboard">
@@ -97,13 +103,13 @@ describe('AppShell Component', () => {
     expect(screen.getByText('coordinator')).toBeInTheDocument();
   });
 
-  it('renders custom navigation items passed via navItems prop', () => {
+  it('renders custom navigation items passed via navItems prop', async () => {
     const customNavItems = [
       { path: '/account', label: 'Account', icon: Activity },
       { path: '/courses', label: 'Courses', icon: BookOpen },
     ];
 
-    render(
+    await renderShell(
       <MemoryRouter initialEntries={['/courses']}>
         <AuthProvider initialUser={mockStudentUser}>
           <AppShell navItems={customNavItems} currentPath="/courses">
@@ -119,8 +125,8 @@ describe('AppShell Component', () => {
     expect(coursesLink).toHaveAttribute('aria-current', 'page');
   });
 
-  it('toggles mobile menu open and closed', () => {
-    render(
+  it('toggles mobile menu open and closed', async () => {
+    await renderShell(
       <MemoryRouter initialEntries={['/account']}>
         <AuthProvider initialUser={mockStudentUser}>
           <AppShell currentPath="/account">
@@ -154,7 +160,7 @@ describe('AppShell Component', () => {
       })
     );
 
-    render(
+    await renderShell(
       <MemoryRouter initialEntries={['/account']}>
         <AuthProvider initialUser={mockStudentUser}>
           <AppShell currentPath="/account">
