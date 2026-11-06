@@ -101,15 +101,14 @@ def _verify_referenced_entity_and_values(
         assert pending_posting is not None, "Pending internship review not found"
         assert pending_posting.title.lower() in text
 
-    elif notif.link_path == "/profile":
-        if recipient.role == UserRole.ORGANIZATION:
-            org_prof = db.scalar(
-                select(OrganizationProfile).where(OrganizationProfile.user_id == recipient.id)
-            )
-            assert org_prof is not None, "Organization profile not found"
-            if notif.kind == NotificationKind.ORGANIZATION_STATUS:
-                assert org_prof.approval_status == ApprovalStatus.APPROVED
-                assert org_prof.approval_status.value in text
+    elif notif.link_path == "/profile" and recipient.role == UserRole.ORGANIZATION:
+        org_prof = db.scalar(
+            select(OrganizationProfile).where(OrganizationProfile.user_id == recipient.id)
+        )
+        assert org_prof is not None, "Organization profile not found"
+        if notif.kind == NotificationKind.ORGANIZATION_STATUS:
+            assert org_prof.approval_status == ApprovalStatus.APPROVED
+            assert org_prof.approval_status.value in text
 
 
 def test_seeded_notifications_entities_links_and_values(
