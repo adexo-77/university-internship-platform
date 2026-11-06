@@ -1,13 +1,18 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import * as notifApi from '../../api/notification';
 import { getHomePath } from '../../config/navigation';
 import { AuthProvider } from '../../context/AuthContext';
 import { useAuth } from '../../hooks/useAuth';
 import { User } from '../../types/auth';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleRoute } from './RoleRoute';
+
+beforeEach(() => {
+  vi.spyOn(notifApi, 'fetchUnreadCount').mockResolvedValue({ unread_count: 0 });
+});
 
 const mockStudentUser: User = {
   id: 1,
@@ -87,7 +92,7 @@ describe('ProtectedRoute Guard', () => {
 });
 
 describe('RoleRoute Guard', () => {
-  it('shows access-denied with allowed role names when unauthorized', () => {
+  it('shows access-denied with allowed role names when unauthorized', async () => {
     renderRoute(
       <Routes>
         <Route element={<RoleRoute allowedRoles={['admin']} />}>
@@ -98,6 +103,7 @@ describe('RoleRoute Guard', () => {
       mockStudentUser,
       '/admin-panel'
     );
+    expect(await screen.findAllByRole('link', { name: 'Notifications' })).not.toHaveLength(0);
     expect(screen.getByText("You don't have access to this page")).toBeInTheDocument();
     expect(screen.getByText('This page is only available to admin accounts.')).toBeInTheDocument();
     expect(screen.queryByText('Admin Exclusive Panel')).not.toBeInTheDocument();
@@ -106,7 +112,7 @@ describe('RoleRoute Guard', () => {
     expect(backBtn.closest('a')).toHaveAttribute('href', '/dashboard');
   });
 
-  it('lists multiple role names in the access-denied message', () => {
+  it('lists multiple role names in the access-denied message', async () => {
     renderRoute(
       <Routes>
         <Route element={<RoleRoute allowedRoles={['admin', 'instructor']} />}>
@@ -116,6 +122,7 @@ describe('RoleRoute Guard', () => {
       mockStudentUser,
       '/restricted'
     );
+    expect(await screen.findAllByRole('link', { name: 'Notifications' })).not.toHaveLength(0);
     expect(
       screen.getByText('This page is only available to admin and instructor accounts.')
     ).toBeInTheDocument();
@@ -147,7 +154,7 @@ describe('RoleRoute Guard', () => {
     expect(screen.getByText('Review Queue Content')).toBeInTheDocument();
   });
 
-  it('blocks coordinator role when not in allowedRoles', () => {
+  it('blocks coordinator role when not in allowedRoles', async () => {
     renderRoute(
       <Routes>
         <Route element={<RoleRoute allowedRoles={['admin']} />}>
@@ -158,6 +165,7 @@ describe('RoleRoute Guard', () => {
       mockCoordinatorUser,
       '/admin/users'
     );
+    expect(await screen.findAllByRole('link', { name: 'Notifications' })).not.toHaveLength(0);
     expect(screen.getByText("You don't have access to this page")).toBeInTheDocument();
     expect(screen.queryByText('Admin Users Content')).not.toBeInTheDocument();
   });

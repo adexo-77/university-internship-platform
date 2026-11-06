@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as internshipApi from '../api/internship';
@@ -117,7 +117,10 @@ describe('MyInternshipsPage Organization Approval Notice and Review Controls', (
     expect(screen.queryByText(/Your organization is awaiting approval/i)).not.toBeInTheDocument();
 
     fireEvent.click(submitBtn);
-    expect(internshipApi.submitInternship).toHaveBeenCalledWith(101);
+    await waitFor(() => {
+      expect(internshipApi.submitInternship).toHaveBeenCalledWith(101);
+      expect(internshipApi.getOrganizationInternships).toHaveBeenCalledTimes(2);
+    });
   });
 
   it('renders withdraw to draft button for pending_review posting and calls withdraw api', async () => {
@@ -142,7 +145,10 @@ describe('MyInternshipsPage Organization Approval Notice and Review Controls', (
 
     const withdrawBtn = await screen.findByRole('button', { name: /withdraw to draft/i });
     fireEvent.click(withdrawBtn);
-    expect(internshipApi.withdrawInternship).toHaveBeenCalledWith(101);
+    await waitFor(() => {
+      expect(internshipApi.withdrawInternship).toHaveBeenCalledWith(101);
+      expect(internshipApi.getOrganizationInternships).toHaveBeenCalledTimes(2);
+    });
   });
 
   it('renders rejection notice with admin review note and edit link for rejected postings', async () => {
@@ -202,6 +208,9 @@ describe('MyInternshipsPage Organization Approval Notice and Review Controls', (
     const confirmCloseBtn = screen.getByRole('button', { name: /close internship/i });
     fireEvent.click(confirmCloseBtn);
 
-    expect(internshipApi.closeInternship).toHaveBeenCalledWith(101);
+    await waitFor(() => {
+      expect(internshipApi.closeInternship).toHaveBeenCalledWith(101);
+      expect(internshipApi.getOrganizationInternships).toHaveBeenCalledTimes(2);
+    });
   });
 });

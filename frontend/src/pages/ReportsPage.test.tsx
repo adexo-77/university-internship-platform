@@ -1,9 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import * as notifApi from '../api/notification';
 import { AuthProvider } from '../context/AuthContext';
 import { User } from '../types/auth';
 import { ReportsPage } from './ReportsPage';
+
+beforeEach(() => {
+  vi.spyOn(notifApi, 'fetchUnreadCount').mockResolvedValue({ unread_count: 0 });
+});
 
 const mockAdmin: User = {
   id: 1,
@@ -26,7 +31,7 @@ const mockCoordinator: User = {
 };
 
 describe('ReportsPage', () => {
-  it('renders both Applications and Users export cards for admin', () => {
+  it('renders both Applications and Users export cards for admin', async () => {
     render(
       <MemoryRouter>
         <AuthProvider initialUser={mockAdmin}>
@@ -35,6 +40,7 @@ describe('ReportsPage', () => {
       </MemoryRouter>
     );
 
+    expect(await screen.findAllByRole('link', { name: 'Notifications' })).not.toHaveLength(0);
     expect(screen.getByRole('heading', { name: 'Reports', level: 1 })).toBeInTheDocument();
     expect(screen.getByTestId('applications-report-card')).toBeInTheDocument();
     expect(screen.getByTestId('users-report-card')).toBeInTheDocument();
@@ -45,7 +51,7 @@ describe('ReportsPage', () => {
     expect(links[1]).toHaveAttribute('href', '/api/admin/reports/users.csv');
   });
 
-  it('renders Applications card but hides Users card for coordinator', () => {
+  it('renders Applications card but hides Users card for coordinator', async () => {
     render(
       <MemoryRouter>
         <AuthProvider initialUser={mockCoordinator}>
@@ -54,6 +60,7 @@ describe('ReportsPage', () => {
       </MemoryRouter>
     );
 
+    expect(await screen.findAllByRole('link', { name: 'Notifications' })).not.toHaveLength(0);
     expect(screen.getByRole('heading', { name: 'Reports', level: 1 })).toBeInTheDocument();
     expect(screen.getByTestId('applications-report-card')).toBeInTheDocument();
     expect(screen.queryByTestId('users-report-card')).not.toBeInTheDocument();

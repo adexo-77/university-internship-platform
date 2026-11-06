@@ -41,7 +41,7 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 pythonpath = ["backend"]
 filterwarnings = [
+    "ignore:.*Using `httpx` with `starlette.testclient` is deprecated.*:Warning",
     "ignore:.*Using `httpx` with `starlette.testclient` is deprecated.*:DeprecationWarning",
-    "ignore::Warning:fastapi.testclient.*",
-    "ignore::Warning:starlette.testclient.*",
+    "ignore:.*Using `httpx` with `starlette.testclient` is deprecated.*:starlette.exceptions.StarletteDeprecationWarning",
 ]

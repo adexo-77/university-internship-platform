@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import * as applicationApi from '../api/application';
@@ -67,6 +67,9 @@ describe('MyApplicationsPage Component', () => {
     const confirmBtn = within(dialog).getByRole('button', { name: /^withdraw$/i });
     fireEvent.click(confirmBtn);
 
-    expect(applicationApi.withdrawApplication).toHaveBeenCalledWith(501);
+    await waitFor(() => {
+      expect(applicationApi.withdrawApplication).toHaveBeenCalledWith(501);
+      expect(applicationApi.getStudentApplications).toHaveBeenCalledTimes(2);
+    });
   });
 });
