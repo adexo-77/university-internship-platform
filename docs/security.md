@@ -37,6 +37,7 @@ This document details the security posture, threat model, control mechanisms, kn
 | **Input Sanitization** | `backend/app/core/sanitization.py` | Strips control characters, rejects `\x00` bytes, and normalizes email addresses via safe NFKC unicode conversion. |
 | **Logging &amp; Error Masking** | `backend/app/core/logging.py` | Request logger masking auth payloads; 500 handler logging stack traces server-side and returning clean `{detail, code, request_id}`. |
 | **Role Authorization** | `backend/app/core/deps.py` | Mandatory server-side session resolution; explicit per-route role sets enforced via `require_roles(*roles)` returning `HTTP 403` for unauthorized personas. |
+| **Dependency Audits** | CI / Package Manifests | Continuous supply-chain checks with `pip-audit` on pinned constraints and `npm audit --audit-level=high --omit=dev` ensuring 0 high/critical vulnerabilities. |
 
 ---
 
