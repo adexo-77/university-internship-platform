@@ -29,7 +29,7 @@ python -m pytest backend/tests/test_openapi_export.py -v
 Authentication uses stateful, server-managed sessions with cryptographically random tokens:
 - **Cookie Name**: `session_id`
 - **Security Flags**: `HttpOnly`, `SameSite=Lax`, `Path=/`, and `Secure` (in production)
-- **Session Expiry**: Configurable TTL (default 24 hours); expired sessions are automatically purged.
+- **Session Expiry**: Configurable TTL (default 7 days / 604,800 seconds); expired sessions are automatically purged.
 - **Identity Decoupling**: Identity is resolved exclusively from the server session record in PostgreSQL. The server rejects any client attempts to forge user identities through headers or request bodies.
 
 ---

@@ -26,7 +26,7 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 > **What to Say**:
 > *"Welcome! Today I am presenting the University Learning &amp; Internship Platform. Traditional university portals separate academic coursework from career recruitment, creating data silos. This platform integrates course tracking, assignment submissions with strict deadline enforcement, verified corporate internship postings, and university administrative governance into a single, cohesive system.*
 >
-> *Under the hood, it's powered by FastAPI, PostgreSQL with SQLAlchemy 2, Alembic migrations, and a React 18 TypeScript frontend. Everything has been built with clean modular architecture, zero linter warnings, and over 390 automated tests."*
+> *Under the hood, it's powered by FastAPI, PostgreSQL with SQLAlchemy 2, Alembic migrations, and a React 18 TypeScript frontend. Everything has been built with clean modular architecture, zero linter warnings, and comprehensive automated test suites."*
 
 ---
 

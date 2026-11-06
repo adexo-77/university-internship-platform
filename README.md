@@ -9,7 +9,7 @@ A web platform that integrates academic coursework management, assignment submis
 ## Features
 
 - **Students**: Browse published courses, enroll with duplicate guards, access reference links, submit coursework with automatic late detection, discover vetted internships with rule-based match scores, apply with cover letters, and track progress with milestone achievement badges.
-- **Instructors**: Author courses with structured syllabi, publish or archive courses, attach external reference links, set assignments with maximum point thresholds and deadlines, review student submissions, and submit bounded numeric grades with qualitative feedback.
+- **Instructors**: Author courses with structured syllabi, manage course publication status (`draft` or `published`), attach external reference links, set assignments with maximum point thresholds and deadlines, review student submissions, and submit bounded numeric grades with qualitative feedback.
 - **Partner Organizations**: Maintain company profile, post internship listings with work mode and duration parameters, edit drafts, submit postings for institutional review, track applicant pipelines, and manage candidate hiring decisions (`submitted` &rarr; `shortlisted` &rarr; `accepted` / `rejected`).
 - **Coordinators**: Review pending organization registrations, moderate submitted internship listings (approve or reject with feedback notes), inspect listings across all statuses, and monitor applicant rosters in read-only mode.
 - **Administrators**: Platform-wide metrics dashboard, user account provisioning, account activation/deactivation guards, administrative password resets, organization approvals, internship moderation, and safe CSV data exports.
@@ -68,7 +68,7 @@ All seeded demo accounts share the password `12345678` (demo-only, populated via
 | Layer | Technologies | Key Libraries / Tools |
 | :--- | :--- | :--- |
 | **Backend** | Python 3.12+, FastAPI, Uvicorn | SQLAlchemy 2, Alembic, psycopg 3, Pydantic v2 |
-| **Frontend** | React 18, TypeScript (strict), Vite | Tailwind CSS, Lucide React, React Router 6 |
+| **Frontend** | Node 20, React 18, TypeScript (strict), Vite | Tailwind CSS, Lucide React, React Router 6 |
 | **Database** | PostgreSQL 16 | Relational constraints, triggers, indexes |
 | **Testing** | Pytest, Vitest, React Testing Library | FastAPI TestClient, Ruff, ESLint, Prettier |
 | **Packaging** | Docker, Docker Compose, Nginx | Multi-stage container builds, Alpine runtime |
@@ -110,7 +110,9 @@ The platform provides an automated Playwright browser test suite covering crawle
 **Test Architecture**:
 - **Authentication Setup & `storageState` Reuse**: The `setup` project (`e2e/auth.setup.ts`) logs in once per role, storing session cookies in `e2e/.auth/<role>.json`. Subsequent test projects reuse these credentials directly, reducing HTTP login volume from hundreds of requests to just 5 initial sessions and staying well below the default security rate limits.
 - **Fast Non-Destructive Suite (`npm run test:e2e:fast`)**: Runs crawler discovery, axe-core WCAG AA audits, layout overflow checks, and error paths across 5 viewport projects (`mobile-360`, `mobile-390`, `tablet-768`, `desktop-1440`, `desktop-1920`) without mutating application data.
-- **Destructive Functional Flows (`npm run test:e2e:flows`)**: Executes multi-step transactional flows (enrollments, assignment grading, internship reviews, and CSV exports) sequentially in a dedicated `flows` project on desktop (`1440px`), with automated demo database resets (`scripts/seed_demo.py --reset-demo`) to guarantee isolation and repeatability.
+- **Destructive Functional Flows (`npm run test:e2e:flows`)**: Executes multi-step transactional flows (enrollments, assignment grading, internship reviews, and CSV exports) sequentially in a dedicated `flows` project on desktop (`1440px`), with automated demo database resets (`scripts/seed_demo.py --reset-demo`) to guarantee isolation and repeatability. Verified invariants include:
+  - **Academic Integrity Guard**: A student cannot leave an enrolled course once graded work exists (`409 Conflict: GRADED_WORK_EXISTS`), preventing orphaned submissions and preserving instructor grading history.
+  - **Application Withdrawal Finality**: Withdrawing an internship application is terminal; students cannot re-apply to the same posting once withdrawn, protecting employer applicant pipeline integrity.
 
 **Prerequisites**:
 1. Start the Docker stack with the testing override for relaxed rate limits:

@@ -44,8 +44,11 @@ wheels/
 htmlcov/
 .mypy_cache/
 test-results/
+test-results
 playwright-report/
+playwright-report
 frontend/e2e/.auth/
+frontend/e2e/.auth
 
 # Node & Frontend
 node_modules/
