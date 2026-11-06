@@ -29,7 +29,6 @@ from app.core.deps import require_roles
 from app.main import app
 from app.models.user import User, UserRole
 
-
 TEST_DB_URL = os.getenv("TEST_DATABASE_URL", settings.TEST_DATABASE_URL)
 test_engine = create_engine(TEST_DB_URL, pool_pre_ping=True)
 TestingSessionLocal = sessionmaker(

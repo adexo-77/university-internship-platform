@@ -310,12 +310,12 @@ flowchart TD
     end
 
     subgraph ComposeNetwork ["Docker Compose Bridge Network"]
-        subgraph FrontendContainer ["frontend container (nginx:1.27.2-alpine)"]
+        subgraph FrontendContainer ["frontend container (build: node:20.18.0-alpine, runtime: nginx:1.27.2-alpine)"]
             Nginx["Nginx Reverse Proxy & Static Server"]
             Static["SPA Dist Assets (/usr/share/nginx/html)"]
         end
 
-        subgraph BackendContainer ["backend container (python:3.12.7-slim)"]
+        subgraph BackendContainer ["backend container (python:3.12.7-slim-bookworm)"]
             FastAPI["FastAPI REST Application (:8000)"]
             Alembic["Alembic Migration Runner"]
         end
@@ -334,6 +334,12 @@ flowchart TD
     Alembic -.->|Startup Migration| PostgreSQL
     PostgreSQL --- Volume
 ```
+
+### Pinned Container Images
+- **Frontend Build**: `node:20.18.0-alpine` (multi-stage Vite static asset compilation)
+- **Frontend Runtime**: `nginx:1.27.2-alpine` (reverse-proxy, SPA routing, security headers)
+- **Backend Build & Runtime**: `python:3.12.7-slim-bookworm` (non-root execution, psycopg 3, Uvicorn)
+- **Database**: `postgres:16.4-alpine` (PostgreSQL 16 relational engine)
 
 ### Production Hardening & Reverse-Proxy Requirements
 In production environments:

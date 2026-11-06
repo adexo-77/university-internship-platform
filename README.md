@@ -18,7 +18,7 @@ A web platform that integrates academic coursework management, assignment submis
 
 ### 1. Demo (Docker)
 
-Run the full containerized platform (PostgreSQL, auto-migrated & pre-seeded FastAPI backend, and Nginx reverse proxy) with a single command:
+Run the full containerized platform (PostgreSQL 16 via `postgres:16.4-alpine`, auto-migrated & pre-seeded FastAPI backend via `python:3.12.7-slim-bookworm`, and React SPA built with `node:20.18.0-alpine` served via `nginx:1.27.2-alpine` reverse proxy) with a single command:
 
 ```powershell
 docker compose up --build -d --wait
@@ -67,11 +67,11 @@ All seeded demo accounts share the password `12345678` (demo-only, populated via
 
 | Layer | Technologies | Key Libraries / Tools |
 | :--- | :--- | :--- |
-| **Backend** | Python 3.12+, FastAPI, Uvicorn | SQLAlchemy 2, Alembic, psycopg 3, Pydantic v2 |
-| **Frontend** | Node 20, React 18, TypeScript (strict), Vite | Tailwind CSS, Lucide React, React Router 6 |
-| **Database** | PostgreSQL 16 | Relational constraints, triggers, indexes |
+| **Backend** | Python 3.12+ (`python:3.12.7-slim-bookworm`), FastAPI, Uvicorn | SQLAlchemy 2, Alembic, psycopg 3, Pydantic v2 |
+| **Frontend** | Node 20 (`node:20.18.0-alpine`), React 18, TypeScript (strict), Vite | Tailwind CSS, Lucide React, React Router 6 |
+| **Database** | PostgreSQL 16 (`postgres:16.4-alpine`) | Relational constraints, triggers, indexes |
 | **Testing** | Pytest, Vitest, React Testing Library | FastAPI TestClient, Ruff, ESLint, Prettier |
-| **Packaging** | Docker, Docker Compose, Nginx | Multi-stage container builds, Alpine runtime |
+| **Packaging** | Docker, Docker Compose, Nginx (`nginx:1.27.2-alpine`) | Multi-stage container builds, Alpine runtime |
 
 ## Architecture
 
