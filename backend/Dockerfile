@@ -8,9 +8,9 @@ WORKDIR /build
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-COPY backend/requirements.txt .
+COPY backend/requirements.txt backend/constraints.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir --default-timeout=100 -r requirements.txt -c constraints.txt
 
 # Stage 2: Minimal runtime image with non-root user and healthcheck
 FROM python:3.12.7-slim-bookworm AS runtime

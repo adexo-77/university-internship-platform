@@ -38,11 +38,16 @@ jobs:
           cache-dependency-path: |
             backend/requirements.txt
             backend/requirements-dev.txt
+            backend/constraints.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r backend/requirements.txt -r backend/requirements-dev.txt
+          pip install -r backend/requirements.txt -r backend/requirements-dev.txt -c backend/constraints.txt
+
+      - name: Security audit Python dependencies (pip-audit)
+        run: pip-audit --fail-on=high
+        working-directory: backend
 
       - name: Check code formatting (ruff format)
         run: ruff format --check .
@@ -65,14 +70,14 @@ jobs:
           ENVIRONMENT: test
 
   frontend:
-    name: Frontend (Node LTS, Lint, Format, Vitest, Build)
+    name: Frontend (Node 20, Lint, Format, Vitest, Build)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js LTS
+      - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -81,6 +86,10 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        working-directory: frontend
+
+      - name: Security audit Node dependencies (npm audit)
+        run: npm audit --audit-level=high --omit=dev
         working-directory: frontend
 
       - name: Check code formatting (prettier)
@@ -133,11 +142,12 @@ jobs:
           cache-dependency-path: |
             backend/requirements.txt
             backend/requirements-dev.txt
+            backend/constraints.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r backend/requirements.txt -r backend/requirements-dev.txt
+          pip install -r backend/requirements.txt -r backend/requirements-dev.txt -c backend/constraints.txt
 
       - name: Run migrations on fresh database
         run: alembic upgrade head
