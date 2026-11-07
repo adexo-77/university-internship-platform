@@ -110,10 +110,10 @@ def seed_notifications(db: Session, users: dict[str, User], now: datetime) -> in
             (
                 s1,
                 NotificationKind.APPLICATION_DECISION,
-                f"Application status: {p_net.title}",
-                f"Your application for '{p_net.title}' was reviewed: {app_abel_net.decision_message}",
+                f"Application rejected: {p_net.title}",
+                f"Your application for '{p_net.title}' was marked as rejected: {app_abel_net.decision_message}",
                 f"/applications/{app_abel_net.id}",
-                now - timedelta(days=2),
+                None,
             )
         )
     if s1 and rel_a and course_db:
