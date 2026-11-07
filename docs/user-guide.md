@@ -49,9 +49,9 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
 | **Ms. Selamawit Tadesse** | Coordinator | `selamawit.tadesse@example.com` | `12345678` | Complete | Coordinator dashboard, organization registration review and approvals, internship moderation review queue, listing takedowns, and read-only applicant roster inspection. |
 | **Dr. Tadesse Bekele** | Instructor | `tadesse.bekele@example.com` | `12345678` | Complete | Instructor dashboard, courses "Database Systems" (published) and "Introduction to Programming" (published), assignment authoring, and student submission grading. |
 | **Ms. Hana Worku** | Instructor | `hana.worku@example.com` | `12345678` | Complete | Course authoring in draft state ("Software Engineering"), curriculum planning, and department course rosters. |
-| **Abel Tesfaye** | Student | `abel.tesfaye@example.com` | `12345678` | Complete | Student dashboard, course progress, submitted ER Diagramming assignment (graded 100/100 with instructor feedback), accepted internship offer from Kaffa Digital Solutions, rejected application, and withdrawn application. |
-| **Meron Girma** | Student | `meron.girma@example.com` | `12345678` | Complete | Student dashboard, course progress, late assignment submission awaiting instructor grading, shortlisted internship candidate at Kaffa Digital Solutions. |
-| **Dawit Lemma** | Student | `dawit.lemma@example.com` | `12345678` | Incomplete | Incomplete profile demonstration showing the profile completion banner and the profile-complete rule before applying (blocking internship applications until university and department are saved); submitted application to Network Support Intern. |
+| **Abel Tesfaye** | Student | `abel.tesfaye@example.com` | `12345678` | Complete | Student dashboard with Next steps card, overdue Database Normalization Lab, tight Advanced SQL Queries assignment due tomorrow, open application to Junior Web Developer Intern, graded 100/100 ER Diagramming submission, rejected and withdrawn applications. |
+| **Meron Girma** | Student | `meron.girma@example.com` | `12345678` | Complete | Student dashboard, high-point Relational Schema Design assignment due later in window (day 5, 100 pts), accepted application to Junior Web Developer Intern, 0 overdue and 0 tight tasks. |
+| **Dawit Lemma** | Student | `dawit.lemma@example.com` | `12345678` | Incomplete | Incomplete profile (missing university and department), receives suggested Data Analysis Intern listing with deadline in window accompanied by profile-completion guidance in the study plan, and submitted application to Network Support Intern. |
 | **Kaffa Digital Solutions** (Yohannes Haile) | Organization | `yohannes.haile@example.com` | `12345678` | Approved | Organization dashboard, postings across lifecycles (`open`, `pending_review`, `draft`, `rejected`), applicant hiring pipeline (accepted Abel Tesfaye, shortlisted Meron Girma). |
 | **Gibe Valley Telecom Services** (Rahel Desta) | Organization | `rahel.desta@example.com` | `12345678` | Approved | Organization dashboard, network support and systems administration postings, candidate rejection decision, and closed listing. |
 | **Abay Data Labs** (Eyob Kassa) | Organization | `eyob.kassa@example.com` | `12345678` | Pending Approval | Pending approval banner demonstration; can create and edit draft postings, but submitting for review or publishing is blocked until an administrator or coordinator reviews and approves the organization profile. |
@@ -110,9 +110,24 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
 4. Select an active listing and click **Apply**.
 5. Fill in your personalized cover letter and submit your application.
 6. Navigate to **My Applications** (`/my-applications`) to monitor review statuses:
-   - Junior Web Developer Intern: **Accepted**
+   - Junior Web Developer Intern: **Submitted** (open, awaiting employer review)
    - Network Support Intern: **Rejected**
    - Systems Administration Intern 2025: **Withdrawn** (Applications can be withdrawn while submitted or shortlisted; note that withdrawal is final and applications cannot be resubmitted for that posting).
+
+### Step 6: Follow the Rule-Based Weekly Study Plan (`/study-plan`)
+1. Click **Study plan** in the top navigation or click **View full study plan** from the **Next steps** card on your dashboard.
+2. Review the **Weekly Progress Summary** card:
+   - Actionable headline summarizing current workload urgency.
+   - 3 to 5 plain sentences synthesizing pending deadlines, course performance averages, nearest achievement badge progress, and active internship application counts.
+   - Metric summary pills: overdue items, tight tasks, upcoming deadlines, active applications, suggested internships in window, and total estimated study minutes.
+3. Explore the **Daily Schedule**:
+   - Tasks are allocated backwards from assignment due dates subject to a 120-minute daily effort cap.
+   - Effort estimates derive deterministically from assignment point values (&le; 20 pts: 45 min, &le; 50 pts: 90 min, &gt; 50 pts: 150 min).
+   - Overdue coursework is scheduled on today with an **Overdue** badge.
+   - Tasks that cannot fit before their deadlines are scheduled from today with a **Tight** badge.
+   - Open suggested internships with deadlines in the window prompt students to apply. Students with incomplete profiles receive an explicit **Profile incomplete** badge and guidance to complete mandatory fields.
+4. Switch the study window between **7 days** (default) and **14 days** using the window selector pills.
+5. Click **Deterministic rules** to expand the full explanation of how the schedule is computed. Note that this plan is 100% rule-based and deterministic without any AI.
 
 ![Internship catalog with rule-based recommendation cards and search filters](screenshots/suggested-internships.png)
 *Internship catalog displaying rule-based suggestion cards with percentage match scores, keyword search, and work mode filter.*

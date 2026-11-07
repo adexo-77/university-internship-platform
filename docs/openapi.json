@@ -326,6 +326,54 @@
         }
       }
     },
+    "/api/students/me/study-plan": {
+      "get": {
+        "tags": [
+          "students"
+        ],
+        "summary": "Get rule-based study plan and weekly progress summary",
+        "description": "Generate a deterministic rule-based study plan for the signed-in student.",
+        "operationId": "get_student_study_plan_api_students_me_study_plan_get",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 14,
+              "minimum": 3,
+              "description": "Number of days in study plan window (3 to 14)",
+              "default": 7,
+              "title": "Days"
+            },
+            "description": "Number of days in study plan window (3 to 14)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyPlanResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/organizations/me": {
       "get": {
         "tags": [
@@ -6185,6 +6233,245 @@
         ],
         "title": "StudentSubmissionRosterItem",
         "description": "Enrolled student with their submission record if present."
+      },
+      "StudyPlanDay": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/StudyPlanItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total_minutes": {
+            "type": "integer",
+            "title": "Total Minutes",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "date"
+        ],
+        "title": "StudyPlanDay",
+        "description": "Plan items allocated to a specific calendar date in the study window."
+      },
+      "StudyPlanItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "course_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Title"
+          },
+          "link_path": {
+            "type": "string",
+            "title": "Link Path"
+          },
+          "due_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Due At"
+          },
+          "suggested_minutes": {
+            "type": "integer",
+            "title": "Suggested Minutes"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "flags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Flags"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "title",
+          "link_path",
+          "due_at",
+          "suggested_minutes",
+          "reason"
+        ],
+        "title": "StudyPlanItem",
+        "description": "An actionable study or application task in the study plan."
+      },
+      "StudyPlanMetrics": {
+        "properties": {
+          "enrolled_courses_count": {
+            "type": "integer",
+            "title": "Enrolled Courses Count"
+          },
+          "assignments_due_count": {
+            "type": "integer",
+            "title": "Assignments Due Count"
+          },
+          "overdue_count": {
+            "type": "integer",
+            "title": "Overdue Count"
+          },
+          "tight_count": {
+            "type": "integer",
+            "title": "Tight Count"
+          },
+          "total_suggested_minutes": {
+            "type": "integer",
+            "title": "Total Suggested Minutes"
+          },
+          "applications_count": {
+            "type": "integer",
+            "title": "Applications Count"
+          },
+          "open_internships_count": {
+            "type": "integer",
+            "title": "Open Internships Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enrolled_courses_count",
+          "assignments_due_count",
+          "overdue_count",
+          "tight_count",
+          "total_suggested_minutes",
+          "applications_count",
+          "open_internships_count"
+        ],
+        "title": "StudyPlanMetrics",
+        "description": "Key metric counts summarizing current student commitments."
+      },
+      "StudyPlanResponse": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "window": {
+            "$ref": "#/components/schemas/StudyPlanWindow"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/StudyPlanSummary"
+          },
+          "plan": {
+            "items": {
+              "$ref": "#/components/schemas/StudyPlanDay"
+            },
+            "type": "array",
+            "title": "Plan"
+          },
+          "overdue": {
+            "items": {
+              "$ref": "#/components/schemas/StudyPlanItem"
+            },
+            "type": "array",
+            "title": "Overdue"
+          },
+          "tight": {
+            "items": {
+              "$ref": "#/components/schemas/StudyPlanItem"
+            },
+            "type": "array",
+            "title": "Tight"
+          },
+          "rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Rules"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "window",
+          "summary",
+          "plan",
+          "rules"
+        ],
+        "title": "StudyPlanResponse",
+        "description": "Complete rule-based study plan and weekly progress summary payload."
+      },
+      "StudyPlanSummary": {
+        "properties": {
+          "headline": {
+            "type": "string",
+            "title": "Headline"
+          },
+          "sentences": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sentences"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/StudyPlanMetrics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "headline",
+          "sentences",
+          "metrics"
+        ],
+        "title": "StudyPlanSummary",
+        "description": "Synthesized text summary and headline derived deterministically from student data."
+      },
+      "StudyPlanWindow": {
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "End Date"
+          },
+          "days": {
+            "type": "integer",
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start_date",
+          "end_date",
+          "days"
+        ],
+        "title": "StudyPlanWindow",
+        "description": "Temporal boundaries of the generated study plan."
       },
       "SubmissionGrade": {
         "properties": {

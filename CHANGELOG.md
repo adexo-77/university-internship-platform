@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.0] - 2026-10-28
 
 ### Added
+- **Student Study Plan &amp; Weekly Progress Summary (Rule-Based, No AI)**:
+  - Deterministic scheduling and progress service (`services/study_plan.py`, `services/study_plan_scheduler.py`, `services/study_plan_summary.py`) with no AI or external network calls:
+    - Point-based effort estimation (&le; 20 pts: 45 min, &le; 50 pts: 90 min, &gt; 50 pts: 150 min).
+    - 120-minute daily effort cap per calendar day.
+    - Backward allocation from assignment due dates; tasks unable to fit before deadlines flagged as "tight" and scheduled from today; overdue tasks scheduled immediately on today with "overdue" flag.
+    - Suggested internships within study window added with "Apply by <date>" and profile completion notice for incomplete profiles.
+    - Generated headline, 3 to 5 plain summary sentences, and progress metrics.
+  - Thin router endpoint `GET /api/students/me/study-plan` (query parameter `days`: 3 to 14, default 7), restricted strictly to authenticated students.
+  - Frontend `StudyPlanPage` at `/study-plan` with window switcher (7/14 days), summary card, daily schedule breakdown, overdue/tight badges, and expandable "Deterministic rules" disclosure.
+  - Compact `StudentNextStepsCard` integrated into `StudentDashboard`.
+  - Comprehensive unit, integration, and e2e test coverage (`test_study_plan_rules.py`, `test_study_plan_access.py`, `StudyPlanPage.test.tsx`, `StudentNextStepsCard.test.tsx`, Playwright e2e spec `study-plan.spec.ts`).
+  - Synchronized OpenAPI specification in `docs/openapi.json`.
 - **Rule-Based Suggested Internships &amp; Student Preferences**:
   - `student_profiles` model extended with `preferred_work_modes` (`VARCHAR(16)[]`, options: `remote`, `hybrid`, `onsite`) and `preferred_location` (`VARCHAR(80)`), backed by Alembic migration `04aa253deb9b`.
   - Pydantic schema validation rejecting invalid work modes, duplicates, control characters, or oversized location strings.

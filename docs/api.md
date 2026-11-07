@@ -150,6 +150,13 @@ Authentication uses stateful, server-managed sessions with cryptographically ran
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/students/me/badges` | Student | Compute and return list of 8 achievement badges with progress for the authenticated student. |
 
+### Student Study Plan Endpoints
+Deterministic, rule-based schedule and weekly progress summary generated from enrolled courses, pending assignments, submission statuses, recent grades, badges, and suggested internships. No AI or external network calls.
+
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/students/me/study-plan` | Student | Retrieve deterministic rule-based study schedule and progress summary. Parameters: `days` (query parameter, integer from 3 to 14, default 7). Values outside range return `422 Unprocessable Entity`. Restricted to students (`403 Forbidden` for non-students; `401 Unauthorized` if unauthenticated). Response fields: `generated_at`, `window` (`start_date`, `end_date`, `days`), `summary` (`headline`, `sentences`, `metrics`), `plan` (daily array with `date`, `total_minutes`, and `items`), `overdue`, `tight`, `rules`. Effort formula: &le; 20 pts &rarr; 45 min, &le; 50 pts &rarr; 90 min, &gt; 50 pts &rarr; 150 min. Daily effort cap: 120 minutes. Backward allocation from due date; items that cannot fit are flagged "tight". Suggested internships with deadlines inside the window prompt application, with explicit profile completion guidance for students with incomplete profiles. |
+
 ### CSV Export Endpoints
 All CSV endpoints return safe UTF-8 spreadsheets with BOM (`\xef\xbb\xbf`), formula-injection sanitization, `Cache-Control: no-store`, and a max limit of 10,000 rows.
 

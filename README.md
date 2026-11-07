@@ -8,7 +8,7 @@ A web platform that integrates academic coursework management, assignment submis
 
 ## Features
 
-- **Students**: Browse published courses, enroll with duplicate guards, access reference links, submit coursework with automatic late detection, discover vetted internships with rule-based match scores, apply with cover letters, and track progress with milestone achievement badges.
+- **Students**: Browse published courses, enroll with duplicate guards, access reference links, submit coursework with automatic late detection, view a deterministic rule-based weekly study plan and progress summary (`/study-plan`), discover vetted internships with rule-based match scores, apply with cover letters, and track progress with milestone achievement badges.
 - **Instructors**: Author courses with structured syllabi, manage course publication status (`draft` or `published`), attach external reference links, set assignments with maximum point thresholds and deadlines, review student submissions, and submit bounded numeric grades with qualitative feedback.
 - **Partner Organizations**: Maintain company profile, post internship listings with work mode and duration parameters, edit drafts, submit postings for institutional review, track applicant pipelines, and manage candidate hiring decisions (`submitted` &rarr; `shortlisted` &rarr; `accepted` / `rejected`).
 - **Coordinators**: Review pending organization registrations, moderate submitted internship listings (approve or reject with feedback notes), inspect listings across all statuses, and monitor applicant rosters in read-only mode.
@@ -113,6 +113,7 @@ The platform provides an automated Playwright browser test suite covering crawle
 - **Destructive Functional Flows (`npm run test:e2e:flows`)**: Executes multi-step transactional flows (enrollments, assignment grading, internship reviews, and CSV exports) sequentially in a dedicated `flows` project on desktop (`1440px`), with automated demo database resets (`scripts/seed_demo.py --reset-demo`) to guarantee isolation and repeatability. Verified invariants include:
   - **Academic Integrity Guard**: A student cannot leave an enrolled course once graded work exists (`409 Conflict: GRADED_WORK_EXISTS`), preventing orphaned submissions and preserving instructor grading history.
   - **Application Withdrawal Finality**: Withdrawing an internship application is terminal; students cannot re-apply to the same posting once withdrawn, protecting employer applicant pipeline integrity.
+  - **Rule-Based Student Study Plan**: Students access a deterministic study schedule and weekly progress summary via `GET /api/students/me/study-plan?days=7` (window 3 to 14 days). Point-based effort estimates (&le; 20 pts: 45 min, &le; 50 pts: 90 min, &gt; 50 pts: 150 min) are allocated backwards from due dates under a 120-minute daily cap. Items unable to fit before deadlines are flagged "tight", overdue work is scheduled immediately with priority, and suggested internships prompt applications with explicit profile completion guidance. All logic is pure and deterministic without AI.
 
 **Prerequisites**:
 1. Start the Docker stack with the testing override for relaxed rate limits:

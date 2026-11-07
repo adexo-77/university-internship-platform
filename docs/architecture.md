@@ -123,6 +123,7 @@ flowchart TD
   - `application.py`: `/internships/{id}/applications`, `/students/me/applications`, `/applications/{id}/withdraw`, `/applications/{id}`, `/applications/{id}/decision`.
   - `notification.py`: `/notifications`, `/notifications/unread-count`, `/notifications/{id}/read`, `/notifications/read-all`.
   - `badge.py`: `/students/me/badges`.
+  - `study_plan.py`: `/students/me/study-plan`.
   - `csv_export.py`: `/courses/{id}/gradebook.csv`, `/internships/{id}/applicants.csv`, `/admin/reports/applications.csv`, `/admin/reports/users.csv`.
 - **Services (`services/`)**:
   - `AuthService`: Registration (atomic user + profile), authentication, session lifecycle.
@@ -139,10 +140,11 @@ flowchart TD
   - `application.py`: Student application submission with profile completeness and open deadline guards, duplicate prevention, student application listing, final withdrawal window (no resubmission), applicant roster retrieval, and organization decision transitions.
   - `notification.py`: Notification creation on 10 domain events, user notifications listing with pagination, unread counter, read status updates, link path validation, and 200-item capacity pruning.
   - `badge.py`: Dynamic student achievement badge computation on read across 8 milestone definitions with progress indicators.
+  - `study_plan.py`, `study_plan_scheduler.py`, `study_plan_summary.py`: Deterministic rule-based student study planning, point-based effort estimation, 120-minute daily cap scheduling, tight and overdue allocation, profile hints, and plain summary synthesis.
   - `csv_export.py` & `csv_export_writer.py`: Safe CSV streaming generation with UTF-8 BOM, formula-injection sanitization, 10,000 row limits, and role/ownership security checks.
 - **Frontend Layer (`frontend/src/`)**:
 - **API (`api/`)**:
-  - `auth.ts`, `profile.ts`, `course.ts`, `assignment.ts`, `internship.ts`, `application.ts`, `notification.ts`, `health.ts`, `badge.ts`.
+  - `auth.ts`, `profile.ts`, `course.ts`, `assignment.ts`, `internship.ts`, `application.ts`, `notification.ts`, `health.ts`, `badge.ts`, `study_plan.ts`.
 - **Context &amp; Navigation (`context/`, `config/`)**:
   - `AuthContext`: Session lifecycle and user identity.
   - `navigation.ts`: Navigation items filtered per role, role-based `getHomePath` (organization routes to `/my-internships`).
@@ -157,10 +159,13 @@ flowchart TD
   - `components/assignments/`: `AssignmentForm`, `AssignmentTable`, `CourseAssignmentsSection`, `DueBadge`, `GradeForm`, `SubmissionForm`, `SubmissionStatusBadge`, `SubmissionsTable`.
   - `components/internships/`: `InternshipForm`, `InternshipTable`, `InternshipStatusBadge`, `ApplyForm`, `ApplicationStatusBadge`, `ApplicantsTable`, `DecisionForm`, `MyApplicationsTable`, `StudentApplicationPanel`, `InternshipApplicantsSection`.
   - `components/notifications/`: `NotificationBell`, `NotificationItem`, `NotificationList`.
+  - `components/study-plan/`: `StudyPlanSummaryCard`, `StudyPlanSchedule`, `StudyPlanDisclosure`.
+  - `components/dashboard/`: `StudentNextStepsCard`, `StudentDashboard`, `InstructorDashboard`, `CoordinatorDashboard`, `AdminDashboard`.
   - `components/ui/`: `Button`, `TextField`, `Textarea`, `Select`, `Badge`, `DataTable`, `EmptyState`, `ErrorMessage`, `Notice`, `PageHeader`.
   - `components/layout/`: `AppShell`.
   - `components/routes/`: `ProtectedRoute`, `RoleRoute`.
 - **Pages (`pages/`)**:
+  - `/study-plan`: Student deterministic rule-based weekly study schedule and progress summary.
   - `/courses`: Course catalogue with title search, pagination, and admin status badges.
   - `/my-courses`: Role-specific view (student enrolled courses; instructor courses with "New course" button).
   - `/courses/new`: Instructor course creation form.
@@ -252,6 +257,7 @@ flowchart TD
 | `/api/notifications/{id}/read` | `POST` | Authenticated | Mark a single notification owned by current user as read | `200 OK` |
 | `/api/notifications/read-all` | `POST` | Authenticated | Mark all notifications owned by current user as read | `200 OK` |
 | `/api/students/me/badges` | `GET` | `student` | Compute and retrieve student achievement badges on read | `200 OK` |
+| `/api/students/me/study-plan` | `GET` | `student` | Deterministic rule-based weekly study plan and progress summary (?days=3-14) | `200 OK` |
 | `/api/courses/{id}/gradebook.csv` | `GET` | `instructor` (owner), `admin` | Export course student gradebook spreadsheet as safe UTF-8 CSV | `200 OK` |
 | `/api/internships/{id}/applicants.csv` | `GET` | `organization` (owner), `coordinator`, `admin` | Export internship applicants dataset as safe UTF-8 CSV | `200 OK` |
 | `/api/admin/reports/applications.csv` | `GET` | `coordinator`, `admin` | Export cross-platform internship applications audit spreadsheet | `200 OK` |
@@ -270,6 +276,7 @@ The table below outlines role access across platform route domains. Anonymous re
 | **Authentication &amp; Self-Service** (`/api/auth/*`) | Yes | Yes | Yes | Yes | Yes | Register (student, org only), login, logout, password change |
 | **In-App Notifications** (`/api/notifications/*`) | Yes | Yes | Yes | Yes | Yes | Scoped strictly to authenticated user's ID |
 | **Achievement Badges** (`/api/students/me/badges`) | Yes | No | No | No | No | Computed on read; student own data only |
+| **Student Study Plan** (`/api/students/me/study-plan`) | Yes | No | No | No | No | Student own data only; deterministic rule-based scheduling; 403 for other roles |
 | **Course Gradebook CSV** (`/api/courses/{id}/gradebook.csv`) | No | Yes (owner) | No | No | Yes | Owner instructor or admin; UTF-8 BOM, formula defense |
 | **Internship Applicants CSV** (`/api/internships/{id}/applicants.csv`) | No | No | Yes (owner) | Yes | Yes | Owner org, coordinator, or admin |
 | **Applications Report CSV** (`/api/admin/reports/applications.csv`) | No | No | No | Yes | Yes | Admin or coordinator audit export |

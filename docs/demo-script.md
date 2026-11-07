@@ -40,7 +40,9 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 >
 > *Next, let's look at coursework. Under the 'Courses' catalog, students can search courses by code or title and enroll with a single click. When submitting assignments, our backend compares the server timestamp against the due date: if submitted after the deadline, it's accepted but automatically flagged as `is_late=true`.*
 >
-> *Now, let's observe our profile-complete rule before applying. If we switch to our third student account, `dawit.lemma@example.com`, who has an incomplete profile (missing university and department), a prominent warning banner appears on their dashboard. If they attempt to apply for an internship, the application is blocked until their university and department profile fields are completed. This ensures partner organizations only receive complete applications."*
+> *Now, let's observe our profile-complete rule before applying. If we switch to our third student account, `dawit.lemma@example.com`, who has an incomplete profile (missing university and department), a prominent warning banner appears on their dashboard. If they attempt to apply for an internship, the application is blocked until their university and department profile fields are completed. This ensures partner organizations only receive complete applications.*
+>
+> *Next, let's examine the student's rule-based weekly study plan. On Abel's dashboard, the 'Next steps' card highlights his overdue assignment and a tight assignment due tomorrow. Clicking 'View full study plan' navigates to `/study-plan`. Our backend generates a deterministic schedule: tasks are allocated backwards from deadlines subject to a 120-minute daily effort cap, with effort estimated purely from assignment point values (&le; 20 pts: 45 min, &le; 50 pts: 90 min, &gt; 50 pts: 150 min). Tasks unable to fit before deadlines are flagged 'tight', overdue work is scheduled immediately on today, and open suggested internships prompt applications. Note that this plan is 100% rule-based without any AI. For Dawit Lemma, whose profile is incomplete, the study plan includes matching suggested internships accompanied by clear profile-completion guidance."*
 
 ---
 
@@ -174,4 +176,8 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 
 ### Q17: How does the platform defend CSV spreadsheet downloads against injection attacks?
 **Answer**: All CSV reports stream through a safe centralized generator (`services/csv_export_writer.py`). It applies CSV formula-injection neutralization by prefixing any cell starting with `=`, `+`, `-`, `@`, `\t`, or `\r` with a single quote `'`. Responses include a UTF-8 Byte Order Mark (`\xef\xbb\xbf`) so Excel renders Amharic text properly, set `Cache-Control: no-store`, enforce a 10,000 row cap, and project strict public field whitelists that permanently omit password hashes, salts, and session tokens.
+
+### Q18: How is the student study plan generated? Is it using AI?
+**Answer**: No, the student study plan is entirely rule-based and deterministic—no AI, machine learning models, or external network APIs are used. The algorithm estimates effort strictly from assignment point values (&le; 20 pts: 45 min, &le; 50 pts: 90 min, &gt; 50 pts: 150 min) and allocates tasks backwards from due dates under a 120-minute daily cap. Work that cannot fit before its deadline is scheduled from today with a 'tight' flag, overdue assignments are placed immediately on today's schedule, and suggested internships within the window prompt applications (with explicit profile completion guidance for students with incomplete profiles).
+
 

@@ -37,6 +37,7 @@ This document details the security posture, threat model, control mechanisms, kn
 | **Input Sanitization** | `backend/app/core/sanitization.py` | Strips control characters, rejects `\x00` bytes, and normalizes email addresses via safe NFKC unicode conversion. |
 | **Logging &amp; Error Masking** | `backend/app/core/logging.py` | Request logger masking auth payloads; 500 handler logging stack traces server-side and returning clean `{detail, code, request_id}`. |
 | **Role Authorization** | `backend/app/core/deps.py` | Mandatory server-side session resolution; explicit per-route role sets enforced via `require_roles(*roles)` returning `HTTP 403` for unauthorized personas. |
+| **Student Data Isolation** | `backend/app/services/study_plan.py` | Student study plan endpoint (`/api/students/me/study-plan`) resolves user identity from session; bounded queries exclusively access the student's own enrolled courses, submissions, applications, and grades. |
 | **Dependency Audits** | CI / Package Manifests | Continuous supply-chain checks with `pip-audit` on pinned constraints and `npm audit --audit-level=high --omit=dev` ensuring 0 high/critical vulnerabilities. |
 
 ---
@@ -46,7 +47,7 @@ This document details the security posture, threat model, control mechanisms, kn
 The platform defines five distinct personas governed by server-enforced role dependencies:
 
 1. **Student (`student`)**:
-   - **Capabilities**: Browse published courses, enroll, access course learning resources, submit coursework before deadline, withdraw pending applications, apply to open postings with completed profile, manage academic profile.
+   - **Capabilities**: Browse published courses, enroll, access course learning resources, submit coursework before deadline, withdraw pending applications, apply to open postings with completed profile, manage academic profile, view deterministic rule-based weekly study plan and progress summary (`/api/students/me/study-plan`).
    - **Restrictions**: Cannot author courses, grade coursework, moderate postings, approve organizations, or manage users (`403 Forbidden`).
 2. **Instructor (`instructor`)**:
    - **Capabilities**: Author and publish courses, curate course learning resources, author assignments, inspect submission rosters, award numeric grades with feedback.
