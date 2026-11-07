@@ -118,7 +118,7 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
 1. Click **Study plan** in the top navigation or click **View full study plan** from the **Next steps** card on your dashboard.
 2. Review the **Weekly Progress Summary** card:
    - Actionable headline summarizing current workload urgency.
-   - 3 to 5 plain sentences synthesizing pending deadlines, course performance averages, nearest achievement badge progress, and active internship application counts.
+   - 3 to 5 plain sentences synthesizing pending deadlines, course performance averages, nearest achievement badge progress, and internship application status breakdowns.
    - Metric summary pills: overdue items, tight tasks, upcoming deadlines, active applications, suggested internships in window, and total estimated study minutes.
 3. Explore the **Daily Schedule**:
    - Tasks are allocated backwards from assignment due dates subject to a 120-minute daily effort cap.
@@ -126,7 +126,7 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
    - Overdue coursework is scheduled on today with an **Overdue** badge.
    - Tasks that cannot fit before their deadlines are scheduled from today with a **Tight** badge.
    - Open suggested internships with deadlines in the window prompt students to apply. Students with incomplete profiles receive an explicit **Profile incomplete** badge and guidance to complete mandatory fields.
-4. Switch the study window between **7 days** (default) and **14 days** using the window selector pills.
+4. Switch the study window between **7 days** (default) and **14 days** using the window selector pills (the frontend automatically includes the student browser's timezone offset in minutes so dates match local time).
 5. Click **Deterministic rules** to expand the full explanation of how the schedule is computed. Note that this plan is 100% rule-based and deterministic without any AI.
 
 ![Internship catalog with rule-based recommendation cards and search filters](screenshots/suggested-internships.png)

@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - 120-minute daily effort cap per calendar day.
     - Backward allocation from assignment due dates; tasks unable to fit before deadlines flagged as "tight" and scheduled from today; overdue tasks scheduled immediately on today with "overdue" flag.
     - Suggested internships within study window added with "Apply by <date>" and profile completion notice for incomplete profiles.
+    - Browser timezone offset integration: optional `utc_offset_minutes` (-720 to 840) query parameter on `GET /api/students/me/study-plan` automatically sent by frontend to compute days and deadline boundaries in the student's local time (UTC+3 for Addis Ababa).
+    - Transparent application status breakdown in weekly summary sentences reflecting all application states accurately.
+    - Strictly additive demo dataset scenarios: baseline academic progress, badges, and application states preserved, with study plan scenarios hosted cleanly on new Introduction to Programming assignments.
     - Generated headline, 3 to 5 plain summary sentences, and progress metrics.
   - Thin router endpoint `GET /api/students/me/study-plan` (query parameter `days`: 3 to 14, default 7), restricted strictly to authenticated students.
   - Frontend `StudyPlanPage` at `/study-plan` with window switcher (7/14 days), summary card, daily schedule breakdown, overdue/tight badges, and expandable "Deterministic rules" disclosure.
