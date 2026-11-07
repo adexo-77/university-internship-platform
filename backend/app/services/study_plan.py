@@ -15,14 +15,9 @@ from app.models.enrollment import Enrollment
 from app.models.student_profile import StudentProfile
 from app.models.submission import Submission
 from app.models.user import User
-from app.schemas.study_plan import (
-    StudyPlanDay,
-    StudyPlanItem,
-    StudyPlanResponse,
-    StudyPlanWindow,
-)
+from app.schemas.study_plan import StudyPlanDay, StudyPlanItem, StudyPlanResponse, StudyPlanWindow
 from app.services.badge import get_student_badges
-from app.services.internship_suggestion import get_internship_suggestions
+from app.services.internship_suggestion import get_candidate_postings, get_internship_suggestions
 from app.services.study_plan_scheduler import (
     DAILY_CAP_MINUTES,
     EFFORT_HIGH_MINUTES,
@@ -168,15 +163,18 @@ def generate_study_plan(
     suggestions_items = (
         get_internship_suggestions(db, student_user, limit=20).items if student_user else []
     )
+    cands: list[tuple[int, str, str | None, datetime | None]] = [
+        (s.id, s.title, s.organization_name, s.application_deadline) for s in suggestions_items
+    ]
+    if not cands and student_user and not profile_complete:
+        raw_cands = get_candidate_postings(db, student_user.id)
+        cands = [(p.id, p.title, org, p.application_deadline) for p, org in raw_cands[:20]]
+
     internship_items_count = 0
-    for sug in suggestions_items:
-        if sug.id in applied_ids or not sug.application_deadline:
+    for int_id, title, org_name, dl in cands:
+        if int_id in applied_ids or not dl:
             continue
-        dl_utc = (
-            sug.application_deadline
-            if sug.application_deadline.tzinfo is not None
-            else sug.application_deadline.replace(tzinfo=UTC)
-        )
+        dl_utc = dl if dl.tzinfo is not None else dl.replace(tzinfo=UTC)
         dl_date = dl_utc.date()
         if today <= dl_date <= window_end_date:
             internship_items_count += 1
@@ -187,11 +185,11 @@ def generate_study_plan(
                 int_flags.append("profile_incomplete")
             day_items[dl_date].append(
                 StudyPlanItem(
-                    id=f"internship-{sug.id}",
+                    id=f"internship-{int_id}",
                     type="internship",
-                    title=f"Apply: {sug.title}",
-                    course_title=sug.organization_name,
-                    link_path=f"/internships/{sug.id}",
+                    title=f"Apply: {title}",
+                    course_title=org_name,
+                    link_path=f"/internships/{int_id}",
                     due_at=dl_utc,
                     suggested_minutes=0,
                     reason=reason_text,

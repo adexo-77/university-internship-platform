@@ -39,9 +39,6 @@ def seed_notifications(db: Session, users: dict[str, User], now: datetime) -> in
     p_web = db.scalar(
         select(Internship).where(Internship.title == "Junior Web Developer Intern")
     )
-    p_net = db.scalar(
-        select(Internship).where(Internship.title == "Network Support Intern")
-    )
     p_mobile = db.scalar(
         select(Internship).where(Internship.title == "Mobile Application Intern")
     )
@@ -65,13 +62,13 @@ def seed_notifications(db: Session, users: dict[str, User], now: datetime) -> in
         else None
     )
 
-    app_abel_net = (
+    app_abel = (
         db.scalar(
             select(Application).where(
-                Application.posting_id == p_net.id, Application.student_id == s1.id
+                Application.posting_id == p_web.id, Application.student_id == s1.id
             )
         )
-        if p_net and s1
+        if p_web and s1
         else None
     )
     app_meron = (
@@ -105,14 +102,14 @@ def seed_notifications(db: Session, users: dict[str, User], now: datetime) -> in
                 now - timedelta(days=1),
             )
         )
-    if s1 and p_net and app_abel_net:
+    if s1 and p_web and app_abel:
         demo_specs.append(
             (
                 s1,
                 NotificationKind.APPLICATION_DECISION,
-                f"Application rejected: {p_net.title}",
-                f"Your application for '{p_net.title}' was marked as rejected: {app_abel_net.decision_message}",
-                f"/applications/{app_abel_net.id}",
+                f"Application accepted: {p_web.title}",
+                f"Your application for '{p_web.title}' was marked as accepted: {app_abel.decision_message}",
+                f"/applications/{app_abel.id}",
                 None,
             )
         )
@@ -134,10 +131,10 @@ def seed_notifications(db: Session, users: dict[str, User], now: datetime) -> in
             (
                 s2,
                 NotificationKind.APPLICATION_DECISION,
-                f"Application accepted: {p_web.title}",
-                f"Your application for '{p_web.title}' was marked as accepted: {app_meron.decision_message}",
+                f"Application shortlisted: {p_web.title}",
+                f"Your application for '{p_web.title}' was marked as shortlisted: {app_meron.decision_message}",
                 f"/applications/{app_meron.id}",
-                now - timedelta(days=1),
+                None,
             )
         )
 

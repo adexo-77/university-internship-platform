@@ -71,19 +71,17 @@ def _seed_student_profiles(db: Session, s1: User, s2: User, s3: User) -> None:
         db.add(
             StudentProfile(
                 user_id=s3.id,
-                university="",
-                department="",
-                skills=["Python", "FastAPI", "SQL", "PostgreSQL"],
-                preferred_work_modes=["remote", "hybrid"],
-                preferred_location="Addis Ababa",
+                skills=[],
+                preferred_work_modes=[],
+                preferred_location=None,
             )
         )
     else:
-        s3_prof.skills = ["Python", "FastAPI", "SQL", "PostgreSQL"]
-        s3_prof.preferred_work_modes = ["remote", "hybrid"]
-        s3_prof.preferred_location = "Addis Ababa"
-        s3_prof.university = ""
-        s3_prof.department = ""
+        s3_prof.skills = []
+        s3_prof.preferred_work_modes = []
+        s3_prof.preferred_location = None
+        s3_prof.university = None
+        s3_prof.department = None
 
 
 def _seed_organization_profiles(

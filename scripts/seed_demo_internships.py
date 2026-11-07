@@ -156,17 +156,17 @@ def _seed_applications(
         (
             p_web.id,
             s1.id,
-            ApplicationStatus.SUBMITTED,
+            ApplicationStatus.ACCEPTED,
             "Dear Hiring Team at Kaffa Digital Solutions, as a fourth-year IT student at Jimma University experienced in Python, FastAPI, and React, I would love to contribute to your enterprise web platforms. My capstone project involved building distributed RESTful services with strict test automation.",
-            None,
-            None,
+            "We were very impressed by your coursework and project repository. We are excited to offer you the Junior Web Developer internship position!",
+            now - timedelta(days=1),
         ),
         (
             p_web.id,
             s2.id,
-            ApplicationStatus.ACCEPTED,
+            ApplicationStatus.SHORTLISTED,
             "Dear Kaffa Digital team, I am writing to express my strong interest in the Junior Web Developer Intern role. Having built multiple frontend projects using React, TypeScript, and Tailwind CSS, I am excited about the prospect of learning from your engineering team in Addis Ababa.",
-            "We were very impressed by your coursework and project repository. We are excited to offer you the Junior Web Developer internship position!",
+            "Your frontend portfolio is strong. We have shortlisted your application for a technical interview next week.",
             now - timedelta(days=1),
         ),
         (

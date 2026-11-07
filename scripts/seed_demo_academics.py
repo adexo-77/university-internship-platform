@@ -7,6 +7,7 @@ from app.models.course import Course, CourseStatus
 from app.models.enrollment import Enrollment
 from app.models.submission import Submission
 from app.models.user import User
+from seed_demo_prog import seed_programming_assignments
 from seed_demo_resources import seed_course_resources
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -72,27 +73,22 @@ def _seed_enrollments(
     db.flush()
 
 
-def _seed_assignments_and_submissions(
+def _seed_database_systems(
     db: Session, course: Course, users: dict[str, User], now: datetime
 ) -> None:
+    # 3 pre-existing assignments from commit 858b684
     specs = [
         (
             "Relational Schema Design & Normalization",
-            now + timedelta(days=5),
+            now + timedelta(days=3),
             100,
             "Design a relational schema for a university clinic management system. Decompose all entities to Third Normal Form (3NF), specify primary/foreign keys, and submit table definitions.",
         ),
         (
             "Advanced SQL Queries & Index Optimization",
-            now + timedelta(days=1),
-            80,
+            now + timedelta(days=18),
+            100,
             "Write analytical SQL queries using window functions and aggregations. Analyze query execution plans using EXPLAIN ANALYZE and suggest composite indexes.",
-        ),
-        (
-            "Database Normalization Lab",
-            now - timedelta(days=1),
-            25,
-            "Normalize clinical database records to BCNF and implement domain constraints.",
         ),
         (
             "ER Diagramming & Conceptual Modeling",
@@ -125,8 +121,6 @@ def _seed_assignments_and_submissions(
         assignments[title] = a
 
     er_a = assignments["ER Diagramming & Conceptual Modeling"]
-    norm_a = assignments["Database Normalization Lab"]
-    sql_a = assignments["Advanced SQL Queries & Index Optimization"]
     s1, s2, s3, inst1 = users["s1"], users["s2"], users["s3"], users["inst1"]
 
     subs = [
@@ -162,28 +156,6 @@ def _seed_assignments_and_submissions(
             "Good effort on entity attributes. Be careful with foreign key definitions.",
             now - timedelta(days=1),
             inst1.id,
-        ),
-        (
-            norm_a.id,
-            s2.id,
-            "BCNF decomposition notes and functional dependency proofs.",
-            "https://github.com/merongirma/bcnf-lab",
-            False,
-            None,
-            None,
-            None,
-            None,
-        ),
-        (
-            sql_a.id,
-            s2.id,
-            "Window function analytics and execution plans.",
-            "https://github.com/merongirma/sql-opt",
-            False,
-            None,
-            None,
-            None,
-            None,
         ),
     ]
     for aid, sid, content, link, is_late, grade, fb, grad_at, grad_by in subs:
@@ -221,4 +193,5 @@ def seed_academics(db: Session, users: dict[str, User], now: datetime) -> None:
     courses = _seed_courses(db, users)
     _seed_enrollments(db, courses, users)
     seed_course_resources(db, courses)
-    _seed_assignments_and_submissions(db, courses["Database Systems"], users, now)
+    _seed_database_systems(db, courses["Database Systems"], users, now)
+    seed_programming_assignments(db, courses["Introduction to Programming"], users, now)

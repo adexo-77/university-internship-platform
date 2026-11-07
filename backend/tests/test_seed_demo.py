@@ -58,8 +58,10 @@ def test_seed_demo_idempotency(real_db_session: Session) -> None:
         a_titles = [
             "Relational Schema Design & Normalization",
             "Advanced SQL Queries & Index Optimization",
-            "Database Normalization Lab",
             "ER Diagramming & Conceptual Modeling",
+            "Python Basics & Control Flow Lab",
+            "Data Structures & Algorithm Complexity Project",
+            "Object-Oriented Programming Workshop",
         ]
         return {
             "users": real_db_session.scalar(
@@ -107,7 +109,7 @@ def test_seed_demo_idempotency(real_db_session: Session) -> None:
     counts_first = get_counts()
     assert counts_first["users"] == 10
     assert counts_first["courses"] == 3
-    assert counts_first["assignments"] == 4
+    assert counts_first["assignments"] == 6
     assert counts_first["resources"] == 6
     assert counts_first["postings"] == 8
     assert counts_first["submissions"] == 5
@@ -157,21 +159,23 @@ def test_seeded_demo_study_plan_scenarios(real_db_session: Session) -> None:
     dawit = real_db_session.scalar(select(User).where(User.email == "dawit.lemma@example.com"))
     assert abel and meron and dawit
 
-    # 1. Abel: overdue assignment, tight assignment due tomorrow, open application
+    # 1. Abel: overdue assignment, tight assignment due tomorrow, accepted application
     abel_plan = generate_study_plan(real_db_session, abel, days=7)
     assert abel_plan.summary.metrics.overdue_count == 1
     assert len(abel_plan.overdue) == 1
-    assert abel_plan.overdue[0].title == "Database Normalization Lab"
-    assert len(abel_plan.tight) == 1
-    assert abel_plan.tight[0].title == "Advanced SQL Queries & Index Optimization"
-    abel_open_app = real_db_session.scalar(
+    assert abel_plan.overdue[0].title == "Python Basics & Control Flow Lab"
+    assert len(abel_plan.tight) >= 1
+    assert any(
+        it.title == "Data Structures & Algorithm Complexity Project" for it in abel_plan.tight
+    )
+    abel_accepted_app = real_db_session.scalar(
         select(Application).where(
             Application.student_id == abel.id,
-            Application.status == ApplicationStatus.SUBMITTED,
+            Application.status == ApplicationStatus.ACCEPTED,
         )
     )
-    assert abel_open_app is not None
-    assert any("submitted" in s.lower() for s in abel_plan.summary.sentences)
+    assert abel_accepted_app is not None
+    assert any("accepted" in s.lower() for s in abel_plan.summary.sentences)
     er_sub = real_db_session.scalar(
         select(Submission)
         .join(Assignment, Submission.assignment_id == Assignment.id)
@@ -182,7 +186,7 @@ def test_seeded_demo_study_plan_scenarios(real_db_session: Session) -> None:
     )
     assert er_sub and er_sub.grade == 100
 
-    # 2. Meron: high-point assignment due later, accepted application, 0 overdue/tight
+    # 2. Meron: high-point assignment due later, shortlisted application, 0 overdue/tight
     meron_plan = generate_study_plan(real_db_session, meron, days=7)
     assert meron_plan.summary.metrics.overdue_count == 0
     assert len(meron_plan.overdue) == 0
@@ -191,19 +195,19 @@ def test_seeded_demo_study_plan_scenarios(real_db_session: Session) -> None:
         it for day in meron_plan.plan for it in day.items if "Relational Schema Design" in it.title
     ]
     assert len(later_items) >= 1
-    meron_accepted = real_db_session.scalar(
+    meron_shortlisted = real_db_session.scalar(
         select(Application).where(
             Application.student_id == meron.id,
-            Application.status == ApplicationStatus.ACCEPTED,
+            Application.status == ApplicationStatus.SHORTLISTED,
         )
     )
-    assert meron_accepted is not None
+    assert meron_shortlisted is not None
 
     # 3. Dawit: incomplete profile, suggested internship in window, profile hint
     dawit_prof = real_db_session.scalar(
         select(StudentProfile).where(StudentProfile.user_id == dawit.id)
     )
-    assert dawit_prof and (not dawit_prof.university or not dawit_prof.department)
+    assert dawit_prof and len(dawit_prof.skills) == 0
     dawit_plan = generate_study_plan(real_db_session, dawit, days=7)
     internship_items = [
         it for day in dawit_plan.plan for it in day.items if it.type == "internship"

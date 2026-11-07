@@ -79,10 +79,9 @@ def test_demo_profile_completeness_and_approval_states(
     s3 = real_db_session.scalar(select(User).where(User.email == "dawit.lemma@example.com"))
     assert s3 is not None
     sp3 = real_db_session.scalar(select(StudentProfile).where(StudentProfile.user_id == s3.id))
-    assert sp3 is not None and (not sp3.university or not sp3.department)
-    assert len(sp3.skills) > 0
-    assert sp3.preferred_work_modes == ["remote", "hybrid"]
-    assert sp3.preferred_location == "Addis Ababa"
+    assert sp3 is not None and len(sp3.skills) == 0
+    assert sp3.preferred_work_modes == []
+    assert sp3.preferred_location is None
 
     coord = real_db_session.scalar(
         select(User).where(User.email == "selamawit.tadesse@example.com")
@@ -149,8 +148,8 @@ def test_seeded_student_achievement_badges(
     assert "perfect_score" in abel_earned_ids
     assert "profile_complete" in abel_earned_ids
     assert "first_application" in abel_earned_ids
-    assert "offer_accepted" not in abel_earned_ids
-    assert len(abel_earned_ids) == 5
+    assert "offer_accepted" in abel_earned_ids
+    assert len(abel_earned_ids) == 6
 
     # Meron's badges
     real_db_client.post("/api/auth/logout")
@@ -167,9 +166,9 @@ def test_seeded_student_achievement_badges(
     assert "first_submission" in meron_earned_ids
     assert "profile_complete" in meron_earned_ids
     assert "first_application" in meron_earned_ids
-    assert "offer_accepted" in meron_earned_ids
+    assert "offer_accepted" not in meron_earned_ids
     assert "perfect_score" not in meron_earned_ids
-    assert len(meron_earned_ids) == 4
+    assert len(meron_earned_ids) == 3
 
     assert len(abel_earned_ids) > len(meron_earned_ids)
     real_db_client.post("/api/auth/logout")
