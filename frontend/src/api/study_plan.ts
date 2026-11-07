@@ -35,8 +35,17 @@ async function handleResponseError(response: Response): Promise<never> {
 /**
  * Fetch rule-based study schedule and progress summary for the current student.
  */
-export async function getStudentStudyPlan(days: number = 7): Promise<StudyPlanResponse> {
-  const response = await fetch(`/api/students/me/study-plan?days=${encodeURIComponent(days)}`, {
+export async function getStudentStudyPlan(
+  days: number = 7,
+  utcOffsetMinutes?: number
+): Promise<StudyPlanResponse> {
+  const offset =
+    utcOffsetMinutes !== undefined ? utcOffsetMinutes : -new Date().getTimezoneOffset();
+  const query = new URLSearchParams({
+    days: String(days),
+    utc_offset_minutes: String(offset),
+  });
+  const response = await fetch(`/api/students/me/study-plan?${query.toString()}`, {
     method: 'GET',
     credentials: 'include',
     headers: {

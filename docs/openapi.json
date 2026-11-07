@@ -348,6 +348,20 @@
               "title": "Days"
             },
             "description": "Number of days in study plan window (3 to 14)"
+          },
+          {
+            "name": "utc_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -720,
+              "description": "Client timezone offset from UTC in minutes (from -720 to 840)",
+              "default": 0,
+              "title": "Utc Offset Minutes"
+            },
+            "description": "Client timezone offset from UTC in minutes (from -720 to 840)"
           }
         ],
         "responses": {

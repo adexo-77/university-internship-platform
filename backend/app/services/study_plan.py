@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -40,26 +40,26 @@ __all__ = [
     "EFFORT_MID_MAX_POINTS",
     "EFFORT_MID_MINUTES",
     "MAX_PLAN_DAYS",
+    "MAX_UTC_OFFSET_MINUTES",
     "MIN_PLAN_DAYS",
+    "MIN_UTC_OFFSET_MINUTES",
     "STUDY_PLAN_RULES",
     "estimate_effort_minutes",
     "generate_study_plan",
 ]
 
-# Window boundaries in days
+# Window and timezone boundaries
 DEFAULT_PLAN_DAYS: int = 7
 MIN_PLAN_DAYS: int = 3
 MAX_PLAN_DAYS: int = 14
+MIN_UTC_OFFSET_MINUTES: int = -720
+MAX_UTC_OFFSET_MINUTES: int = 840
 
 
-def _is_profile_complete(profile: StudentProfile | None) -> bool:
+def _is_profile_complete(p: StudentProfile | None) -> bool:
     """Check whether mandatory university and department profile fields are non-empty."""
     return bool(
-        profile
-        and profile.university
-        and profile.university.strip()
-        and profile.department
-        and profile.department.strip()
+        p and p.university and p.university.strip() and p.department and p.department.strip()
     )
 
 
@@ -68,20 +68,23 @@ def generate_study_plan(
     student: User | int,
     days: int = DEFAULT_PLAN_DAYS,
     current_time: datetime | None = None,
+    utc_offset_minutes: int = 0,
 ) -> StudyPlanResponse:
     """Generate a deterministic, rule-based study schedule across the requested window."""
-    if isinstance(student, User):
-        student_id = student.id
-        student_user = student
-    else:
-        student_id = student
-        student_user = db.scalar(select(User).where(User.id == student_id))
+    student_id = student.id if isinstance(student, User) else student
+    student_user = (
+        student
+        if isinstance(student, User)
+        else db.scalar(select(User).where(User.id == student_id))
+    )
 
+    tz = timezone(timedelta(minutes=utc_offset_minutes))
     now = current_time or datetime.now(UTC)
     if now.tzinfo is None:
         now = now.replace(tzinfo=UTC)
+    now_local = now.astimezone(tz)
 
-    today = now.date()
+    today = now_local.date()
     window_end_date = today + timedelta(days=days - 1)
     window_dates = [today + timedelta(days=i) for i in range(days)]
 
@@ -119,19 +122,21 @@ def generate_study_plan(
     submitted_assignment_ids = {s.assignment_id for s in submissions}
 
     # Calculate average course grades for summary
-    course_grades_data: list[dict[str, object]] = []
-    for cid in course_ids:
-        c_subs = [
-            s
-            for s in submissions
-            if s.grade is not None
-            and any(a.id == s.assignment_id and a.course_id == cid for a in assignments)
-        ]
-        if c_subs:
-            avg_val = sum(s.grade for s in c_subs) / len(c_subs)
-            course_grades_data.append(
-                {"title": course_title_map.get(cid, "Course"), "avg": avg_val}
-            )
+    course_grades_data: list[dict[str, object]] = [
+        {
+            "title": course_title_map.get(cid, "Course"),
+            "avg": sum(s.grade for s in c_subs) / len(c_subs),
+        }
+        for cid in course_ids
+        if (
+            c_subs := [
+                s
+                for s in submissions
+                if s.grade is not None
+                and any(a.id == s.assignment_id and a.course_id == cid for a in assignments)
+            ]
+        )
+    ]
 
     # Pending assignments are those without a submission (graded and submitted excluded)
     pending_assignments = [a for a in assignments if a.id not in submitted_assignment_ids]
@@ -141,7 +146,7 @@ def generate_study_plan(
         pending_assignments=pending_assignments,
         course_title_map=course_title_map,
         window_dates=window_dates,
-        now=now,
+        now=now_local,
     )
 
     # 4. Profile check (Query 4)
@@ -175,10 +180,11 @@ def generate_study_plan(
         if int_id in applied_ids or not dl:
             continue
         dl_utc = dl if dl.tzinfo is not None else dl.replace(tzinfo=UTC)
-        dl_date = dl_utc.date()
+        dl_local = dl_utc.astimezone(tz)
+        dl_date = dl_local.date()
         if today <= dl_date <= window_end_date:
             internship_items_count += 1
-            reason_text = f"Apply by {dl_utc.strftime('%d %b %Y')}"
+            reason_text = f"Apply by {dl_local.strftime('%d %b %Y')}"
             int_flags: list[str] = []
             if not profile_complete:
                 reason_text += " (Complete your profile to apply)"
@@ -190,7 +196,7 @@ def generate_study_plan(
                     title=f"Apply: {title}",
                     course_title=org_name,
                     link_path=f"/internships/{int_id}",
-                    due_at=dl_utc,
+                    due_at=dl_local,
                     suggested_minutes=0,
                     reason=reason_text,
                     flags=int_flags,

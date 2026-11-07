@@ -10,7 +10,9 @@ from app.schemas.study_plan import StudyPlanResponse
 from app.services.study_plan import (
     DEFAULT_PLAN_DAYS,
     MAX_PLAN_DAYS,
+    MAX_UTC_OFFSET_MINUTES,
     MIN_PLAN_DAYS,
+    MIN_UTC_OFFSET_MINUTES,
     generate_study_plan,
 )
 
@@ -31,6 +33,12 @@ def get_student_study_plan(
         le=MAX_PLAN_DAYS,
         description="Number of days in study plan window (3 to 14)",
     ),
+    utc_offset_minutes: int = Query(
+        default=0,
+        ge=MIN_UTC_OFFSET_MINUTES,
+        le=MAX_UTC_OFFSET_MINUTES,
+        description="Client timezone offset from UTC in minutes (from -720 to 840)",
+    ),
     current_user: User = Depends(require_student),
     db: Session = Depends(get_db),
 ) -> StudyPlanResponse:
@@ -39,4 +47,5 @@ def get_student_study_plan(
         db=db,
         student=current_user,
         days=days,
+        utc_offset_minutes=utc_offset_minutes,
     )

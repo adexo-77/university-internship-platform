@@ -53,8 +53,9 @@ def schedule_pending_assignments(
         due_utc = (
             assign.due_at if assign.due_at.tzinfo is not None else assign.due_at.replace(tzinfo=UTC)
         )
+        due_local = due_utc.astimezone(now.tzinfo) if now.tzinfo is not None else due_utc
         is_ov = due_utc < now
-        due_date = due_utc.date()
+        due_date = due_local.date()
         effort = estimate_effort_minutes(assign.max_points)
         c_title = course_title_map.get(assign.course_id)
 
@@ -71,7 +72,7 @@ def schedule_pending_assignments(
                 title=assign.title,
                 course_title=c_title,
                 link_path=f"/assignments/{assign.id}",
-                due_at=due_utc,
+                due_at=due_local,
                 suggested_minutes=effort,
                 reason=f"Overdue coursework ({effort} min estimated from {assign.max_points} pts)",
                 flags=flags,
@@ -103,7 +104,7 @@ def schedule_pending_assignments(
                             title=assign.title,
                             course_title=c_title,
                             link_path=f"/assignments/{assign.id}",
-                            due_at=due_utc,
+                            due_at=due_local,
                             suggested_minutes=take,
                             reason=prep_reason,
                             flags=[],
@@ -119,7 +120,7 @@ def schedule_pending_assignments(
                         title=assign.title,
                         course_title=c_title,
                         link_path=f"/assignments/{assign.id}",
-                        due_at=due_utc,
+                        due_at=due_local,
                         suggested_minutes=effort,
                         reason=prep_reason,
                         flags=flags,
@@ -143,7 +144,7 @@ def schedule_pending_assignments(
                             title=assign.title,
                             course_title=c_title,
                             link_path=f"/assignments/{assign.id}",
-                            due_at=due_utc,
+                            due_at=due_local,
                             suggested_minutes=take,
                             reason=prep_reason,
                             flags=flags,
@@ -158,7 +159,7 @@ def schedule_pending_assignments(
                             title=assign.title,
                             course_title=c_title,
                             link_path=f"/assignments/{assign.id}",
-                            due_at=due_utc,
+                            due_at=due_local,
                             suggested_minutes=needed,
                             reason=prep_reason,
                             flags=flags,
