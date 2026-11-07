@@ -33,6 +33,7 @@ import { NotificationsPage } from './pages/NotificationsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ReportsPage } from './pages/ReportsPage';
+import { StudyPlanPage } from './pages/StudyPlanPage';
 import { SubmissionGradePage } from './pages/SubmissionGradePage';
 import { SystemStatusPage } from './pages/SystemStatusPage';
 
@@ -86,8 +87,9 @@ export const AppRoutes: React.FC = () => {
           <Route path="/my-courses" element={<MyCoursesPage />} />
         </Route>
 
-        {/* Student applications */}
+        {/* Student applications & study plan */}
         <Route element={<RoleRoute allowedRoles={['student']} />}>
+          <Route path="/study-plan" element={<StudyPlanPage />} />
           <Route path="/my-applications" element={<MyApplicationsPage />} />
         </Route>
 

@@ -4,6 +4,7 @@ import {
   BookOpen,
   Briefcase,
   Building2,
+  CalendarCheck,
   ClipboardCheck,
   Contact,
   FileText,
@@ -57,6 +58,12 @@ export const navigationItems: NavItem[] = [
     roles: ['admin', 'coordinator'],
   },
   {
+    path: '/study-plan',
+    label: 'Study plan',
+    icon: CalendarCheck,
+    roles: ['student'],
+  },
+  {
     path: '/courses',
     label: 'Courses',
     icon: BookOpen,
@@ -107,6 +114,7 @@ export const navigationItems: NavItem[] = [
 
 export const SECTION_ROUTES: Array<{ prefix: string; title: string }> = [
   { prefix: '/dashboard', title: 'Dashboard' },
+  { prefix: '/study-plan', title: 'Study plan' },
   { prefix: '/notifications', title: 'Notifications' },
   { prefix: '/account', title: 'Account' },
   { prefix: '/profile', title: 'Profile' },
@@ -163,6 +171,9 @@ export interface BackTarget {
  * Returns null for top-level navigation routes that do not have a parent.
  */
 export function resolveBackTarget(path: string): BackTarget | null {
+  if (path === '/study-plan') {
+    return { parentPath: '/dashboard', label: 'Back to Dashboard' };
+  }
   if (path === '/notifications') {
     return { parentPath: '/dashboard', label: 'Back to Dashboard' };
   }

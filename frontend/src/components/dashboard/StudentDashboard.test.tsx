@@ -69,6 +69,29 @@ describe('StudentDashboard', () => {
           headers: { 'Content-Type': 'application/json' },
         });
       }
+      if (url.includes('/api/students/me/study-plan')) {
+        return new Response(
+          JSON.stringify({
+            generated_at: '2026-11-07T08:00:00Z',
+            window: { days: 7, start_date: '2026-11-07', end_date: '2026-11-13' },
+            summary: {
+              headline: 'Your schedule is clear.',
+              sentences: ['No pending assignments.'],
+              metrics: {
+                enrolled_courses_count: 0,
+                assignments_due_count: 0,
+                total_scheduled_minutes: 0,
+                overdue_assignments_count: 0,
+              },
+            },
+            plan: [],
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+      }
       return new Response(JSON.stringify({}), { status: 200 });
     });
   });

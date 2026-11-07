@@ -29,12 +29,15 @@ describe('Navigation Configuration', () => {
     const labels = studentItems.map((i) => i.label);
 
     expect(labels).toContain('Dashboard');
+    expect(labels).toContain('Study plan');
     expect(labels).toContain('Courses');
     expect(labels).toContain('My courses');
     expect(labels).toContain('Internships');
     expect(labels).toContain('My applications');
     expect(labels).toContain('Profile');
     expect(labels).toContain('Account');
+    expect(labels.indexOf('Study plan')).toBeGreaterThan(labels.indexOf('Dashboard'));
+    expect(labels.indexOf('Study plan')).toBeLessThan(labels.indexOf('Courses'));
     expect(labels).not.toContain('My internships');
     expect(labels).not.toContain('System status');
   });
@@ -132,6 +135,7 @@ describe('Navigation Configuration', () => {
     });
 
     it('resolves independent sections matching prefixes correctly', () => {
+      expect(resolveSectionTitle('/study-plan')).toBe('Study plan');
       expect(resolveSectionTitle('/my-courses')).toBe('My courses');
       expect(resolveSectionTitle('/my-applications')).toBe('My applications');
       expect(resolveSectionTitle('/my-internships')).toBe('My internships');
@@ -186,6 +190,10 @@ describe('Navigation Configuration', () => {
       expect(resolveBackTarget('/assignments/101/submissions/7/grade')).toEqual({
         parentPath: '/assignments/101',
         label: 'Back to Assignment',
+      });
+      expect(resolveBackTarget('/study-plan')).toEqual({
+        parentPath: '/dashboard',
+        label: 'Back to Dashboard',
       });
       expect(resolveBackTarget('/notifications')).toEqual({
         parentPath: '/dashboard',

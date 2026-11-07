@@ -9,6 +9,7 @@ import { StudentApplicationsSection } from './StudentApplicationsSection';
 import { StudentCoursesSection } from './StudentCoursesSection';
 import { StudentBadgesSection } from '../badges/StudentBadgesSection';
 import { SuggestedInternshipsSection } from '../internships/SuggestedInternshipsSection';
+import { StudentNextStepsCard } from './StudentNextStepsCard';
 
 export interface StudentDashboardProps {
   data: StudentDashboardResponse;
@@ -41,6 +42,9 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ data }) => {
       )}
 
       <StatStrip items={stats} />
+
+      {/* Next Steps: Rule-Based Schedule Card */}
+      <StudentNextStepsCard />
 
       {/* Due Next Section */}
       <section className="space-y-3">
