@@ -82,6 +82,7 @@ def verify_account(
         "role": expected_role,
         "login": "FAIL",
         "dashboard": "FAIL",
+        "study_plan": "N/A",
         "notifications": "FAIL",
         "home": "FAIL",
         "passed": "false",
@@ -116,14 +117,26 @@ def verify_account(
         return res
     res["dashboard"] = "200 OK"
 
-    # 4. Notifications
+    # 4. Study plan (students only)
+    if expected_role == "student":
+        status, plan_data = client.request("GET", "/api/students/me/study-plan")
+        if (
+            status != 200
+            or not isinstance(plan_data, dict)
+            or "summary" not in plan_data
+        ):
+            res["study_plan"] = f"ERR {status}"
+            return res
+        res["study_plan"] = "200 OK"
+
+    # 5. Notifications
     status, _ = client.request("GET", "/api/notifications")
     if status != 200:
         res["notifications"] = f"ERR {status}"
         return res
     res["notifications"] = "200 OK"
 
-    # 5. SPA home page (HTML)
+    # 6. SPA home page (HTML)
     status, html_content = client.request(
         "GET", "/", headers={"Accept": "text/html,application/xhtml+xml"}
     )
@@ -142,9 +155,17 @@ def verify_account(
 
 def print_table(results: list[dict[str, str]]) -> None:
     """Print clean aligned verification table."""
-    headers = ("Account", "Role", "Login", "Dashboard", "Notifications", "Home Page")
-    fmt = "{:<24} | {:<12} | {:<10} | {:<10} | {:<14} | {:<10}"
-    divider = "-" * 90
+    headers = (
+        "Account",
+        "Role",
+        "Login",
+        "Dashboard",
+        "Study Plan",
+        "Notifications",
+        "Home Page",
+    )
+    fmt = "{:<24} | {:<12} | {:<10} | {:<10} | {:<10} | {:<14} | {:<10}"
+    divider = "-" * 105
     print(divider)
     print(fmt.format(*headers))
     print(divider)
@@ -155,6 +176,7 @@ def print_table(results: list[dict[str, str]]) -> None:
                 r["role"],
                 r["login"],
                 r["dashboard"],
+                r["study_plan"],
                 r["notifications"],
                 r["home"],
             )

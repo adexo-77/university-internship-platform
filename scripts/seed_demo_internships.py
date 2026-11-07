@@ -29,7 +29,7 @@ POSTINGS_DATA = [
         "Addis Ababa",
         InternshipWorkMode.REMOTE,
         10,
-        timedelta(days=21),
+        timedelta(days=5),
         InternshipStatus.OPEN,
         None,
     ),
@@ -137,6 +137,9 @@ def _seed_postings(
             )
             db.add(p)
             db.flush()
+        else:
+            p.application_deadline = now + delta
+            p.status = st
         postings[title] = p
     return postings
 
@@ -153,17 +156,17 @@ def _seed_applications(
         (
             p_web.id,
             s1.id,
-            ApplicationStatus.ACCEPTED,
+            ApplicationStatus.SUBMITTED,
             "Dear Hiring Team at Kaffa Digital Solutions, as a fourth-year IT student at Jimma University experienced in Python, FastAPI, and React, I would love to contribute to your enterprise web platforms. My capstone project involved building distributed RESTful services with strict test automation.",
-            "We were very impressed by your coursework and project repository. We are excited to offer you the Junior Web Developer internship position!",
-            now - timedelta(days=1),
+            None,
+            None,
         ),
         (
             p_web.id,
             s2.id,
-            ApplicationStatus.SHORTLISTED,
+            ApplicationStatus.ACCEPTED,
             "Dear Kaffa Digital team, I am writing to express my strong interest in the Junior Web Developer Intern role. Having built multiple frontend projects using React, TypeScript, and Tailwind CSS, I am excited about the prospect of learning from your engineering team in Addis Ababa.",
-            "Your frontend portfolio is strong. We have shortlisted your application for a technical interview next week.",
+            "We were very impressed by your coursework and project repository. We are excited to offer you the Junior Web Developer internship position!",
             now - timedelta(days=1),
         ),
         (
@@ -192,11 +195,12 @@ def _seed_applications(
         ),
     ]
     for pid, sid, st, cl, msg, dec_at in app_specs:
-        if not db.scalar(
+        existing = db.scalar(
             select(Application).where(
                 Application.posting_id == pid, Application.student_id == sid
             )
-        ):
+        )
+        if not existing:
             db.add(
                 Application(
                     posting_id=pid,
@@ -207,6 +211,11 @@ def _seed_applications(
                     decided_at=dec_at,
                 )
             )
+        else:
+            existing.status = st
+            existing.cover_letter = cl
+            existing.decision_message = msg
+            existing.decided_at = dec_at
     db.flush()
 
 

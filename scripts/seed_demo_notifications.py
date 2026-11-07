@@ -17,7 +17,6 @@ from sqlalchemy.orm import Session
 def seed_notifications(db: Session, users: dict[str, User], now: datetime) -> int:
     """Seed realistic initial notifications for demo accounts idempotently."""
     created_count = 0
-
     s1 = users.get("s1") or users.get("abel.tesfaye@example.com")
     s2 = users.get("s2") or users.get("meron.girma@example.com")
     inst1 = users.get("inst1") or users.get("tadesse.bekele@example.com")
@@ -26,7 +25,6 @@ def seed_notifications(db: Session, users: dict[str, User], now: datetime) -> in
     admin = users.get("admin") or users.get("mulugeta.assefa@example.com")
     coord = users.get("coord") or users.get("selamawit.tadesse@example.com")
 
-    # Fetch real entities
     er_a = db.scalar(
         select(Assignment).where(
             Assignment.title == "ER Diagramming & Conceptual Modeling"
@@ -38,9 +36,11 @@ def seed_notifications(db: Session, users: dict[str, User], now: datetime) -> in
         )
     )
     course_db = db.scalar(select(Course).where(Course.title == "Database Systems"))
-
     p_web = db.scalar(
         select(Internship).where(Internship.title == "Junior Web Developer Intern")
+    )
+    p_net = db.scalar(
+        select(Internship).where(Internship.title == "Network Support Intern")
     )
     p_mobile = db.scalar(
         select(Internship).where(Internship.title == "Mobile Application Intern")
@@ -49,8 +49,7 @@ def seed_notifications(db: Session, users: dict[str, User], now: datetime) -> in
     sub_abel = (
         db.scalar(
             select(Submission).where(
-                Submission.assignment_id == er_a.id,
-                Submission.student_id == s1.id,
+                Submission.assignment_id == er_a.id, Submission.student_id == s1.id
             )
         )
         if er_a and s1
@@ -59,35 +58,31 @@ def seed_notifications(db: Session, users: dict[str, User], now: datetime) -> in
     sub_meron = (
         db.scalar(
             select(Submission).where(
-                Submission.assignment_id == er_a.id,
-                Submission.student_id == s2.id,
+                Submission.assignment_id == er_a.id, Submission.student_id == s2.id
             )
         )
         if er_a and s2
         else None
     )
 
-    app_abel = (
+    app_abel_net = (
         db.scalar(
             select(Application).where(
-                Application.posting_id == p_web.id,
-                Application.student_id == s1.id,
+                Application.posting_id == p_net.id, Application.student_id == s1.id
             )
         )
-        if p_web and s1
+        if p_net and s1
         else None
     )
     app_meron = (
         db.scalar(
             select(Application).where(
-                Application.posting_id == p_web.id,
-                Application.student_id == s2.id,
+                Application.posting_id == p_web.id, Application.student_id == s2.id
             )
         )
         if p_web and s2
         else None
     )
-
     op_abay = (
         db.scalar(
             select(OrganizationProfile).where(OrganizationProfile.user_id == org3.id)
@@ -110,15 +105,15 @@ def seed_notifications(db: Session, users: dict[str, User], now: datetime) -> in
                 now - timedelta(days=1),
             )
         )
-    if s1 and p_web and app_abel:
+    if s1 and p_net and app_abel_net:
         demo_specs.append(
             (
                 s1,
                 NotificationKind.APPLICATION_DECISION,
-                f"Application accepted: {p_web.title}",
-                f"Your application for '{p_web.title}' was marked as accepted: {app_abel.decision_message}",
-                f"/applications/{app_abel.id}",
-                None,
+                f"Application status: {p_net.title}",
+                f"Your application for '{p_net.title}' was reviewed: {app_abel_net.decision_message}",
+                f"/applications/{app_abel_net.id}",
+                now - timedelta(days=2),
             )
         )
     if s1 and rel_a and course_db:
@@ -139,10 +134,10 @@ def seed_notifications(db: Session, users: dict[str, User], now: datetime) -> in
             (
                 s2,
                 NotificationKind.APPLICATION_DECISION,
-                f"Application shortlisted: {p_web.title}",
-                f"Your application for '{p_web.title}' was marked as shortlisted: {app_meron.decision_message}",
+                f"Application accepted: {p_web.title}",
+                f"Your application for '{p_web.title}' was marked as accepted: {app_meron.decision_message}",
                 f"/applications/{app_meron.id}",
-                None,
+                now - timedelta(days=1),
             )
         )
 

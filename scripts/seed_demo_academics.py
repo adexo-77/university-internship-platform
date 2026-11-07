@@ -4,10 +4,10 @@ from datetime import datetime, timedelta
 
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
-from app.models.course_resource import CourseResource
 from app.models.enrollment import Enrollment
 from app.models.submission import Submission
 from app.models.user import User
+from seed_demo_resources import seed_course_resources
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -78,22 +78,31 @@ def _seed_assignments_and_submissions(
     specs = [
         (
             "Relational Schema Design & Normalization",
-            now + timedelta(days=3),
+            now + timedelta(days=5),
+            100,
             "Design a relational schema for a university clinic management system. Decompose all entities to Third Normal Form (3NF), specify primary/foreign keys, and submit table definitions.",
         ),
         (
             "Advanced SQL Queries & Index Optimization",
-            now + timedelta(days=18),
+            now + timedelta(days=1),
+            80,
             "Write analytical SQL queries using window functions and aggregations. Analyze query execution plans using EXPLAIN ANALYZE and suggest composite indexes.",
+        ),
+        (
+            "Database Normalization Lab",
+            now - timedelta(days=1),
+            25,
+            "Normalize clinical database records to BCNF and implement domain constraints.",
         ),
         (
             "ER Diagramming & Conceptual Modeling",
             now - timedelta(days=5),
+            100,
             "Construct an Entity-Relationship (ER) diagram for a student registration system. Detail entity cardinalities, composite attributes, and weak entities.",
         ),
     ]
     assignments: dict[str, Assignment] = {}
-    for title, due, desc in specs:
+    for title, due, pts, desc in specs:
         a = db.scalar(
             select(Assignment).where(
                 Assignment.course_id == course.id, Assignment.title == title
@@ -104,18 +113,25 @@ def _seed_assignments_and_submissions(
                 course_id=course.id,
                 title=title,
                 due_at=due,
-                max_points=100,
+                max_points=pts,
                 description=desc,
             )
             db.add(a)
             db.flush()
+        else:
+            a.due_at = due
+            a.max_points = pts
+            a.description = desc
         assignments[title] = a
 
     er_a = assignments["ER Diagramming & Conceptual Modeling"]
+    norm_a = assignments["Database Normalization Lab"]
+    sql_a = assignments["Advanced SQL Queries & Index Optimization"]
     s1, s2, s3, inst1 = users["s1"], users["s2"], users["s3"], users["inst1"]
 
     subs = [
         (
+            er_a.id,
             s1.id,
             "Complete Entity-Relationship diagram for university clinic management, mapped to 3NF tables with foreign keys and unique constraints.",
             "https://github.com/abeltesfaye/clinic-er-model",
@@ -123,8 +139,10 @@ def _seed_assignments_and_submissions(
             100,
             "Outstanding structural design and clear cardinalities.",
             now - timedelta(days=3),
+            inst1.id,
         ),
         (
+            er_a.id,
             s2.id,
             "Conceptual data model and normalization notes for student course registration portal.",
             "https://github.com/merongirma/course-reg-db",
@@ -132,8 +150,10 @@ def _seed_assignments_and_submissions(
             None,
             None,
             None,
+            None,
         ),
         (
+            er_a.id,
             s3.id,
             "Initial draft of the entity-relationship schema for registration entities.",
             "https://github.com/dawitlemma/er-draft",
@@ -141,17 +161,41 @@ def _seed_assignments_and_submissions(
             78,
             "Good effort on entity attributes. Be careful with foreign key definitions.",
             now - timedelta(days=1),
+            inst1.id,
+        ),
+        (
+            norm_a.id,
+            s2.id,
+            "BCNF decomposition notes and functional dependency proofs.",
+            "https://github.com/merongirma/bcnf-lab",
+            False,
+            None,
+            None,
+            None,
+            None,
+        ),
+        (
+            sql_a.id,
+            s2.id,
+            "Window function analytics and execution plans.",
+            "https://github.com/merongirma/sql-opt",
+            False,
+            None,
+            None,
+            None,
+            None,
         ),
     ]
-    for sid, content, link, is_late, grade, fb, grad_at in subs:
-        if not db.scalar(
+    for aid, sid, content, link, is_late, grade, fb, grad_at, grad_by in subs:
+        existing = db.scalar(
             select(Submission).where(
-                Submission.assignment_id == er_a.id, Submission.student_id == sid
+                Submission.assignment_id == aid, Submission.student_id == sid
             )
-        ):
+        )
+        if not existing:
             db.add(
                 Submission(
-                    assignment_id=er_a.id,
+                    assignment_id=aid,
                     student_id=sid,
                     content=content,
                     link_url=link,
@@ -159,73 +203,22 @@ def _seed_assignments_and_submissions(
                     grade=grade,
                     feedback=fb,
                     graded_at=grad_at,
-                    graded_by=inst1.id if grade is not None else None,
+                    graded_by=grad_by,
                 )
             )
-    db.flush()
-
-
-RESOURCE_SPECS = [
-    (
-        "Introduction to Programming",
-        "Official Python Tutorial",
-        "https://docs.python.org/3/tutorial/",
-        "The official Python tutorial covering core syntax, data structures, and standard library fundamentals.",
-    ),
-    (
-        "Introduction to Programming",
-        "Think Python 2e",
-        "https://greenteapress.com/wp/think-python-2e/",
-        "Free introductory programming textbook focusing on algorithmic thinking and Python foundations.",
-    ),
-    (
-        "Database Systems",
-        "PostgreSQL Official Documentation",
-        "https://www.postgresql.org/docs/current/",
-        "Complete manual for PostgreSQL database server architecture, SQL syntax, and administration.",
-    ),
-    (
-        "Database Systems",
-        "Use The Index, Luke!",
-        "https://use-the-index-luke.com/",
-        "Guide to database indexing and SQL performance optimization for developers.",
-    ),
-    (
-        "Software Engineering",
-        "Refactoring Guru: Design Patterns",
-        "https://refactoring.guru/design-patterns",
-        "Visual guide to architectural and behavioral design patterns in modern software development.",
-    ),
-    (
-        "Software Engineering",
-        "Git Book Documentation",
-        "https://git-scm.com/book/en/v2",
-        "Pro Git official guide covering distributed version control workflows, branching, and collaboration.",
-    ),
-]
-
-
-def _seed_course_resources(db: Session, courses: dict[str, Course]) -> None:
-    for course_title, title, url, desc in RESOURCE_SPECS:
-        course = courses.get(course_title)
-        if not course:
-            continue
-        exists = db.scalar(
-            select(CourseResource.id).where(
-                CourseResource.course_id == course.id, CourseResource.title == title
-            )
-        )
-        if not exists:
-            db.add(
-                CourseResource(
-                    course_id=course.id, title=title, url=url, description=desc
-                )
-            )
+        else:
+            existing.content = content
+            existing.link_url = link
+            existing.is_late = is_late
+            existing.grade = grade
+            existing.feedback = fb
+            existing.graded_at = grad_at
+            existing.graded_by = grad_by
     db.flush()
 
 
 def seed_academics(db: Session, users: dict[str, User], now: datetime) -> None:
     courses = _seed_courses(db, users)
     _seed_enrollments(db, courses, users)
-    _seed_course_resources(db, courses)
+    seed_course_resources(db, courses)
     _seed_assignments_and_submissions(db, courses["Database Systems"], users, now)

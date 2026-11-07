@@ -16,14 +16,16 @@ from seed_demo import seed_demo
 from seed_demo_reset import ALL_DEMO_EMAILS, reset_demo
 
 from app.core.security import hash_password
-from app.models.application import Application
+from app.models.application import Application, ApplicationStatus
 from app.models.assignment import Assignment
 from app.models.course import Course
 from app.models.course_resource import CourseResource
 from app.models.internship import Internship
 from app.models.notification import Notification
+from app.models.student_profile import StudentProfile
 from app.models.submission import Submission
 from app.models.user import User, UserRole
+from app.services.study_plan import generate_study_plan
 
 
 def test_seed_demo_refuses_in_production(real_db_session: Session) -> None:
@@ -56,6 +58,7 @@ def test_seed_demo_idempotency(real_db_session: Session) -> None:
         a_titles = [
             "Relational Schema Design & Normalization",
             "Advanced SQL Queries & Index Optimization",
+            "Database Normalization Lab",
             "ER Diagramming & Conceptual Modeling",
         ]
         return {
@@ -104,10 +107,10 @@ def test_seed_demo_idempotency(real_db_session: Session) -> None:
     counts_first = get_counts()
     assert counts_first["users"] == 10
     assert counts_first["courses"] == 3
-    assert counts_first["assignments"] == 3
+    assert counts_first["assignments"] == 4
     assert counts_first["resources"] == 6
     assert counts_first["postings"] == 8
-    assert counts_first["submissions"] == 3
+    assert counts_first["submissions"] == 5
     assert counts_first["apps"] == 5
     assert counts_first["notifications"] == 12
 
@@ -143,3 +146,68 @@ def test_reset_demo_preserves_non_demo_accounts(real_db_session: Session) -> Non
     )
     assert survivor is not None
     assert survivor.full_name == "Prof. Persistent"
+
+
+def test_seeded_demo_study_plan_scenarios(real_db_session: Session) -> None:
+    """Seeded demo accounts exhibit three distinct study plan scenarios."""
+    seed_demo(real_db_session, force=True)
+
+    abel = real_db_session.scalar(select(User).where(User.email == "abel.tesfaye@example.com"))
+    meron = real_db_session.scalar(select(User).where(User.email == "meron.girma@example.com"))
+    dawit = real_db_session.scalar(select(User).where(User.email == "dawit.lemma@example.com"))
+    assert abel and meron and dawit
+
+    # 1. Abel: overdue assignment, tight assignment due tomorrow, open application
+    abel_plan = generate_study_plan(real_db_session, abel, days=7)
+    assert abel_plan.summary.metrics.overdue_count == 1
+    assert len(abel_plan.overdue) == 1
+    assert abel_plan.overdue[0].title == "Database Normalization Lab"
+    assert len(abel_plan.tight) == 1
+    assert abel_plan.tight[0].title == "Advanced SQL Queries & Index Optimization"
+    abel_open_app = real_db_session.scalar(
+        select(Application).where(
+            Application.student_id == abel.id,
+            Application.status == ApplicationStatus.SUBMITTED,
+        )
+    )
+    assert abel_open_app is not None
+    assert any("submitted" in s.lower() for s in abel_plan.summary.sentences)
+    er_sub = real_db_session.scalar(
+        select(Submission)
+        .join(Assignment, Submission.assignment_id == Assignment.id)
+        .where(
+            Submission.student_id == abel.id,
+            Assignment.title == "ER Diagramming & Conceptual Modeling",
+        )
+    )
+    assert er_sub and er_sub.grade == 100
+
+    # 2. Meron: high-point assignment due later, accepted application, 0 overdue/tight
+    meron_plan = generate_study_plan(real_db_session, meron, days=7)
+    assert meron_plan.summary.metrics.overdue_count == 0
+    assert len(meron_plan.overdue) == 0
+    assert len(meron_plan.tight) == 0
+    later_items = [
+        it for day in meron_plan.plan for it in day.items if "Relational Schema Design" in it.title
+    ]
+    assert len(later_items) >= 1
+    meron_accepted = real_db_session.scalar(
+        select(Application).where(
+            Application.student_id == meron.id,
+            Application.status == ApplicationStatus.ACCEPTED,
+        )
+    )
+    assert meron_accepted is not None
+
+    # 3. Dawit: incomplete profile, suggested internship in window, profile hint
+    dawit_prof = real_db_session.scalar(
+        select(StudentProfile).where(StudentProfile.user_id == dawit.id)
+    )
+    assert dawit_prof and (not dawit_prof.university or not dawit_prof.department)
+    dawit_plan = generate_study_plan(real_db_session, dawit, days=7)
+    internship_items = [
+        it for day in dawit_plan.plan for it in day.items if it.type == "internship"
+    ]
+    assert len(internship_items) >= 1
+    assert any("profile_incomplete" in it.flags for it in internship_items)
+    assert any("Complete your profile to apply" in it.reason for it in internship_items)
