@@ -59,8 +59,9 @@ ROLE_MATRIX: list[tuple[str, str, set[UserRole]]] = [
     ("GET", "/api/dashboard/student", {UserRole.STUDENT}),
     ("GET", "/api/dashboard/instructor", {UserRole.INSTRUCTOR}),
     ("GET", "/api/dashboard/organization", {UserRole.ORGANIZATION}),
-    # Achievement badges
+    # Achievement badges and study plan
     ("GET", "/api/students/me/badges", {UserRole.STUDENT}),
+    ("GET", "/api/students/me/study-plan", {UserRole.STUDENT}),
     # Administrative and coordinator CSV reports
     (
         "GET",

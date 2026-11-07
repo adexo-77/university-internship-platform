@@ -37,6 +37,6 @@ def get_student_study_plan(
     """Generate a deterministic rule-based study plan for the signed-in student."""
     return generate_study_plan(
         db=db,
-        student_id=current_user.id,
+        student=current_user,
         days=days,
     )

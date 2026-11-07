@@ -14,6 +14,7 @@ from app.models.course import Course, CourseStatus
 from app.models.enrollment import Enrollment
 from app.models.student_profile import StudentProfile
 from app.models.submission import Submission
+from app.models.user import User
 from app.schemas.study_plan import (
     StudyPlanDay,
     StudyPlanItem,
@@ -21,7 +22,7 @@ from app.schemas.study_plan import (
     StudyPlanWindow,
 )
 from app.services.badge import get_student_badges
-from app.services.internship_suggestion import get_suggested_internships
+from app.services.internship_suggestion import get_internship_suggestions
 from app.services.study_plan_scheduler import (
     DAILY_CAP_MINUTES,
     EFFORT_HIGH_MINUTES,
@@ -69,11 +70,18 @@ def _is_profile_complete(profile: StudentProfile | None) -> bool:
 
 def generate_study_plan(
     db: Session,
-    student_id: int,
+    student: User | int,
     days: int = DEFAULT_PLAN_DAYS,
     current_time: datetime | None = None,
 ) -> StudyPlanResponse:
     """Generate a deterministic, rule-based study schedule across the requested window."""
+    if isinstance(student, User):
+        student_id = student.id
+        student_user = student
+    else:
+        student_id = student
+        student_user = db.scalar(select(User).where(User.id == student_id))
+
     now = current_time or datetime.now(UTC)
     if now.tzinfo is None:
         now = now.replace(tzinfo=UTC)
@@ -157,9 +165,11 @@ def generate_study_plan(
     )
 
     # 6. Suggested internships (bounded suggestions)
-    suggestions_resp = get_suggested_internships(db, student_id, limit=20)
+    suggestions_items = (
+        get_internship_suggestions(db, student_user, limit=20).items if student_user else []
+    )
     internship_items_count = 0
-    for sug in suggestions_resp.items:
+    for sug in suggestions_items:
         if sug.id in applied_ids or not sug.application_deadline:
             continue
         dl_utc = (
@@ -190,7 +200,7 @@ def generate_study_plan(
             )
 
     # 7. Student achievement badges (bounded calculation)
-    badges = get_student_badges(db, student_id)
+    badges = get_student_badges(db, student_user) if student_user else []
 
     # Assemble plan days
     plan: list[StudyPlanDay] = []
