@@ -128,8 +128,8 @@ def build_summary_sentences(
             f"{cnt} {st}" for st, cnt in sorted(app_status_counts.items()) if cnt > 0
         ]
         sentences.append(
-            f"You have {total_apps} active internship application{'s' if total_apps != 1 else ''} "
-            f"({', '.join(breakdown_parts)})."
+            f"You have {total_apps} application{'s' if total_apps != 1 else ''}: "
+            f"{', '.join(breakdown_parts)}."
         )
     elif open_internships_count > 0:
         plural_int = "deadlines" if open_internships_count != 1 else "deadline"
