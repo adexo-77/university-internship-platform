@@ -4,6 +4,7 @@ import { authenticateAsRole, DemoRole, trackErrors } from './helpers';
 const ROLE_ROUTES = {
   student: [
     '/dashboard',
+    '/study-plan',
     '/my-courses',
     '/courses',
     '/courses/1',
