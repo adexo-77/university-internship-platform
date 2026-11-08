@@ -205,3 +205,20 @@ def test_study_plan_summary_when_all_badges_unlocked() -> None:
     )
 
     assert "You have unlocked all available achievement badges." in summary.sentences
+
+
+def test_badge_titles_canonical_and_consistent() -> None:
+    """Verify the 8 canonical badge titles are strictly consistent across service and schema."""
+    expected_titles = [
+        "First submission",
+        "On-time habit",
+        "High achiever",
+        "Perfect score",
+        "Course finisher",
+        "Profile complete",
+        "First application",
+        "Offer accepted",
+    ]
+    actual_titles = [d["title"] for d in BADGE_DEFINITIONS]
+    assert actual_titles == expected_titles
+

@@ -12,7 +12,7 @@ const mockFullPlan: StudyPlanResponse = {
     sentences: [
       'You are currently enrolled in 2 published courses.',
       '1 assignment is currently overdue and scheduled for immediate catch-up.',
-      'Your nearest badge is Course Finisher (1 of 3 completed).',
+      "Your nearest achievement milestone is 'Course finisher' (1 of 3 completed).",
     ],
     metrics: {
       enrolled_courses_count: 2,
