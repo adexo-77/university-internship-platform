@@ -221,4 +221,3 @@ def test_badge_titles_canonical_and_consistent() -> None:
     ]
     actual_titles = [d["title"] for d in BADGE_DEFINITIONS]
     assert actual_titles == expected_titles
-
