@@ -116,10 +116,11 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
 
 ### Step 6: Follow the Rule-Based Weekly Study Plan (`/study-plan`)
 1. Click **Study plan** in the top navigation or click **View full study plan** from the **Next steps** card on your dashboard.
-2. Review the **Weekly Progress Summary** card:
+2. Review the **Study plan & weekly progress** page:
+   - Header badge: **Rule-based plan**.
    - Actionable headline summarizing current workload urgency.
    - 3 to 5 plain sentences synthesizing pending deadlines, course performance averages, nearest achievement badge progress, and internship application status breakdowns.
-   - Metric summary pills: overdue items, tight tasks, upcoming deadlines, active applications, suggested internships in window, and total estimated study minutes.
+   - Metric cards: **Courses** (enrolled count), **Pending tasks** (assignments due count), **Minutes planned** (total suggested minutes), and **Overdue** (overdue tasks count).
 3. Explore the **Daily Schedule**:
    - Tasks are allocated backwards onto calendar days strictly before assignment due dates subject to a 120-minute daily effort cap.
    - Effort estimates derive deterministically from assignment point values (&le; 20 pts: 45 min, &le; 50 pts: 90 min, &gt; 50 pts: 150 min).

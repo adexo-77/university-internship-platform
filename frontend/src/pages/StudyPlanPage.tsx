@@ -92,7 +92,7 @@ export const StudyPlanPage: React.FC = () => {
         </div>
 
         <span className="text-xs text-pencil border border-line px-2 py-0.5 rounded-sm self-start sm:self-auto">
-          Rule-based plan &bull; No AI
+          Rule-based plan
         </span>
       </div>
 
