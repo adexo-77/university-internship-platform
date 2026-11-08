@@ -48,11 +48,12 @@ export const StudyPlanDisclosure: React.FC = () => {
             </li>
             <li>
               <strong>Daily workload cap:</strong> Each day has a maximum of 120 minutes of planned
-              study. Tasks are scheduled as late as possible before their due dates.
+              study. Preparation is scheduled as late as possible on days strictly before due dates.
             </li>
             <li>
-              <strong>Tight schedule flag:</strong> If a task cannot fit comfortably before its due
-              date, work begins immediately from today and is labeled as tight.
+              <strong>Tight schedule flag:</strong> If a task cannot fit in the remaining capacity
+              before its due date, work begins immediately from today up through the due date and is
+              labeled as tight.
             </li>
             <li>
               <strong>Exclusion:</strong> Assignments you have already submitted or received grades

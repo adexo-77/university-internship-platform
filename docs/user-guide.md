@@ -121,13 +121,13 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
    - 3 to 5 plain sentences synthesizing pending deadlines, course performance averages, nearest achievement badge progress, and internship application status breakdowns.
    - Metric summary pills: overdue items, tight tasks, upcoming deadlines, active applications, suggested internships in window, and total estimated study minutes.
 3. Explore the **Daily Schedule**:
-   - Tasks are allocated backwards from assignment due dates subject to a 120-minute daily effort cap.
+   - Tasks are allocated backwards onto calendar days strictly before assignment due dates subject to a 120-minute daily effort cap.
    - Effort estimates derive deterministically from assignment point values (&le; 20 pts: 45 min, &le; 50 pts: 90 min, &gt; 50 pts: 150 min).
    - Overdue coursework is scheduled on today with an **Overdue** badge.
-   - Tasks that cannot fit before their deadlines are scheduled from today with a **Tight** badge.
+   - Tasks that cannot fit in the remaining capacity before their due dates are flagged with a **Tight** badge and scheduled starting from today up through the due date.
    - Open suggested internships with deadlines in the window prompt students to apply. Students with incomplete profiles receive an explicit **Profile incomplete** badge and guidance to complete mandatory fields.
 4. Switch the study window between **7 days** (default) and **14 days** using the window selector pills (the frontend automatically includes the student browser's timezone offset in minutes so dates match local time).
-5. Click **Deterministic rules** to expand the full explanation of how the schedule is computed. Note that this plan is 100% rule-based and deterministic without any AI.
+5. Click **How this plan is made** to expand the full explanation of how the schedule is computed. Note that this plan is 100% rule-based and deterministic without any AI.
 
 ![Internship catalog with rule-based recommendation cards and search filters](screenshots/suggested-internships.png)
 *Internship catalog displaying rule-based suggestion cards with percentage match scores, keyword search, and work mode filter.*

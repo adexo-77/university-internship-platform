@@ -24,9 +24,12 @@ STUDY_PLAN_RULES: list[str] = [
     ),
     (
         "Daily study effort is capped at 120 minutes per day, spread backwards "
-        "from before the due date."
+        "onto calendar days strictly before the due date."
     ),
-    "Work that cannot fit before its deadline is scheduled starting today and flagged as 'tight'.",
+    (
+        "Work that cannot fit in available capacity before its due date is scheduled "
+        "starting today up through the due date and flagged as 'tight'."
+    ),
     "No preparation is scheduled after an assignment's due date.",
     (
         "Open suggested internships with deadlines in the window are included "
