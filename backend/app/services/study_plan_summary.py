@@ -23,8 +23,9 @@ STUDY_PLAN_RULES: list[str] = [
         "up to 50 pts = 90 min, above 50 pts = 150 min."
     ),
     (
-        "Daily study effort is capped at 120 minutes per day, spread backwards "
-        "onto calendar days strictly before the due date."
+        "Daily study effort is capped at 120 minutes per day. Urgent work is scheduled first, "
+        "then remaining coursework is placed on the earliest days with free capacity, "
+        "never after the due date."
     ),
     (
         "Work that cannot fit in available capacity before its due date is scheduled "

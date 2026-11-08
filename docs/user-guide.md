@@ -122,7 +122,7 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
    - 3 to 5 plain sentences synthesizing pending deadlines, course performance averages, nearest achievement badge progress, and internship application status breakdowns.
    - Metric cards: **Courses** (enrolled count), **Pending tasks** (assignments due count), **Minutes planned** (total suggested minutes), and **Overdue** (overdue tasks count).
 3. Explore the **Daily Schedule**:
-   - Tasks are allocated backwards onto calendar days strictly before assignment due dates subject to a 120-minute daily effort cap.
+   - Urgent work is scheduled first, then remaining coursework is placed on the earliest days with free capacity, never after the due date, subject to a 120-minute daily effort cap.
    - Effort estimates derive deterministically from assignment point values (&le; 20 pts: 45 min, &le; 50 pts: 90 min, &gt; 50 pts: 150 min).
    - Overdue coursework is scheduled on today with an **Overdue** badge.
    - Tasks that cannot fit in the remaining capacity before their due dates are flagged with a **Tight** badge and scheduled starting from today up through the due date.

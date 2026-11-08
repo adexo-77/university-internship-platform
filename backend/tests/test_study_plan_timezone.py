@@ -107,8 +107,8 @@ def test_study_plan_timezone_bucketing_at_midnight_boundaries(
     # 00:30 deadline lands on day 1 (2026-11-09)
     assert any("Internship Due 00:30" in it.title for it in day_1_items)
     assert not any("Internship Due 00:30" in it.title for it in day_0_items)
-    # Assignment due 00:30 local day 2 prepares on day 1 (the day before its local deadline)
-    assert any("Assignment Due 00:30 Local Day 2" in it.title for it in day_1_items)
+    # Assignment due 00:30 local day 2 is scheduled on earliest free day (day 0) before deadline
+    assert any("Assignment Due 00:30 Local Day 2" in it.title for it in day_0_items)
 
     # In contrast, without offset (UTC 0): both internships share UTC date 2026-11-08
     plan_utc = generate_study_plan(

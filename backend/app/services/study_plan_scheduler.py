@@ -86,9 +86,9 @@ def schedule_pending_assignments(
             cap_before = sum(remaining_cap[d] for d in days_before)
 
             if cap_before >= effort:
-                # Fits before due date: allocate backwards starting as late as cap allows
+                # Fits before due date: allocate on earliest days with free capacity
                 needed = effort
-                for d in reversed(days_before):
+                for d in days_before:
                     if needed <= 0:
                         break
                     avail = remaining_cap[d]

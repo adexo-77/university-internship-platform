@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Deterministic scheduling and progress service (`services/study_plan.py`, `services/study_plan_scheduler.py`, `services/study_plan_summary.py`) with no AI or external network calls:
     - Point-based effort estimation (&le; 20 pts: 45 min, &le; 50 pts: 90 min, &gt; 50 pts: 150 min).
     - 120-minute daily effort cap per calendar day.
-    - Backward allocation from assignment due dates; tasks unable to fit before deadlines flagged as "tight" and scheduled from today; overdue tasks scheduled immediately on today with "overdue" flag.
+    - Urgent work prioritized first, then remaining coursework scheduled on earliest days with free capacity before due dates; tasks unable to fit before deadlines flagged as "tight" and scheduled from today; overdue tasks scheduled immediately on today with "overdue" flag.
     - Suggested internships within study window added with "Apply by <date>" and profile completion notice for incomplete profiles.
     - Browser timezone offset integration: optional `utc_offset_minutes` (-720 to 840) query parameter on `GET /api/students/me/study-plan` automatically sent by frontend to compute days and deadline boundaries in the student's local time (UTC+3 for Addis Ababa).
     - Transparent application status breakdown in weekly summary sentences reflecting all application states accurately.

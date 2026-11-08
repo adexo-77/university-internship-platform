@@ -214,10 +214,11 @@ def test_study_plan_ordering_ties_and_submission_exclusion(
 
     # Verify ID ordering between a1 and a2 (a1 was created first, lower ID)
     assert a1.id < a2.id
-    # Both scheduled before day 4
-    d3_items = [i["title"] for i in data["plan"][3]["items"]]
-    if "Assignment Beta" in d3_items and "Assignment Alpha" in d3_items:
-        assert d3_items.index("Assignment Beta") < d3_items.index("Assignment Alpha")
+    # Under earliest-free-day placement, both start on day 0 respecting ID order
+    d0_items = [i["title"] for i in data["plan"][0]["items"]]
+    assert "Assignment Beta" in d0_items
+    assert "Assignment Alpha" in d0_items
+    assert d0_items.index("Assignment Beta") < d0_items.index("Assignment Alpha")
 
 
 def test_study_plan_nothing_pending_and_student_without_courses(
