@@ -50,7 +50,7 @@ This document provides an **8 to 10 minute end-to-end presentation script** for 
 > **Action**: Log out and log in as `tadesse.bekele@example.com` (password `12345678`).
 
 > **What to Say**:
-> *"Next, let's explore the faculty experience. Instructors have a dedicated dashboard showing active courses, student enrollment totals, and a 'Needs Grading' queue.*
+> *"Next, let's explore the faculty experience. Instructors have a dedicated dashboard showing active courses, student enrollment totals, and a 'Needs Grading' queue with 3 pending submissions awaiting review from Meron Girma.*
 >
 > *Instructors can author courses with a course code, department, description, and structured syllabus outline. Courses can be kept in `draft` mode while being prepared and `published` when ready.*
 >

@@ -145,7 +145,7 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
 2. The dashboard highlights:
    - **Active Courses** published (Database Systems, Introduction to Programming).
    - **Total Enrolled Students** across all courses.
-   - **Needs Grading** count of student submissions awaiting grading (Meron Girma's submission).
+   - **Needs Grading** count of student submissions awaiting grading (3 submissions from Meron Girma across Database Systems and Introduction to Programming).
 3. Click any submission in the "Needs Grading" list to jump directly to the grading interface.
 
 ### Step 2: Create &amp; Manage Courses (`/courses/new`)
