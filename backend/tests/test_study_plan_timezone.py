@@ -148,3 +148,27 @@ def test_study_plan_utc_offset_endpoint_validation(
 
     resp_over = real_db_client.get("/api/students/me/study-plan?utc_offset_minutes=841")
     assert resp_over.status_code == 422
+
+
+def test_study_plan_endpoint_uses_injected_get_now(
+    real_db_client: TestClient,
+    real_db_session: Session,
+) -> None:
+    """FastAPI endpoint respects get_now dependency override for deterministic time travel."""
+    from app.core.deps import get_now
+    from app.main import app
+
+    create_test_user(db=real_db_session, email="stu_tz_freeze@example.com", role=UserRole.STUDENT)
+    frozen_now = datetime(2027, 3, 1, 10, 0, 0, tzinfo=UTC)
+    app.dependency_overrides[get_now] = lambda: frozen_now
+
+    try:
+        login_test_user(real_db_client, "stu_tz_freeze@example.com")
+        resp = real_db_client.get("/api/students/me/study-plan")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["window"]["start_date"] == "2027-03-01"
+        assert data["window"]["end_date"] == "2027-03-07"
+    finally:
+        app.dependency_overrides.pop(get_now, None)
+

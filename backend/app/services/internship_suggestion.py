@@ -121,9 +121,15 @@ def score_posting(
     return total_score, matched_skills, work_mode_match, location_match
 
 
-def get_candidate_postings(db: Session, student_id: int) -> list[tuple[Internship, str | None]]:
+def get_candidate_postings(
+    db: Session,
+    student_id: int,
+    now: datetime | None = None,
+) -> list[tuple[Internship, str | None]]:
     """Fetch candidate postings with ONE query matching student catalogue visibility."""
-    now = datetime.now(UTC)
+    current_time = now if now is not None else datetime.now(UTC)
+    if current_time.tzinfo is None:
+        current_time = current_time.replace(tzinfo=UTC)
     org_col = func.coalesce(OrganizationProfile.organization_name, User.full_name)
 
     stmt = (
@@ -132,7 +138,7 @@ def get_candidate_postings(db: Session, student_id: int) -> list[tuple[Internshi
         .outerjoin(OrganizationProfile, User.id == OrganizationProfile.user_id)
         .where(
             Internship.status == InternshipStatus.OPEN,
-            Internship.application_deadline > now,
+            Internship.application_deadline > current_time,
             User.is_active.is_(True),
             OrganizationProfile.approval_status == ApprovalStatus.APPROVED,
             Internship.id.not_in(
@@ -149,6 +155,7 @@ def get_internship_suggestions(
     db: Session,
     current_user: User,
     limit: int = 5,
+    now: datetime | None = None,
 ) -> InternshipSuggestionResponse:
     """Retrieve scored and sorted internship suggestions for the authenticated student."""
     if current_user.role != UserRole.STUDENT:
@@ -162,7 +169,7 @@ def get_internship_suggestions(
         return InternshipSuggestionResponse(items=[], reason_code="NO_SKILLS")
 
     clamped_limit = min(max(limit, 1), 10)
-    candidates = get_candidate_postings(db, current_user.id)
+    candidates = get_candidate_postings(db, current_user.id, now=now)
 
     scored: list[ScoredInternship] = []
     for posting, org_name in candidates:

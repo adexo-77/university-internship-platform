@@ -166,14 +166,18 @@ def generate_study_plan(
 
     # 6. Suggested internships (bounded suggestions)
     suggestions_items = (
-        get_internship_suggestions(db, student_user, limit=20).items if student_user else []
+        get_internship_suggestions(db, student_user, limit=20, now=now).items
+        if student_user
+        else []
     )
-    cands: list[tuple[int, str, str | None, datetime | None]] = [
+    cands = [
         (s.id, s.title, s.organization_name, s.application_deadline) for s in suggestions_items
     ]
     if not cands and student_user and not profile_complete:
-        raw_cands = get_candidate_postings(db, student_user.id)
-        cands = [(p.id, p.title, org, p.application_deadline) for p, org in raw_cands[:20]]
+        cands = [
+            (p.id, p.title, org, p.application_deadline)
+            for p, org in get_candidate_postings(db, student_user.id, now=now)[:20]
+        ]
 
     internship_items_count = 0
     for int_id, title, org_name, dl in cands:

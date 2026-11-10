@@ -1,10 +1,12 @@
 """Thin router for internship postings creation, listing, details, and updates."""
 
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.deps import get_current_user, require_roles
+from app.core.deps import get_current_user, get_now, require_roles
 from app.models.internship import InternshipWorkMode
 from app.models.user import User, UserRole
 from app.schemas.internship import (
@@ -172,12 +174,14 @@ def get_internship_suggestions(
     limit: int = Query(default=5, ge=1, le=10, description="Maximum suggestions to return"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    now: datetime = Depends(get_now),
 ) -> InternshipSuggestionResponse:
     """Retrieve personalized rule-based internship suggestions for the authenticated student."""
     return suggestion_service.get_internship_suggestions(
         db=db,
         current_user=current_user,
         limit=limit,
+        now=now,
     )
 
 

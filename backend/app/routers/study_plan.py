@@ -1,10 +1,12 @@
 """Study plan router providing student-specific deterministic study scheduling."""
 
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.deps import require_roles
+from app.core.deps import get_now, require_roles
 from app.models.user import User, UserRole
 from app.schemas.study_plan import StudyPlanResponse
 from app.services.study_plan import (
@@ -41,11 +43,13 @@ def get_student_study_plan(
     ),
     current_user: User = Depends(require_student),
     db: Session = Depends(get_db),
+    now: datetime = Depends(get_now),
 ) -> StudyPlanResponse:
     """Generate a deterministic rule-based study plan for the signed-in student."""
     return generate_study_plan(
         db=db,
         student=current_user,
         days=days,
+        current_time=now,
         utc_offset_minutes=utc_offset_minutes,
     )

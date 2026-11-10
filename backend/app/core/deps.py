@@ -1,6 +1,7 @@
 """Authentication and authorization dependencies for FastAPI endpoints."""
 
 from collections.abc import Callable
+from datetime import UTC, datetime
 
 from fastapi import Depends, Request
 from sqlalchemy.orm import Session
@@ -47,3 +48,9 @@ def require_roles(*roles: UserRole | str) -> Callable[[User], User]:
         return current_user
 
     return role_checker
+
+
+def get_now() -> datetime:
+    """Dependency that returns the current UTC datetime (overridable in tests)."""
+    return datetime.now(UTC)
+
