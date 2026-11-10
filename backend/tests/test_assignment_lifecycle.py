@@ -1,10 +1,11 @@
 """Integration tests for assignment update grade floor constraints and deletion guards."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
 from app.models.enrollment import Enrollment
@@ -39,7 +40,7 @@ def test_assignment_patch_max_points_conflict_with_existing_grade(
     assignment = Assignment(
         course_id=course.id,
         title="Project",
-        due_at=datetime.now(UTC) + timedelta(days=5),
+        due_at=get_now() + timedelta(days=5),
         max_points=100,
     )
     real_db_session.add(assignment)
@@ -52,7 +53,7 @@ def test_assignment_patch_max_points_conflict_with_existing_grade(
         student_id=stud.id,
         content="Final project submission",
         grade=85,
-        graded_at=datetime.now(UTC),
+        graded_at=get_now(),
         graded_by=inst.id,
     )
     real_db_session.add(sub)
@@ -88,7 +89,7 @@ def test_assignment_delete_blocked_when_submissions_exist(
     assignment = Assignment(
         course_id=course.id,
         title="Lab 1",
-        due_at=datetime.now(UTC) + timedelta(days=5),
+        due_at=get_now() + timedelta(days=5),
         max_points=50,
     )
     real_db_session.add(assignment)
@@ -132,7 +133,7 @@ def test_organization_and_coordinator_cannot_access_assignments(
     assignment = Assignment(
         course_id=course.id,
         title="Protected Assignment",
-        due_at=datetime.now(UTC) + timedelta(days=5),
+        due_at=get_now() + timedelta(days=5),
         max_points=50,
     )
     real_db_session.add(assignment)

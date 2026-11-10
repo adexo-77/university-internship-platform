@@ -8,11 +8,12 @@ Policy:
 Asserts status codes (200, 401, 403, 404) and no data leaks on refusal.
 """
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
 from app.models.course_resource import CourseResource
@@ -23,7 +24,7 @@ from tests.factories import create_test_user, login_test_user
 
 
 def _seed_course_data(db: Session) -> dict:
-    now = datetime.now(UTC)
+    now = get_now()
     inst_owner = create_test_user(db, "inst_owner@matrix.edu", UserRole.INSTRUCTOR)
     inst_other = create_test_user(db, "inst_other@matrix.edu", UserRole.INSTRUCTOR)
     stud_enrolled = create_test_user(db, "stud_enrolled@matrix.edu", UserRole.STUDENT)

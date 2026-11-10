@@ -1,13 +1,14 @@
 """Contract tests ensuring backend dashboard payloads match frontend fixtures."""
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.application import ApplicationStatus
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
@@ -59,7 +60,7 @@ def test_student_dashboard_matches_frontend_contract(
     real_db_session.add(Enrollment(course_id=course.id, student_id=student.id))
     real_db_session.commit()
 
-    now = datetime.now(UTC)
+    now = get_now()
     a1 = Assignment(
         course_id=course.id, title="Raft Consensus", due_at=now - timedelta(days=2), max_points=100
     )
@@ -104,7 +105,7 @@ def test_instructor_dashboard_matches_frontend_contract(
     real_db_session.add(course)
     real_db_session.commit()
     real_db_session.add(Enrollment(course_id=course.id, student_id=student.id))
-    now = datetime.now(UTC)
+    now = get_now()
     a = Assignment(
         course_id=course.id, title="Vector Clocks", due_at=now - timedelta(days=1), max_points=100
     )

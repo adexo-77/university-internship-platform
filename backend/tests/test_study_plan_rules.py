@@ -1,10 +1,11 @@
 """Boundary and algorithmic verification for rule-based study plan generation."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
 from app.models.enrollment import Enrollment
@@ -31,7 +32,7 @@ def test_study_plan_overdue_and_due_today_boundaries(
     real_db_session.add(course)
     real_db_session.commit()
     real_db_session.add(Enrollment(student_id=student.id, course_id=course.id))
-    now = datetime.now(UTC)
+    now = get_now()
 
     real_db_session.add_all(
         [
@@ -104,7 +105,7 @@ def test_study_plan_due_tomorrow_large_effort_tight_and_cap(
     real_db_session.commit()
     real_db_session.add(Enrollment(student_id=student.id, course_id=course.id))
 
-    now = datetime.now(UTC)
+    now = get_now()
     # Assignment due tomorrow: max 80 points (>50 -> 150 min effort)
     # Capacity before tomorrow is only today (120 min). 150 > 120 => tight!
     real_db_session.add(
@@ -166,7 +167,7 @@ def test_study_plan_ordering_ties_and_submission_exclusion(
     real_db_session.commit()
     real_db_session.add(Enrollment(student_id=student.id, course_id=course.id))
 
-    common_due = datetime.now(UTC) + timedelta(days=4)
+    common_due = get_now() + timedelta(days=4)
     a1 = Assignment(
         course_id=course.id,
         title="Assignment Beta",
@@ -198,7 +199,7 @@ def test_study_plan_ordering_ties_and_submission_exclusion(
         content="Solution submission",
         link_url="https://github.com/student/db-project",
         grade=45.0,
-        graded_at=datetime.now(UTC),
+        graded_at=get_now(),
     )
     real_db_session.add(sub)
     real_db_session.commit()

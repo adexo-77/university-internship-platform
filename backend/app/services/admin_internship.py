@@ -1,10 +1,11 @@
 """Business logic for administrative internship review and management."""
 
-from datetime import UTC, datetime
+from datetime import datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.core.exceptions import ConflictException, NotFoundException
 from app.models.application import Application
 from app.models.internship import Internship, InternshipStatus
@@ -31,7 +32,7 @@ def _to_response(
     applicant_count: int = 0,
     now: datetime | None = None,
 ) -> InternshipResponse:
-    current_time = now or datetime.now(UTC)
+    current_time = now or get_now()
     is_open = p.status == InternshipStatus.OPEN
     return InternshipResponse(
         id=p.id,
@@ -64,7 +65,7 @@ def list_admin_internships(
     """List postings for administrative review ordered oldest first."""
     clamped_limit = min(max(limit, 1), 100)
     clamped_offset = max(offset, 0)
-    now = datetime.now(UTC)
+    now = get_now()
 
     org_col = func.coalesce(OrganizationProfile.organization_name, User.full_name)
     stmt = (
@@ -125,7 +126,7 @@ def review_internship(
         )
 
     p.reviewed_by = reviewer_id
-    p.reviewed_at = datetime.now(UTC)
+    p.reviewed_at = get_now()
     p.review_note = payload.review_note
     db.flush()
 

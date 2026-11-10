@@ -4,6 +4,8 @@ from datetime import UTC, datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.clock import get_now
+
 
 class AssignmentCreate(BaseModel):
     """Payload to create a new assignment."""
@@ -21,7 +23,7 @@ class AssignmentCreate(BaseModel):
         """Ensure due_at is timezone-aware and set in the future."""
         if value.tzinfo is None:
             value = value.replace(tzinfo=UTC)
-        now = datetime.now(UTC)
+        now = get_now()
         if value <= now:
             raise ValueError("Due date must be in the future")
         return value

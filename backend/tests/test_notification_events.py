@@ -1,10 +1,11 @@
 """Tests for academic and application domain notification events."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.application import ApplicationStatus
 from app.models.enrollment import Enrollment
 from app.models.notification import Notification, NotificationKind
@@ -32,7 +33,7 @@ def test_assignment_created_notifies_enrolled_students_only(real_db_session: Ses
     db.add(Enrollment(course_id=course.id, student_id=s2.id))
     db.commit()
 
-    due = datetime.now(UTC) + timedelta(days=5)
+    due = get_now() + timedelta(days=5)
     payload = AssignmentCreate(
         title="Distributed Systems Lab",
         description="Raft consensus implementation",

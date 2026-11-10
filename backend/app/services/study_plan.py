@@ -8,6 +8,7 @@ from datetime import UTC, datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.application import Application
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
@@ -72,14 +73,10 @@ def generate_study_plan(
 ) -> StudyPlanResponse:
     """Generate a deterministic, rule-based study schedule across the requested window."""
     student_id = student.id if isinstance(student, User) else student
-    student_user = (
-        student
-        if isinstance(student, User)
-        else db.scalar(select(User).where(User.id == student_id))
-    )
+    student_user = student if isinstance(student, User) else db.get(User, student_id)
 
     tz = timezone(timedelta(minutes=utc_offset_minutes))
-    now = current_time or datetime.now(UTC)
+    now = current_time or get_now()
     if now.tzinfo is None:
         now = now.replace(tzinfo=UTC)
     now_local = now.astimezone(tz)
@@ -211,13 +208,13 @@ def generate_study_plan(
     badges = get_student_badges(db, student_user) if student_user else []
 
     # Assemble plan days
-    plan: list[StudyPlanDay] = []
-    total_minutes = 0
-    for d in window_dates:
-        items = day_items[d]
-        d_min = sum(i.suggested_minutes for i in items)
-        total_minutes += d_min
-        plan.append(StudyPlanDay(date=d, items=items, total_minutes=d_min))
+    plan = [
+        StudyPlanDay(
+            date=d, items=day_items[d], total_minutes=sum(i.suggested_minutes for i in day_items[d])
+        )
+        for d in window_dates
+    ]
+    total_minutes = sum(d.total_minutes for d in plan)
 
     due_in_window = sum(
         1

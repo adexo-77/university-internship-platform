@@ -1,10 +1,11 @@
 """Integration tests for the organization dashboard endpoint."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.application import ApplicationStatus
 from app.models.internship import InternshipStatus
 from app.models.organization_profile import ApprovalStatus
@@ -96,7 +97,7 @@ def test_organization_dashboard_metrics_and_isolation(
     )
 
     # Applications for Org A
-    now = datetime.now(UTC)
+    now = get_now()
     app1 = create_test_application(
         real_db_session, p1, student_1, status=ApplicationStatus.SUBMITTED
     )

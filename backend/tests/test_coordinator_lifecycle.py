@@ -1,11 +1,12 @@
 """Tests for coordinator provisioning lifecycle, notifications, and dashboard metrics."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.internship import InternshipStatus
 from app.models.notification import Notification, NotificationKind
 from app.models.user import UserRole
@@ -93,7 +94,7 @@ def test_notifications_reach_coordinators_and_admins(
         org_user,
         title="AI Engineer",
         status=InternshipStatus.DRAFT,
-        application_deadline=datetime.now(UTC) + timedelta(days=20),
+        application_deadline=get_now() + timedelta(days=20),
     )
     submit_internship(db, posting.id, org_user)
 

@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.clock import get_now
 from app.models.internship import InternshipStatus, InternshipWorkMode
 
 
@@ -23,7 +24,7 @@ class InternshipCreate(BaseModel):
     @field_validator("application_deadline")
     @classmethod
     def validate_future_deadline(cls, value: datetime) -> datetime:
-        now = datetime.now(UTC)
+        now = get_now()
         deadline = value if value.tzinfo is not None else value.replace(tzinfo=UTC)
         if deadline <= now:
             raise ValueError("Application deadline must be set to a future date")
@@ -48,7 +49,7 @@ class InternshipUpdate(BaseModel):
     @classmethod
     def validate_future_deadline_on_update(cls, value: datetime | None) -> datetime | None:
         if value is not None:
-            now = datetime.now(UTC)
+            now = get_now()
             deadline = value if value.tzinfo is not None else value.replace(tzinfo=UTC)
             if deadline <= now:
                 raise ValueError("Application deadline must be set to a future date")

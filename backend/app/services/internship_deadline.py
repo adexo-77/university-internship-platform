@@ -2,6 +2,7 @@
 
 from datetime import UTC, datetime, timedelta
 
+from app.core.clock import get_now
 from app.core.exceptions import ConflictException
 from app.models.internship import Internship, InternshipStatus
 from app.schemas.internship import InternshipResponse
@@ -20,7 +21,7 @@ def check_deadline_cap(deadline: datetime, p: Internship | None = None) -> None:
     ref = (
         ensure_utc(p.reviewed_at)
         if p and p.status == InternshipStatus.OPEN and p.reviewed_at
-        else datetime.now(UTC)
+        else get_now()
     )
     max_dl = ref + timedelta(days=MAX_DEADLINE_DAYS)
     if dl > max_dl:
@@ -50,7 +51,7 @@ def update_posting_deadline(p: Internship, new_deadline: datetime) -> None:
 
 def is_applications_accepted(p: Internship, current_time: datetime | None = None) -> bool:
     """Return True if posting is open and deadline is in the future."""
-    now = current_time or datetime.now(UTC)
+    now = current_time or get_now()
     return p.status == InternshipStatus.OPEN and p.application_deadline > now
 
 
@@ -62,7 +63,7 @@ def to_internship_response(
     include_review: bool = False,
 ) -> InternshipResponse:
     """Serialize an Internship model to InternshipResponse schema."""
-    current_time = now or datetime.now(UTC)
+    current_time = now or get_now()
     return InternshipResponse(
         id=p.id,
         organization_id=p.organization_id,

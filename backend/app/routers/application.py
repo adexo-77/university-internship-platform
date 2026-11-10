@@ -1,10 +1,12 @@
 """Thin router for internship applications, decisions, and status transitions."""
 
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.deps import get_current_user, require_roles
+from app.core.deps import get_current_user, get_now, require_roles
 from app.models.application import ApplicationStatus
 from app.models.user import User, UserRole
 from app.schemas.application import (
@@ -34,6 +36,7 @@ def apply_to_internship(
     payload: ApplicationCreate,
     current_user: User = Depends(require_student),
     db: Session = Depends(get_db),
+    now: datetime = Depends(get_now),
 ) -> ApplicationResponse:
     """Submit an application as the authenticated student to an open internship posting."""
     return application_service.apply_to_internship(
@@ -41,6 +44,7 @@ def apply_to_internship(
         posting_id=id,
         student_id=current_user.id,
         payload=payload,
+        now=now,
     )
 
 

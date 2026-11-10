@@ -1,12 +1,13 @@
 """Integration tests for user session lifecycle, cookies, expiration, and role guards."""
 
 import hashlib
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.core.security import SESSION_COOKIE_NAME, hash_password
 from app.models.session import Session as SessionModel
 from app.models.user import User, UserRole
@@ -60,7 +61,7 @@ def test_expired_session_gives_401(real_db_client: TestClient, real_db_session: 
         select(SessionModel).where(SessionModel.user_id == user.id)
     ).all()
     for s in sessions:
-        s.expires_at = datetime.now(UTC) - timedelta(hours=1)
+        s.expires_at = get_now() - timedelta(hours=1)
     real_db_session.commit()
 
     # Now calling /me with the cookie fails

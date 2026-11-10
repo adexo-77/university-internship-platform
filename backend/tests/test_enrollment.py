@@ -1,11 +1,12 @@
 """Integration tests for course enrollment, unenrollment, rosters, and cascade deletes."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
 from app.models.enrollment import Enrollment
@@ -210,7 +211,7 @@ def test_leave_course_blocked_when_graded_work_exists(
     real_db_session.add(course)
     real_db_session.commit()
     real_db_session.add(Enrollment(course_id=course.id, student_id=stud.id))
-    now = datetime.now(UTC)
+    now = get_now()
     assign = Assignment(
         course_id=course.id, title="AST", due_at=now + timedelta(days=7), max_points=100
     )

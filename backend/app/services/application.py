@@ -1,10 +1,11 @@
 """Business logic and database operations for internship applications."""
 
-from datetime import UTC, datetime
+from datetime import datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.core.exceptions import ConflictException, ForbiddenException, NotFoundException
 from app.models.application import Application, ApplicationStatus
 from app.models.internship import Internship, InternshipStatus
@@ -26,7 +27,11 @@ from app.services.notification import create_notification
 
 
 def apply_to_internship(
-    db: Session, posting_id: int, student_id: int, payload: ApplicationCreate
+    db: Session,
+    posting_id: int,
+    student_id: int,
+    payload: ApplicationCreate,
+    now: datetime | None = None,
 ) -> ApplicationResponse:
     """Submit an application to an open internship posting before deadline."""
     p = db.scalar(select(Internship).where(Internship.id == posting_id))
@@ -36,7 +41,8 @@ def apply_to_internship(
         raise ConflictException(
             message="Applications can only be submitted to open postings", code="POSTING_NOT_OPEN"
         )
-    if p.application_deadline <= datetime.now(UTC):
+    cur_now = now or get_now()
+    if p.application_deadline <= cur_now:
         raise ConflictException(message="Application deadline has passed", code="DEADLINE_PASSED")
 
     prof = db.scalar(select(StudentProfile).where(StudentProfile.user_id == student_id))
@@ -213,7 +219,7 @@ def decide_application(
 
     app.status = payload.status
     app.decision_message = payload.decision_message
-    app.decided_at = datetime.now(UTC)
+    app.decided_at = get_now()
     db.flush()
     msg_suffix = f": {payload.decision_message}" if payload.decision_message else "."
     create_notification(

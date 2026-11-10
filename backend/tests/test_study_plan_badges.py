@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.core.security import hash_password
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
@@ -106,7 +107,7 @@ def test_study_plan_ontime_habit_counts_only_ontime_submissions(
     real_db_session.add(Enrollment(course_id=course.id, student_id=student.id))
     real_db_session.flush()
 
-    now = datetime.now(UTC)
+    now = get_now()
     a1 = Assignment(
         course_id=course.id,
         title="Assignment 1",

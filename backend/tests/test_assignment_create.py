@@ -1,10 +1,11 @@
 """Integration tests for assignment creation and visibility rules."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
 from app.models.enrollment import Enrollment
@@ -36,8 +37,8 @@ def test_assignment_creation_instructor_only_and_future_due(
     stud = create_test_user(real_db_session, "stud@test.edu", UserRole.STUDENT)
     course = _seed_course(real_db_session, inst1)
 
-    future_due = (datetime.now(UTC) + timedelta(days=7)).isoformat()
-    past_due = (datetime.now(UTC) - timedelta(days=1)).isoformat()
+    future_due = (get_now() + timedelta(days=7)).isoformat()
+    past_due = (get_now() - timedelta(days=1)).isoformat()
 
     # Student -> 403
     login_test_user(real_db_client, stud.email)
@@ -98,7 +99,7 @@ def test_assignment_visibility_rules(real_db_client: TestClient, real_db_session
 
     course = _seed_course(real_db_session, inst)
     real_db_session.add(Enrollment(course_id=course.id, student_id=enrolled_stud.id))
-    due = datetime.now(UTC) + timedelta(days=5)
+    due = get_now() + timedelta(days=5)
     assignment = Assignment(
         course_id=course.id,
         title="Homework 1",

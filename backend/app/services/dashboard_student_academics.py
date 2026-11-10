@@ -1,10 +1,9 @@
 """Academics aggregation queries for student dashboard (due next, grades, progress)."""
 
-from datetime import UTC, datetime
-
 from sqlalchemy import Float, exists, func, select
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
 from app.models.enrollment import Enrollment
@@ -19,7 +18,7 @@ from app.schemas.dashboard_student import (
 
 def get_student_due_next(db: Session, student_id: int) -> list[StudentDueNextItem]:
     """Fetch up to 5 upcoming unsubmitted assignments for enrolled published courses."""
-    now = datetime.now(UTC)
+    now = get_now()
     has_submitted = exists(
         select(1).where(
             Submission.assignment_id == Assignment.id,

@@ -1,10 +1,9 @@
 """Domain service implementing organization approval management by administrators."""
 
-from datetime import UTC, datetime
-
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.core.exceptions import NotFoundException
 from app.models.notification import NotificationKind
 from app.models.organization_profile import ApprovalStatus, OrganizationProfile
@@ -99,7 +98,7 @@ class AdminOrganizationService:
         org, user = row
         org.approval_status = payload.approval_status
         org.approval_note = payload.approval_note
-        org.reviewed_at = datetime.now(UTC)
+        org.reviewed_at = get_now()
         org.reviewed_by = current_admin.id
         db.flush()
 

@@ -1,10 +1,11 @@
 """Tests for internship posting creation, ownership, and management workflows."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.internship import InternshipStatus
 from app.models.user import UserRole
 from tests.factories import (
@@ -21,7 +22,7 @@ def test_org_can_create_internship_posting(
     org = create_test_user(real_db_session, "tech@corp.org", UserRole.ORGANIZATION)
     login_test_user(real_db_client, org.email)
 
-    deadline = (datetime.now(UTC) + timedelta(days=30)).isoformat()
+    deadline = (get_now() + timedelta(days=30)).isoformat()
     resp = real_db_client.post(
         "/api/internships",
         json={
@@ -63,7 +64,7 @@ def test_create_internship_requires_future_deadline(
     org = create_test_user(real_db_session, "future@corp.org", UserRole.ORGANIZATION)
     login_test_user(real_db_client, org.email)
 
-    past_deadline = (datetime.now(UTC) - timedelta(days=1)).isoformat()
+    past_deadline = (get_now() - timedelta(days=1)).isoformat()
     resp = real_db_client.post(
         "/api/internships",
         json={
@@ -84,7 +85,7 @@ def test_student_and_instructor_cannot_create_internship(
     student = create_test_user(real_db_session, "student@univ.edu", UserRole.STUDENT)
     login_test_user(real_db_client, student.email)
 
-    deadline = (datetime.now(UTC) + timedelta(days=10)).isoformat()
+    deadline = (get_now() + timedelta(days=10)).isoformat()
     resp = real_db_client.post(
         "/api/internships",
         json={

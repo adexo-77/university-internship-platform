@@ -1,10 +1,11 @@
 """Tests for administrative and organization lifecycle notification events."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.internship import InternshipStatus
 from app.models.notification import Notification, NotificationKind
 from app.models.organization_profile import ApprovalStatus, OrganizationProfile
@@ -103,7 +104,7 @@ def test_internship_submitted_notifies_admins(real_db_session: Session) -> None:
         org,
         title="Cloud Architect Intern",
         status=InternshipStatus.DRAFT,
-        application_deadline=datetime.now(UTC) + timedelta(days=30),
+        application_deadline=get_now() + timedelta(days=30),
     )
 
     submit_internship(db, posting.id, org)

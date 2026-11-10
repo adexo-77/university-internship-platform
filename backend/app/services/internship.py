@@ -1,10 +1,9 @@
 """Business logic and database operations for internship posting management."""
 
-from datetime import UTC, datetime
-
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.core.exceptions import ConflictException, NotFoundException
 from app.models.application import Application
 from app.models.internship import Internship, InternshipStatus
@@ -61,7 +60,7 @@ def create_internship(
 def get_organization_internships(db: Session, organization_id: int) -> list[InternshipResponse]:
     """Retrieve all internship postings owned by the organization with applicant counts."""
     org_name = _get_org_name(db, organization_id)
-    now = datetime.now(UTC)
+    now = get_now()
     stmt = (
         select(Internship, func.count(Application.id).label("applicant_count"))
         .outerjoin(Application, Internship.id == Application.posting_id)

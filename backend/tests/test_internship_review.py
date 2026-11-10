@@ -1,10 +1,11 @@
 """Integration tests for administrator review, rejection, takedown, and privacy."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.internship import InternshipStatus
 from app.models.organization_profile import ApprovalStatus
 from app.models.user import UserRole
@@ -26,7 +27,7 @@ def test_admin_internship_review_queue(
         real_db_session, "org_queue@test.com", approval_status=ApprovalStatus.APPROVED
     )
 
-    now = datetime.now(UTC)
+    now = get_now()
     p1 = create_test_internship(
         real_db_session,
         org,

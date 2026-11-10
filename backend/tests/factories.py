@@ -1,10 +1,11 @@
 """Test data factories and authentication helpers for backend test suites."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.core.security import hash_password
 from app.models.application import Application, ApplicationStatus
 from app.models.assignment import Assignment
@@ -63,7 +64,7 @@ def seed_course_and_assignment(
         course_id=course.id,
         title="Problem Set 1",
         description="Graph theory",
-        due_at=datetime.now(UTC) + timedelta(days=due_delta_days),
+        due_at=get_now() + timedelta(days=due_delta_days),
         max_points=max_points,
     )
     db.add(assignment)
@@ -98,7 +99,7 @@ def create_test_internship(
     posting_deadline = (
         application_deadline
         if application_deadline is not None
-        else datetime.now(UTC) + timedelta(days=deadline_delta_days)
+        else get_now() + timedelta(days=deadline_delta_days)
     )
 
     posting = Internship(

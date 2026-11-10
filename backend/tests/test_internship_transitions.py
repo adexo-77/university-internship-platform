@@ -1,10 +1,11 @@
 """Tests for organization internship submission, withdrawal, closing, and edit locks."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.internship import InternshipStatus
 from app.models.organization_profile import ApprovalStatus
 from app.models.user import UserRole
@@ -101,7 +102,7 @@ def test_open_posting_deadline_extension_and_locks(
     owner, _ = create_test_organization(
         real_db_session, "owner_ext@test.com", approval_status=ApprovalStatus.APPROVED
     )
-    approval_date = datetime.now(UTC) - timedelta(days=10)
+    approval_date = get_now() - timedelta(days=10)
     base_deadline = approval_date + timedelta(days=20)
     posting = create_test_internship(
         real_db_session,
@@ -177,7 +178,7 @@ def test_draft_and_rejected_deadline_cap_rules(
 ) -> None:
     owner, _ = create_test_organization(real_db_session, "owner_rules@test.com")
     login_test_user(real_db_client, owner.email)
-    now = datetime.now(UTC)
+    now = get_now()
 
     # Creation beyond 90 days fails
     create_fail = real_db_client.post(

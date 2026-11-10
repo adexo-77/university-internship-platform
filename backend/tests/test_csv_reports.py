@@ -2,11 +2,12 @@
 
 import csv
 import io
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.application import Application, ApplicationStatus
 from app.models.internship import Internship, InternshipStatus, InternshipWorkMode
 from app.models.student_profile import StudentProfile
@@ -45,7 +46,7 @@ def test_applicants_csv_columns_and_authorization(
         requirements="Python",
         location="Bole, Addis Ababa",
         work_mode=InternshipWorkMode.HYBRID,
-        application_deadline=datetime.now(UTC) + timedelta(days=14),
+        application_deadline=get_now() + timedelta(days=14),
         status=InternshipStatus.OPEN,
     )
     real_db_session.add(posting)
@@ -122,7 +123,7 @@ def test_applications_report_csv_and_role_access(
         requirements="TypeScript",
         location="Remote",
         work_mode=InternshipWorkMode.REMOTE,
-        application_deadline=datetime.now(UTC) + timedelta(days=7),
+        application_deadline=get_now() + timedelta(days=7),
         status=InternshipStatus.OPEN,
     )
     real_db_session.add(posting)
@@ -134,7 +135,7 @@ def test_applications_report_csv_and_role_access(
             student_id=stu.id,
             cover_letter="Cover",
             status=ApplicationStatus.ACCEPTED,
-            decided_at=datetime.now(UTC),
+            decided_at=get_now(),
         )
     )
     real_db_session.commit()

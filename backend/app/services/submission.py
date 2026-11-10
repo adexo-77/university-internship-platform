@@ -1,10 +1,11 @@
 """Business logic and database operations for assignment submissions and grading."""
 
-from datetime import UTC, datetime
+from datetime import datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.core.exceptions import ConflictException, ForbiddenException, NotFoundException
 from app.models.assignment import Assignment
 from app.models.course import Course
@@ -68,7 +69,7 @@ def submit_assignment(
             code="SUBMISSION_ALREADY_GRADED",
         )
 
-    now = current_time or datetime.now(UTC)
+    now = current_time or get_now()
     is_late = now > assignment.due_at
 
     if submission:
@@ -211,7 +212,7 @@ def grade_submission(
             code="GRADE_OUT_OF_BOUNDS",
         )
 
-    now = datetime.now(UTC)
+    now = get_now()
     submission.grade = payload.grade
     submission.feedback = payload.feedback
     submission.graded_at = now

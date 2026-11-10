@@ -1,11 +1,12 @@
 """Access controls, days validation, isolation, and query bounds for study plan."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy import event
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
 from app.models.enrollment import Enrollment
@@ -106,14 +107,14 @@ def test_study_plan_student_isolation(
                 course_id=course_a.id,
                 title="Private Task A",
                 description="Task A",
-                due_at=datetime.now(UTC) + timedelta(days=2),
+                due_at=get_now() + timedelta(days=2),
                 max_points=30,
             ),
             Assignment(
                 course_id=course_b.id,
                 title="Private Task B",
                 description="Task B",
-                due_at=datetime.now(UTC) + timedelta(days=2),
+                due_at=get_now() + timedelta(days=2),
                 max_points=30,
             ),
         ]
@@ -173,7 +174,7 @@ def test_study_plan_profile_hint_and_query_count_bound(
         location="Remote",
         work_mode="remote",
         status=InternshipStatus.OPEN,
-        application_deadline=datetime.now(UTC) + timedelta(days=3),
+        application_deadline=get_now() + timedelta(days=3),
     )
     real_db_session.add(internship)
     real_db_session.commit()

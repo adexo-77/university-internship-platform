@@ -1,10 +1,11 @@
 """Integration tests for assignment submission lifecycle, late calculation, and locking."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.enrollment import Enrollment
 from app.models.user import UserRole
 from tests.factories import create_test_user, login_test_user, seed_course_and_assignment
@@ -44,7 +45,7 @@ def test_submission_lifecycle_and_late_calculation(
     assert res_update.json()["content"] == "Updated graph solution"
 
     # 2. Adjust assignment.due_at to the past in DB to test deterministic late calculation
-    assignment.due_at = datetime.now(UTC) - timedelta(hours=2)
+    assignment.due_at = get_now() - timedelta(hours=2)
     real_db_session.commit()
 
     # stud2 submits after deadline -> is_late = True

@@ -1,10 +1,11 @@
 """Tests for student achievement badge boundaries (submissions, grades, course, profile)."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
 from app.models.enrollment import Enrollment
@@ -33,7 +34,7 @@ def test_badge_first_submission_and_ontime_habit_boundary(
     assert badges["ontime_habit"]["earned"] is False
     assert badges["ontime_habit"]["progress"] == {"current": 0, "target": 5}
 
-    due = datetime.now(UTC) + timedelta(days=2)
+    due = get_now() + timedelta(days=2)
     for i in range(4):
         a = Assignment(course_id=course.id, title=f"A{i}", due_at=due, max_points=100)
         real_db_session.add(a)
@@ -86,7 +87,7 @@ def test_badge_high_achiever_and_perfect_score_boundary(
     a1 = Assignment(
         course_id=course.id,
         title="Hard Exam",
-        due_at=datetime.now(UTC) + timedelta(days=1),
+        due_at=get_now() + timedelta(days=1),
         max_points=1000,
     )
     real_db_session.add(a1)
@@ -108,7 +109,7 @@ def test_badge_high_achiever_and_perfect_score_boundary(
     a2 = Assignment(
         course_id=course.id,
         title="Quiz",
-        due_at=datetime.now(UTC) + timedelta(days=1),
+        due_at=get_now() + timedelta(days=1),
         max_points=100,
     )
     real_db_session.add(a2)
@@ -127,7 +128,7 @@ def test_badge_high_achiever_and_perfect_score_boundary(
     a3 = Assignment(
         course_id=course.id,
         title="Lab",
-        due_at=datetime.now(UTC) + timedelta(days=1),
+        due_at=get_now() + timedelta(days=1),
         max_points=50,
     )
     real_db_session.add(a3)
@@ -159,13 +160,13 @@ def test_badge_course_finisher_and_profile_complete_boundary(
     a1 = Assignment(
         course_id=c_two.id,
         title="Part 1",
-        due_at=datetime.now(UTC) + timedelta(days=1),
+        due_at=get_now() + timedelta(days=1),
         max_points=100,
     )
     a2 = Assignment(
         course_id=c_two.id,
         title="Part 2",
-        due_at=datetime.now(UTC) + timedelta(days=1),
+        due_at=get_now() + timedelta(days=1),
         max_points=100,
     )
     real_db_session.add_all([a1, a2])

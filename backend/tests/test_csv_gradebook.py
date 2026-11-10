@@ -2,11 +2,12 @@
 
 import csv
 import io
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
 from app.models.enrollment import Enrollment
@@ -40,7 +41,7 @@ def test_gradebook_csv_columns_calculations_and_bom(
         ]
     )
 
-    due = datetime.now(UTC) + timedelta(days=3)
+    due = get_now() + timedelta(days=3)
     a1 = Assignment(course_id=course.id, title="SQL Basics", due_at=due, max_points=100)
     a2 = Assignment(course_id=course.id, title="Indexing", due_at=due, max_points=50)
     real_db_session.add_all([a1, a2])

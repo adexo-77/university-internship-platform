@@ -85,9 +85,14 @@ def _seed_student_profiles(db: Session, s1: User, s2: User, s3: User) -> None:
 
 
 def _seed_organization_profiles(
-    db: Session, admin: User, org1: User, org2: User, org3: User
+    db: Session,
+    admin: User,
+    org1: User,
+    org2: User,
+    org3: User,
+    now: datetime | None = None,
 ) -> None:
-    now = datetime.now(UTC)
+    current_time = now or datetime.now(UTC)
     if not db.scalar(
         select(OrganizationProfile).where(OrganizationProfile.user_id == org1.id)
     ):
@@ -102,7 +107,7 @@ def _seed_organization_profiles(
                 approval_status=ApprovalStatus.APPROVED,
                 approval_note="Verified enterprise corporate partner.",
                 reviewed_by=admin.id,
-                reviewed_at=now - timedelta(days=60),
+                reviewed_at=current_time - timedelta(days=60),
             )
         )
     if not db.scalar(
@@ -119,7 +124,7 @@ def _seed_organization_profiles(
                 approval_status=ApprovalStatus.APPROVED,
                 approval_note="Verified telecommunications service provider.",
                 reviewed_by=admin.id,
-                reviewed_at=now - timedelta(days=45),
+                reviewed_at=current_time - timedelta(days=45),
             )
         )
     if not db.scalar(
@@ -138,7 +143,11 @@ def _seed_organization_profiles(
         )
 
 
-def seed_demo_users_and_profiles(db: Session, pw_hash: str) -> dict[str, User]:
+def seed_demo_users_and_profiles(
+    db: Session,
+    pw_hash: str,
+    now: datetime | None = None,
+) -> dict[str, User]:
     users: dict[str, User] = {}
     for email, name, role in ROSTER_USERS:
         users[email] = get_or_create_user(db, email, name, role, pw_hash)
@@ -155,7 +164,7 @@ def seed_demo_users_and_profiles(db: Session, pw_hash: str) -> dict[str, User]:
     org3 = users["eyob.kassa@example.com"]
 
     _seed_student_profiles(db, s1, s2, s3)
-    _seed_organization_profiles(db, admin, org1, org2, org3)
+    _seed_organization_profiles(db, admin, org1, org2, org3, now=now)
     db.flush()
 
     return {

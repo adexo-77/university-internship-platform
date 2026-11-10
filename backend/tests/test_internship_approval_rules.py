@@ -1,11 +1,13 @@
 """Integration tests for organization approval constraints on internship postings."""
 
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
+
+from app.core.clock import get_now
 
 SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
@@ -38,7 +40,7 @@ def test_unapproved_organization_cannot_publish_internship(
     login_test_user(real_db_client, org_user.email)
 
     # Creating draft is permitted
-    deadline = (datetime.now(UTC) + timedelta(days=20)).isoformat()
+    deadline = (get_now() + timedelta(days=20)).isoformat()
     draft_resp = real_db_client.post(
         "/api/internships",
         json={
@@ -175,7 +177,7 @@ def test_seeded_pending_organization_eyob_kassa_capabilities(
     assert prof_resp.json()["approval_status"] == "pending"
 
     # 3. Can create draft internship posting
-    deadline = (datetime.now(UTC) + timedelta(days=25)).isoformat()
+    deadline = (get_now() + timedelta(days=25)).isoformat()
     create_resp = real_db_client.post(
         "/api/internships",
         json={

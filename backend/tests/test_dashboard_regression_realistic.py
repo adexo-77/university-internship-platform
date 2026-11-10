@@ -1,10 +1,11 @@
 """Regression tests for role dashboards with realistic data covering all statuses."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.application import ApplicationStatus
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
@@ -39,7 +40,7 @@ def test_student_dashboard_realistic_statuses(
     real_db_session.add(Enrollment(course_id=course.id, student_id=student.id))
     real_db_session.commit()
 
-    now = datetime.now(UTC)
+    now = get_now()
     a_graded = Assignment(
         course_id=course.id, title="HW 1", due_at=now - timedelta(days=5), max_points=100
     )
@@ -108,7 +109,7 @@ def test_instructor_dashboard_realistic_statuses(
             Enrollment(course_id=course.id, student_id=s2.id),
         ]
     )
-    now = datetime.now(UTC)
+    now = get_now()
     assign = Assignment(
         course_id=course.id, title="Schema Design", due_at=now - timedelta(days=2), max_points=100
     )

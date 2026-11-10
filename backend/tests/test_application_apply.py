@@ -1,10 +1,11 @@
 """Tests for application submission, eligibility checks, profile requirements, and withdrawals."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.application import ApplicationStatus
 from app.models.internship import InternshipStatus
 from app.models.student_profile import StudentProfile
@@ -81,7 +82,7 @@ def test_cannot_apply_to_closed_posting(
 def test_cannot_apply_after_deadline(real_db_client: TestClient, real_db_session: Session) -> None:
     org = create_test_user(real_db_session, "org_dead@test.com", UserRole.ORGANIZATION)
     posting = create_test_internship(real_db_session, org)
-    posting.application_deadline = datetime.now(UTC) - timedelta(hours=1)
+    posting.application_deadline = get_now() - timedelta(hours=1)
     real_db_session.commit()
 
     student = create_test_user(real_db_session, "stud_dead@test.com", UserRole.STUDENT)

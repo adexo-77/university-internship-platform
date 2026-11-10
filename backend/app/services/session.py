@@ -1,10 +1,11 @@
 """Domain service implementing session lifecycle, persistence, and resolution."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.clock import get_now
 from app.core.security import (
     SESSION_LIFETIME_SECONDS,
     generate_session_token,
@@ -20,7 +21,7 @@ class SessionService:
     @staticmethod
     def purge_expired_sessions(db: Session) -> int:
         """Purge expired sessions across all users."""
-        now = datetime.now(UTC)
+        now = get_now()
         result = db.execute(delete(SessionModel).where(SessionModel.expires_at <= now))
         db.commit()
         return int(result.rowcount)
@@ -30,7 +31,7 @@ class SessionService:
         """Create a new session record storing only the SHA-256 hash of the token."""
         raw_token = generate_session_token()
         token_hash = hash_session_token(raw_token)
-        expires_at = datetime.now(UTC) + timedelta(seconds=SESSION_LIFETIME_SECONDS)
+        expires_at = get_now() + timedelta(seconds=SESSION_LIFETIME_SECONDS)
 
         session_record = SessionModel(
             user_id=user_id,
@@ -69,7 +70,7 @@ class SessionService:
         if session_record is None:
             return None
 
-        now = datetime.now(UTC)
+        now = get_now()
         if session_record.expires_at <= now:
             db.delete(session_record)
             db.commit()

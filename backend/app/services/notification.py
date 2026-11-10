@@ -1,11 +1,11 @@
 """Domain service for in-app user notifications and lifecycle events."""
 
-from datetime import UTC, datetime
 from urllib.parse import urlsplit
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.core.exceptions import NotFoundException
 from app.models.notification import Notification, NotificationKind
 from app.schemas.notification import NotificationListResponse, NotificationResponse
@@ -121,7 +121,7 @@ def mark_notification_read(db: Session, notification_id: int, user_id: int) -> N
         raise NotFoundException(message="Notification not found", code="NOTIFICATION_NOT_FOUND")
 
     if notification.read_at is None:
-        notification.read_at = datetime.now(UTC)
+        notification.read_at = get_now()
         db.commit()
         db.refresh(notification)
 
@@ -130,7 +130,7 @@ def mark_notification_read(db: Session, notification_id: int, user_id: int) -> N
 
 def mark_all_notifications_read(db: Session, user_id: int) -> int:
     """Mark all unread notifications for user as read idempotently."""
-    now = datetime.now(UTC)
+    now = get_now()
     stmt = (
         update(Notification)
         .where(Notification.user_id == user_id, Notification.read_at.is_(None))

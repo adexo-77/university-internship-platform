@@ -1,12 +1,13 @@
 """Tests for cookie security, production configuration guards, and session purging."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.core.config import Settings, validate_production_configuration
 from app.core.security import hash_session_token
 from app.models.session import Session as SessionModel
@@ -72,7 +73,7 @@ def test_expired_sessions_purged_on_login(
     user = create_test_user(db=real_db_session, email=email, role=UserRole.STUDENT, password=pwd)
 
     # Seed an expired session for this user
-    past_time = datetime.now(UTC) - timedelta(hours=2)
+    past_time = get_now() - timedelta(hours=2)
     expired_session = SessionModel(
         user_id=user.id,
         token_hash=hash_session_token("expired_dummy_token_12345"),
@@ -96,7 +97,7 @@ def test_expired_sessions_purged_on_login(
         select(SessionModel).where(SessionModel.user_id == user.id)
     ).all()
     assert len(sessions) == 1
-    assert sessions[0].expires_at > datetime.now(UTC)
+    assert sessions[0].expires_at > get_now()
 
 
 def test_purge_expired_sessions_service_method(real_db_session: Session) -> None:
@@ -107,7 +108,7 @@ def test_purge_expired_sessions_service_method(real_db_session: Session) -> None
         role=UserRole.STUDENT,
         password="Password123!",
     )
-    past_time = datetime.now(UTC) - timedelta(days=1)
+    past_time = get_now() - timedelta(days=1)
     expired = SessionModel(
         user_id=user.id,
         token_hash=hash_session_token("stale_token_abc"),

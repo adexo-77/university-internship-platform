@@ -56,9 +56,14 @@ def seed_demo(db: Session, force: bool = False) -> None:
                 print("Demo dataset already seeded (skipping fast).")
                 return
 
-    now = datetime.now(UTC)
+    env_now = os.environ.get("TEST_FROZEN_NOW")
+    if env_now:
+        dt = datetime.fromisoformat(env_now)
+        now = dt if dt.tzinfo is not None else dt.replace(tzinfo=UTC)
+    else:
+        now = datetime.now(UTC)
     pw_hash = hash_password(DEMO_PASSWORD)
-    users = seed_demo_users_and_profiles(db, pw_hash)
+    users = seed_demo_users_and_profiles(db, pw_hash, now=now)
     seed_academics(db, users, now)
     seed_internships_and_apps(db, users, now)
     seed_notifications(db, users, now)

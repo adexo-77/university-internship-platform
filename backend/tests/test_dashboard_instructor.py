@@ -1,10 +1,11 @@
 """Integration tests for the instructor dashboard endpoint."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
 from app.models.enrollment import Enrollment
@@ -88,7 +89,7 @@ def test_instructor_dashboard_metrics_and_isolation(
     )
     real_db_session.commit()
 
-    now = datetime.now(UTC)
+    now = get_now()
     a1 = Assignment(
         course_id=c1.id,
         title="Lab 1",

@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.core.exceptions import ForbiddenException
 from app.models.application import Application
 from app.models.internship import Internship, InternshipStatus
@@ -127,7 +128,7 @@ def get_candidate_postings(
     now: datetime | None = None,
 ) -> list[tuple[Internship, str | None]]:
     """Fetch candidate postings with ONE query matching student catalogue visibility."""
-    current_time = now if now is not None else datetime.now(UTC)
+    current_time = now if now is not None else get_now()
     if current_time.tzinfo is None:
         current_time = current_time.replace(tzinfo=UTC)
     org_col = func.coalesce(OrganizationProfile.organization_name, User.full_name)

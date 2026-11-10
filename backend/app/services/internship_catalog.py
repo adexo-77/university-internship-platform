@@ -1,10 +1,11 @@
 """Internship catalog queries, search, pagination, and visibility logic."""
 
-from datetime import UTC, datetime
+from datetime import datetime
 
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.core.exceptions import ForbiddenException, NotFoundException
 from app.models.application import Application
 from app.models.internship import Internship, InternshipStatus, InternshipWorkMode
@@ -34,7 +35,7 @@ def _to_response(
     now: datetime | None = None,
     include_review: bool = False,
 ) -> InternshipResponse:
-    current_time = now or datetime.now(UTC)
+    current_time = now or get_now()
     is_open = p.status == InternshipStatus.OPEN
     return InternshipResponse(
         id=p.id,
@@ -77,7 +78,7 @@ def list_internships(
 
     clamped_limit = min(max(limit, 1), 100)
     clamped_offset = max(offset, 0)
-    now = datetime.now(UTC)
+    now = get_now()
 
     org_col = func.coalesce(OrganizationProfile.organization_name, User.full_name)
     stmt = (

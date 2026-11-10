@@ -1,10 +1,11 @@
 """Tests for student achievement badge isolation, application badges, and role guards."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.application import Application, ApplicationStatus
 from app.models.internship import Internship, InternshipStatus, InternshipWorkMode
 from app.models.user import UserRole
@@ -24,7 +25,7 @@ def test_badge_internship_applications_boundary(
         requirements="Python",
         location="Remote",
         work_mode=InternshipWorkMode.REMOTE,
-        application_deadline=datetime.now(UTC) + timedelta(days=10),
+        application_deadline=get_now() + timedelta(days=10),
         status=InternshipStatus.OPEN,
     )
     real_db_session.add(posting)
@@ -84,7 +85,7 @@ def test_badge_student_isolation(real_db_client: TestClient, real_db_session: Se
         requirements="Pytest",
         location="Remote",
         work_mode=InternshipWorkMode.REMOTE,
-        application_deadline=datetime.now(UTC) + timedelta(days=10),
+        application_deadline=get_now() + timedelta(days=10),
         status=InternshipStatus.OPEN,
     )
     real_db_session.add(posting)

@@ -1,10 +1,11 @@
 """Integration tests for student dashboard metrics, ordering, and isolation."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.application import ApplicationStatus
 from app.models.assignment import Assignment
 from app.models.course import Course, CourseStatus
@@ -50,7 +51,7 @@ def test_student_dashboard_due_next_filters_and_ordering(
     )
     real_db_session.commit()
 
-    now = datetime.now(UTC)
+    now = get_now()
     a_soon = Assignment(
         course_id=pub_course.id,
         title="Assignment Soon",
@@ -135,7 +136,7 @@ def test_student_dashboard_course_progress_grades_and_isolation(
     )
     real_db_session.commit()
 
-    now = datetime.now(UTC)
+    now = get_now()
     a1 = Assignment(
         course_id=course_1.id,
         title="HW 1",
@@ -151,7 +152,7 @@ def test_student_dashboard_course_progress_grades_and_isolation(
     real_db_session.add_all([a1, a2])
     real_db_session.commit()
 
-    now_ts = datetime.now(UTC)
+    now_ts = get_now()
     sub1 = Submission(
         assignment_id=a1.id,
         student_id=student_a.id,

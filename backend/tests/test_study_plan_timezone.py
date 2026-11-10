@@ -171,4 +171,3 @@ def test_study_plan_endpoint_uses_injected_get_now(
         assert data["window"]["end_date"] == "2027-03-07"
     finally:
         app.dependency_overrides.pop(get_now, None)
-

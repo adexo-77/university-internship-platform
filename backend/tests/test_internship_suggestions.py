@@ -1,23 +1,28 @@
 """Integration tests for GET /api/internships/suggestions with real database."""
 
-from datetime import UTC, datetime, timedelta
+import itertools
+from datetime import timedelta
 
 from fastapi.testclient import TestClient
 from sqlalchemy import event
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.models.application import Application, ApplicationStatus
 from app.models.internship import Internship, InternshipStatus, InternshipWorkMode
 from app.models.organization_profile import ApprovalStatus, OrganizationProfile
 from app.models.user import User, UserRole
 from tests.factories import create_test_user
 
+_ORG_COUNTER = itertools.count(1)
+
 
 def _setup_org(db: Session, name: str = "Test Org", approved: bool = True) -> User:
     """Create organization user with profile."""
+    idx = next(_ORG_COUNTER)
     user = create_test_user(
         db,
-        email=f"org_{datetime.now().timestamp()}_{name.lower().replace(' ', '_')}@test.edu",
+        email=f"org_{idx}_{name.lower().replace(' ', '_')}@test.edu",
         role=UserRole.ORGANIZATION,
     )
     prof = OrganizationProfile(
@@ -41,7 +46,7 @@ def _create_posting(
     days_future: int = 14,
 ) -> Internship:
     """Create internship posting."""
-    deadline = datetime.now(UTC) + timedelta(days=days_future)
+    deadline = get_now() + timedelta(days=days_future)
     posting = Internship(
         organization_id=org_id,
         title=title,

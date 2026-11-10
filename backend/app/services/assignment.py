@@ -1,10 +1,9 @@
 """Business logic and database operations for course assignments."""
 
-from datetime import UTC, datetime
-
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.clock import get_now
 from app.core.exceptions import ConflictException, ForbiddenException, NotFoundException
 from app.models.assignment import Assignment
 from app.models.course import Course
@@ -49,7 +48,7 @@ def create_assignment(
             code="FORBIDDEN",
         )
 
-    now = datetime.now(UTC)
+    now = get_now()
     if payload.due_at <= now:
         raise ConflictException(
             message="Due date must be in the future on creation",
