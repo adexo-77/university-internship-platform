@@ -4,6 +4,7 @@ import os
 import time
 import warnings
 from collections.abc import Generator
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -25,7 +26,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from alembic import command
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.deps import require_roles
+from app.core.deps import get_now, require_roles
 from app.main import app
 from app.models.user import User, UserRole
 
@@ -167,7 +168,18 @@ def reset_rate_limiter_fixture() -> Generator[None, None, None]:
     rate_limiter.reset()
     rate_limiter.enabled = False
     rate_limiter.set_clock(time.time)
+
+
+FROZEN_TEST_NOW = datetime(2026, 11, 10, 12, 0, 0, tzinfo=UTC)
+
+
+@pytest.fixture(autouse=True)
+def freeze_clock_in_tests() -> Generator[None, None, None]:
+    """Provide frozen clock for test isolation and reproducibility."""
+    from app.core.clock import reset_clock, set_clock
+
+    set_clock(lambda: FROZEN_TEST_NOW)
+    app.dependency_overrides[get_now] = lambda: FROZEN_TEST_NOW
     yield
-    rate_limiter.reset()
-    rate_limiter.enabled = False
-    rate_limiter.set_clock(time.time)
+    reset_clock()
+    app.dependency_overrides.pop(get_now, None)

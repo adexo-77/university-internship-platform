@@ -31,7 +31,7 @@ from seed_demo_users import seed_demo_users_and_profiles
 DEMO_PASSWORD = "12345678"
 
 
-def seed_demo(db: Session, force: bool = False) -> None:
+def seed_demo(db: Session, force: bool = False, now: datetime | None = None) -> None:
     env = os.environ.get("ENVIRONMENT", settings.ENVIRONMENT).strip().lower()
     if env == "production" and not force:
         print(
@@ -56,17 +56,12 @@ def seed_demo(db: Session, force: bool = False) -> None:
                 print("Demo dataset already seeded (skipping fast).")
                 return
 
-    env_now = os.environ.get("TEST_FROZEN_NOW")
-    if env_now:
-        dt = datetime.fromisoformat(env_now)
-        now = dt if dt.tzinfo is not None else dt.replace(tzinfo=UTC)
-    else:
-        now = datetime.now(UTC)
+    effective_now = now or datetime.now(UTC)
     pw_hash = hash_password(DEMO_PASSWORD)
-    users = seed_demo_users_and_profiles(db, pw_hash, now=now)
-    seed_academics(db, users, now)
-    seed_internships_and_apps(db, users, now)
-    seed_notifications(db, users, now)
+    users = seed_demo_users_and_profiles(db, pw_hash, now=effective_now)
+    seed_academics(db, users, effective_now)
+    seed_internships_and_apps(db, users, effective_now)
+    seed_notifications(db, users, effective_now)
     db.commit()
     print("Demo dataset seeded successfully.")
 

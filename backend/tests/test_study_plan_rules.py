@@ -2,7 +2,6 @@
 
 from datetime import timedelta
 
-import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -13,11 +12,6 @@ from app.models.enrollment import Enrollment
 from app.models.submission import Submission
 from app.models.user import UserRole
 from tests.factories import create_test_user, login_test_user
-
-
-@pytest.fixture(autouse=True)
-def _freeze_test_clock(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("TEST_FROZEN_NOW", "2026-11-10T12:00:00Z")
 
 
 def test_study_plan_overdue_and_due_today_boundaries(
