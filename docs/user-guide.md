@@ -36,8 +36,8 @@ The platform provides two distinct operating modes:
 - **Mobile Navigation Drawer**: On mobile screens (viewports under 768px), click the menu icon in the top header to reveal the navigation drawer with full keyboard focus management and scroll lock.
 - **Touch-Friendly Controls**: Interactive buttons, navigation links, and inputs provide a minimum 44px hit target for touchscreen devices.
 
-![Login screen with email and password fields and registration link](screenshots/login.png)
-*Login page with email and password input fields and role registration link.*
+![Login screen with UNIVERSITY wordmark, email and password fields, and role registration link](screenshots/login.png)
+*Login page with UNIVERSITY wordmark, credentials input fields, and role registration link.*
 
 ### Pre-Seeded Demo Accounts Reference
 
@@ -77,8 +77,8 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
    - "ER Diagramming &amp; Conceptual Modeling" past due displays a past due badge.
 4. Review the **Recent Grades** panel showing scored assignments with percentage chips and instructor feedback (e.g., 100% on ER Diagramming).
 
-![Student dashboard with coursework metrics, rule-based next steps action items, and upcoming assignment deadlines](screenshots/student-dashboard.png)
-*Student dashboard displaying course enrollment metrics, rule-based next steps task items with effort estimates, and upcoming assignment due dates.*
+![Student dashboard with course progress, due assignments, recommendations, and achievement badges](screenshots/student-dashboard.png)
+*Student dashboard displaying course progress bars, upcoming due dates, matching internship suggestions, and achievement badges.*
 
 ### Step 2: Browse &amp; Enroll in Courses (`/courses`)
 1. Click **Courses** in the main navigation.
@@ -133,8 +133,8 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
 ![Rule-based study plan and weekly progress schedule](screenshots/study-plan.png)
 *Deterministic rule-based study plan displaying weekly progress summary, academic performance averages, and daily scheduled tasks with effort estimates.*
 
-![Internship catalog with rule-based recommendation cards and search filters](screenshots/suggested-internships.png)
-*Internship catalog displaying rule-based suggestion cards with percentage match scores, keyword search, and work mode filter.*
+![Internship catalog with rule-based suggestion cards, keyword search, work mode filter, and listings table](screenshots/suggested-internships.png)
+*Internship catalog displaying rule-based suggestion cards with percentage match scores, search filters, and listings table.*
 
 ---
 
@@ -213,8 +213,8 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
    - Meron Girma: **Shortlisted**
 5. Click **Review Application** to advance candidate decisions. Terminal decisions lock the application against tampering.
 
-![Organization internship postings table with status badges, applicant counts, and review feedback notice](screenshots/organization-applicants.png)
-*Organization internship management view displaying postings across lifecycle statuses, applicant counts, and admin review rejection feedback notice.*
+![Organization internship applicant roster with candidate details, decision status badges, and CSV export](screenshots/organization-applicants.png)
+*Organization posting details view showing candidate applicant roster, decision status badges, and CSV export action.*
 
 ---
 

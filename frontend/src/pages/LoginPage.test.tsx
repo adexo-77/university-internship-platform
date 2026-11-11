@@ -9,6 +9,21 @@ describe('LoginPage Component', () => {
     vi.restoreAllMocks();
   });
 
+  it('renders the UNIVERSITY brand wordmark and platform tagline', () => {
+    render(
+      <MemoryRouter initialEntries={['/login']}>
+        <AuthProvider initialUser={null}>
+          <LoginPage />
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    const brand = screen.getByTestId('platform-brand');
+    expect(brand).toBeInTheDocument();
+    expect(brand).toHaveTextContent('UNIVERSITY');
+    expect(brand).toHaveTextContent('Learning & Internship Platform');
+  });
+
   it('validates required fields before submitting', async () => {
     render(
       <MemoryRouter initialEntries={['/login']}>

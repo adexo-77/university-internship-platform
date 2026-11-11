@@ -4,8 +4,8 @@
 
 A web platform that integrates academic coursework management, assignment submission and grading, verified corporate internship postings, and university administrative oversight into a unified system. Built with Python FastAPI, PostgreSQL, and React with TypeScript, it enforces server-side role-based access control, relational data integrity, and strict input validation across all workflows.
 
-![Student dashboard showing enrolled courses, assignment metrics, rule-based next steps, and upcoming due dates](docs/screenshots/student-dashboard.png)
-*Student dashboard displaying enrollment metrics, rule-based next steps action items, and upcoming assignment due dates.*
+![Student dashboard showing course progress, study plan next steps, suggested internships, and achievement badges](docs/screenshots/student-dashboard.png)
+*Full student dashboard displaying academic metrics, course progress bars, rule-based study plan next steps, matching internship recommendations, and achievement badges.*
 
 ![Rule-based weekly study plan and progress summary](docs/screenshots/study-plan.png)
 *Deterministic rule-based weekly study plan displaying progress summary, workload alerts, and daily schedule allocations.*
