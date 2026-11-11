@@ -77,8 +77,8 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
    - "ER Diagramming &amp; Conceptual Modeling" past due displays a past due badge.
 4. Review the **Recent Grades** panel showing scored assignments with percentage chips and instructor feedback (e.g., 100% on ER Diagramming).
 
-![Student dashboard with course progress, due assignments, recommendations, and achievement badges](screenshots/student-dashboard.png)
-*Student dashboard displaying course progress bars, upcoming due dates, matching internship suggestions, and achievement badges.*
+![Student dashboard with coursework metrics, rule-based next steps action items, and upcoming assignment deadlines](screenshots/student-dashboard.png)
+*Student dashboard displaying course enrollment metrics, rule-based next steps task items with effort estimates, and upcoming assignment due dates.*
 
 ### Step 2: Browse &amp; Enroll in Courses (`/courses`)
 1. Click **Courses** in the main navigation.
@@ -129,6 +129,9 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
    - Open suggested internships with deadlines in the window prompt students to apply. Students with incomplete profiles receive an explicit **Profile incomplete** badge and guidance to complete mandatory fields.
 4. Switch the study window between **7 days** (default) and **14 days** using the window selector pills (the frontend automatically includes the student browser's timezone offset in minutes so dates match local time).
 5. Click **How this plan is made** to expand the full explanation of how the schedule is computed. Note that this plan is 100% rule-based and deterministic without any AI.
+
+![Rule-based study plan and weekly progress schedule](screenshots/study-plan.png)
+*Deterministic rule-based study plan displaying weekly progress summary, academic performance averages, and daily scheduled tasks with effort estimates.*
 
 ![Internship catalog with rule-based recommendation cards and search filters](screenshots/suggested-internships.png)
 *Internship catalog displaying rule-based suggestion cards with percentage match scores, keyword search, and work mode filter.*
@@ -210,8 +213,8 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
    - Meron Girma: **Shortlisted**
 5. Click **Review Application** to advance candidate decisions. Terminal decisions lock the application against tampering.
 
-![Organization dashboard showing posting overview and latest applicants with status badges](screenshots/organization-applicants.png)
-*Organization dashboard displaying posting counts across lifecycle stages and recent applicant status summary.*
+![Organization internship postings table with status badges, applicant counts, and review feedback notice](screenshots/organization-applicants.png)
+*Organization internship management view displaying postings across lifecycle statuses, applicant counts, and admin review rejection feedback notice.*
 
 ---
 
@@ -280,8 +283,8 @@ All demo accounts are provisioned via `scripts/seed_demo.py`. For local testing 
 4. Click **Approve** to publish to students, or **Reject** with feedback for the employer.
 5. Take down listings when necessary to safeguard student placements.
 
-![Internship reviews moderation queue with status filter and listing review actions](screenshots/coordinator-reviews.png)
-*Internship moderation table displaying pending listings with organization, location, submission timestamp, and review action button.*
+![Internship reviews moderation queue with status filter and review and takedown actions](screenshots/coordinator-reviews.png)
+*Internship moderation table displaying listings across statuses with organization, location, submission timestamp, review action, and takedown buttons.*
 
 ### Step 4: Internship Listings and Read-Only Applicant Inspection (`/internships`)
 1. Click **Internships** to browse all platform listings across all statuses (`draft`, `pending_review`, `open`, `closed`, `rejected`).
@@ -374,8 +377,8 @@ The web application is fully responsive across mobile, tablet, and desktop displ
 - Responsive data tables with horizontal scroll containers and card layouts.
 - Tested on narrow 360px mobile viewports for student course access and application tracking.
 
-![Mobile responsive dashboard layout on 360px viewport with header menu toggle and stacked cards](screenshots/mobile-360.png)
-*Mobile viewport rendering at 360px width showing stacked dashboard metric cards, due dates, and top navigation header with menu toggle.*
+![Mobile slide-over navigation drawer on 360px viewport with close button and user menu links](screenshots/mobile-360.png)
+*Mobile viewport rendering at 360px width showing the expanded slide-over navigation drawer, close toggle, full platform navigation links, and student session footer.*
 
 ---
 
