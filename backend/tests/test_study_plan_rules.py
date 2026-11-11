@@ -2,6 +2,7 @@
 
 from datetime import timedelta
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -14,15 +15,18 @@ from app.models.user import UserRole
 from tests.factories import create_test_user, login_test_user
 
 
+@pytest.fixture(autouse=True)
+def _freeze_test_clock(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("TEST_FROZEN_NOW", "2026-11-10T12:00:00Z")
+
+
 def test_study_plan_overdue_and_due_today_boundaries(
     real_db_client: TestClient,
     real_db_session: Session,
 ) -> None:
     """Overdue coursework comes first and is flagged; work due today is flagged tight."""
-    student = create_test_user(real_db_session, "stu_plan_boundary@example.com", UserRole.STUDENT)
-    instructor = create_test_user(
-        real_db_session, "inst_plan_boundary@example.com", UserRole.INSTRUCTOR
-    )
+    student = create_test_user(real_db_session, "stu_b@test.edu", UserRole.STUDENT)
+    instructor = create_test_user(real_db_session, "inst_b@test.edu", UserRole.INSTRUCTOR)
     course = Course(
         instructor_id=instructor.id,
         title="Operating Systems",
@@ -61,7 +65,7 @@ def test_study_plan_overdue_and_due_today_boundaries(
     )
     real_db_session.commit()
 
-    login_test_user(real_db_client, "stu_plan_boundary@example.com")
+    login_test_user(real_db_client, "stu_b@test.edu")
     resp = real_db_client.get("/api/students/me/study-plan?days=7")
     assert resp.status_code == 200
     data = resp.json()
@@ -215,10 +219,7 @@ def test_study_plan_ordering_ties_and_submission_exclusion(
 
     # Verify ID ordering between a1 and a2 (a1 was created first, lower ID)
     assert a1.id < a2.id
-    # Under earliest-free-day placement, both start on day 0 respecting ID order
     d0_items = [i["title"] for i in data["plan"][0]["items"]]
-    assert "Assignment Beta" in d0_items
-    assert "Assignment Alpha" in d0_items
     assert d0_items.index("Assignment Beta") < d0_items.index("Assignment Alpha")
 
 
@@ -236,12 +237,8 @@ def test_study_plan_nothing_pending_and_student_without_courses(
     resp_no_courses = real_db_client.get("/api/students/me/study-plan")
     assert resp_no_courses.status_code == 200
     data_no_courses = resp_no_courses.json()
-    assert (
-        "You are not currently enrolled in any published courses."
-        in data_no_courses["summary"]["sentences"]
-    )
-    assert "There is nothing pending to do right now" in " ".join(
-        data_no_courses["summary"]["sentences"]
-    )
+    sents = " ".join(data_no_courses["summary"]["sentences"])
+    assert "You are not currently enrolled in any published courses." in sents
+    assert "There is nothing pending to do right now" in sents
     assert data_no_courses["summary"]["metrics"]["enrolled_courses_count"] == 0
     assert data_no_courses["summary"]["metrics"]["assignments_due_count"] == 0
