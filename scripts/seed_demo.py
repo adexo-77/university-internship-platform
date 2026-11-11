@@ -17,6 +17,7 @@ for d in (BACKEND_DIR, SCRIPTS_DIR):
     if str(d) not in sys.path:
         sys.path.insert(0, str(d))
 
+from app.core.clock import get_now
 from app.core.config import settings
 from app.core.database import SessionLocal
 from app.core.security import hash_password
@@ -56,7 +57,7 @@ def seed_demo(db: Session, force: bool = False, now: datetime | None = None) -> 
                 print("Demo dataset already seeded (skipping fast).")
                 return
 
-    effective_now = now or datetime.now(UTC)
+    effective_now = now or get_now()
     pw_hash = hash_password(DEMO_PASSWORD)
     users = seed_demo_users_and_profiles(db, pw_hash, now=effective_now)
     seed_academics(db, users, effective_now)

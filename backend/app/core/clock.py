@@ -3,7 +3,12 @@
 from collections.abc import Callable
 from datetime import UTC, datetime
 
-_clock: Callable[[], datetime] = lambda: datetime.now(UTC)
+
+def _default_clock() -> datetime:
+    return datetime.now(UTC)
+
+
+_clock: Callable[[], datetime] = _default_clock
 
 
 def get_now() -> datetime:
@@ -20,4 +25,4 @@ def set_clock(clock_fn: Callable[[], datetime]) -> None:
 def reset_clock() -> None:
     """Reset clock function to system UTC."""
     global _clock
-    _clock = lambda: datetime.now(UTC)
+    _clock = _default_clock
