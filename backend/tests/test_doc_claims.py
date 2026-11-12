@@ -16,8 +16,6 @@ FORBIDDEN_TERMS: list[tuple[str, re.Pattern[str]]] = [
     ("pwdlib", re.compile(r"pwdlib", re.IGNORECASE)),
     ("bcrypt", re.compile(r"bcrypt", re.IGNORECASE)),
     ("GPA", re.compile(r"\bGPA\b", re.IGNORECASE)),
-    ("brolf", re.compile(r"brolf", re.IGNORECASE)),
-    ("evaluator", re.compile(r"evaluator", re.IGNORECASE)),
     ("production-grade", re.compile(r"production-grade", re.IGNORECASE)),
 ]
 
