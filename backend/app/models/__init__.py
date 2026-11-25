@@ -1,5 +1,6 @@
 """Database models package."""
 
+from app.models.ai_usage_daily import AiUsageDaily
 from app.models.application import Application, ApplicationStatus
 from app.models.assignment import Assignment
 from app.models.base import Base
@@ -15,6 +16,7 @@ from app.models.submission import Submission
 from app.models.user import User, UserRole
 
 __all__ = [
+    "AiUsageDaily",
     "Application",
     "ApplicationStatus",
     "ApprovalStatus",

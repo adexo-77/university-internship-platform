@@ -13,6 +13,7 @@ if str(BACKEND_DIR) not in sys.path:
 
 from app.core.config import settings
 from app.models import (  # noqa: F401
+    AiUsageDaily,
     Application,
     Assignment,
     Base,
