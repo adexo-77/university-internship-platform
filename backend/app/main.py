@@ -17,6 +17,7 @@ from app.core.security_headers import SecurityHeadersMiddleware
 from app.routers.admin_internship import router as admin_internship_router
 from app.routers.admin_organization import router as admin_organization_router
 from app.routers.admin_user import router as admin_user_router
+from app.routers.ai import router as ai_router
 from app.routers.application import router as application_router
 from app.routers.assignment import router as assignment_router
 from app.routers.auth import router as auth_router
@@ -143,3 +144,4 @@ app.include_router(admin_internship_router, prefix="/api")
 app.include_router(dashboard_router, prefix="/api")
 app.include_router(notification_router, prefix="/api")
 app.include_router(csv_export_router, prefix="/api")
+app.include_router(ai_router)

@@ -70,6 +70,9 @@ ROLE_MATRIX: list[tuple[str, str, set[UserRole]]] = [
     ),
     ("GET", "/api/admin/reports/users.csv", {UserRole.ADMIN}),
     ("GET", "/api/internships/suggestions", {UserRole.STUDENT}),
+    # AI assistance status and consent (all authenticated roles)
+    ("GET", "/api/ai/status", ALL_ROLES),
+    ("PUT", "/api/ai/consent", ALL_ROLES),
 ]
 
 
