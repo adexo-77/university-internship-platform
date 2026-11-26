@@ -180,15 +180,19 @@ def guard_ai_call(
         return cached
 
     today = now.date()
+    next_reset = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    retry_after = max(1, int((next_reset - now).total_seconds()))
     if get_daily_calls(db, today, None) >= active_cfg.AI_DAILY_LIMIT_GLOBAL:
         _log_metadata(feature, "global_rate_limited", started)
         raise RateLimitExceededException(
+            retry_after=retry_after,
             message="Global daily AI usage limit reached.",
             code="AI_GLOBAL_LIMIT_EXCEEDED",
         )
     if get_daily_calls(db, today, user.id) >= active_cfg.AI_DAILY_LIMIT_PER_USER:
         _log_metadata(feature, "user_rate_limited", started)
         raise RateLimitExceededException(
+            retry_after=retry_after,
             message="Daily AI usage limit reached for your account.",
             code="AI_USER_LIMIT_EXCEEDED",
         )
