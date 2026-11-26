@@ -17,6 +17,7 @@ A web platform that integrates academic coursework management, assignment submis
 - **Partner Organizations**: Maintain company profile, post internship listings with work mode and duration parameters, edit drafts, submit postings for institutional review, track applicant pipelines, and manage candidate hiring decisions (`submitted` &rarr; `shortlisted` &rarr; `accepted` / `rejected`).
 - **Coordinators**: Review pending organization registrations, moderate submitted internship listings (approve or reject with feedback notes), inspect listings across all statuses, and monitor applicant rosters in read-only mode.
 - **Administrators**: Platform-wide metrics dashboard, user account provisioning, account activation/deactivation guards, administrative password resets, organization approvals, internship moderation, and safe CSV data exports.
+- **AI Foundation (Off by Default)**: Opt-in AI assistance infrastructure with a provider abstraction (offline mock by default), a guard layer enforcing consent, per-user and global daily quotas, a kill switch, and an output sanitizer. Users manage consent on the Account page; prompts never include names, emails, or submission text. No user-visible generative features are enabled in this phase.
 
 ## Quick Start
 
@@ -151,12 +152,14 @@ npm run test:e2e:flows
 - **Authorization**: Server-side Role-Based Access Control (RBAC) enforced via FastAPI dependencies and service logic. UI guards are convenience layers only.
 - **Input & Output Defenses**: Pydantic runtime schema validation, SQLAlchemy parameterized queries against SQL injection, HTML input sanitization against XSS, and formula-injection neutralization on CSV exports.
 - **Traffic Controls**: Sliding-window rate limiters on authentication routes, origin verification on state-changing requests, and a 256 KB request size cap.
+- **AI Safety**: AI is off by default (`AI_ENABLED=false`), requires explicit user consent, enforces per-user and global daily quotas, and never sends names, emails, or submission text to the provider. The API key is held as a `SecretStr` and never logged.
 
 ## Documentation Index
 
 - [docs/architecture.md](docs/architecture.md): Topology, component boundaries, and endpoint security matrix.
 - [docs/database.md](docs/database.md): Mermaid ER diagram, table schemas, foreign key relationships, and indexes.
 - [docs/security.md](docs/security.md): Threat model, authentication architecture, and security controls.
+- [docs/ai.md](docs/ai.md): AI foundation architecture, privacy model, quotas, and offline development.
 - [docs/requirements.md](docs/requirements.md): Requirements coverage traceability matrix.
 - [docs/api.md](docs/api.md): Complete REST API endpoint reference and query parameters.
 - [docs/user-guide.md](docs/user-guide.md): Persona workflows, demo instructions, and visual interface walkthroughs.
