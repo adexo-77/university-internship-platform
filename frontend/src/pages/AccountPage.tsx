@@ -1,4 +1,5 @@
 import { ChangePasswordForm } from '../components/account/ChangePasswordForm';
+import { AiSettingsSection } from '../components/account/AiSettingsSection';
 import { AppShell } from '../components/layout/AppShell';
 import { BackLink, Badge, Column, DataTable, PageHeader } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
@@ -80,6 +81,10 @@ export const AccountPage: React.FC = () => {
             Update your account password. You will remain logged in on this device.
           </p>
           <ChangePasswordForm />
+        </div>
+
+        <div className="space-y-4 pt-4 border-t border-line">
+          <AiSettingsSection />
         </div>
       </div>
     </AppShell>

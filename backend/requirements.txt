@@ -5,3 +5,4 @@ pydantic-settings==2.16.2
 sqlalchemy==2.1.8
 psycopg[binary]==3.3.8
 alembic==1.20.1
+httpx==0.28.1

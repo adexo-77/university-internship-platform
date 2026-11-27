@@ -19,6 +19,7 @@ This document details the security posture, threat model, control mechanisms, kn
 | **PostgreSQL Driver Crashes (NUL Bytes)** | High | Database driver (`psycopg`) and auth queries | Pydantic string sanitization rejecting NUL bytes (`\x00`) and control characters with `422 Unprocessable Entity`. |
 | **Session Hijacking &amp; Token Exposure** | High | User credentials &amp; session states | `HttpOnly`, `SameSite=Lax`, `Secure` (production) cookies. Database stores SHA-256 token hashes, never raw tokens. |
 | **Sensitive Data Exposure in Errors/Logs** | Medium | Stack traces, password hashes, secrets | Structured logging filtering passwords and tokens; generic JSON 500 handler returning only UUID `request_id`. |
+| **AI Prompt Injection & PII Leakage** | High | AI provider requests and outputs | Prompts exclude names, emails, and submission text; user text is treated as data; output is plain-text with control characters stripped and length capped; `AI_API_KEY` held as `SecretStr` and never logged. |
 
 ---
 
@@ -39,6 +40,7 @@ This document details the security posture, threat model, control mechanisms, kn
 | **Role Authorization** | `backend/app/core/deps.py` | Mandatory server-side session resolution; explicit per-route role sets enforced via `require_roles(*roles)` returning `HTTP 403` for unauthorized personas. |
 | **Student Data Isolation** | `backend/app/services/study_plan.py` | Student study plan endpoint (`/api/students/me/study-plan`) resolves user identity from session; bounded queries exclusively access the student's own enrolled courses, submissions, applications, and grades. |
 | **Dependency Audits** | CI / Package Manifests | Continuous supply-chain checks with `pip-audit` on pinned constraints and `npm audit --audit-level=high --omit=dev` ensuring 0 high/critical vulnerabilities. |
+| **AI Guard Layer** | `backend/app/services/ai_guard.py` | Kill switch (`AI_ENABLED`), explicit user consent (`users.ai_consent_at`), prompt length caps, per-user and global daily quotas (`ai_usage_daily`), bounded in-memory cache, and output sanitizer. Identity resolved from server session; `AI_API_KEY` stored as `SecretStr` and never logged. |
 
 ---
 

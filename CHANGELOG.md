@@ -5,6 +5,19 @@ All notable changes to the **University Learning &amp; Internship Platform** wil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **AI Foundation (Phase A, Infrastructure Only)**:
+  - Off-by-default configuration (`AI_ENABLED`, `AI_PROVIDER`, `AI_BASE_URL`, `AI_API_KEY` as `SecretStr`, `AI_MODEL`, `AI_TIMEOUT_SECONDS`, `AI_MAX_OUTPUT_TOKENS`, `AI_DAILY_LIMIT_PER_USER`, `AI_DAILY_LIMIT_GLOBAL`, `AI_CACHE_TTL_SECONDS`).
+  - Provider abstraction (`services/ai_provider.py`) with a deterministic offline `MockProvider` and an `OpenAICompatibleProvider` that retries on timeout and 5xx responses.
+  - Guard layer (`services/ai_guard.py`) with kill switch, consent enforcement, prompt length caps, bounded in-memory cache, per-user and global daily quotas, and a plain-text output sanitizer.
+  - `ai_usage_daily` model and migration `718e43c6e30a`; `users.ai_consent_at` column and migration `6f2bdc1d19f9`.
+  - Thin endpoints `GET /api/ai/status` and `PUT /api/ai/consent` for authenticated users.
+  - Frontend opt-in consent panel (`AiSettingsSection`) on the Account page with a plain-language privacy explanation and `useAiStatus` hook.
+  - Tests: `test_ai.py`, `test_ai_provider.py`, `test_ai_endpoints.py`, `useAiStatus.test.ts`, `AiSettingsSection.test.tsx`.
+  - Documentation: `docs/ai.md` plus updates to `README.md`, `docs/security.md`, `docs/requirements.md`, and `docs/openapi.json`.
+
 ## [1.2.0] - 2026-10-28
 
 ### Added

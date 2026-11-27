@@ -2,8 +2,9 @@
 
 import sys
 from pathlib import Path
+from typing import Literal
 
-from pydantic import ValidationError, model_validator
+from pydantic import SecretStr, ValidationError, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Determine repository root directory dynamically (backend/app/core -> project root)
@@ -46,6 +47,18 @@ class Settings(BaseSettings):
     RATE_LIMIT_CHANGE_PASSWORD_LIMIT: int = 5
     RATE_LIMIT_CHANGE_PASSWORD_WINDOW: int = 900
     DEMO_PUBLIC_MODE: bool = False
+
+    # AI Foundation (off by default)
+    AI_ENABLED: bool = False
+    AI_PROVIDER: Literal["openai_compatible", "mock"] = "mock"
+    AI_BASE_URL: str | None = None
+    AI_API_KEY: SecretStr | None = None
+    AI_MODEL: str | None = None
+    AI_TIMEOUT_SECONDS: int = 10
+    AI_MAX_OUTPUT_TOKENS: int = 400
+    AI_DAILY_LIMIT_PER_USER: int = 10
+    AI_DAILY_LIMIT_GLOBAL: int = 200
+    AI_CACHE_TTL_SECONDS: int = 3600
 
     @model_validator(mode="after")
     def validate_production_settings(self) -> "Settings":

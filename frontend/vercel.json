@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://brolf-challenge-adugna-dhaba-1.onrender.com/api/$1"
+    }
+  ]
+}

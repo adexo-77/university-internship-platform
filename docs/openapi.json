@@ -3118,6 +3118,70 @@
           }
         }
       }
+    },
+    "/api/ai/status": {
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Read Ai Status",
+        "description": "Return AI availability, user consent status, and remaining daily quota.",
+        "operationId": "read_ai_status_api_ai_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/consent": {
+      "put": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Set Ai Consent",
+        "description": "Accept or withdraw AI assistance consent for the signed-in user.",
+        "operationId": "set_ai_consent_api_ai_consent_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiConsentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiStatusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3501,6 +3565,62 @@
         "type": "object",
         "title": "AdminUserUpdateRequest",
         "description": "Schema for updating user active status or role."
+      },
+      "AiConsentRequest": {
+        "properties": {
+          "consented": {
+            "type": "boolean",
+            "title": "Consented"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "consented"
+        ],
+        "title": "AiConsentRequest",
+        "description": "Request payload to accept or withdraw AI assistance consent."
+      },
+      "AiStatusResponse": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "consented": {
+            "type": "boolean",
+            "title": "Consented"
+          },
+          "consent_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consent At"
+          },
+          "remaining_quota": {
+            "type": "integer",
+            "title": "Remaining Quota"
+          },
+          "daily_limit": {
+            "type": "integer",
+            "title": "Daily Limit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enabled",
+          "consented",
+          "remaining_quota",
+          "daily_limit"
+        ],
+        "title": "AiStatusResponse",
+        "description": "Publicly safe AI status and daily quota summary for the signed-in user."
       },
       "ApplicantProfile": {
         "properties": {
