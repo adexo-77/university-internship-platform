@@ -19,7 +19,7 @@ This document details the security posture, threat model, control mechanisms, kn
 | **PostgreSQL Driver Crashes (NUL Bytes)** | High | Database driver (`psycopg`) and auth queries | Pydantic string sanitization rejecting NUL bytes (`\x00`) and control characters with `422 Unprocessable Entity`. |
 | **Session Hijacking &amp; Token Exposure** | High | User credentials &amp; session states | `HttpOnly`, `SameSite=Lax`, `Secure` (production) cookies. Database stores SHA-256 token hashes, never raw tokens. |
 | **Sensitive Data Exposure in Errors/Logs** | Medium | Stack traces, password hashes, secrets | Structured logging filtering passwords and tokens; generic JSON 500 handler returning only UUID `request_id`. |
-| **AI Prompt Injection &amp; PII Leakage** | High | AI provider requests and outputs | Prompts exclude names, emails, and submission text; user text is treated as data; output is plain-text with control characters stripped and length capped; `AI_API_KEY` held as `SecretStr` and never logged. |
+| **AI Prompt Injection & PII Leakage** | High | AI provider requests and outputs | Prompts exclude names, emails, and submission text; user text is treated as data; output is plain-text with control characters stripped and length capped; `AI_API_KEY` held as `SecretStr` and never logged. |
 
 ---
 

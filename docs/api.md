@@ -167,6 +167,14 @@ All CSV endpoints return safe UTF-8 spreadsheets with BOM (`\xef\xbb\xbf`), form
 | `GET` | `/api/admin/reports/applications.csv` | Coordinator, Admin | Export audit report: posting title, organization name, applicant name, status, applied date, decided date. |
 | `GET` | `/api/admin/reports/users.csv` | Admin | Export user registry: id, name, email, role, active status, created date (excludes password hashes and tokens). |
 
+### AI Assistance Endpoints
+AI assistance is off by default and requires explicit user consent. Identity is resolved from the server session. Prompts never include names, emails, or submission text.
+
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/ai/status` | Authenticated | Return AI availability (`enabled`), the signed-in user's consent state (`consented`, `consent_at`), and remaining daily quota (`remaining_quota`, `daily_limit`). |
+| `PUT` | `/api/ai/consent` | Authenticated | Accept or withdraw AI assistance consent. Request body: `{ "consented": boolean }` (extra fields forbidden). Returns the updated status payload. |
+
 ---
 
 ## 4. Standard Response &amp; Error Format
